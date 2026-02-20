@@ -1,37 +1,34 @@
 "use client";
 
-import type { Block, BlockStyle } from "@/stores/editorStore";
+import { Block } from "@/stores/editorStore";
 
-interface DividerBlockProps {
-    block: Block;
-    style: BlockStyle;
+interface DividerProps {
+  style?: "solid" | "dashed" | "dotted";
+  color?: string;
+  thickness?: number;
+  width?: number;
+  align?: "left" | "center" | "right";
 }
 
-export function DividerBlock({ block, style }: DividerBlockProps) {
-    const p = block.props as Record<string, string | number>;
-    const thickness = Number(p.thickness) || 1;
-    const color = (p.color as string) || "rgba(0,0,0,0.12)";
-    const width = (p.width as string) || "100%";
-    const borderStyle = (p.style as string) || "solid";
+export function DividerBlock({ block }: { block: Block }) {
+  const p = block.props as DividerProps;
+  const color = p.color ?? "var(--border)";
+  const thickness = p.thickness ?? 1;
+  const width = p.width ?? 100;
+  const style = p.style ?? "solid";
+  const align = p.align ?? "center";
 
-    return (
-        <div
-            style={{
-                padding: style.padding ?? "16px 24px",
-                margin: style.margin,
-                textAlign: "center",
-            }}
-        >
-            <hr
-                style={{
-                    border: "none",
-                    borderTopWidth: thickness,
-                    borderTopStyle: borderStyle as React.CSSProperties["borderTopStyle"],
-                    borderTopColor: color,
-                    width,
-                    margin: "0 auto",
-                }}
-            />
-        </div>
-    );
+  const justifyMap = { left: "flex-start", center: "center", right: "flex-end" };
+
+  return (
+    <div style={{ padding: "0.75rem 2rem", display: "flex", justifyContent: justifyMap[align] }}>
+      <hr style={{
+        width: `${width}%`,
+        height: 0,
+        border: "none",
+        borderTop: `${thickness}px ${style} ${color}`,
+        margin: 0,
+      }} />
+    </div>
+  );
 }

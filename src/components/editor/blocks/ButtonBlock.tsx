@@ -1,64 +1,58 @@
 "use client";
 
-import type { Block, BlockStyle } from "@/stores/editorStore";
-import { cn } from "@/lib/utils";
+import { Block } from "@/stores/editorStore";
 
-interface ButtonBlockProps {
-    block: Block;
-    style: BlockStyle;
+interface ButtonProps {
+  label?: string;
+  href?: string;
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+  size?: "sm" | "md" | "lg";
+  align?: "left" | "center" | "right";
+  color?: string;
 }
 
-const SIZE_STYLES: Record<string, React.CSSProperties> = {
-    sm: { padding: "8px 20px", fontSize: 13 },
-    md: { padding: "12px 28px", fontSize: 15 },
-    lg: { padding: "16px 36px", fontSize: 17 },
+const sizeMap = {
+  sm: { padding: "0.5rem 1.25rem", fontSize: "0.8rem" },
+  md: { padding: "0.75rem 1.75rem", fontSize: "0.95rem" },
+  lg: { padding: "0.9rem 2.25rem", fontSize: "1.1rem" },
 };
 
-export function ButtonBlock({ block, style }: ButtonBlockProps) {
-    const p = block.props as Record<string, string | boolean>;
-    const variant = (p.variant as string) || "primary";
-    const size = (p.size as string) || "md";
-    const sizeStyle = SIZE_STYLES[size] ?? SIZE_STYLES.md;
-    const bgColor = (p.bgColor as string) || "#6366f1";
-    const textColor = (p.textColor as string) || "#ffffff";
-    const fullWidth = p.fullWidth === true;
+export function ButtonBlock({ block }: { block: Block }) {
+  const p = block.props as ButtonProps;
+  const align = p.align ?? "center";
+  const size = sizeMap[p.size ?? "md"];
+  const color = p.color ?? "#6366f1";
 
-    const variantStyle: React.CSSProperties =
-        variant === "primary"
-            ? { background: bgColor, color: textColor, border: "none" }
-            : variant === "secondary"
-            ? { background: "rgba(0,0,0,0.08)", color: "#0f172a", border: "none" }
-            : variant === "outline"
-            ? { background: "transparent", color: bgColor, border: `2px solid ${bgColor}` }
-            : { background: "transparent", color: bgColor, border: "none" };
+  const justifyMap = { left: "flex-start", center: "center", right: "flex-end" };
 
-    return (
-        <div
-            style={{
-                padding: style.padding ?? "24px",
-                margin: style.margin,
-                background: style.background,
-                textAlign: (p.textAlign as React.CSSProperties["textAlign"]) || "center",
-            }}
-        >
-            <a
-                href={(p.href as string) || "#"}
-                onClick={(e) => e.preventDefault()}
-                style={{
-                    ...sizeStyle,
-                    ...variantStyle,
-                    display: fullWidth ? "block" : "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 100,
-                    fontWeight: 700,
-                    textDecoration: "none",
-                    cursor: "default",
-                    width: fullWidth ? "100%" : undefined,
-                }}
-            >
-                {(p.label as string) || "Click Me"}
-            </a>
-        </div>
-    );
+  const getStyle = (): React.CSSProperties => {
+    const base: React.CSSProperties = {
+      ...size,
+      borderRadius: 999,
+      fontWeight: 700,
+      cursor: "pointer",
+      border: "2px solid transparent",
+      textDecoration: "none",
+      display: "inline-block",
+      transition: "all 0.2s",
+    };
+    switch (p.variant) {
+      case "secondary":
+        return { ...base, background: `${color}22`, color, borderColor: "transparent" };
+      case "outline":
+        return { ...base, background: "transparent", color, borderColor: color };
+      case "ghost":
+        return { ...base, background: "transparent", color, borderColor: "transparent" };
+      default:
+        return { ...base, background: color, color: "white", boxShadow: `0 4px 20px ${color}55` };
+    }
+  };
+
+  return (
+    <div style={{ padding: "1rem 2rem", display: "flex", justifyContent: justifyMap[align] }}>
+      <a href={p.href ?? "#"} style={getStyle()} onClick={e => e.preventDefault()}>
+        {p.label ?? "Click me"}
+      </a>
+    </div>
+  );
 }
