@@ -1,20 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Menu, X, Zap } from "lucide-react";
+import { Menu, X, Zap } from "lucide-react";
 import Link from "next/link";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
-  onSearchChange?: (q: string) => void;
   onLoginClick?: () => void;
 }
 
-export function Header({ onSearchChange, onLoginClick }: HeaderProps) {
+export function Header({ onLoginClick }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -22,173 +19,114 @@ export function Header({ onSearchChange, onLoginClick }: HeaderProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    onSearchChange?.(e.target.value);
-  };
-
-  const navLinks = [
-    { label: "Templates", href: "#templates" },
-  ];
-
   return (
     <>
-      {/* ── Header shell — fully Tailwind ── */}
-      <header
-        className={cn(
-          "fixed top-0 inset-x-0 z-[100] transition-all duration-300",
-          scrolled
-            ? "bg-black/85 backdrop-blur-xl border-b border-white/6"
-            : "bg-transparent border-b border-transparent"
-        )}
-      >
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-5">
+      {/* ── Outer wrapper to handle fixed position ── */}
+      <div className="fixed top-0 inset-x-0 z-[100] flex justify-center p-4 md:p-6 transition-all duration-300">
 
-          {/* ── Logo ── */}
-          <Link href="/" className="flex items-center gap-2 shrink-0 no-underline">
+        {/* ── The "Pill" Header ── */}
+        <header
+          className={cn(
+            "w-full max-w-5xl flex items-center justify-between gap-4 px-6 h-14 md:h-16 rounded-2xl md:rounded-full transition-all duration-500 ease-in-out border",
+            scrolled || mobileOpen
+              ? "bg-[#09090b]/80 backdrop-blur-2xl border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+              : "bg-transparent border-transparent"
+          )}
+        >
+          {/* Logo Section */}
+          <Link href="/" className="group flex items-center gap-2 no-underline shrink-0">
             <div
-              className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center shrink-0"
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
               style={{
-                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                boxShadow: "0 0 16px rgba(99,102,241,0.5)",
+                background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                boxShadow: "0 0 15px rgba(99,102,241,0.4)",
               }}
             >
-              <Zap size={18} color="white" fill="white" />
+              <Zap size={16} color="white" fill="white" />
             </div>
-            <span
-              className="text-[1.15rem] font-extrabold tracking-[-0.03em] whitespace-nowrap bg-clip-text text-transparent"
-              style={{
-                background: "linear-gradient(135deg, #818cf8, #a78bfa)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
+            <span className="text-lg font-bold tracking-tight text-white hidden sm:block">
               PageCraft
             </span>
           </Link>
 
-          {/* ── Center (Search + Nav) ── */}
-          <div className="hidden md:flex flex-1 items-center justify-center gap-6 px-4">
-            <div className="relative w-full max-w-[340px]">
-              <Search
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35 pointer-events-none"
-              />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearch}
-                placeholder="Search templates…"
-                className="w-full pl-9 pr-9 py-2 bg-white/5 border border-white/8 rounded-full text-white text-[0.8rem] outline-none transition-all placeholder:text-white/30 focus:bg-indigo-500/10 focus:border-indigo-500/50"
-              />
-              {searchQuery && (
-                <button
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-white/40 flex items-center p-0"
-                  onClick={() => { setSearchQuery(""); onSearchChange?.(""); }}
-                >
-                  <X size={12} />
-                </button>
-              )}
-            </div>
+          {/* Desktop Nav: Middle Section */}
+          <nav className="hidden md:flex items-center bg-white/5 border border-white/8 px-1.5 py-1 rounded-full">
+            <Link
+              href="#templates"
+              className="px-6 py-1.5 rounded-full text-sm font-medium text-white/70 hover:text-white transition-all hover:bg-white/5"
+            >
+              Templates
+            </Link>
+          </nav>
 
-            <nav className="hidden lg:flex items-center gap-0.5 shrink-0">
-              {navLinks.map(l => (
-                <Link
-                  key={l.label}
-                  href={l.href}
-                  className="px-2.5 py-1.5 rounded-lg text-[0.85rem] font-medium text-white/55 no-underline transition-all whitespace-nowrap hover:text-white hover:bg-white/7"
-                >
-                  {l.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {/* ── Right actions ── */}
-          <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggle />
-
-            {/* Log in — hidden on mobile */}
+          {/* Right Section: Auth */}
+          <div className="flex items-center gap-2 md:gap-4">
             <button
               onClick={onLoginClick}
-              className="hidden md:inline-flex px-4 py-1.5 rounded-full text-[0.825rem] font-semibold text-white/65 bg-transparent border border-white/10 cursor-pointer whitespace-nowrap transition-all hover:text-white hover:border-white/20 hover:bg-white/5"
+              className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-white/60 hover:text-white transition-all"
             >
               Log in
             </button>
 
-            {/* Start Free — always visible */}
             <Link
               href="/editor"
-              className="inline-flex items-center px-4.5 py-[0.4rem] rounded-full text-[0.825rem] font-bold text-white no-underline whitespace-nowrap transition-all hover:brightness-110"
+              className="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-bold text-white no-underline shadow-lg transition-all hover:scale-105 active:scale-95 bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500"
               style={{
-                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                boxShadow: "0 0 18px rgba(99,102,241,0.4)",
+                boxShadow: "0 4px 20px -5px rgba(99,102,241,0.6)",
               }}
             >
               Start Free
             </Link>
 
-            {/* Hamburger — only on mobile */}
+            {/* Mobile Menu Toggle */}
             <button
-              onClick={() => setMobileOpen(o => !o)}
-              aria-label="Toggle menu"
-              className="flex md:hidden items-center justify-center p-1.5 rounded-lg bg-white/6 border border-white/10 cursor-pointer text-white/70 shrink-0 transition-all hover:bg-white/10"
+              onClick={() => setMobileOpen((o) => !o)}
+              className="flex md:hidden items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 transition-all"
             >
               {mobileOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
-        </div>
+        </header>
+      </div>
 
-        {/* ── Mobile menu ── */}
-        {mobileOpen && (
-          <div className="flex flex-col gap-1 bg-[rgba(6,6,14,0.97)] backdrop-blur-xl border-t border-white/6 px-5 pt-4 pb-6 md:hidden">
-
-            {/* Mobile search */}
-            <div className="relative mb-3">
-              <Search
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35 pointer-events-none"
-              />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearch}
-                placeholder="Search templates…"
-                className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/8 rounded-full text-white text-[0.8rem] outline-none transition-all placeholder:text-white/30 focus:bg-indigo-500/10 focus:border-indigo-500/50"
-              />
-            </div>
-
-            {/* Nav links */}
-            {navLinks.map(l => (
+      {/* ── Mobile menu overlay ── */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-md animate-fade-in md:hidden"
+          onClick={() => setMobileOpen(false)}
+        >
+          <div
+            className="absolute top-24 left-4 right-4 bg-[#09090b] border border-white/10 rounded-3xl p-6 flex flex-col gap-6 shadow-2xl animate-in fade-in zoom-in duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <nav className="flex flex-col gap-2">
               <Link
-                key={l.label}
-                href={l.href}
+                href="#templates"
+                className="py-4 px-4 text-lg font-medium text-white/70 border-b border-white/5 hover:text-white transition-colors"
                 onClick={() => setMobileOpen(false)}
-                className="block py-3 px-2 text-[0.95rem] font-medium text-white/55 no-underline border-b border-white/4 transition-colors hover:text-white"
               >
-                {l.label}
+                Templates
               </Link>
-            ))}
+            </nav>
 
-            {/* CTA row */}
-            <div className="flex gap-3 mt-3">
+            <div className="flex flex-col gap-3">
               <button
                 onClick={() => { onLoginClick?.(); setMobileOpen(false); }}
-                className="flex-1 py-2.5 px-4 rounded-full text-sm font-semibold text-white bg-transparent border border-white/10 cursor-pointer transition-all hover:bg-white/5"
+                className="w-full py-4 rounded-2xl bg-white/5 text-white font-semibold hover:bg-white/10 transition-colors"
               >
                 Log in
               </button>
               <Link
                 href="/editor"
-                className="flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-white text-center no-underline"
-                style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+                className="w-full py-4 rounded-2xl text-center font-bold text-white bg-linear-to-r from-indigo-600 to-violet-600"
+                onClick={() => setMobileOpen(false)}
               >
                 Start Free
               </Link>
             </div>
           </div>
-        )}
-      </header>
+        </div>
+      )}
     </>
   );
 }

@@ -105,6 +105,8 @@ interface EditorStore {
 
     updateTheme: (theme: Partial<ThemeConfig>) => void;
     updateMeta: (meta: Partial<MetaConfig>) => void;
+    updateSlug: (slug: string) => void;
+    updateTitle: (title: string) => void;
 
     undo: () => void;
     redo: () => void;
@@ -216,6 +218,20 @@ export const useEditorStore = create<EditorStore>()(
             set((s) => {
                 if (!s.page) return;
                 s.page.meta = { ...s.page.meta, ...meta };
+                s.isDirty = true;
+            }),
+
+        updateSlug: (slug) =>
+            set((s) => {
+                if (!s.page) return;
+                s.page.slug = slug;
+                s.isDirty = true;
+            }),
+
+        updateTitle: (title) =>
+            set((s) => {
+                if (!s.page) return;
+                s.page.title = title;
                 s.isDirty = true;
             }),
 

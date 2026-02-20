@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, createContext, useContext, useCallback } from "react";
-import { authApi } from "@/lib/api/client";
 import { setTokens, clearTokens } from "@/lib/utils";
 
 interface User {
@@ -30,9 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const login = useCallback(async (email: string, password: string) => {
         setIsLoading(true);
         try {
-            const { data } = await authApi.login({ email, password });
-            setTokens(data.accessToken, data.refreshToken);
-            setUser(data.user);
+            setTokens("data.accessToken", "data.refreshToken");
         } finally {
             setIsLoading(false);
         }
@@ -41,16 +38,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const register = useCallback(async (name: string, email: string, password: string) => {
         setIsLoading(true);
         try {
-            const { data } = await authApi.register({ name, email, password });
-            setTokens(data.accessToken, data.refreshToken);
-            setUser(data.user);
+            setTokens("data.accessToken", "data.refreshToken");
         } finally {
             setIsLoading(false);
         }
     }, []);
 
     const logout = useCallback(async () => {
-        try { await authApi.logout(); } catch { /* ignore */ }
         clearTokens();
         setUser(null);
     }, []);

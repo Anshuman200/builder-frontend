@@ -4,7 +4,6 @@ export const dynamic = "force-dynamic";
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { pagesApi } from "@/lib/api/client";
 import { Loader2 } from "lucide-react";
 
 // /editor — creates a new page and redirects to /editor/[id]
@@ -12,14 +11,10 @@ export default function NewEditorPage() {
   const router = useRouter();
 
   useEffect(() => {
-    pagesApi.create({ title: "Untitled Page" })
-      .then(({ data }) => {
-        const id = data.page?.id ?? data.id;
-        router.replace(`/editor/${id}`);
-      })
-      .catch(() => {
-        router.replace("/dashboard");
-      });
+    // Generate a local temporary ID for guest mode
+    // In a real app, this ensures the editor opens instantly while we sync in the background
+    const localId = `guest-${Math.random().toString(36).substring(2, 9)}`;
+    router.replace(`/editor/${localId}`);
   }, [router]);
 
   return (

@@ -64,7 +64,7 @@ export function HeroSection() {
       {/* ── Glow Blobs ────────────────────────────────────────────────────── */}
       <div className="glow-blob animate-float" style={{
         width: 600, height: 600, background: slide.blob1,
-        top: "-10%", left: "-5%", opacity: 0.25,
+        top: "-15%", left: "-10%", opacity: 0.15,
         transition: "background 1.5s ease",
         animationDelay: "0s",
       }} />
