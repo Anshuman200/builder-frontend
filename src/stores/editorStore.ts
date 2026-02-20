@@ -149,10 +149,17 @@ export const useEditorStore = create<EditorStore>()(
         setViewMode: (mode) => set((s) => { s.viewMode = mode; }),
         setIsSaving: (v) => set((s) => { s.isSaving = v; }),
 
-        addBlock: (block, _parentId) =>
+        addBlock: (block, parentId) =>
             set((s) => {
                 if (!s.page) return;
-                s.page.content.push(block);
+                if (parentId) {
+                    s.page.content = findAndUpdate(s.page.content, parentId, (b) => ({
+                        ...b,
+                        children: [...(b.children ?? []), block],
+                    }));
+                } else {
+                    s.page.content.push(block);
+                }
                 s.isDirty = true;
                 const snapshot = JSON.parse(JSON.stringify(s.page));
                 s.history = s.history.slice(0, s.historyIndex + 1);
