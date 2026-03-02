@@ -1,0 +1,35 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - echo "AWS BRANCH = $AWS_BRANCH"
+
+        # Dev branch
+        - if [ "$AWS_BRANCH" = "dev" ]; then cp .env.development .env; fi
+
+        # Production branch
+        - if [ "$AWS_BRANCH" = "main" ]; then cp .env.production .env; fi
+
+        # Debug output
+        - echo "========== USING .env FILE =========="
+        - cat .env
+        - echo "====================================="
+
+        # Install dependencies AFTER env is set
+        - npm clean-install
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
+  environment:
+    AWS_BRANCH: $AWS_BRANCH
+
+  framework: next
