@@ -74,6 +74,10 @@ export interface EditorPage {
     theme: ThemeConfig;
     meta: MetaConfig;
     status: "DRAFT" | "PUBLISHED" | "ARCHIVED" | string;
+    isTemplate?: boolean;
+    isPublic?: boolean;
+    isLocked?: boolean;
+    category?: string;
 }
 
 // ─── BLOCKS & TEMPLATES ────────────────────────────────────────────────────────

@@ -79,6 +79,7 @@ async function request<T = any>(
 
 export const pagesApi = {
     list: () => request("/pages"),
+    templates: () => request("/pages/templates"),
 
     create: (body: { title: string, content?: any, meta?: any }) =>
         request("/pages", { method: "POST", body: JSON.stringify(body) }),

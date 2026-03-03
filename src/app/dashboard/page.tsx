@@ -10,6 +10,7 @@ import {
   PlusIcon,
   EllipsisVerticalIcon,
   PencilSquareIcon,
+  PencilIcon,
   TrashIcon,
   GlobeAltIcon,
   ArrowRightOnRectangleIcon,
@@ -20,7 +21,7 @@ import {
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { useAuth } from "@/hooks/useAuth";
-import { usePages, useCreatePage, useDeletePage, usePublishPage, useUnpublishPage, useDuplicatePage } from "@/lib/api/queries";
+import { usePages, useTemplates, useCreatePage, useDeletePage, usePublishPage, useUnpublishPage, useDuplicatePage, useUpdatePage } from "@/lib/api/queries";
 import { ConfirmDialog } from "@/components/ui/glass/ConfirmDialog";
 import { useToasts } from "@/hooks/useToasts";
 import {
@@ -44,6 +45,9 @@ interface Page {
   status: string;
   updatedAt: string;
   previewUrl?: string;
+  isPublic?: boolean;
+  category?: string;
+  author?: { name: string };
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -87,8 +91,8 @@ function getGradient(seed: string) {
   return colors[idx];
 }
 
-function PageCard({ page, onEdit, onDelete, onTogglePublish, onDuplicate, onPreview }: {
-  page: Page, onEdit: () => void, onDelete: () => void, onTogglePublish: () => void, onDuplicate: () => void, onPreview: () => void
+function PageCard({ page, onEdit, onDelete, onTogglePublish, onTogglePublic, onDuplicate, onPreview, isTemplateView, isRenaming, renameValue, setRenameValue, onRenameStart, onRenameSubmit }: {
+  page: Page, onEdit: () => void, onDelete: () => void, onTogglePublish: () => void, onTogglePublic?: () => void, onDuplicate: () => void, onPreview: () => void, isTemplateView?: boolean, isRenaming?: boolean, renameValue?: string, setRenameValue?: (val: string) => void, onRenameStart?: () => void, onRenameSubmit?: () => void
 }) {
   const [hovered, setHovered] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -141,6 +145,15 @@ function PageCard({ page, onEdit, onDelete, onTogglePublish, onDuplicate, onPrev
             {isPublished ? <CheckCircleIcon style={{ width: 10, height: 10, color: "#10b981" }} /> : <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#f59e0b" }} />}
             {isPublished ? "LIVE" : "DRAFT"}
           </span>
+          {page.isPublic && (
+            <span style={{
+              padding: "4px 10px", borderRadius: 30, background: "rgba(255,255,255,0.9)",
+              color: "#6366f1", fontSize: "0.65rem", fontWeight: 700,
+              display: "flex", alignItems: "center", gap: 4, border: "1px solid rgba(0,0,0,0.1)",
+            }}>
+              PUBLIC
+            </span>
+          )}
         </div>
       </div>
 
@@ -148,13 +161,40 @@ function PageCard({ page, onEdit, onDelete, onTogglePublish, onDuplicate, onPrev
       <div style={{ padding: "1.25rem", position: "relative" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h3 style={{
-              margin: 0, fontSize: "0.95rem", fontWeight: 700, color: "var(--text)",
-              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-            }}>
-              {page.title || "Untitled Project"}
-            </h3>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, color: "var(--text-muted)", fontSize: "0.75rem" }}>
+            {isRenaming && setRenameValue && onRenameSubmit ? (
+              <input
+                autoFocus
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onBlur={onRenameSubmit}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') onRenameSubmit();
+                  if (e.key === 'Escape') {
+                    setRenameValue(page.title || "Untitled Project");
+                    onRenameSubmit();
+                  }
+                }}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  margin: 0, fontSize: "0.95rem", fontWeight: 700, color: "var(--text)",
+                  width: "100%", background: "var(--bg)", border: "1px solid var(--primary)",
+                  borderRadius: 6, padding: "2px 6px", outline: "none",
+                }}
+              />
+            ) : (
+              <h3 style={{
+                margin: 0, fontSize: "0.95rem", fontWeight: 700, color: "var(--text)",
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+              }}>
+                {page.title || "Untitled Project"}
+              </h3>
+            )}
+            {isTemplateView && page.author?.name && (
+              <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: 2, fontWeight: 500 }}>
+                By {page.author.name}
+              </div>
+            )}
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: isTemplateView ? 2 : 4, color: "var(--text-muted)", fontSize: "0.75rem" }}>
               <ClockIcon style={{ width: 12, height: 12 }} />
               <span>{timeAgo(page.updatedAt)}</span>
             </div>
@@ -183,12 +223,14 @@ function PageCard({ page, onEdit, onDelete, onTogglePublish, onDuplicate, onPrev
                 className="w-48 bg-(--surface) border border-(--border) rounded-xl p-2 shadow-xl z-100"
               >
                 {[
-                  { label: "Edit content", Icon: PencilSquareIcon, onClick: onEdit },
+                  (!isTemplateView ? { label: "Edit content", Icon: PencilSquareIcon, onClick: onEdit } : null),
+                  (!isTemplateView && onRenameStart ? { label: "Rename", Icon: PencilIcon, onClick: onRenameStart } : null),
                   { label: "Preview", Icon: EyeIcon, onClick: onPreview },
-                  { label: "Duplicate", Icon: Squares2X2Icon, onClick: onDuplicate },
-                  { label: isPublished ? "Unpublish" : "Go live", Icon: GlobeAltIcon, onClick: onTogglePublish },
-                  { label: "Delete project", Icon: TrashIcon, onClick: onDelete, danger: true },
-                ].map((item, i) => (
+                  { label: isTemplateView ? "Use Template" : "Duplicate", Icon: Squares2X2Icon, onClick: onDuplicate },
+                  (!isTemplateView ? { label: isPublished ? "Unpublish" : "Go live", Icon: GlobeAltIcon, onClick: onTogglePublish } : null),
+                  (!isTemplateView && onTogglePublic ? { label: page.isPublic ? "Set as Private" : "Set as Public", Icon: GlobeAltIcon, onClick: onTogglePublic } : null),
+                  (!isTemplateView ? { label: "Delete project", Icon: TrashIcon, onClick: onDelete, danger: true } : null),
+                ].filter(Boolean).map((item: any, i) => (
                   <DropdownMenuItem
                     key={i}
                     onClick={(e) => { e.stopPropagation(); item.onClick(); }}
@@ -251,16 +293,41 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const { data: pages = [], isLoading: loading } = usePages();
+  const { data: templates = [], isLoading: templatesLoading } = useTemplates();
   const createMutation = useCreatePage();
   const deleteMutation = useDeletePage();
   const publishMutation = usePublishPage();
   const unpublishMutation = useUnpublishPage();
   const duplicateMutation = useDuplicatePage();
+  const updateMutation = useUpdatePage();
 
   const [search, setSearch] = useState("");
+  const [mainTab, setMainTab] = useState<"projects" | "templates">("projects");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [mobileTab, setMobileTab] = useState<"home" | "search" | "recent">("home");
   const [deleteTarget, setDeleteTarget] = useState<Page | null>(null);
+
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+
+  const handleRenameSubmit = useCallback(async (page: Page) => {
+    if (!renameValue.trim() || renameValue.trim() === page.title) {
+      setRenamingId(null);
+      return;
+    }
+    try {
+      await updateMutation.mutateAsync({ id: page._id, title: renameValue.trim() });
+      success("Project renamed");
+    } catch {
+      toastError("Failed to rename project");
+    }
+    setRenamingId(null);
+  }, [renameValue, updateMutation, success, toastError]);
+
+  const handleRenameStart = useCallback((page: Page) => {
+    setRenamingId(page._id);
+    setRenameValue(page.title || "Untitled Project");
+  }, []);
 
   const handleCreate = useCallback(async () => {
     try {
@@ -298,23 +365,50 @@ export default function DashboardPage() {
     }
   }, [publishMutation, unpublishMutation, success, toastError]);
 
+  const handleTogglePublic = useCallback(async (page: Page) => {
+    try {
+      if (page.isPublic) {
+        await updateMutation.mutateAsync({ id: page._id, isPublic: false, isTemplate: false });
+        success("Project made Private");
+      } else {
+        await updateMutation.mutateAsync({ id: page._id, isPublic: true, isTemplate: true });
+        success("Project made Public");
+      }
+    } catch {
+      toastError("Failed to update visibility");
+    }
+  }, [updateMutation, success, toastError]);
+
   const handleDuplicate = useCallback(async (page: Page) => {
     try {
-      await duplicateMutation.mutateAsync(page._id);
-      success("Page duplicated");
+      const res = await duplicateMutation.mutateAsync(page._id) as any;
+      success(mainTab === "templates" ? "Template copied to your projects!" : "Page duplicated");
+      if (mainTab === "templates") {
+        setMainTab("projects");
+        if (res?.data?.page?._id) {
+          router.push(`/editor/${res.data.page._id}`);
+        }
+      }
     } catch {
       toastError("Failed to duplicate");
     }
-  }, [duplicateMutation, success, toastError]);
+  }, [duplicateMutation, success, toastError, mainTab, router]);
 
   const handleLogout = useCallback(async () => {
     await logout();
     router.push("/");
   }, [logout, router]);
 
-  const filtered = pages.filter((p: Page) =>
+  const filteredPages = pages.filter((p: Page) =>
     !search || p.title?.toLowerCase().includes(search.toLowerCase()) || p.slug?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const filteredTemplates = templates.filter((p: Page) =>
+    !search || p.title?.toLowerCase().includes(search.toLowerCase()) || p.category?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const activeData = mainTab === "projects" ? filteredPages : filteredTemplates;
+  const activeLoading = mainTab === "projects" ? loading : templatesLoading;
 
   const userInitial = (user?.name || user?.email || "U")[0].toUpperCase();
   const userGradient = getGradient(user?.name || "user");
@@ -462,15 +556,22 @@ export default function DashboardPage() {
 
             {/* Section title */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
-              <div>
-                <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--text)", margin: 0, letterSpacing: "-0.03em" }}>
-                  My Projects
-                </h1>
-                {!loading && (
-                  <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: "4px 0 0" }}>
-                    {filtered.length} {filtered.length === 1 ? "project" : "projects"}
-                  </p>
-                )}
+              <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+                <div>
+                  <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--text)", margin: 0, letterSpacing: "-0.03em" }}>
+                    {mainTab === "projects" ? "My Projects" : "Community Templates"}
+                  </h1>
+                  {!activeLoading && (
+                    <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: "4px 0 0" }}>
+                      {activeData.length} {activeData.length === 1 ? (mainTab === "projects" ? "project" : "template") : (mainTab === "projects" ? "projects" : "templates")}
+                    </p>
+                  )}
+                </div>
+                {/* Desktop Tabs */}
+                <div className="desktop-only" style={{ display: "flex", background: "var(--surface)", padding: 4, borderRadius: 12, border: "1px solid var(--border)" }}>
+                  <button onClick={() => setMainTab("projects")} style={{ padding: "6px 16px", borderRadius: 8, background: mainTab === "projects" ? "var(--bg)" : "transparent", border: "1px solid", borderColor: mainTab === "projects" ? "var(--border)" : "transparent", color: mainTab === "projects" ? "var(--text)" : "var(--text-muted)", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", transition: "all 0.2s" }}>My Projects</button>
+                  <button onClick={() => setMainTab("templates")} style={{ padding: "6px 16px", borderRadius: 8, background: mainTab === "templates" ? "var(--bg)" : "transparent", border: "1px solid", borderColor: mainTab === "templates" ? "var(--border)" : "transparent", color: mainTab === "templates" ? "var(--text)" : "var(--text-muted)", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", transition: "all 0.2s" }}>Templates</button>
+                </div>
               </div>
 
               <div style={{ display: "flex", border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden", background: "var(--surface)" }}>
@@ -494,10 +595,10 @@ export default function DashboardPage() {
             </div>
 
             {/* Loading skeleton */}
-            {loading && (
+            {activeLoading && (
               <div style={{
                 display: "grid",
-                gridTemplateColumns: viewMode === "grid" ? "repeat(auto-fill, minmax(240px, 1fr))" : "1fr",
+                gridTemplateColumns: viewMode === "grid" ? "repeat(auto-fill, minmax(260px, 1fr))" : "1fr",
                 gap: 16,
               }}>
                 {[0, 1, 2].map(i => (
@@ -514,36 +615,44 @@ export default function DashboardPage() {
             )}
 
             {/* Empty state */}
-            {!loading && filtered.length === 0 && (
-              <EmptyState onCreate={handleCreate} />
+            {!activeLoading && activeData.length === 0 && (
+              mainTab === "projects" ? <EmptyState onCreate={handleCreate} /> : <div style={{ padding: "4rem 2rem", textAlign: "center", color: "var(--text-muted)" }}>No public templates found. Be the first to publish one!</div>
             )}
 
             {/* Page grid */}
-            {!loading && filtered.length > 0 && viewMode === "grid" && (
+            {!activeLoading && activeData.length > 0 && viewMode === "grid" && (
               <div style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
                 gap: 20,
               }}>
-                {filtered.map((page: Page) => (
+                {activeData.map((page: Page) => (
                   <PageCard
                     key={page._id}
                     page={page}
-                    onEdit={() => router.push(`/editor/${page._id}`)}
+                    onEdit={() => mainTab === "projects" ? router.push(`/editor/${page._id}`) : handleDuplicate(page)}
                     onPreview={() => window.open(`/preview/${page._id}`, "_blank")}
                     onDelete={() => setDeleteTarget(page)}
                     onTogglePublish={() => handleTogglePublish(page)}
+                    onTogglePublic={() => handleTogglePublic(page)}
                     onDuplicate={() => handleDuplicate(page)}
+                    isTemplateView={mainTab === "templates"}
+                    isRenaming={renamingId === page._id}
+                    renameValue={renameValue}
+                    setRenameValue={setRenameValue}
+                    onRenameStart={() => handleRenameStart(page)}
+                    onRenameSubmit={() => handleRenameSubmit(page)}
                   />
                 ))}
               </div>
             )}
 
             {/* List view */}
-            {!loading && filtered.length > 0 && viewMode === "list" && (
+            {!activeLoading && activeData.length > 0 && viewMode === "list" && (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {filtered.map((page: Page) => {
+                {activeData.map((page: Page) => {
                   const isPublished = page.status?.toLowerCase() === "published";
+                  const isTemplateView = mainTab === "templates";
                   return (
                     <div key={page._id} style={{
                       display: "flex", alignItems: "center", gap: 12,
@@ -563,16 +672,48 @@ export default function DashboardPage() {
                       </div>
 
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "var(--text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {page.title || "Untitled"}
-                        </div>
+                        {renamingId === page._id ? (
+                          <input
+                            autoFocus
+                            value={renameValue}
+                            onChange={(e) => setRenameValue(e.target.value)}
+                            onBlur={() => handleRenameSubmit(page)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleRenameSubmit(page);
+                              if (e.key === 'Escape') {
+                                setRenameValue(page.title || "Untitled Project");
+                                handleRenameSubmit(page);
+                              }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                              margin: 0, fontSize: "0.95rem", fontWeight: 700, color: "var(--text)",
+                              width: "100%", maxWidth: 300, background: "var(--bg)", border: "1px solid var(--primary)",
+                              borderRadius: 6, padding: "2px 6px", outline: "none",
+                            }}
+                          />
+                        ) : (
+                          <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "var(--text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {page.title || "Untitled"}
+                          </div>
+                        )}
                         <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
-                          <span style={{
-                            padding: "2px 8px", borderRadius: 10,
-                            background: isPublished ? "rgba(16,185,129,0.1)" : "rgba(245,158,11,0.1)",
-                            color: isPublished ? "#10b981" : "#f59e0b",
-                            fontWeight: 700, fontSize: "0.65rem",
-                          }}>{isPublished ? "PUBLISHED" : "DRAFT"}</span>
+                          {mainTab === "projects" && (
+                            <span style={{
+                              padding: "2px 8px", borderRadius: 10,
+                              background: isPublished ? "rgba(16,185,129,0.1)" : "rgba(245,158,11,0.1)",
+                              color: isPublished ? "#10b981" : "#f59e0b",
+                              fontWeight: 700, fontSize: "0.65rem",
+                            }}>{isPublished ? "PUBLISHED" : "DRAFT"}</span>
+                          )}
+                          {page.category && mainTab === "templates" && (
+                            <span style={{
+                              padding: "2px 8px", borderRadius: 10,
+                              background: "rgba(99,102,241,0.1)",
+                              color: "#6366f1",
+                              fontWeight: 700, fontSize: "0.65rem",
+                            }}>{page.category}</span>
+                          )}
                           <span><ClockIcon style={{ width: 12, height: 12, display: "inline", verticalAlign: "middle" }} /> {timeAgo(page.updatedAt)}</span>
                         </div>
                       </div>
@@ -586,14 +727,54 @@ export default function DashboardPage() {
                         }} onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"} onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "transparent"}>
                           <EyeIcon style={{ width: 16, height: 16 }} />
                         </button>
-                        <button onClick={() => setDeleteTarget(page)} title="Delete" style={{
-                          width: 36, height: 36, borderRadius: 10,
-                          background: "rgba(239,68,68,0.05)", border: "1px solid transparent",
-                          cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                          color: "#ef4444", transition: "all 0.2s",
-                        }}>
-                          <TrashIcon style={{ width: 16, height: 16 }} />
-                        </button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                width: 36, height: 36, borderRadius: 10,
+                                background: "transparent", border: "1px solid transparent",
+                                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                                color: "var(--text-muted)", transition: "all 0.2s",
+                              }}
+                              onMouseEnter={e => {
+                                const target = e.currentTarget as HTMLElement;
+                                target.style.background = "var(--bg)";
+                                target.style.borderColor = "var(--border)";
+                              }}
+                              onMouseLeave={e => {
+                                const target = e.currentTarget as HTMLElement;
+                                target.style.background = "transparent";
+                                target.style.borderColor = "transparent";
+                              }}
+                            >
+                              <EllipsisVerticalIcon style={{ width: 18, height: 18 }} />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 bg-(--surface) border border-(--border) rounded-xl p-2 shadow-xl z-100">
+                            {[
+                              (!isTemplateView ? { label: "Edit content", Icon: PencilSquareIcon, onClick: () => router.push(`/editor/${page._id}`) } : null),
+                              (!isTemplateView ? { label: "Rename", Icon: PencilIcon, onClick: () => handleRenameStart(page) } : null),
+                              { label: "Preview", Icon: EyeIcon, onClick: () => window.open(`/preview/${page._id}`, "_blank") },
+                              { label: isTemplateView ? "Use Template" : "Duplicate", Icon: Squares2X2Icon, onClick: () => handleDuplicate(page) },
+                              (!isTemplateView ? { label: isPublished ? "Unpublish" : "Go live", Icon: GlobeAltIcon, onClick: () => handleTogglePublish(page) } : null),
+                              (!isTemplateView ? { label: page.isPublic ? "Make Private" : "Make Public", Icon: GlobeAltIcon, onClick: () => handleTogglePublic(page) } : null),
+                              (!isTemplateView ? { label: "Delete project", Icon: TrashIcon, onClick: () => setDeleteTarget(page), danger: true } : null),
+                            ].filter(Boolean).map((item: any, i) => (
+                              <DropdownMenuItem
+                                key={i}
+                                onClick={(e) => { e.stopPropagation(); item.onClick(); }}
+                                className={`flex items-center gap-3 py-2 px-3 rounded-lg cursor-pointer transition-colors ${item.danger
+                                  ? "text-red-500 hover:bg-red-500/10 focus:bg-red-500/10"
+                                  : "text-(--text) hover:bg-(--bg) focus:bg-(--bg)"
+                                  }`}
+                              >
+                                <item.Icon style={{ width: 16, height: 16 }} />
+                                {item.label}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   );

@@ -10,6 +10,7 @@ interface User {
     email: string;
     avatarUrl?: string;
     plan: string;
+    role?: string;
 }
 
 interface AuthContextType {

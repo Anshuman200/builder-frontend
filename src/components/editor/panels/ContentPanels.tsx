@@ -5,6 +5,7 @@ import { useEditorStore } from "@/stores/editorStore";
 
 import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, AnimationPanel } from "./shared";
 import { EDITOR_FEATURES } from "@/lib/editorFeatures";
+import { useAuth } from "@/hooks/useAuth";
 
 export function FeaturesPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
@@ -177,11 +178,13 @@ export function TeamPanel({ block }: { block: Block }) {
 }
 
 export function PageSettingsPanel({ page }: { page: EditorPage }) {
-    const { updateTheme } = useEditorStore();
+    const { updateTheme, updatePageData } = useEditorStore();
+    const { user } = useAuth();
     const l = page.theme?.layout || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
     const f = page.theme?.features || { scrollToTop: false, scrollToTopPosition: "bottom-right", scrollToTopColor: "#6366f1", themeSwitcher: true, themeSwitcherPosition: "bottom-left" };
     const upL = (key: string, val: string) => updateTheme({ layout: { ...l, [key]: val } });
     const upF = (key: string, val: unknown) => updateTheme({ features: { ...f, [key]: val } });
+    const upP = (key: string, val: unknown) => updatePageData({ [key]: val });
 
     return (
         <aside style={{ width: 240, flexShrink: 0, background: "var(--bg-secondary)", borderLeft: "1px solid var(--border)", overflowY: "auto", display: "flex", flexDirection: "column" }}>
@@ -189,6 +192,26 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                 <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Page Settings</p>
                 <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--text)", fontWeight: 600 }}>Global Configuration</p>
             </div>
+            <Section title="Visibility & Access">
+                <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Make this page public for others to view and duplicate.</div>
+                <ToggleInput value={!!page.isPublic} onChange={(v) => { upP("isPublic", v); if (v) upP("isTemplate", true); }} label="Make Public" />
+                {page.isPublic && (
+                    <Field label="Category">
+                        <SelectInput
+                            value={page.category || "Other"}
+                            onChange={(v) => upP("category", v)}
+                            options={[{ label: "Portfolio", value: "Portfolio" }, { label: "Landing Page", value: "Landing Page" }, { label: "E-commerce", value: "E-commerce" }, { label: "Blog", value: "Blog" }, { label: "Other", value: "Other" }]}
+                        />
+                    </Field>
+                )}
+                {user?.role === "admin" && (
+                    <>
+                        <div style={{ margin: "12px 0", height: 1, background: "var(--border)" }} />
+                        <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}><span style={{ color: "var(--primary)", fontWeight: 600 }}>Admin Only:</span> Prevent others from editing this template directly.</div>
+                        <ToggleInput value={!!page.isLocked} onChange={(v) => upP("isLocked", v)} label="Lock Template" />
+                    </>
+                )}
+            </Section>
             <Section title="Global Container">
                 <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Controls max-width & horizontal padding for top-level blocks.</div>
                 <Field label="Max Width"><TextInput value={l.maxWidth} onChange={(v) => upL("maxWidth", v)} placeholder="100dvw" /></Field>

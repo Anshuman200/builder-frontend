@@ -63,6 +63,7 @@ interface EditorStore {
     updateMeta: (meta: Partial<MetaConfig>) => void;
     updateSlug: (slug: string) => void;
     updateTitle: (title: string) => void;
+    updatePageData: (data: Partial<Pick<EditorPage, "isTemplate" | "isPublic" | "isLocked" | "category">>) => void;
 
     undo: () => void;
     redo: () => void;
@@ -324,6 +325,13 @@ export const useEditorStore = create<EditorStore>()(
             set((s) => {
                 if (!s.page) return;
                 s.page.title = title;
+                s.isDirty = true;
+            }),
+
+        updatePageData: (data) =>
+            set((s) => {
+                if (!s.page) return;
+                Object.assign(s.page, data);
                 s.isDirty = true;
             }),
 

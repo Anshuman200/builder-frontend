@@ -15,6 +15,16 @@ export const usePages = () => {
     });
 };
 
+export const useTemplates = () => {
+    return useQuery({
+        queryKey: ["templates"],
+        queryFn: async () => {
+            const { data } = await pagesApi.templates();
+            return Array.isArray(data) ? data : data?.templates ?? [];
+        },
+    });
+};
+
 export const usePage = (id: string, enabled = true) => {
     return useQuery({
         queryKey: ["pages", id],
@@ -35,6 +45,7 @@ export const useCreatePage = () => {
             pagesApi.create(body),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["pages"] });
+            queryClient.invalidateQueries({ queryKey: ["templates"] });
         },
     });
 };
@@ -47,6 +58,7 @@ export const useUpdatePage = () => {
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ["pages"] });
             queryClient.invalidateQueries({ queryKey: ["pages", variables.id] });
+            queryClient.invalidateQueries({ queryKey: ["templates"] });
         },
     });
 };
@@ -57,6 +69,7 @@ export const useDeletePage = () => {
         mutationFn: (id: string) => pagesApi.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["pages"] });
+            queryClient.invalidateQueries({ queryKey: ["templates"] });
         },
     });
 };
@@ -67,6 +80,7 @@ export const useDuplicatePage = () => {
         mutationFn: (id: string) => pagesApi.duplicate(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["pages"] });
+            queryClient.invalidateQueries({ queryKey: ["templates"] });
         },
     });
 };
@@ -78,6 +92,7 @@ export const usePublishPage = () => {
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ["pages"] });
             queryClient.invalidateQueries({ queryKey: ["pages", id] });
+            queryClient.invalidateQueries({ queryKey: ["templates"] });
         },
     });
 };
@@ -89,6 +104,7 @@ export const useUnpublishPage = () => {
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ["pages"] });
             queryClient.invalidateQueries({ queryKey: ["pages", id] });
+            queryClient.invalidateQueries({ queryKey: ["templates"] });
         },
     });
 };

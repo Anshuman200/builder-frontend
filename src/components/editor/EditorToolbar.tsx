@@ -53,6 +53,10 @@ export default function EditorToolbar() {
     title: page?.title || "Untitled",
     meta: page?.meta || {},
     theme: page?.theme || {},
+    isTemplate: page?.isTemplate,
+    isPublic: page?.isPublic,
+    isLocked: page?.isLocked,
+    category: page?.category,
     content: {
       root: {
         id: "root",
