@@ -60,9 +60,9 @@ export function FeaturesPanel({ block }: { block: Block }) {
                                 <span style={{ fontSize: 10, fontWeight: 600 }}>Feature {idx + 1}</span>
                                 <button onClick={() => { const nF = [...((p.features as any[]) || [])]; nF.splice(idx, 1); up("features", nF); }} style={{ background: "transparent", border: "none", color: "var(--error, red)", cursor: "pointer", fontSize: 12 }}>&times;</button>
                             </div>
-                            <input value={feature.title} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx].title = e.target.value; up("features", nF); }} placeholder="Feature Title" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
-                            <textarea value={feature.description} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx].description = e.target.value; up("features", nF); }} placeholder="Feature Description" rows={2} style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)", resize: "vertical" }} />
-                            <input value={feature.icon} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx].icon = e.target.value; up("features", nF); }} placeholder="Lucide Icon (e.g. Star)" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
+                            <input value={feature.title} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], title: e.target.value }; up("features", nF); }} placeholder="Feature Title" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
+                            <textarea value={feature.description} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], description: e.target.value }; up("features", nF); }} placeholder="Feature Description" rows={2} style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)", resize: "vertical" }} />
+                            <input value={feature.icon} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], icon: e.target.value }; up("features", nF); }} placeholder="Lucide Icon (e.g. Star)" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
                         </div>
                     ))}
                     <button onClick={() => { const nF = [...((p.features as any[]) || [])]; nF.push({ id: crypto.randomUUID(), title: "New Feature", description: "Describe it here.", icon: "Star" }); up("features", nF); }} style={{ padding: "6px 0", background: "var(--primary-light)", color: "var(--primary)", border: "none", borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>+ Add Feature</button>
@@ -297,6 +297,67 @@ export function ContactFormPanel({ block }: { block: Block }) {
                 <Field label="Text Color"><ColorInput value={(p.inputTextColor as string) || "#111827"} onChange={(v) => up("inputTextColor", v)} /></Field>
                 <Field label="Label Color"><ColorInput value={(p.labelColor as string) || "#374151"} onChange={(v) => up("labelColor", v)} /></Field>
             </Section>
+            <AnimationPanel block={block} />
+        </>
+    );
+}
+
+export function AccordionPanel({ block }: { block: Block }) {
+    const { updateBlock } = useEditorStore();
+    const p = block.props;
+    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+
+    return (
+        <>
+            <Section title="Accordion Items">
+                <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Manage FAQ items below.</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {((p.items as any[]) || []).map((item, idx) => (
+                        <div key={item.id || idx} style={{ display: "flex", flexDirection: "column", gap: 4, padding: 8, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <span style={{ fontSize: 10, fontWeight: 600 }}>Item {idx + 1}</span>
+                                <button onClick={() => { const nT = [...((p.items as any[]) || [])]; nT.splice(idx, 1); up("items", nT); }} style={{ background: "transparent", border: "none", color: "var(--error, red)", cursor: "pointer", fontSize: 12 }}>&times;</button>
+                            </div>
+                            <input value={item.title} onChange={(e) => { const nT = [...((p.items as any[]) || [])]; nT[idx] = { ...nT[idx], title: e.target.value }; up("items", nT); }} placeholder="Question / Title" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
+                            <textarea value={item.content} onChange={(e) => { const nT = [...((p.items as any[]) || [])]; nT[idx] = { ...nT[idx], content: e.target.value }; up("items", nT); }} placeholder="Answer / Content" rows={3} style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)", resize: "vertical" }} />
+                        </div>
+                    ))}
+                    <button onClick={() => { const nT = [...((p.items as any[]) || [])]; nT.push({ id: crypto.randomUUID(), title: "New FAQ", content: "Details here..." }); up("items", nT); }} style={{ padding: "6px 0", background: "var(--primary-light)", color: "var(--primary)", border: "none", borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>+ Add FAQ Item</button>
+                </div>
+            </Section>
+
+            <Section title="Layout & Style">
+                <Field label="Variant"><SelectInput value={(p.variant as string) || "contained"} onChange={(v) => up("variant", v)} options={[{ label: "Contained", value: "contained" }, { label: "Separated", value: "separated" }, { label: "Minimal", value: "minimal" }]} /></Field>
+                <Field label="Divider"><SelectInput value={(p.divider as string) || "line"} onChange={(v) => up("divider", v)} options={[{ label: "Line", value: "line" }, { label: "None", value: "none" }]} /></Field>
+                <Field label="Max Width"><TextInput value={(p.maxWidth as string) || "800px"} onChange={(v) => up("maxWidth", v)} placeholder="800px or 100%" /></Field>
+                <Field label="Item Radius"><BorderRadiusInput value={(p.itemRadius as string) || "8px"} onChange={(v) => up("itemRadius", v)} /></Field>
+            </Section>
+
+            <Section title="Typography">
+                <Field label="Title Size"><TextInput value={(p.titleSize as string) || "16px"} onChange={(v) => up("titleSize", v)} placeholder="16px" /></Field>
+                <Field label="Title Weight"><SelectInput value={(p.titleWeight as string) || "600"} onChange={(v) => up("titleWeight", v)} options={[{ label: "Normal (400)", value: "400" }, { label: "Medium (500)", value: "500" }, { label: "Semibold (600)", value: "600" }, { label: "Bold (700)", value: "700" }]} /></Field>
+                <Field label="Description Size"><TextInput value={(p.descSize as string) || "15px"} onChange={(v) => up("descSize", v)} placeholder="15px" /></Field>
+            </Section>
+
+            <Section title="Icon">
+                <Field label="Icon Style"><SelectInput value={(p.iconStyle as string) || "chevron"} onChange={(v) => up("iconStyle", v)} options={[{ label: "Chevron", value: "chevron" }, { label: "Plus / Minus", value: "plus" }]} /></Field>
+                <Field label="Icon Size"><TextInput value={(p.iconSize as string) || "20px"} onChange={(v) => up("iconSize", v)} placeholder="20px" /></Field>
+                <Field label="Icon Color"><ColorInput value={(p.iconColor as string) || "#6366f1"} onChange={(v) => up("iconColor", v)} /></Field>
+            </Section>
+
+
+            <Section title="Colors">
+                <Field label="Main Background"><ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} /></Field>
+                <Field label="Item Background"><ColorInput value={(p.itemBgColor as string) || "#ffffff"} onChange={(v) => up("itemBgColor", v)} /></Field>
+                <Field label="Item Border"><ColorInput value={(p.itemBorderColor as string) || "#e2e8f0"} onChange={(v) => up("itemBorderColor", v)} /></Field>
+                <Field label="Title Color"><ColorInput value={(p.titleColor as string) || "#0f172a"} onChange={(v) => up("titleColor", v)} /></Field>
+                <Field label="Content Color"><ColorInput value={(p.contentColor as string) || "#475569"} onChange={(v) => up("contentColor", v)} /></Field>
+            </Section>
+
+            <Section title="Container Padding">
+                <Field label="Padding"><TextInput value={(p.padding as string) || "24px"} onChange={(v) => up("padding", v)} placeholder="e.g. 64px 24px" /></Field>
+            </Section>
+
             <AnimationPanel block={block} />
         </>
     );

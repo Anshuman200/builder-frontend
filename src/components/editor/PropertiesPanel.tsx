@@ -22,7 +22,7 @@ export { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, Bord
 // ─── Per-panel imports ────────────────────────────────────────────────────────
 import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPanel, VideoPanel, ColumnsPanel } from "./panels/BasicPanels";
 import { ButtonPanel, HeaderPanel, FooterPanel } from "./panels/LayoutPanels";
-import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel } from "./panels/ContentPanels";
+import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel, AccordionPanel } from "./panels/ContentPanels";
 
 // ─── Block finder utility ─────────────────────────────────────────────────────
 
@@ -78,6 +78,7 @@ export default function PropertiesPanel() {
             {selectedBlock.type === "columns" && <ColumnsPanel block={selectedBlock} />}
             {selectedBlock.type === "footer" && <FooterPanel block={selectedBlock} />}
             {selectedBlock.type === "contactForm" && <ContactFormPanel block={selectedBlock} />}
+            {selectedBlock.type === "accordion" && <AccordionPanel block={selectedBlock} />}
 
             {/* Generic Section ID field for all blocks */}
             <Section title="Advanced">

@@ -42,10 +42,12 @@ export function BlockRendererRef({ block }: { block: Block }) {
 
 export function ChildBlockWrapper({
     block,
+    children,
     outlineColor = "#6366f1",
     outlineColorHover = "#a5b4fc",
 }: {
     block: Block;
+    children?: React.ReactNode;
     outlineColor?: string;
     outlineColorHover?: string;
 }) {
@@ -108,14 +110,14 @@ export function ChildBlockWrapper({
                     variants={variants}
                     transition={transition}
                 >
-                    <BlockRendererRef block={block} />
+                    {children || <BlockRendererRef block={block} />}
                 </motion.div>
             );
         }
 
         return (
             <div style={{ position: "relative", width: "100%" }}>
-                <BlockRendererRef block={block} />
+                {children || <BlockRendererRef block={block} />}
             </div>
         );
     }
@@ -168,7 +170,7 @@ export function ChildBlockWrapper({
                     </button>
                 </div>
             )}
-            <BlockRendererRef block={block} />
+            {children || <BlockRendererRef block={block} />}
         </div>
     );
 }

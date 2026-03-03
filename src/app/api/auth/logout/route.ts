@@ -16,6 +16,12 @@ export async function POST() {
         path: "/",
         maxAge: 0,
     });
+    response.cookies.set("hasSession", "", {
+        httpOnly: false,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 0,
+    });
 
     return response;
 }

@@ -15,19 +15,26 @@ import { useEditorStore } from "@/stores/editorStore";
 import { EDITOR_FEATURES } from "@/lib/editorFeatures";
 
 // ─── Category display order ───────────────────────────────────────────────────
-const CATEGORY_ORDER = ["Navigation", "Hero", "Logos", "Team", "Gallery", "Features", "Pricing", "Testimonial", "Contact", "Footer"];
+const CATEGORY_ORDER = ["Navigation", "Hero", "Logos", "Team", "Gallery", "Features", "Pricing", "Testimonial", "FAQ", "Contact", "Footer"];
 
 // Category icons (emoji for quick visual distinction)
 const CATEGORY_ICONS: Record<string, string> = {
   Navigation: "🧭", Hero: "⭐", Logos: "🏷️", Team: "👥",
   Gallery: "🖼️", Features: "✨", Pricing: "💰",
-  Testimonial: "💬", Contact: "📬", Footer: "📄",
+  Testimonial: "💬", Contact: "📬", Footer: "📄", FAQ: "❓",
 };
 
 export default function BlockPalette() {
-  const [activeTab, setActiveTab] = React.useState<"elements" | "sections">("sections");
+  const [activeTab, setActiveTab] = React.useState<"elements" | "sections">("elements");
   const [drawerCategory, setDrawerCategory] = React.useState<string | null>(null);
+  const [lastDrawerCategory, setLastDrawerCategory] = React.useState<string | null>(null);
   const [search, setSearch] = React.useState("");
+
+  React.useEffect(() => {
+    if (drawerCategory) setLastDrawerCategory(drawerCategory);
+  }, [drawerCategory]);
+
+  const displayCategory = drawerCategory || lastDrawerCategory;
 
   // Group sections by category
   const sectionsByCategory = React.useMemo(() => {
@@ -126,6 +133,7 @@ export default function BlockPalette() {
             <button
               key={cat}
               onClick={() => setDrawerCategory(drawerCategory === cat ? null : cat)}
+              onMouseEnter={() => setDrawerCategory(drawerCategory === cat ? null : cat)}
               style={{
                 display: "flex", alignItems: "center", gap: 10,
                 padding: "10px 12px", borderRadius: 8, border: "none",
@@ -168,47 +176,62 @@ export default function BlockPalette() {
         </div>
       </aside>
 
-      {/* ── Sections Drawer ── */}
-      {drawerCategory && (
-        <div style={{
-          width: 300, flexShrink: 0,
-          display: "flex", flexDirection: "column",
-          background: "var(--bg-secondary)",
-          borderRight: "1px solid var(--border)",
-          overflow: "hidden",
-          zIndex: 1,
-        }}>
-          {/* Drawer header */}
-          <div style={{
-            display: "flex", alignItems: "center", padding: "12px 14px",
-            borderBottom: "1px solid var(--border)", flexShrink: 0, gap: 10,
-          }}>
-            <span style={{ fontSize: 18 }}>{CATEGORY_ICONS[drawerCategory]}</span>
-            <span style={{ flex: 1, fontWeight: 700, fontSize: 14, color: "var(--text)" }}>
-              {drawerCategory}
-            </span>
-            <button
-              onClick={() => setDrawerCategory(null)}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", display: "flex", padding: 2 }}
-            >
-              <XMarkIcon style={{ width: 16, height: 16 }} />
-            </button>
-          </div>
+      {/* ── Sections Drawer (Animated) ── */}
+      <div style={{
+        width: 300, flexShrink: 0,
+        display: "flex", flexDirection: "column",
+        background: "var(--bg-secondary)",
+        borderRight: "1px solid var(--border)",
+        overflow: "hidden",
 
-          {/* Drawer section list */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "10px", display: "flex", flexDirection: "column", gap: 10 }}>
-            {(sectionsByCategory[drawerCategory] ?? []).map(tpl => (
-              <DrawerSectionCard key={tpl.id} template={tpl} onAdd={() => setDrawerCategory(null)} />
-            ))}
-          </div>
+        /* Floating drawer styles */
+        position: "absolute",
+        top: 0,
+        bottom: 0,
+        left: 220, /* width of main sidebar */
+        zIndex: 50,
+        boxShadow: drawerCategory ? "4px 0 24px rgba(0,0,0,0.15)" : "none",
 
-          <div style={{ padding: "7px 12px", borderTop: "1px solid var(--border)", flexShrink: 0 }}>
-            <p style={{ margin: 0, fontSize: 10, color: "var(--text-subtle)", lineHeight: 1.5 }}>
-              Click to insert section into canvas.
-            </p>
-          </div>
-        </div>
-      )}
+        /* Smooth animation */
+        transform: drawerCategory ? "translateX(0)" : "translateX(-20px)",
+        opacity: drawerCategory ? 1 : 0,
+        pointerEvents: drawerCategory ? "auto" : "none",
+        transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-out, box-shadow 0.25s ease-out",
+      }}>
+        {displayCategory && (
+          <>
+            {/* Drawer header */}
+            <div style={{
+              display: "flex", alignItems: "center", padding: "12px 14px",
+              borderBottom: "1px solid var(--border)", flexShrink: 0, gap: 10,
+            }}>
+              <span style={{ fontSize: 18 }}>{CATEGORY_ICONS[displayCategory]}</span>
+              <span style={{ flex: 1, fontWeight: 700, fontSize: 14, color: "var(--text)" }}>
+                {displayCategory}
+              </span>
+              <button
+                onClick={() => setDrawerCategory(null)}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", display: "flex", padding: 2 }}
+              >
+                <XMarkIcon style={{ width: 16, height: 16 }} />
+              </button>
+            </div>
+
+            {/* Drawer section list */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "10px", display: "flex", flexDirection: "column", gap: 10 }}>
+              {(sectionsByCategory[displayCategory] ?? []).map(tpl => (
+                <DrawerSectionCard key={tpl.id} template={tpl} onAdd={() => setDrawerCategory(null)} />
+              ))}
+            </div>
+
+            <div style={{ padding: "7px 12px", borderTop: "1px solid var(--border)", flexShrink: 0 }}>
+              <p style={{ margin: 0, fontSize: 10, color: "var(--text-subtle)", lineHeight: 1.5 }}>
+                Click to insert section into canvas.
+              </p>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -240,8 +263,8 @@ function DrawerSectionCard({ template, onAdd }: { template: SectionTemplate; onA
       {...listeners}
       onClick={handleClick}
       style={{
-        borderRadius: 10, border: "1px solid var(--border)",
-        background: "var(--surface)", cursor: "pointer",
+        borderRadius: 10, border: "1px solid gray",
+        background: "var(--surface-hover)", cursor: "pointer",
         opacity: isDragging ? 0.4 : 1,
         userSelect: "none", overflow: "hidden",
         transition: "border-color 0.15s, box-shadow 0.15s",

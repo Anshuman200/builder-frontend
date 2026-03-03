@@ -10,11 +10,16 @@ export const gallerySections: SectionTemplate[] = [
         preview: `<div style="font-family:sans-serif;padding:12px;background:var(--bg-secondary)">
       <div style="font-size:9px;font-weight:700;color:var(--text);margin-bottom:8px;text-align:center">Gallery</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-        ${[1, 2, 3, 4].map(() => `<div style="height:30px;background:var(--surface);border-radius:4px;border:1px solid var(--border)"></div>`).join("")}
+        ${[
+                "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=100&q=80",
+                "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=100&q=80",
+                "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=100&q=80",
+                "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=100&q=80"
+            ].map(src => `<div style="height:35px;background:url(${src}) center/cover;border-radius:4px;border:1px solid var(--border)"></div>`).join("")}
       </div>
     </div>`,
         create: () => {
-            const root = makeBlock("container", { bgColor: "#ffffff", padding: "5rem 2rem" });
+            const root = makeBlock("container", { bgColor: "#ffffff", padding: "4rem 2rem" });
             const col1 = makeBlock("columns", { leftWidth: "50", gap: "1rem" });
             col1.props.col0 = [makeBlock("image", { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80", borderRadius: "8px", aspectRatio: "4/3" })];
             col1.props.col1 = [makeBlock("image", { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600&q=80", borderRadius: "8px", aspectRatio: "4/3" })];
@@ -33,13 +38,15 @@ export const gallerySections: SectionTemplate[] = [
         name: "Gallery Masonry",
         category: "Gallery",
         preview: `<div style="font-family:sans-serif;padding:12px;background:var(--bg-secondary)">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
-        <div style="height:48px;background:var(--surface);border-radius:4px;border:1px solid var(--border)"></div>
-        <div style="height:32px;background:var(--bg);border-radius:4px;border:1px solid var(--border)"></div>
-        <div style="height:48px;background:var(--surface);border-radius:4px;border:1px solid var(--border)"></div>
-        <div style="height:32px;background:var(--bg);border-radius:4px;border:1px solid var(--border)"></div>
-        <div style="height:48px;background:var(--surface);border-radius:4px;border:1px solid var(--border)"></div>
-        <div style="height:32px;background:var(--bg);border-radius:4px;border:1px solid var(--border)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="height:48px;background:url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=100&q=80) center/cover;border-radius:4px;border:1px solid var(--border)"></div>
+          <div style="height:64px;background:url(https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=100&q=80) center/cover;border-radius:4px;border:1px solid var(--border)"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="height:64px;background:url(https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=100&q=80) center/cover;border-radius:4px;border:1px solid var(--border)"></div>
+          <div style="height:48px;background:url(https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=100&q=80) center/cover;border-radius:4px;border:1px solid var(--border)"></div>
+        </div>
       </div>
     </div>`,
         create: () => {

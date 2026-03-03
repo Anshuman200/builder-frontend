@@ -14,7 +14,7 @@ export const DEFAULT_CONFIG = {
   },
   // Animations - Base
   animation: {
-    type: "none",
+    type: "fade",
     duration: 0.5,
     delay: 0,
     playback: "once"
@@ -254,6 +254,11 @@ export const BLOCK_TYPES: BlockConfig[] = [
       iconColor: "#6366f1",
       divider: "line",     // line | none | seamless
       variant: "contained", // contained | separated | minimal
+      titleSize: "16px",
+      titleWeight: "600",
+      descSize: "15px",
+      iconStyle: "chevron",
+      iconSize: "20px",
 
       animationType: DEFAULT_CONFIG.animation.type,
       animationDuration: DEFAULT_CONFIG.animation.duration,

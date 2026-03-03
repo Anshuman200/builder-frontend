@@ -12,6 +12,7 @@ export const EDITOR_FEATURES = {
         "divider",
         "icon",
         "video",
+        "accordion",
         "features",
         "columns",
         "team",
@@ -29,6 +30,7 @@ export const EDITOR_FEATURES = {
         "Testimonial",
         "Footer",
         "Contact",
+        "FAQ",
     ],
 
     // Properties Panel Features

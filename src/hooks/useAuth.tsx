@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, createContext, useContext, useCallback } from "react";
-import { clearTokens } from "@/lib/utils";
+import { clearTokens, getCookie } from "@/lib/utils";
 import { authApi } from "@/lib/api/client";
 
 interface User {
@@ -32,6 +32,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true); // true until profile is checked
 
     const fetchProfile = useCallback(async () => {
+        if (!getCookie("hasSession")) {
+            setIsLoading(false);
+            return;
+        }
+
         try {
             const { data } = await authApi.getProfile();
             if (data) setUser(data as User);

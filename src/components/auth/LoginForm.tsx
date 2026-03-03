@@ -66,7 +66,7 @@ export function LoginForm(props: any) {
                             value={field.state.value}
                             onChange={(e) => field.handleChange(e.target.value)}
                         />
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: -8, marginBottom: field.state.meta.errors.length ? 8 : 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 1, marginBottom: field.state.meta.errors.length ? 8 : 0 }}>
                             <GlassLink onClick={() => { setTab("forgot-password"); }}>Forgot password?</GlassLink>
                         </div>
                         {field.state.meta.errors && field.state.meta.errors.length > 0 && <GlassError message={field.state.meta.errors[0]?.toString() || ""} />}

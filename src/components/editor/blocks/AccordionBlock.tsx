@@ -2,6 +2,7 @@ import type { Block } from "@/@Types";
 // components/editor/blocks/AccordionBlock.tsx
 import React, { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChildBlockWrapper } from "./shared";
 
 
 export default function AccordionBlock({ block }: { block: Block }) {
@@ -13,6 +14,17 @@ export default function AccordionBlock({ block }: { block: Block }) {
     const maxWidth = (block.props.maxWidth as string) || "800px";
     const padding = (block.props.padding as string) || "24px";
     const bgColor = (block.props.bgColor as string) || "transparent";
+
+    // Typography
+    const titleSize = (block.props.titleSize as string) || "16px";
+    const titleWeight = (block.props.titleWeight as string) || "600";
+    const descSize = (block.props.descSize as string) || "15px";
+
+    // Icon
+    const iconStyle = (block.props.iconStyle as string) || "chevron"; // chevron, plus
+    const iconSize = (block.props.iconSize as string) || "20px";
+
+    // Item Styling
 
     const itemBgColor = (block.props.itemBgColor as string) || "#ffffff";
     const itemBorderColor = (block.props.itemBorderColor as string) || "#e2e8f0";
@@ -69,6 +81,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
 
     return (
         <div
+            id={(block.props.sectionId as string) || `block-${block.id}`}
             style={{
                 width: "100%",
                 display: "flex",
@@ -94,18 +107,48 @@ export default function AccordionBlock({ block }: { block: Block }) {
                                     userSelect: "none",
                                 }}
                             >
-                                <div style={{ fontWeight: 600, color: titleColor, fontSize: "16px" }}>
+                                <div style={{ fontWeight: Number(titleWeight) || 600, color: titleColor, fontSize: titleSize }}>
                                     {item.title}
                                 </div>
-                                <ChevronDownIcon
-                                    style={{
-                                        width: "20px",
-                                        height: "20px",
-                                        color: iconColor,
-                                        transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                                        transition: "transform 0.3s ease",
-                                    }}
-                                />
+                                {iconStyle === "plus" ? (
+                                    <div style={{
+                                        position: "relative",
+                                        width: iconSize,
+                                        height: iconSize,
+                                    }}>
+                                        <div style={{
+                                            position: "absolute",
+                                            top: "50%",
+                                            left: "50%",
+                                            width: "100%",
+                                            height: "2px",
+                                            backgroundColor: iconColor,
+                                            transform: isOpen ? "translate(-50%, -50%) rotate(180deg)" : "translate(-50%, -50%) rotate(0)",
+                                            transition: "transform 0.3s ease",
+                                        }} />
+                                        <div style={{
+                                            position: "absolute",
+                                            top: "50%",
+                                            left: "50%",
+                                            width: "2px",
+                                            height: "100%",
+                                            backgroundColor: iconColor,
+                                            transform: isOpen ? "translate(-50%, -50%) rotate(90deg)" : "translate(-50%, -50%) rotate(0)",
+                                            transition: "transform 0.3s ease",
+                                            opacity: isOpen ? 0 : 1,
+                                        }} />
+                                    </div>
+                                ) : (
+                                    <ChevronDownIcon
+                                        style={{
+                                            width: iconSize,
+                                            height: iconSize,
+                                            color: iconColor,
+                                            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                                            transition: "transform 0.3s ease",
+                                        }}
+                                    />
+                                )}
                             </div>
 
                             {/* Collapsible Content */}
@@ -120,7 +163,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
                                     style={{
                                         padding: "0 20px 20px 20px",
                                         color: contentColor,
-                                        fontSize: "15px",
+                                        fontSize: descSize,
                                         lineHeight: "1.6",
                                         borderTop: (isOpen && divider === "line" && variant !== "minimal") ? `1px solid ${itemBorderColor}` : "none",
                                         paddingTop: (isOpen && divider === "line" && variant !== "minimal") ? "16px" : "0",

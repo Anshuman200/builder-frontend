@@ -37,5 +37,13 @@ export async function POST(req: NextRequest) {
         maxAge: 60 * 15, // 15 minutes
     });
 
+    // Client-side session indicator
+    response.cookies.set("hasSession", "true", {
+        httpOnly: false,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
     return response;
 }

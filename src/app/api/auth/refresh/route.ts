@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
         const response = NextResponse.json(data, { status: res.status });
         response.cookies.delete("accessToken");
         response.cookies.delete("refreshToken");
+        response.cookies.delete("hasSession");
         return response;
     }
 
@@ -35,6 +36,13 @@ export async function POST(req: NextRequest) {
         sameSite: "lax",
         path: "/",
         maxAge: 60 * 15, // 15 minutes
+    });
+
+    response.cookies.set("hasSession", "true", {
+        httpOnly: false,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
     return response;
