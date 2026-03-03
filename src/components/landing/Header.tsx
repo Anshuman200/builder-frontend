@@ -48,16 +48,6 @@ export function Header({ onLoginClick }: HeaderProps) {
             </span>
           </Link>
 
-          {/* Desktop Nav: Middle Section */}
-          <nav className="hidden md:flex items-center bg-white/5 border border-white/8 px-1.5 py-1 rounded-full">
-            <Link
-              href="#templates"
-              className="px-6 py-1.5 rounded-full text-sm font-medium text-white/70 hover:text-white transition-all hover:bg-white/5"
-            >
-              Templates
-            </Link>
-          </nav>
-
           {/* Right Section: Auth */}
           <div className="flex items-center gap-2 md:gap-4">
             <button
@@ -98,15 +88,6 @@ export function Header({ onLoginClick }: HeaderProps) {
             className="absolute top-24 left-4 right-4 bg-[#09090b] border border-white/10 rounded-3xl p-6 flex flex-col gap-6 shadow-2xl animate-in fade-in zoom-in duration-300"
             onClick={(e) => e.stopPropagation()}
           >
-            <nav className="flex flex-col gap-2">
-              <Link
-                href="#templates"
-                className="py-4 px-4 text-lg font-medium text-white/70 border-b border-white/5 hover:text-white transition-colors"
-                onClick={() => setMobileOpen(false)}
-              >
-                Templates
-              </Link>
-            </nav>
 
             <div className="flex flex-col gap-3">
               <button

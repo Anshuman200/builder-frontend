@@ -207,7 +207,7 @@ export default function EditorToolbar() {
 
       {/* Left — logo + title */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none", flexShrink: 0 }}>
+        <Link href="/dashboard" style={{ display: "flex", alignItems: "center", textDecoration: "none", flexShrink: 0 }}>
           <div style={{
             width: 28, height: 28, borderRadius: 8,
             background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
