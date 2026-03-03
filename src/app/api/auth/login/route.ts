@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api";
+const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3019/api";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();

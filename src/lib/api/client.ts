@@ -32,13 +32,19 @@ async function request<T = any>(
     });
 
     if (res.status === 401 && !path.startsWith("/auth/")) {
+        // Create the promise to wait for the refreshed token before we might trigger the refresh itself
+        const tokenPromise = new Promise<string>((resolve) => {
+            subscribeTokenRefresh(t => resolve(t));
+        });
+
         // Attempt refresh
         if (!isRefreshing) {
             isRefreshing = true;
             try {
                 const refreshRes = await fetch("/api/auth/refresh", { method: "POST" });
                 if (refreshRes.ok) {
-                    const newToken = getCookie("accessToken");
+                    const data = await refreshRes.json();
+                    const newToken = data.accessToken || getCookie("accessToken");
                     onRefreshed(newToken || "");
                 } else {
                     onRefreshed("");
@@ -52,9 +58,7 @@ async function request<T = any>(
         }
 
         // Wait for the refreshed token
-        const newToken = await new Promise<string>((resolve) => {
-            subscribeTokenRefresh(t => resolve(t));
-        });
+        const newToken = await tokenPromise;
 
         if (newToken) {
             res = await fetch(`${API}${path}`, {

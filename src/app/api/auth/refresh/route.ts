@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     const { accessToken } = data;
 
-    const response = NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true, accessToken });
 
     // Non-httpOnly accessToken — readable by JS so API client can forward it to external backend
     response.cookies.set("accessToken", accessToken, {
