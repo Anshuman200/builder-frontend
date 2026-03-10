@@ -42,9 +42,11 @@ export function AuthModal({ open, onClose, defaultTab = "login" }: AuthModalProp
   const handleClose = () => { reset(); onClose(); };
 
   const handleLogin = async (email: string, password: string) => {
-    await login(email, password);
+    const result = await login(email, password);
     handleClose();
-    if (window.location.pathname === "/") router.push("/dashboard");
+    if (window.location.pathname === "/" || window.location.pathname === "/dashboard") {
+      router.push(result?.redirectTo ?? "/dashboard");
+    }
   };
 
   const handleRegister = async (name: string, email: string, password: string) => {

@@ -18,8 +18,12 @@ export async function POST(req: NextRequest) {
     }
 
     const { accessToken, refreshToken, user } = data;
+    const isAdmin = user?.role === 'admin';
 
-    const response = NextResponse.json({ user });
+    const response = NextResponse.json({
+        user,
+        redirectTo: isAdmin ? '/admin' : '/dashboard'
+    });
 
     // httpOnly refreshToken — cannot be read by JS (secure from XSS)
     response.cookies.set("refreshToken", refreshToken, {
@@ -39,6 +43,14 @@ export async function POST(req: NextRequest) {
 
     // Client-side session indicator
     response.cookies.set("hasSession", "true", {
+        httpOnly: false,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    // Role cookie for middleware-level route protection (non-httpOnly so middleware can read it)
+    response.cookies.set("userRole", user?.role ?? "user", {
         httpOnly: false,
         sameSite: "lax",
         path: "/",

@@ -140,3 +140,30 @@ export const authApi = {
     resetPassword: (body: Record<string, string>) =>
         request("/auth/reset-password", { method: "POST", body: JSON.stringify(body) }),
 };
+
+export const adminApi = {
+    // Users
+    listUsers: (params: Record<string, string> = {}) => {
+        const qs = new URLSearchParams(params).toString();
+        return request(`/admin/users${qs ? `?${qs}` : ""}`);
+    },
+
+    getRegions: () => request("/admin/users/regions"),
+
+    getUser: (id: string) => request(`/admin/users/${id}`),
+
+    activateUser: (id: string) =>
+        request(`/admin/users/${id}/activate`, { method: "PATCH" }),
+
+    deactivateUser: (id: string) =>
+        request(`/admin/users/${id}/deactivate`, { method: "PATCH" }),
+
+    deleteUser: (id: string) =>
+        request(`/admin/users/${id}`, { method: "DELETE" }),
+
+    // Templates
+    listTemplates: (params: Record<string, string> = {}) => {
+        const qs = new URLSearchParams(params).toString();
+        return request(`/admin/templates${qs ? `?${qs}` : ""}`);
+    },
+};

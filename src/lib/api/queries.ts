@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { pagesApi, authApi } from "./client";
+import { pagesApi, authApi, adminApi } from "./client";
 
 // ─── Pages Queries ──────────────────────────────────────────────────────────
 
@@ -119,5 +119,78 @@ export const useProfile = () => {
             return data;
         },
         retry: false,
+    });
+};
+
+// ─── Admin Queries ────────────────────────────────────────────────────────────
+
+export const useAdminUsers = (params: Record<string, string> = {}) => {
+    return useQuery({
+        queryKey: ["admin", "users", params],
+        queryFn: async () => {
+            const { data } = await adminApi.listUsers(params);
+            return data as { users: any[]; total: number; page: number; pages: number };
+        },
+    });
+};
+
+export const useAdminRegions = () => {
+    return useQuery({
+        queryKey: ["admin", "regions"],
+        queryFn: async () => {
+            const { data } = await adminApi.getRegions();
+            return (data as any).regions as string[];
+        },
+    });
+};
+
+export const useAdminUser = (id: string) => {
+    return useQuery({
+        queryKey: ["admin", "users", id],
+        queryFn: async () => {
+            const { data } = await adminApi.getUser(id);
+            return data as { user: any; pages: any[] };
+        },
+        enabled: !!id,
+    });
+};
+
+export const useActivateUser = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => adminApi.activateUser(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+        },
+    });
+};
+
+export const useDeactivateUser = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => adminApi.deactivateUser(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+        },
+    });
+};
+
+export const useDeleteAdminUser = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => adminApi.deleteUser(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+        },
+    });
+};
+
+export const useAdminTemplates = (params: Record<string, string> = {}) => {
+    return useQuery({
+        queryKey: ["admin", "templates", params],
+        queryFn: async () => {
+            const { data } = await adminApi.listTemplates(params);
+            return data as { templates: any[]; total: number; page: number; pages: number };
+        },
     });
 };

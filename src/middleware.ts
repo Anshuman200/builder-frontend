@@ -7,23 +7,32 @@ export function middleware(request: NextRequest) {
     const accessToken = request.cookies.get('accessToken')?.value;
     const refreshToken = request.cookies.get('refreshToken')?.value;
     const isAuthed = !!(accessToken || refreshToken);
+    const userRole = request.cookies.get('userRole')?.value ?? 'user';
+    const isAdmin = userRole === 'admin';
 
     // Redirect logged-in users away from the landing page
     if (pathname === '/' && isAuthed) {
         const url = request.nextUrl.clone();
-        url.pathname = '/dashboard';
+        url.pathname = isAdmin ? '/admin' : '/dashboard';
         url.search = '';
         return NextResponse.redirect(url);
     }
 
     // Redirect unauthenticated users away from protected routes
-    const protectedPaths = ['/dashboard'];
+    const protectedPaths = ['/dashboard', '/admin'];
     const isProtected = protectedPaths.some(p => pathname.startsWith(p));
 
     if (isProtected && !isAuthed) {
         const url = request.nextUrl.clone();
         url.pathname = '/';
         url.searchParams.set('auth', 'login');
+        return NextResponse.redirect(url);
+    }
+
+    // Redirect non-admin users away from /admin
+    if (pathname.startsWith('/admin') && isAuthed && !isAdmin) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/dashboard';
         return NextResponse.redirect(url);
     }
 

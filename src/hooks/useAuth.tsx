@@ -16,7 +16,7 @@ interface User {
 interface AuthContextType {
     user: User | null;
     isLoading: boolean;
-    login: (email: string, password: string) => Promise<void>;
+    login: (email: string, password: string) => Promise<{ redirectTo?: string }>;
     register: (name: string, email: string, password: string) => Promise<void>;
     verifyOtp: (email: string, otp: string) => Promise<void>;
     forgotPassword: (email: string) => Promise<void>;
@@ -58,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             const { data } = await authApi.login({ email, password });
             setUser(data.user);
+            return { redirectTo: data.redirectTo };
         } finally {
             setIsLoading(false);
         }
