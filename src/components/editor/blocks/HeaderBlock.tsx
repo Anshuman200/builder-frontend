@@ -6,12 +6,11 @@ import { PreviewContext, BlockProps } from "./shared";
 
 export function HeaderBlock({ block }: BlockProps) {
     const p = block.props;
-    const { viewMode, page } = useEditorStore();
-    const theme = page?.theme || { layout: { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" } };
-    const layoutObj = theme.layout || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
+    const viewMode = useEditorStore((s) => s.viewMode);
+    const layoutObj = useEditorStore((s) => s.page?.theme?.layout) || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
+    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
     const isPreview = React.useContext(PreviewContext);
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-    const isDark = (page?.theme?.mode || "light") === "dark";
 
     const layout = (p.layout as string) || "standard";
     const position = (p.position as string) || "static";

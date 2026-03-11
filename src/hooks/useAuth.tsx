@@ -16,9 +16,10 @@ interface User {
 interface AuthContextType {
     user: User | null;
     isLoading: boolean;
+    keyStatus: "locked" | "unlocked";
     login: (email: string, password: string) => Promise<{ redirectTo?: string }>;
     register: (name: string, email: string, password: string) => Promise<void>;
-    verifyOtp: (email: string, otp: string) => Promise<void>;
+    verifyOtp: (email: string, otp: string, password?: string) => Promise<void>;
     forgotPassword: (email: string) => Promise<void>;
     resetPassword: (email: string, resetToken: string, newPassword: string) => Promise<void>;
     logout: () => Promise<void>;
@@ -30,7 +31,8 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true); // true until profile is checked
+    const [isLoading, setIsLoading] = useState(true);
+    const [keyStatus, setKeyStatus] = useState<"locked" | "unlocked">("locked");
 
     const fetchProfile = useCallback(async () => {
         if (!getCookie("hasSession")) {
@@ -48,7 +50,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, []);
 
-    // Restore auth state on every page load from cookie-based session
+    // Check key status on mount and when user changes
+    useEffect(() => {
+        const hasKey = !!sessionStorage.getItem("pagecraft_session_key");
+        setKeyStatus(hasKey ? "unlocked" : "locked");
+    }, [user]);
+
+    // Restore auth state on every page load
     useEffect(() => {
         fetchProfile();
     }, [fetchProfile]);
@@ -57,7 +65,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
         try {
             const { data } = await authApi.login({ email, password });
+            // WhatsApp-Grade: Capture password in session storage for E2EE
+            sessionStorage.setItem("pagecraft_session_key", password);
             setUser(data.user);
+            setKeyStatus("unlocked");
             return { redirectTo: data.redirectTo };
         } finally {
             setIsLoading(false);
@@ -68,15 +79,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
         try {
             await authApi.register({ name, email, password });
+            // We don't log in immediately on register usually, but if we did:
+            // sessionStorage.setItem("pagecraft_session_key", password);
         } finally {
             setIsLoading(false);
         }
     }, []);
 
-    const verifyOtp = useCallback(async (email: string, otp: string) => {
+    const verifyOtp = useCallback(async (email: string, otp: string, password?: string) => {
         setIsLoading(true);
         try {
             const { data } = await authApi.verifyOtp({ email, otp });
+            if (password) {
+                sessionStorage.setItem("pagecraft_session_key", password);
+                setKeyStatus("unlocked");
+            }
             setUser(data.user);
         } finally {
             setIsLoading(false);
@@ -96,6 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
         try {
             await authApi.resetPassword({ email, resetToken, newPassword });
+            // Re-login might happen here or after
         } finally {
             setIsLoading(false);
         }
@@ -106,12 +124,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await authApi.logout();
         } finally {
             clearTokens();
+            sessionStorage.removeItem("pagecraft_session_key");
             setUser(null);
+            setKeyStatus("locked");
         }
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, register, verifyOtp, forgotPassword, resetPassword, logout, setUser, fetchProfile }}>
+        <AuthContext.Provider value={{ user, isLoading, keyStatus, login, register, verifyOtp, forgotPassword, resetPassword, logout, setUser, fetchProfile }}>
             {children}
         </AuthContext.Provider>
     );

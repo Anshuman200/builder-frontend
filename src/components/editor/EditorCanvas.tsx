@@ -279,15 +279,16 @@ const DropZone = memo(function DropZone({ blocks }: { blocks: Block[] }) {
           <EmptyState isOver={isOver} />
         ) : (
           blocks.map((block, index) => (
-            <CanvasBlock
-              key={block.id}
-              block={block}
-              isDropTarget={dropInfo.overId === block.id}
-              isFirst={index === 0}
-              isDraggingFromPalette={dropInfo.isDraggingFromPalette}
-              activeHeight={activeHeight}
-              dropPosition={dropInfo.position}
-            />
+            <React.Fragment key={block.id}>
+              <CanvasBlock
+                block={block}
+                isDropTarget={dropInfo.overId === block.id}
+                isFirst={index === 0}
+                isDraggingFromPalette={dropInfo.isDraggingFromPalette}
+                activeHeight={activeHeight}
+                dropPosition={dropInfo.position}
+              />
+            </React.Fragment>
           ))
         )}
 

@@ -13,6 +13,7 @@ import ScrollToTop from "@/components/shared/ScrollToTop";
 import ThemeSwitcher from "@/components/shared/ThemeSwitcher";
 import { pagesApi } from "@/lib/api/client";
 
+
 /**
  * Preview page — renders the page content exactly as it will appear,
  * without any editor chrome. Blocks are fully read-only.
@@ -24,43 +25,29 @@ export default function PreviewPage() {
     const [loading, setLoading] = useState(!page);
 
     useEffect(() => {
-        if (!pageId) return;
+        async function load() {
+            if (!pageId) return;
 
-        // Try cross-device API store first (for phones / LAN IP)
-        fetch(`/api/preview/${pageId}`)
-            .then((r) => r.ok ? r.json() : null)
-            .then((data) => {
-                if (data && data.content) {
-                    setPage(data);
-                    setLoading(false);
+            try {
+                const res = await pagesApi.get(pageId);
+                const data = res.data?.page || res.data;
+
+                if (data) {
+                    setPage({
+                        ...data,
+                        content: Array.isArray(data.content) ? data.content : []
+                    });
                 } else {
-                    fallbackLoad();
+                    setPage(loadPage(pageId));
                 }
-            })
-            .catch(() => fallbackLoad());
-
-        function fallbackLoad() {
-            if (pageId.length >= 24) {
-                pagesApi.get(pageId)
-                    .then(({ data: apiPage }) => {
-                        if (apiPage) {
-                            const pageData = apiPage.page || apiPage;
-                            const content = pageData.content?.root?.children
-                                || (Array.isArray(pageData.content) ? pageData.content : []);
-                            setPage({ ...pageData, content });
-                        } else {
-                            // Fallback if DB fetch fails
-                            setPage(loadPage(pageId));
-                        }
-                    })
-                    .catch(() => setPage(loadPage(pageId)))
-                    .finally(() => setLoading(false));
-            } else {
-                // Origin-bound localStorage fallback for guest mode tabs
+            } catch (e) {
+                console.error("Preview load failed", e);
                 setPage(loadPage(pageId));
+            } finally {
                 setLoading(false);
             }
         }
+        load();
     }, [pageId, setPage]);
 
     if (loading || !page) {

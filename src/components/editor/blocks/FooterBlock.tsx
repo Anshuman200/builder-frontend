@@ -5,11 +5,11 @@ import { PreviewContext, BlockProps } from "./shared";
 
 export function FooterBlock({ block }: BlockProps) {
     const p = block.props;
-    const { viewMode, page } = useEditorStore();
-    const theme = page?.theme || { layout: { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" } };
-    const layoutObj = theme.layout || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
+    const viewMode = useEditorStore((s) => s.viewMode);
+    const layoutObj = useEditorStore((s) => s.page?.theme?.layout) || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
     const isPreview = React.useContext(PreviewContext);
-    const isDark = (page?.theme?.mode || "light") === "dark";
+    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
+
 
     const rawBg = (p.bgColor as string) || "#0f172a";
     const rawText = (p.textColor as string) || "#f8fafc";

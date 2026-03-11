@@ -52,10 +52,12 @@ export function ChildBlockWrapper({
     outlineColorHover?: string;
 }) {
     const isPreview = React.useContext(PreviewContext);
-    const { selectedBlockId, hoveredBlockId, selectBlock, hoverBlock, deleteBlock } =
-        useEditorStore();
-    const isSelected = !isPreview && selectedBlockId === block.id;
-    const isHovered = !isPreview && hoveredBlockId === block.id;
+    // Targeted selectors — only re-render when THIS block's selection/hover state changes
+    const isSelected = !isPreview && useEditorStore((s) => s.selectedBlockId === block.id);
+    const isHovered = !isPreview && useEditorStore((s) => s.hoveredBlockId === block.id);
+    const selectBlock = useEditorStore((s) => s.selectBlock);
+    const hoverBlock = useEditorStore((s) => s.hoverBlock);
+    const deleteBlock = useEditorStore((s) => s.deleteBlock);
     const showControls = isSelected || isHovered;
 
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({

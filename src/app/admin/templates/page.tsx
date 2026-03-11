@@ -4,14 +4,11 @@ import { useState, useDeferredValue, useEffect } from "react";
 import { MagnifyingGlassIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { useAdminTemplates } from "@/lib/api/queries";
 import { TemplatePreviewModal } from "@/components/admin/TemplatePreviewModal";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button, Input, Select, Skeleton } from "antd";
 import { cn } from "@/lib/utils";
 import { useToasts } from "@/hooks/useToasts";
+import { CommonContainer } from "@/components/layout/CommonContainer";
+import { TemplateCard } from "@/components/templates/TemplateCard";
 
 function timeAgo(dateStr: string) {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -62,11 +59,13 @@ export default function AdminTemplatesPage() {
     }, [isError]);
 
     return (
-        <div className="p-8 max-w-7xl w-full">
-            {/* Title */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-extrabold text-(--text) tracking-tight">Templates</h1>
-                <p className="text-sm text-(--text-muted) mt-1">
+        <CommonContainer className="py-8">
+            {/* Header */}
+            <div className="mb-7">
+                <h1 className="m-0 text-2xl font-extrabold text-(--text) tracking-tight">
+                    Templates
+                </h1>
+                <p className="mt-1 text-sm text-(--text-muted)">
                     {data ? `${data.total} total templates` : "Loading..."}
                 </p>
             </div>
@@ -74,16 +73,16 @@ export default function AdminTemplatesPage() {
             {/* Filters row */}
             <div className="flex gap-3 mb-6 flex-wrap items-center">
                 {/* Visibility tabs */}
-                <div className="flex bg-(--bg) border border-(--border) rounded-xl p-1 gap-0.5">
+                <div className="flex bg-(--surface) border border-(--border) rounded-xl p-1 gap-0.5">
                     {VISIBILITY_TABS.map(({ key, label }) => (
                         <button
                             key={key}
                             onClick={() => { setVisibility(key); setPage(1); }}
                             className={cn(
-                                "px-4 py-1.5 rounded-lg text-sm font-semibold transition-all",
+                                "px-4 py-1.5 rounded-lg border-none cursor-pointer font-semibold text-xs transition-all",
                                 visibility === key
-                                    ? "bg-(--surface) text-(--text) shadow-sm"
-                                    : "text-(--text-muted) hover:text-(--text)"
+                                    ? "bg-linear-to-br from-indigo-500 to-indigo-600 text-white shadow-lg"
+                                    : "bg-transparent text-(--text-muted) hover:text-(--text)"
                             )}
                         >
                             {label}
@@ -92,53 +91,46 @@ export default function AdminTemplatesPage() {
                 </div>
 
                 {/* Search */}
-                <div className="relative flex-1 min-w-52">
-                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-muted)" />
+                <div className="flex-1 min-w-[220px]">
                     <Input
+                        prefix={<MagnifyingGlassIcon className="w-4 h-4 text-(--text-muted)" />}
                         placeholder="Search by title..."
                         value={search}
                         onChange={e => { setSearch(e.target.value); setPage(1); }}
-                        className="pl-9 bg-(--surface) border-(--border) text-(--text) placeholder:text-(--text-muted) h-10"
+                        size="large"
+                        className="bg-(--surface) border-(--border) text-(--text) rounded-xl"
                     />
                 </div>
 
                 {/* Sort */}
                 <Select
                     value={`${sortBy}:${order}`}
-                    onValueChange={value => {
+                    onChange={value => {
                         const [f, o] = value.split(":");
                         setSortBy(f); setOrder(o as "asc" | "desc"); setPage(1);
                     }}
-                    
-                >
-                    <SelectTrigger className="w-[180px] bg-(--surface) border-(--border)">
-                        <SelectValue placeholder="Sort by..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="updatedAt:desc">Newest first</SelectItem>
-                        <SelectItem value="updatedAt:asc">Oldest first</SelectItem>
-                        <SelectItem value="title:asc">Title A→Z</SelectItem>
-                        <SelectItem value="title:desc">Title Z→A</SelectItem>
-                    </SelectContent>
-                </Select>
+                    size="large"
+                    className="w-[180px]"
+                    popupMatchSelectWidth={false}
+                    options={[
+                        { label: "Newest first", value: "updatedAt:desc" },
+                        { label: "Oldest first", value: "updatedAt:asc" },
+                        { label: "Title A→Z", value: "title:asc" },
+                        { label: "Title Z→A", value: "title:desc" },
+                    ]}
+                />
             </div>
 
             {/* Skeleton loading */}
             {isLoading && (
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-6">
                     {Array.from({ length: 8 }).map((_, i) => (
-                        <div key={i} className="rounded-2xl overflow-hidden border border-(--border)">
-                            <Skeleton className="h-32 w-full rounded-none bg-(--surface)" />
-                            <div className="p-3 space-y-2 bg-(--bg)">
-                                <Skeleton className="h-4 w-3/4 bg-(--surface)" />
-                                <Skeleton className="h-3 w-1/2 bg-(--surface)" />
-                            </div>
-                        </div>
+                        <div key={i} className="h-64 bg-(--surface) border border-(--border) rounded-xl animate-pulse" />
                     ))}
                 </div>
             )}
 
-            {/* Empty */}
+            {/* Empty state */}
             {!isLoading && templates.length === 0 && (
                 <div className="flex items-center justify-center h-48 rounded-2xl border border-dashed border-(--border) text-(--text-muted) text-sm">
                     No templates found matching your filters.
@@ -147,56 +139,15 @@ export default function AdminTemplatesPage() {
 
             {/* Grid */}
             {!isLoading && templates.length > 0 && (
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-6">
                     {templates.map((tpl: any) => (
-                        <Card
+                        <TemplateCard
                             key={tpl._id}
+                            template={tpl}
                             onClick={() => setPreview({ id: tpl._id, title: tpl.title })}
-                            className="bg-(--surface) border-(--border) overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20 hover:border-indigo-500/40 group p-0 gap-0"
-                        >
-                            {/* Thumbnail */}
-                            <div className={cn(
-                                "h-32 bg-gradient-to-br flex items-center justify-center relative",
-                                getGradient(tpl.title || "A")
-                            )}>
-                                <span className="text-5xl font-black text-white/20 group-hover:scale-110 transition-transform duration-500">
-                                    {(tpl.title || "T")[0].toUpperCase()}
-                                </span>
-                                <div className="absolute top-2.5 left-2.5 flex gap-1.5">
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/30 backdrop-blur-sm text-white border border-white/10">
-                                        {tpl.status === "PUBLISHED" ? "LIVE" : "DRAFT"}
-                                    </span>
-                                    <span className={cn(
-                                        "text-[10px] font-bold px-2 py-0.5 rounded-full text-white border border-white/10",
-                                        tpl.isPublic ? "bg-emerald-500/70" : "bg-indigo-500/70"
-                                    )}>
-                                        {tpl.isPublic ? "PUBLIC" : "PRIVATE"}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Info */}
-                            <CardContent className="p-3">
-                                <p className="font-bold text-sm text-(--text) truncate group-hover:text-indigo-400 transition-colors">
-                                    {tpl.title || "Untitled"}
-                                </p>
-                                {tpl.author && (
-                                    <p className="text-xs text-(--text-muted) mt-0.5 truncate">
-                                        By {tpl.author.name || tpl.author.email || "Unknown"}
-                                    </p>
-                                )}
-                                <div className="flex items-center gap-1.5 mt-2 text-xs text-(--text-muted)">
-                                    <ClockIcon className="w-3 h-3" />
-                                    {timeAgo(tpl.updatedAt)}
-                                    {tpl.category && tpl.category !== "Other" && (
-                                        <>
-                                            <span className="opacity-40">·</span>
-                                            <span className="text-indigo-400 font-semibold">{tpl.category}</span>
-                                        </>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
+                            variant="admin"
+                            subtitle={timeAgo(tpl.updatedAt)}
+                        />
                     ))}
                 </div>
             )}
@@ -205,9 +156,6 @@ export default function AdminTemplatesPage() {
             {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-2 mt-8">
                     <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-(--border) bg-(--surface) text-(--text) hover:bg-(--bg)"
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={page === 1}
                     >
@@ -218,22 +166,13 @@ export default function AdminTemplatesPage() {
                         .map(p => (
                             <Button
                                 key={p}
-                                size="icon"
-                                className={cn(
-                                    "h-9 w-9 text-sm",
-                                    p === page
-                                        ? "bg-indigo-500 hover:bg-indigo-600 text-white"
-                                        : "bg-(--surface) border border-(--border) text-(--text-muted) hover:bg-(--bg)"
-                                )}
+                                type={p === page ? "primary" : "default"}
                                 onClick={() => setPage(p)}
                             >
                                 {p}
                             </Button>
                         ))}
                     <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-(--border) bg-(--surface) text-(--text) hover:bg-(--bg)"
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
                     >
@@ -250,6 +189,6 @@ export default function AdminTemplatesPage() {
                     onClose={() => setPreview(null)}
                 />
             )}
-        </div>
+        </CommonContainer>
     );
 }

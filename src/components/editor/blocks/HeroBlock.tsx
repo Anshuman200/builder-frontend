@@ -12,9 +12,8 @@ export function HeroBlock({ block }: BlockProps) {
     const bgOverlay = (p.bgOverlay as string) || "rgba(0,0,0,0.25)";
     const childBlocks = (p.childBlocks as any[]) ?? [];
 
-    const { viewMode, page } = useEditorStore();
-    const theme = page?.theme || { layout: { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" } };
-    const layoutObj = theme.layout || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
+    const viewMode = useEditorStore((s) => s.viewMode);
+    const layoutObj = useEditorStore((s) => s.page?.theme?.layout) || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
     const isPreview = React.useContext(PreviewContext);
 
     const desktopPadding = (p.padding as string) || "4rem 0px";

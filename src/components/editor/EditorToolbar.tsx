@@ -13,8 +13,7 @@ import {
   EyeIcon,
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Popover, Dropdown, MenuProps } from "antd";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEditorStore } from "@/stores/editorStore";
@@ -24,6 +23,7 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { pagesApi } from "@/lib/api/client";
 import { clearLocalDraft } from "@/lib/storage";
 import { useToasts } from "@/hooks/useToasts";
+
 
 export default function EditorToolbar() {
   const {
@@ -49,32 +49,29 @@ export default function EditorToolbar() {
   const canRedo = historyIndex < history.length - 1;
 
   // Helper to format payload for backend
-  const formatPayload = () => ({
-    title: page?.title || "Untitled",
-    meta: page?.meta || {},
-    theme: page?.theme || {},
-    isTemplate: page?.isTemplate,
-    isPublic: page?.isPublic,
-    isLocked: page?.isLocked,
-    category: page?.category,
-    content: {
-      root: {
-        id: "root",
-        type: "Canvas",
-        props: {},
-        children: page?.content || []
-      }
-    }
-  });
+  const getPlainPayload = () => {
+    if (!page) return null;
+
+    return {
+      title: page.title,
+      slug: page.slug,
+      content: page.content || [],
+      meta: page.meta || {},
+      category: page.category || 'Other',
+      status: page.status || 'DRAFT'
+    };
+  };
 
   // Auto-save effect
   useEffect(() => {
     if (!user || !pageId || !isDirty || isSaving) return;
-    if (pageId.length < 24) return; // Do not auto-save guest ids; require manual save to create
+    if (pageId.length < 24) return;
 
     const timeoutId = setTimeout(async () => {
       try {
-        await pagesApi.update(pageId, formatPayload());
+        const payload = getPlainPayload();
+        if (!payload) return;
+        await pagesApi.update(pageId, payload);
         markClean();
         clearLocalDraft(pageId);
       } catch (e) {
@@ -94,9 +91,11 @@ export default function EditorToolbar() {
 
     setIsSaving(true);
     try {
+      const payload = getPlainPayload();
+      if (!payload) return;
+
       if (pageId.length < 24) {
-        // Create new page in DB to replace local guest ID
-        const res = await pagesApi.create(formatPayload());
+        const res = await pagesApi.create(payload);
         const newId = res.data.page._id;
         markClean();
         clearLocalDraft(pageId);
@@ -104,7 +103,7 @@ export default function EditorToolbar() {
         router.replace(`/editor/${newId}`);
         return;
       }
-      await pagesApi.update(pageId, formatPayload());
+      await pagesApi.update(pageId, payload);
       markClean();
       clearLocalDraft(pageId);
     } catch (e) {
@@ -126,14 +125,17 @@ export default function EditorToolbar() {
       let finalPageId = pageId;
       // First save draft
       if (isDirty || pageId.length < 24) {
+        const payload = getPlainPayload();
+        if (!payload) return;
+
         if (pageId.length < 24) {
-          const res = await pagesApi.create(formatPayload());
+          const res = await pagesApi.create(payload);
           finalPageId = res.data.page._id;
           markClean();
           clearLocalDraft(pageId);
           clearLocalDraft(finalPageId);
         } else {
-          await pagesApi.update(pageId, formatPayload());
+          await pagesApi.update(pageId, payload);
           markClean();
           clearLocalDraft(pageId);
         }
@@ -374,105 +376,112 @@ export default function EditorToolbar() {
 
         {/* Page settings popover */}
         <div style={{ position: "relative" }}>
-          <Popover>
-            <PopoverTrigger asChild>
+          <Popover
+            placement="bottomRight"
+            trigger="click"
+            styles={{ root: { background: 'var(--bg-secondary)', border: '1px solid var(--border)', padding: '4px', maxWidth: '280px' } }}
+            content={
+              <div className="w-56">
+                <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)", marginBottom: "4px" }}>
+                  <p className="text-(--text)" style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>Page Settings</p>
+                </div>
+
+                <div style={{ padding: "4px 8px" }}>
+                  <SettingField label="Title">
+                    <input
+                      className="input-dark"
+                      defaultValue={page?.title}
+                      onBlur={(e) => updateTitle(e.target.value)}
+                      placeholder="Page title"
+                    />
+                  </SettingField>
+
+                  <SettingField label="Slug">
+                    <input
+                      className="input-dark"
+                      defaultValue={page?.slug}
+                      onBlur={(e) => updateSlug(slugify(e.target.value))}
+                      placeholder="page-slug"
+                    />
+                  </SettingField>
+
+                  <SettingField label="Meta Description">
+                    <textarea
+                      className="input-dark"
+                      defaultValue={page?.meta?.description || ""}
+                      onBlur={(e) => updateMeta({ description: e.target.value })}
+                      rows={2}
+                      style={{ resize: "none" }}
+                      placeholder="Brief description for search engines"
+                    />
+                  </SettingField>
+
+                  <SettingField label="OG Image URL">
+                    <input
+                      className="input-dark"
+                      defaultValue={page?.meta?.ogImage || ""}
+                      onBlur={(e) => updateMeta({ ogImage: e.target.value })}
+                      placeholder="https://..."
+                    />
+                  </SettingField>
+                </div>
+              </div>
+            }
+          >
+            <div>
               <IconBtn title="Page settings">
                 <AdjustmentsHorizontalIcon style={{ width: 14, height: 14, color: "currentColor" }} />
               </IconBtn>
-            </PopoverTrigger>
-
-            <PopoverContent
-              align="end"
-              sideOffset={8}
-              className="w-56 bg-(--bg-secondary) border border-(--border) rounded-md py-1 shadow-lg z-1000"
-            >
-              <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)", marginBottom: "4px" }}>
-                <p className="text-(--text)" style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>Page Settings</p>
-              </div>
-
-              <SettingField label="Title">
-                <input
-                  className="input-dark"
-                  defaultValue={page?.title}
-                  onBlur={(e) => updateTitle(e.target.value)}
-                  placeholder="Page title"
-                />
-              </SettingField>
-
-              <SettingField label="Slug">
-                <input
-                  className="input-dark"
-                  defaultValue={page?.slug}
-                  onBlur={(e) => updateSlug(slugify(e.target.value))}
-                  placeholder="page-slug"
-                />
-              </SettingField>
-
-              <SettingField label="Meta Description">
-                <textarea
-                  className="input-dark"
-                  defaultValue={page?.meta?.description || ""}
-                  onBlur={(e) => updateMeta({ description: e.target.value })}
-                  rows={2}
-                  style={{ resize: "none" }}
-                  placeholder="Brief description for search engines"
-                />
-              </SettingField>
-
-              <SettingField label="OG Image URL">
-                <input
-                  className="input-dark"
-                  defaultValue={page?.meta?.ogImage || ""}
-                  onBlur={(e) => updateMeta({ ogImage: e.target.value })}
-                  placeholder="https://..."
-                />
-              </SettingField>
-            </PopoverContent>
+            </div>
           </Popover>
         </div>
 
         {/* User Menu Popover (if logged in) */}
         {user && (
           <div style={{ position: "relative" }}>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  style={{
-                    width: 32, height: 32, borderRadius: 8,
-                    background: "linear-gradient(135deg, #10b981, #3b82f6)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "white", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer",
-                    border: "2px solid var(--border)", outline: "none"
-                  }}>
-                  {(user?.name || user?.email || "U")[0].toUpperCase()}
-                </button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent
-                align="end"
-                className="w-56 bg-(--surface) border border-(--border) rounded-xl p-1 shadow-xl z-1000 text-(--text)"
-              >
-                <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)", marginBottom: "4px" }}>
-                  <p style={{ margin: 0, fontSize: "0.85rem", fontWeight: 600, color: "var(--text)" }}>{user?.name || "User"}</p>
-                  <p style={{ margin: 0, fontSize: "0.75rem", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis" }}>{user?.email}</p>
-                </div>
-                <DropdownMenuItem
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    await logout();
-                    router.push("/");
-                  }}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 8,
-                    cursor: "pointer", color: "#ef4444", fontSize: "0.85rem", fontWeight: 500,
-                  }}
-                  className="focus:bg-(--bg) cursor-pointer rounded-lg p-2"
-                >
-                  <ArrowRightOnRectangleIcon style={{ width: 16, height: 16 }} />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Dropdown
+              trigger={['click']}
+              placement="bottomRight"
+              menu={{
+                items: [
+                  {
+                    key: 'header',
+                    label: (
+                      <div style={{ padding: "4px 8px", borderBottom: "1px solid var(--border)", marginBottom: "4px" }}>
+                        <p style={{ margin: 0, fontSize: "0.85rem", fontWeight: 600, color: "inherit" }}>{user?.name || "User"}</p>
+                        <p style={{ margin: 0, fontSize: "0.75rem", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis" }}>{user?.email}</p>
+                      </div>
+                    ),
+                    disabled: true,
+                    style: { cursor: 'default' }
+                  },
+                  {
+                    key: 'logout',
+                    onClick: async () => {
+                      await logout();
+                      router.push("/");
+                    },
+                    label: (
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#ef4444", fontSize: "0.85rem", fontWeight: 500 }}>
+                        <ArrowRightOnRectangleIcon style={{ width: 16, height: 16 }} />
+                        Log out
+                      </div>
+                    ),
+                  }
+                ]
+              }}
+            >
+              <button
+                style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: "linear-gradient(135deg, #10b981, #3b82f6)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "white", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer",
+                  border: "2px solid var(--border)", outline: "none"
+                }}>
+                {(user?.name || user?.email || "U")[0].toUpperCase()}
+              </button>
+            </Dropdown>
           </div>
         )}
       </div>

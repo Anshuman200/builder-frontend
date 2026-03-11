@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { pagesApi, authApi, adminApi } from "./client";
 
 // ─── Pages Queries ──────────────────────────────────────────────────────────
@@ -18,10 +18,27 @@ export const usePages = () => {
 export const useTemplates = () => {
     return useQuery({
         queryKey: ["templates"],
+        // The landing page just needs the top 10
         queryFn: async () => {
-            const { data } = await pagesApi.templates();
+            const { data } = await pagesApi.templates({ limit: 10 });
             return Array.isArray(data) ? data : data?.templates ?? [];
         },
+    });
+};
+
+export const useInfinitePublicTemplates = (params?: Record<string, string | number>) => {
+    return useInfiniteQuery({
+        queryKey: ["templates", "infinite", params],
+        // Cast pageParam to 'any' initially if type definitions are strict, or use the signature correctly
+        queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
+            const { data } = await pagesApi.templates({ ...params, page: pageParam });
+            return data;
+        },
+        getNextPageParam: (lastPage: any) => {
+            if (lastPage.page < lastPage.pages) return lastPage.page + 1;
+            return undefined;
+        },
+        initialPageParam: 1,
     });
 };
 

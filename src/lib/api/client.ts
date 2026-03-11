@@ -79,7 +79,18 @@ async function request<T = any>(
 
 export const pagesApi = {
     list: () => request("/pages"),
-    templates: () => request("/pages/templates"),
+    templates: (params?: Record<string, string | number>) => {
+        const urlParams = new URLSearchParams();
+        if (params) {
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== undefined && value !== null && value !== "") {
+                    urlParams.append(key, String(value));
+                }
+            });
+        }
+        const qs = urlParams.toString();
+        return request(`/pages/templates${qs ? `?${qs}` : ""}`);
+    },
 
     create: (body: { title: string, content?: any, meta?: any }) =>
         request("/pages", { method: "POST", body: JSON.stringify(body) }),

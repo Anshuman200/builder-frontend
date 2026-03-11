@@ -59,7 +59,7 @@ export function Header({ onLoginClick }: HeaderProps) {
 
             <Link
               href="/editor"
-              className="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-bold text-white no-underline shadow-lg transition-all hover:scale-105 active:scale-95 bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500"
+              className="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-bold !text-white no-underline shadow-lg transition-all hover:scale-105 active:scale-95 bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500"
               style={{
                 boxShadow: "0 4px 20px -5px rgba(99,102,241,0.6)",
               }}
@@ -98,7 +98,7 @@ export function Header({ onLoginClick }: HeaderProps) {
               </button>
               <Link
                 href="/editor"
-                className="w-full py-4 rounded-2xl text-center font-bold text-white bg-linear-to-r from-indigo-600 to-violet-600"
+                className="w-full py-4 rounded-2xl text-center font-bold !text-white bg-linear-to-r from-indigo-600 to-violet-600"
                 onClick={() => setMobileOpen(false)}
               >
                 Start Free

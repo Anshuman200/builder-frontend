@@ -8,8 +8,9 @@ export function TextBlock({ block }: BlockProps) {
     const Tag = ((p.tag as string) || "p") as React.ElementType;
     const defaultSizes: Record<string, string> = { h1: "2.25rem", h2: "1.875rem", h3: "1.5rem", h4: "1.25rem", p: "1rem" };
     const tag = (p.tag as string) || "p";
-    const { viewMode, page } = useEditorStore();
-    const isDark = (page?.theme?.mode || "light") === "dark";
+    const viewMode = useEditorStore((s) => s.viewMode);
+    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
+
 
     const desktopSize = (p.fontSize as string) || defaultSizes[tag] || "1rem";
     const tabletSize = (p.tabletFontSize as string) || desktopSize;

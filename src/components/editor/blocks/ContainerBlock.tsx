@@ -9,8 +9,9 @@ export function ContainerBlock({ block }: BlockProps) {
     const childBlocks = (p.childBlocks as any[]) ?? [];
     const rawBg = p.bgColor as string;
 
-    const { viewMode, page } = useEditorStore();
-    const isDark = (page?.theme?.mode || "light") === "dark";
+    const viewMode = useEditorStore((s) => s.viewMode);
+    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
+
     const isPreview = React.useContext(PreviewContext);
 
     let bgColor = rawBg || "transparent";

@@ -12,17 +12,7 @@ import React from "react";
 import { ChevronDownIcon, CheckIcon, SwatchIcon } from "@heroicons/react/24/outline";
 
 import { useEditorStore } from "@/stores/editorStore";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
+import { Dropdown, Popover } from "antd";
 
 export type { Block, EditorPage };
 export { useEditorStore };
@@ -96,36 +86,36 @@ export function TextareaInput({ value, onChange, rows = 3, placeholder }: { valu
 export function SelectInput({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { label: string; value: string }[] }) {
     const selectedOption = options.find((o) => o.value === value) || options[0];
 
+    const menuItems = options.map((o) => ({
+        key: o.value,
+        label: (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                {o.label}
+                {o.value === value && <CheckIcon style={{ width: 12, height: 12, color: PANEL_COLORS.primary }} />}
+            </div>
+        ),
+        onClick: () => onChange(o.value),
+        style: {
+            padding: "4px 8px", fontSize: 11, color: PANEL_COLORS.text, borderRadius: 4, background: o.value === value ? "#0099ff33" : "transparent"
+        }
+    }));
+
     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <button
-                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", height: 26, padding: "0 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", transition: "background 0.15s" }}
-                    onMouseEnter={e => e.currentTarget.style.background = PANEL_COLORS.inputHoverBg}
-                    onMouseLeave={e => e.currentTarget.style.background = PANEL_COLORS.inputBg}
-                >
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedOption?.label}</span>
-                    <ChevronDownIcon style={{ width: 12, height: 12, opacity: 0.5, flexShrink: 0 }} />
-                </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-                align="start"
-                style={{ zIndex: 9999, minWidth: 140, background: "#1e1e1e", border: `1px solid ${PANEL_COLORS.border}`, borderRadius: 6, padding: 4, boxShadow: "0 4px 12px rgba(0,0,0,0.4)" }}
+        <Dropdown
+            trigger={['click']}
+            placement="bottomLeft"
+            menu={{ items: menuItems, style: { background: "#1e1e1e", border: `1px solid ${PANEL_COLORS.border}`, borderRadius: 6, padding: 4, boxShadow: "0 4px 12px rgba(0,0,0,0.4)" } }}
+            getPopupContainer={() => document.body}
+        >
+            <button
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", height: 26, padding: "0 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", transition: "background 0.15s" }}
+                onMouseEnter={e => e.currentTarget.style.background = PANEL_COLORS.inputHoverBg}
+                onMouseLeave={e => e.currentTarget.style.background = PANEL_COLORS.inputBg}
             >
-                {options.map((o) => (
-                    <DropdownMenuItem
-                        key={o.value}
-                        onClick={() => onChange(o.value)}
-                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 8px", fontSize: 11, color: PANEL_COLORS.text, borderRadius: 4, cursor: "pointer", outline: "none", background: o.value === value ? "#0099ff33" : "transparent" }}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = o.value === value ? "#0099ff44" : "#2a2a2a")}
-                        onMouseLeave={(e) => (e.currentTarget.style.background = o.value === value ? "#0099ff33" : "transparent")}
-                    >
-                        {o.label}
-                        {o.value === value && <CheckIcon style={{ width: 12, height: 12, color: PANEL_COLORS.primary }} />}
-                    </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-        </DropdownMenu>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedOption?.label}</span>
+                <ChevronDownIcon style={{ width: 12, height: 12, opacity: 0.5, flexShrink: 0 }} />
+            </button>
+        </Dropdown>
     );
 }
 
@@ -257,42 +247,42 @@ export function ColorInput({ value, onChange }: { value: string; onChange: (v: s
     const hexValue = toHex(value);
 
     return (
-        <Popover>
-            <PopoverTrigger asChild>
-                <button
-                    style={{ display: "flex", gap: 8, alignItems: "center", width: "100%", height: 26, padding: "0 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", transition: "background 0.15s" }}
-                    onMouseEnter={e => e.currentTarget.style.background = PANEL_COLORS.inputHoverBg}
-                    onMouseLeave={e => e.currentTarget.style.background = PANEL_COLORS.inputBg}
-                >
-                    <div style={{ width: 14, height: 14, borderRadius: 3, background: displayValue, border: "1px solid rgba(255,255,255,0.15)" }} />
-                    <span style={{ flex: 1, textAlign: "left", fontFamily: "monospace", fontSize: 11, opacity: 0.9 }}>{displayValue}</span>
-                </button>
-            </PopoverTrigger>
-            <PopoverContent
-                align="end"
-                sideOffset={8}
-                style={{ zIndex: 9999, padding: 12, background: "#1e1e1e", border: `1px solid ${PANEL_COLORS.border}`, borderRadius: 6, boxShadow: "0 8px 24px rgba(0,0,0,0.4)", display: "flex", flexDirection: "column", gap: 12, width: 220 }}
-            >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <SwatchIcon style={{ width: 14, height: 14, color: PANEL_COLORS.muted }} />
-                    <span style={{ fontSize: 11, fontWeight: 500, color: PANEL_COLORS.text }}>Color Picker</span>
-                </div>
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <div style={{ position: "relative", width: 26, height: 26, borderRadius: 4, overflow: "hidden", border: `1px solid ${PANEL_COLORS.border}` }}>
-                        <input type="color" value={hexValue} onChange={(e) => onChange(e.target.value)} style={{ position: "absolute", top: -8, left: -8, width: 44, height: 44, cursor: "pointer", border: "none", padding: 0 }} />
+        <Popover
+            placement="bottomRight"
+            trigger="click"
+            styles={{ root: { zIndex: 9999, padding: 12, background: "#1e1e1e", border: `1px solid ${PANEL_COLORS.border}`, borderRadius: 6, boxShadow: "0 8px 24px rgba(0,0,0,0.4)", display: "flex", flexDirection: "column", gap: 12, width: 220 } }}
+            content={
+                <>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <SwatchIcon style={{ width: 14, height: 14, color: PANEL_COLORS.muted }} />
+                        <span style={{ fontSize: 11, fontWeight: 500, color: PANEL_COLORS.text }}>Color Picker</span>
                     </div>
-                    <input value={displayValue} onChange={(e) => onChange(e.target.value)} placeholder="#000000" spellCheck={false}
-                        style={{ flex: 1, height: 26, padding: "0 8px", fontSize: 11, fontFamily: "monospace", background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none" }}
-                        onFocus={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.primary; }}
-                        onBlur={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; }}
-                    />
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 6 }}>
-                    {["#ffffff", "#f8fafc", "#f1f5f9", "#e2e8f0", "#cbd5e1", "#1e1e1e", "#64748b", "#475569", "#334155", "#1e293b", "#0f172a", "#020617", "#ef4444", "#f97316", "#eab308", "#22c55e", "#0ea5e9", "#0099ff"].map(c => (
-                        <button key={c} onClick={() => onChange(c)} style={{ width: 24, height: 24, borderRadius: 4, background: c, border: c === "#ffffff" || c === "#f8fafc" ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.05)", cursor: "pointer", padding: 0 }} title={c} />
-                    ))}
-                </div>
-            </PopoverContent>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                        <div style={{ position: "relative", width: 26, height: 26, borderRadius: 4, overflow: "hidden", border: `1px solid ${PANEL_COLORS.border}` }}>
+                            <input type="color" value={hexValue} onChange={(e) => onChange(e.target.value)} style={{ position: "absolute", top: -8, left: -8, width: 44, height: 44, cursor: "pointer", border: "none", padding: 0 }} />
+                        </div>
+                        <input value={displayValue} onChange={(e) => onChange(e.target.value)} placeholder="#000000" spellCheck={false}
+                            style={{ flex: 1, height: 26, padding: "0 8px", fontSize: 11, fontFamily: "monospace", background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none" }}
+                            onFocus={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.primary; }}
+                            onBlur={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; }}
+                        />
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 6 }}>
+                        {["#ffffff", "#f8fafc", "#f1f5f9", "#e2e8f0", "#cbd5e1", "#1e1e1e", "#64748b", "#475569", "#334155", "#1e293b", "#0f172a", "#020617", "#ef4444", "#f97316", "#eab308", "#22c55e", "#0ea5e9", "#0099ff"].map(c => (
+                            <button key={c} onClick={() => onChange(c)} style={{ width: 24, height: 24, borderRadius: 4, background: c, border: c === "#ffffff" || c === "#f8fafc" ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.05)", cursor: "pointer", padding: 0 }} title={c} />
+                        ))}
+                    </div>
+                </>
+            }
+        >
+            <button
+                style={{ display: "flex", gap: 8, alignItems: "center", width: "100%", height: 26, padding: "0 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", transition: "background 0.15s" }}
+                onMouseEnter={e => e.currentTarget.style.background = PANEL_COLORS.inputHoverBg}
+                onMouseLeave={e => e.currentTarget.style.background = PANEL_COLORS.inputBg}
+            >
+                <div style={{ width: 14, height: 14, borderRadius: 3, background: displayValue, border: "1px solid rgba(255,255,255,0.15)" }} />
+                <span style={{ flex: 1, textAlign: "left", fontFamily: "monospace", fontSize: 11, opacity: 0.9 }}>{displayValue}</span>
+            </button>
         </Popover>
     );
 }

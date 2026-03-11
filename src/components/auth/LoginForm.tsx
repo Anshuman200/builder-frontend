@@ -1,93 +1,90 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "@tanstack/react-form";
-import { EnvelopeIcon } from "@heroicons/react/24/outline";
-import { GlassInput } from "@/components/ui/glass/GlassInput";
-import { GlassButton } from "@/components/ui/glass/GlassButton";
-import { GlassField, GlassError } from "@/components/ui/glass/GlassField";
-import { FormHeading, GlassLink, PasswordField } from "./AuthShared";
+import { Form, Input, Button } from "antd";
+import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+import { FormHeading, GlassLink } from "./AuthShared";
 
 export function LoginForm(props: any) {
     const { handleLogin, error, setTab, isLoading } = props;
     const [globalError, setGlobalError] = useState(error);
+    const [form] = Form.useForm();
 
-    const form = useForm({
-        defaultValues: {
-            email: "",
-            password: "",
-        },
-        onSubmit: async ({ value }) => {
-            setGlobalError("");
-            try {
-                await handleLogin(value.email, value.password);
-            } catch (err: any) {
-                setGlobalError("Invalid email or password. Please try again.");
-            }
-        },
-    });
+    const onFinish = async (values: any) => {
+        setGlobalError("");
+        try {
+            await handleLogin(values.email, values.password);
+        } catch (err: any) {
+            setGlobalError("Invalid email or password. Please try again.");
+        }
+    };
 
     return (
-        <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit(); }} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <Form
+            form={form}
+            layout="vertical"
+            onFinish={onFinish}
+            className="flex flex-col gap-0"
+            requiredMark={false}
+        >
             <FormHeading title="Welcome back" subtitle="Sign in to your PageCraft account" />
 
-            <form.Field
+            <Form.Item
                 name="email"
-                validators={{
-                    onChange: ({ value }) => !value ? 'Email is required' : undefined,
-                }}
-                children={(field) => (
-                    <GlassField label="Email" htmlFor="login-email">
-                        <GlassInput
-                            id="login-email"
-                            type="email"
-                            required
-                            value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            onBlur={field.handleBlur}
-                            placeholder="you@example.com"
-                            icon={<EnvelopeIcon style={{ width: 15, height: 15 }} />}
-                        />
-                        {field.state.meta.errors && field.state.meta.errors.length > 0 && <GlassError message={field.state.meta.errors[0]?.toString() || ""} />}
-                    </GlassField>
-                )}
-            />
+                label={<span className="text-white/70 text-sm">Email</span>}
+                rules={[{ required: true, message: 'Email is required' }, { type: 'email', message: 'Please enter a valid email' }]}
+                className="mb-0"
+            >
+                <Input
+                    prefix={<EnvelopeIcon className="w-4 h-4 text-white/40" />}
+                    placeholder="you@example.com"
+                    size="large"
+                    className="h-12 bg-white/5 border-white/10 text-white placeholder-white/20 rounded-xl"
+                />
+            </Form.Item>
 
-            <form.Field
+            <Form.Item
                 name="password"
-                validators={{
-                    onChange: ({ value }) => !value ? 'Password is required' : undefined,
-                }}
-                children={(field) => (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                        <PasswordField
-                            id="login-password"
-                            label="Password"
-                            value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                        />
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 1, marginBottom: field.state.meta.errors.length ? 8 : 0 }}>
-                            <GlassLink onClick={() => { setTab("forgot-password"); }}>Forgot password?</GlassLink>
-                        </div>
-                        {field.state.meta.errors && field.state.meta.errors.length > 0 && <GlassError message={field.state.meta.errors[0]?.toString() || ""} />}
+                label={<span className="text-white/70 text-sm">Password</span>}
+                rules={[{ required: true, message: 'Password is required' }]}
+                className="mb-0"
+                extra={
+                    <div className="flex justify-end mt-1">
+                        <GlassLink onClick={() => setTab("forgot-password")}>Forgot password?</GlassLink>
                     </div>
-                )}
-            />
+                }
+            >
+                <Input.Password
+                    prefix={<LockClosedIcon className="w-4 h-4 text-white/40" />}
+                    placeholder="••••••••"
+                    size="large"
+                    className="h-12 bg-white/5 border-white/10 text-white placeholder-white/20 rounded-xl"
+                />
+            </Form.Item>
 
-            {globalError && <GlassError message={globalError} />}
+            {globalError && (
+                <div className="text-red-500 text-sm mb-3">
+                    {globalError}
+                </div>
+            )}
 
-            <form.Subscribe
-                selector={(state) => [state.canSubmit, state.isSubmitting]}
-                children={([canSubmit, isSubmitting]) => (
-                    <GlassButton type="submit" variant="primary" fullWidth loading={isLoading || isSubmitting} disabled={!canSubmit} loadingLabel="Signing in…">
-                        Sign in
-                    </GlassButton>
-                )}
-            />
+            <Form.Item className="mb-4">
+                <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={isLoading}
+                    size="large"
+                    block
+                    className="bg-linear-to-br from-indigo-500 to-indigo-600 border-none font-bold h-12 rounded-xl"
+                >
+                    Sign in
+                </Button>
+            </Form.Item>
 
-            <p style={{ textAlign: "center", fontSize: "0.82rem", color: "rgba(255,255,255,0.35)", margin: 0 }}>
-                No account?{" "}<GlassLink onClick={() => setTab("register")}>Create one free</GlassLink>
+            <p className="text-center text-sm text-white/30">
+                No account?{" "}
+                <GlassLink onClick={() => setTab("register")}>Create one free</GlassLink>
             </p>
-        </form>
+        </Form>
     );
 }

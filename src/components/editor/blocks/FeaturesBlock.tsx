@@ -7,8 +7,9 @@ import { PreviewContext, BlockProps } from "./shared";
 
 export function FeaturesBlock({ block }: BlockProps) {
     const p = block.props;
-    const { viewMode, page } = useEditorStore();
-    const isDark = (page?.theme?.mode || "light") === "dark";
+    const viewMode = useEditorStore((s) => s.viewMode);
+    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
+
     const isPreview = React.useContext(PreviewContext);
 
     const LIGHT_BGS = ["#ffffff", "#fff", "#f8fafc", "#f1f5f9"];

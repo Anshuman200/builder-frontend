@@ -2,10 +2,6 @@
 
 import type { Tab } from "@/@Types";
 import { useState } from "react";
-import { EyeIcon, EyeSlashIcon, LockClosedIcon } from "@heroicons/react/24/outline";
-import { GlassInput } from "@/components/ui/glass/GlassInput";
-import { GlassField } from "@/components/ui/glass/GlassField";
-
 
 export function GlassOrb({ style }: { style: React.CSSProperties }) {
     return (
@@ -82,40 +78,5 @@ export function GlassLink({ onClick, children }: { onClick: () => void; children
         >
             {children}
         </button>
-    );
-}
-
-export function PasswordField({ id, label, value, onChange, onBlur }: {
-    id: string; label: string;
-    value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    onBlur?: () => void;
-}) {
-    const [show, setShow] = useState(false);
-    return (
-        <GlassField label={label} htmlFor={id}>
-            <GlassInput
-                id={id}
-                type={show ? "text" : "password"}
-                value={value}
-                onChange={onChange}
-                onBlur={onBlur}
-                placeholder="••••••••"
-                icon={<LockClosedIcon style={{ width: 15, height: 15 }} />}
-                suffix={
-                    <button
-                        type="button"
-                        onClick={() => setShow(s => !s)}
-                        style={{
-                            background: "none", border: "none", cursor: "pointer",
-                            color: "rgba(255,255,255,0.35)", display: "flex", padding: 0,
-                        }}
-                    >
-                        {show
-                            ? <EyeSlashIcon style={{ width: 15, height: 15 }} />
-                            : <EyeIcon style={{ width: 15, height: 15 }} />}
-                    </button>
-                }
-            />
-        </GlassField>
     );
 }
