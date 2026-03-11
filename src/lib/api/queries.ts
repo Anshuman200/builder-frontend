@@ -53,6 +53,40 @@ export const usePage = (id: string, enabled = true) => {
     });
 };
 
+// ─── Site Pages Queries ──────────────────────────────────────────────────────
+
+export const useSitePage = (slug: string) => {
+    return useQuery({
+        queryKey: ["site-page", slug],
+        queryFn: async () => {
+            const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3019/api';
+            const res = await fetch(`${API}/site-pages/${slug}`);
+            if (!res.ok) {
+                throw new Error("Page not found");
+            }
+            const data = await res.json();
+            return data.page;
+        },
+        enabled: !!slug,
+        retry: false,
+    });
+};
+
+export const useSitePages = () => {
+    return useQuery({
+        queryKey: ["site-pages"],
+        queryFn: async () => {
+            const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3019/api';
+            const res = await fetch(`${API}/site-pages`);
+            if (!res.ok) {
+                throw new Error("Pages not found");
+            }
+            const data = await res.json();
+            return data.pages;
+        },
+    });
+};
+
 // ─── Pages Mutations ─────────────────────────────────────────────────────────
 
 export const useCreatePage = () => {
@@ -136,6 +170,25 @@ export const useProfile = () => {
             return data;
         },
         retry: false,
+    });
+};
+
+// ─── Forms Mutations ──────────────────────────────────────────────────────────
+
+export const useSubmitForm = () => {
+    return useMutation({
+        mutationFn: (body: any) => {
+            // we use the backend directly so no proxy fetch here!
+            return fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3019/api'}/forms/submit`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            }).then(async (res) => {
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Failed to submit form");
+                return data;
+            });
+        },
     });
 };
 

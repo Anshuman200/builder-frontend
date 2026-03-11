@@ -505,3 +505,179 @@ img {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
+
+/* Admin Site Pages / Jodit Editor Overrides */
+.jodit-dark-theme-override .jodit-container {
+  border-color: var(--border) !important;
+}
+
+.jodit-dark-theme-override .jodit-toolbar__box {
+  background: var(--surface) !important;
+  border-bottom-color: var(--border) !important;
+}
+
+.jodit-dark-theme-override .jodit-workplace {
+  background: var(--bg) !important;
+}
+
+.jodit-dark-theme-override .jodit-wysiwyg {
+  color: var(--text) !important;
+}
+
+/* Fix Jodit popups being unclickable inside Antd Modal */
+.jodit-dialog__box,
+.jodit-popup {
+  z-index: 99999 !important;
+}
+
+.ant-modal-wrap {
+  z-index: 1000 !important;
+}
+
+/* Prevent Antd from blocking pointer events to Jodit popovers */
+.ant-modal-root .ant-modal-wrap {
+  pointer-events: auto !important;
+}
+
+/* Admin Table Shimmer Effect */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Jodit Popups (Portalled to Body) Styles */
+.jodit-dialog__box,
+.jodit-popup,
+.jodit-dialog__panel,
+.jodit-ui-popup__content,
+.jodit-ui-form,
+.jodit-ui-block,
+.jodit-tabs__wrapper,
+.jodit-dialog__header,
+.jodit-tabs__buttons {
+  background: var(--surface) !important;
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+}
+
+.jodit-ui-input__wrapper,
+.jodit-ui-input {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* Specifically target the container that holds the icon + input */
+.jodit-ui-input__box,
+.jodit-ui-input__icon {
+  background: transparent !important;
+  color: var(--text) !important;
+}
+
+.jodit-ui-input__input,
+input.jodit-input,
+.jodit-ui-input__wrapper input {
+  background: var(--bg) !important;
+  background-color: var(--bg) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+/* Fix specific upper URL label box */
+.jodit-ui-block {
+  background: transparent !important;
+  justify-content: center !important;
+}
+
+.jodit-ui-group {
+  background: transparent !important;
+}
+
+.jodit-tabs .jodit-tabs__buttons .jodit-ui-button[aria-pressed="true"]:not([disabled]) .jodit-ui-button__text {
+  background-color: transparent !important;
+}
+
+.jodit-ui-input.jodit-ui-input_focused_true .jodit-ui-input__input {
+  border-color: var(--primary) !important;
+}
+
+.jodit-ui-button__icon {
+  color: var(--text-muted) !important;
+  fill: var(--text-muted) !important;
+}
+
+.jodit-ui-input__input::placeholder,
+input.jodit-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.jodit-ui-input__label,
+.jodit-ui-label,
+label.jodit-ui-label {
+  color: var(--text-muted) !important;
+  font-weight: 500 !important;
+}
+
+/* Tabs */
+.jodit-tabs__button {
+  background: transparent !important;
+  color: var(--text-muted) !important;
+  border-bottom: 2px solid transparent !important;
+}
+
+.jodit-tabs__button.jodit-tabs__button_active {
+  color: var(--text) !important;
+  border-bottom-color: var(--primary) !important;
+}
+
+/* Primary buttons */
+.jodit-ui-button.jodit-ui-button_variant_primary,
+.jodit-button_primary {
+  background-color: var(--primary) !important;
+  border: none !important;
+  border-radius: 6px !important;
+}
+
+.jodit-ui-button_variant_primary .jodit-ui-button__text,
+.jodit-button_primary .jodit-ui-button__text {
+  color: var(--primary-foreground) !important;
+}
+
+/* Standard buttons / generic texts */
+.jodit-ui-button,
+.jodit-button {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  border-radius: 6px !important;
+}
+
+.jodit-ui-button.jodit-ui-button_variant_primary.jodit-ui-button_size_middle,
+.jodit-ui-button_variant_primary,
+.jodit-button.jodit-button_primary {
+  background: var(--primary) !important;
+  background-color: var(--primary) !important;
+}
+
+.jodit-ui-button.jodit-ui-button_variant_primary .jodit-ui-button__text {
+  color: var(--primary-foreground) !important;
+}
+
+
+.jodit-ui-button__text {
+  color: var(--text) !important;
+}
+
+/* Jodit messages */
+.jodit__message {
+  background: var(--bg) !important;
+  color: var(--danger) !important;
+}

@@ -15,6 +15,8 @@ import { useAuth } from "@/hooks/useAuth";
 const NAV = [
     { href: "/admin/users", label: "Users", icon: UsersIcon, badge: null },
     { href: "/admin/templates", label: "Templates", icon: DocumentDuplicateIcon, badge: null },
+    { href: "/admin/site-pages", label: "Site Pages", icon: DocumentDuplicateIcon, badge: null },
+    { href: "/admin/inquiries", label: "Inquiries", icon: DocumentDuplicateIcon, badge: null },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

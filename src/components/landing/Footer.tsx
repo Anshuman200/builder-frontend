@@ -1,24 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { BoltIcon, GlobeAltIcon, CodeBracketIcon, EnvelopeIcon, ArrowRightIcon, HeartIcon } from "@heroicons/react/24/outline";
+import { BoltIcon, GlobeAltIcon, CodeBracketIcon, EnvelopeIcon, HeartIcon } from "@heroicons/react/24/outline";
 import { Container } from "@/components/ui/Container";
 import { CommonContainer } from "../layout/CommonContainer";
-
-const FOOTER_LINKS = {
-  Product: [
-    { label: "Templates", href: "/templates" },
-    { label: "Features", href: "/#features" },
-  ],
-  Company: [
-    { label: "About", href: "#about" },
-    { label: "Contact", href: "#contact" },
-  ],
-  Legal: [
-    { label: "Privacy Policy", href: "#privacy" },
-    { label: "Terms of Service", href: "#terms" },
-  ],
-};
+import { useSitePages } from "@/lib/api/queries";
 
 const SOCIAL = [
   { icon: GlobeAltIcon, href: "#", label: "Twitter" },
@@ -28,6 +14,24 @@ const SOCIAL = [
 ];
 
 export function Footer() {
+  const { data: sitePages = [] } = useSitePages();
+
+  const FOOTER_LINKS = {
+    Product: [
+      { label: "Templates", href: "/templates" },
+      { label: "Features", href: "/#features" },
+    ],
+    Company: [
+      { label: "Contact", href: "/contact" },
+    ],
+    Legal: sitePages.length > 0 ? sitePages.map((p: { title: string; slug: string }) => ({ label: p.title, href: `/${p.slug}` })) : [],
+  };
+
+  const bottomLinks = [
+    ...(sitePages.slice(0, 1).map((p: { title: string; slug: string }) => ({ label: p.title, href: `/${p.slug}` }))),
+    { label: "Contact", href: "/contact" }
+  ];
+
   return (
     <footer style={{
       position: "relative",
@@ -56,7 +60,7 @@ export function Footer() {
                 <div style={{
                   width: 32, height: 32, borderRadius: 9,
                   background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
+                  display: "flex", alignItems: "center", justifyItems: "center",
                 }}>
                   <BoltIcon style={{ width: 16, height: 16, color: "white" }} />
                 </div>
@@ -107,7 +111,7 @@ export function Footer() {
                   {section}
                 </h4>
                 <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-                  {links.map(({ label, href }) => (
+                  {links.map(({ label, href }: { label: string; href: string }) => (
                     <li key={label}>
                       <Link href={href} style={{
                         color: "rgba(255,255,255,0.38)",
@@ -145,12 +149,12 @@ export function Footer() {
               Made with <HeartIcon style={{ width: 11, height: 11, color: "#ef4444", fill: "#ef4444" }} /> for creators worldwide
             </p>
             <div style={{ display: "flex", gap: "1.5rem" }}>
-              {["Privacy", "Terms", "Cookies"].map(l => (
-                <Link key={l} href="#" style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.25)", textDecoration: "none", transition: "color 0.15s" }}
+              {bottomLinks.map(({ label, href }) => (
+                <Link key={label} href={href} style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.25)", textDecoration: "none", transition: "color 0.15s" }}
                   onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
                   onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.25)")}
                 >
-                  {l}
+                  {label}
                 </Link>
               ))}
             </div>

@@ -23,10 +23,11 @@ export async function POST(req: NextRequest) {
         response.cookies.delete("accessToken");
         response.cookies.delete("refreshToken");
         response.cookies.delete("hasSession");
+        response.cookies.delete("userRole");
         return response;
     }
 
-    const { accessToken } = data;
+    const { accessToken, role } = data;
 
     const response = NextResponse.json({ success: true, accessToken });
 
@@ -44,6 +45,15 @@ export async function POST(req: NextRequest) {
         path: "/",
         maxAge: 60 * 60 * 24 * 7, // 7 days
     });
+
+    if (role) {
+        response.cookies.set("userRole", role, {
+            httpOnly: false,
+            sameSite: "lax",
+            path: "/",
+            maxAge: 60 * 60 * 24 * 7, // 7 days
+        });
+    }
 
     return response;
 }

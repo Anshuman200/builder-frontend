@@ -6,8 +6,9 @@ export default function middleware(request: NextRequest) {
 
     const accessToken = request.cookies.get('accessToken')?.value;
     const refreshToken = request.cookies.get('refreshToken')?.value;
+    const userRole = request.cookies.get('userRole')?.value;
+    
     const isAuthed = !!(accessToken || refreshToken);
-    const userRole = request.cookies.get('userRole')?.value ?? 'user';
     const isAdmin = userRole === 'admin';
 
     // Redirect logged-in users away from the landing page

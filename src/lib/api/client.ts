@@ -177,4 +177,19 @@ export const adminApi = {
         const qs = new URLSearchParams(params).toString();
         return request(`/admin/templates${qs ? `?${qs}` : ""}`);
     },
+
+    // Site Pages
+    listSitePages: () => request("/admin/site-pages"),
+    createSitePage: (body: any) => request("/admin/site-pages", { method: "POST", body: JSON.stringify(body) }),
+    updateSitePage: (id: string, body: any) => request(`/admin/site-pages/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+    deleteSitePage: (id: string) => request(`/admin/site-pages/${id}`, { method: "DELETE" }),
+
+    // Inquiries
+    listInquiries: () => request("/admin/inquiries"),
+    replyInquiry: (id: string, replyMessage: string) => request(`/admin/inquiries/${id}/reply`, { method: "PATCH", body: JSON.stringify({ replyMessage }) }),
+    deleteInquiry: (id: string) => request(`/admin/inquiries/${id}`, { method: "DELETE" }),
+};
+
+export const formsApi = {
+    submit: (body: any) => request("/forms/submit", { method: "POST", body: JSON.stringify(body) }),
 };
