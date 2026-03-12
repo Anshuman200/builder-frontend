@@ -9,11 +9,13 @@ import {
     ArrowRightOnRectangleIcon,
     ChevronLeftIcon,
     Squares2X2Icon,
+    PhotoIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "@/hooks/useAuth";
 
 const NAV = [
     { href: "/admin/users", label: "Users", icon: UsersIcon, badge: null },
+    { href: "/admin/media", label: "Media", icon: PhotoIcon, badge: null },
     { href: "/admin/templates", label: "Templates", icon: DocumentDuplicateIcon, badge: null },
     { href: "/admin/site-pages", label: "Site Pages", icon: DocumentDuplicateIcon, badge: null },
     { href: "/admin/inquiries", label: "Inquiries", icon: DocumentDuplicateIcon, badge: null },
@@ -90,34 +92,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                 {/* Nav */}
                 <nav style={{ flex: 1, padding: "12px 8px", display: "flex", flexDirection: "column", gap: 2, overflowY: "auto" }}>
-                    {/* Dashboard link */}
-                    <a
-                        href="/dashboard"
-                        style={{
-                            display: "flex", alignItems: "center", gap: 10,
-                            padding: collapsed ? "10px" : "10px 12px",
-                            borderRadius: 10,
-                            color: "var(--text-muted)",
-                            textDecoration: "none",
-                            fontSize: "0.85rem",
-                            fontWeight: 500,
-                            transition: "all 0.15s",
-                            justifyContent: collapsed ? "center" : "flex-start",
-                        }}
-                        onMouseEnter={e => {
-                            (e.currentTarget as HTMLElement).style.background = "rgba(99,102,241,0.08)";
-                            (e.currentTarget as HTMLElement).style.color = "#818cf8";
-                        }}
-                        onMouseLeave={e => {
-                            (e.currentTarget as HTMLElement).style.background = "transparent";
-                            (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
-                        }}
-                        title="Back to Dashboard"
-                    >
-                        <Squares2X2Icon style={{ width: 18, height: 18, flexShrink: 0 }} />
-                        {!collapsed && <span>Dashboard</span>}
-                    </a>
-
                     <div style={{ height: 1, background: "var(--border)", margin: "4px 4px 8px" }} />
 
                     {NAV.map(({ href, label, icon: Icon }) => {

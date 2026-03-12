@@ -14,7 +14,7 @@ function onRefreshed(token: string) {
     refreshSubscribers = [];
 }
 
-async function request<T = any>(
+export async function request<T = any>(
     path: string,
     opts: RequestInit = {}
 ): Promise<{ data: T }> {

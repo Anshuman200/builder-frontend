@@ -26,6 +26,7 @@ import { Dropdown, Modal } from "antd";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 import { TemplateCard } from "@/components/templates/TemplateCard";
+import MediaLibraryView from "@/components/media/MediaLibraryView";
 
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -132,7 +133,7 @@ export default function DashboardPage() {
   const updateMutation = useUpdatePage();
 
   const [search, setSearch] = useState("");
-  const [mainTab, setMainTab] = useState<"projects" | "templates">("projects");
+  const [mainTab, setMainTab] = useState<"projects" | "templates" | "media">("projects");
   const [deleteTarget, setDeleteTarget] = useState<Page | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
@@ -209,7 +210,7 @@ export default function DashboardPage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)" }}>
       {/* Header */}
-      <header style={{ height: 60, borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", padding: "0 24px", gap: 20, position: "sticky", top: 0, background: "var(--bg)", zIndex: 10 }}>
+      <header style={{ height: 60, borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", padding: "0 24px", gap: 20, position: "sticky", top: 0, background: "var(--bg)", zIndex: 50 }}>
         <BoltIcon style={{ width: 24, height: 24, color: "#6366f1" }} />
         <h1 style={{ fontSize: "1rem", fontWeight: 800, margin: 0 }}>PageCraft</h1>
         <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
@@ -272,6 +273,7 @@ export default function DashboardPage() {
         <div style={{ display: "flex", gap: 24, marginBottom: 32, borderBottom: "1px solid var(--border)" }}>
           <button onClick={() => setMainTab("projects")} style={{ padding: "12px 16px", background: "transparent", border: "none", borderBottom: mainTab === "projects" ? "2px solid #6366f1" : "none", color: mainTab === "projects" ? "#6366f1" : "var(--text-muted)", fontWeight: 700, cursor: "pointer" }}>My Projects</button>
           <button onClick={() => setMainTab("templates")} style={{ padding: "12px 16px", background: "transparent", border: "none", borderBottom: mainTab === "templates" ? "2px solid #6366f1" : "none", color: mainTab === "templates" ? "#6366f1" : "var(--text-muted)", fontWeight: 700, cursor: "pointer" }}>Templates</button>
+          <button onClick={() => setMainTab("media")} style={{ padding: "12px 16px", background: "transparent", border: "none", borderBottom: mainTab === "media" ? "2px solid #6366f1" : "none", color: mainTab === "media" ? "#6366f1" : "var(--text-muted)", fontWeight: 700, cursor: "pointer" }}>Media</button>
         </div>
 
         {items.length === 0 ? (
@@ -281,6 +283,8 @@ export default function DashboardPage() {
             icon={PlusIcon}
             onAction={handleCreate}
           />
+        ) : mainTab === "media" ? (
+          <MediaLibraryView />
         ) : (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
             {filtered.map((p: any) => (
