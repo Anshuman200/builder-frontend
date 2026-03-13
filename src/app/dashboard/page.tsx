@@ -241,6 +241,12 @@ export default function DashboardPage() {
                 ),
                 disabled: true,
               },
+              {
+                key: "profile",
+                label: "Profile Settings",
+                icon: <PencilIcon style={{ width: 15, height: 15 }} />,
+                onClick: () => router.push("/dashboard/profile"),
+              },
               { type: "divider" },
               {
                 key: "logout",
@@ -258,13 +264,24 @@ export default function DashboardPage() {
             title={user?.name}
             style={{
               width: 36, height: 36, borderRadius: "50%",
-              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              background: (user as any)?.profilePic ? "transparent" : "linear-gradient(135deg, #6366f1, #8b5cf6)",
               color: "#fff", border: "none", fontWeight: 800, fontSize: "0.95rem",
               cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0,
+              padding: 0,
+              overflow: 'hidden',
+              position: 'relative'
             }}
           >
-            {(user?.name || "U").charAt(0).toUpperCase()}
+            {(user as any)?.profilePic ? (
+              <img 
+                src={(user as any).profilePic} 
+                alt="" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              (user?.name || "U").charAt(0).toUpperCase()
+            )}
           </button>
         </Dropdown>
       </header>

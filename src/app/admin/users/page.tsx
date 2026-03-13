@@ -11,7 +11,9 @@ import {
     ChevronUpDownIcon,
     UsersIcon,
     UserPlusIcon,
+    UserMinusIcon,
     ShieldExclamationIcon,
+    NoSymbolIcon,
 } from "@heroicons/react/24/outline";
 import {
     useAdminUsers,
@@ -24,6 +26,7 @@ import { Table, Input, Select, Tag, Button, Modal } from "antd";
 import { UserProfileModal } from "@/components/admin/UserProfileModal";
 import { useToasts } from "@/hooks/useToasts";
 import { cn } from "@/lib/utils";
+import { CommonContainer } from "@/components/layout/CommonContainer";
 
 const GRADIENTS = [
     "from-indigo-500 to-violet-600",
@@ -138,16 +141,21 @@ export default function AdminUsersPage() {
                 </div>
             ),
             key: "name",
+            width: 220,
             render: (_: any, user: any) => (
                 <div className="flex items-center gap-3 min-w-0">
-                    <div className={cn(
-                        "w-9 h-9 rounded-xl shrink-0 bg-linear-to-br flex items-center justify-center text-sm font-black text-white shadow-sm",
-                        getGradient(user.name || user.email || "?")
-                    )}>
-                        {(user.name || user.email || "?")[0].toUpperCase()}
-                    </div>
+                    {user.profilePic ? (
+                        <img src={user.profilePic} alt="" className="w-9 h-9 rounded-xl object-cover shrink-0 shadow-sm" />
+                    ) : (
+                        <div className={cn(
+                            "w-9 h-9 rounded-xl shrink-0 bg-linear-to-br flex items-center justify-center text-sm font-black text-white shadow-sm",
+                            getGradient(user.name || user.email || "?")
+                        )}>
+                            {(user.name || user.email || "?")[0].toUpperCase()}
+                        </div>
+                    )}
                     <div className="min-w-0">
-                        <p className="text-sm font-bold text-(--text) truncate max-w-[150px] m-0">{user.name || "—"}</p>
+                        <p className="text-sm font-bold text-(--text) truncate m-0">{user.name || "—"}</p>
                         {user.role === "admin" && (
                             <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wide">Admin</span>
                         )}
@@ -163,12 +171,14 @@ export default function AdminUsersPage() {
             ),
             dataIndex: "email",
             key: "email",
-            render: (email: string) => <span className="text-sm text-(--text-muted)">{email}</span>
+            width: 260,
+            render: (email: string) => <span className="text-sm text-(--text-muted) truncate block" title={email}>{email}</span>
         },
         {
             title: "Region",
             dataIndex: "region",
             key: "region",
+            width: 140,
             render: (region: string) => region
                 ? <span className="text-xs font-medium px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-400">{region}</span>
                 : <span className="text-(--text-muted) opacity-30">—</span>
@@ -181,23 +191,31 @@ export default function AdminUsersPage() {
             ),
             dataIndex: "createdAt",
             key: "createdAt",
+            width: 160,
             render: (createdAt: string) => (
-                <span className="text-xs text-(--text-muted)">
-                    {new Date(createdAt).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" })}
-                </span>
+                <div className="flex flex-col whitespace-nowrap">
+                    <span className="text-sm font-medium text-(--text)">
+                        {new Date(createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" })}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider text-(--text-muted) font-bold">
+                        {new Date(createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                    </span>
+                </div>
             )
         },
         {
             title: "Status",
             key: "status",
+            width: 120,
             render: (_: any, user: any) => {
                 const isActive = user.isActive !== false;
                 return (
                     <Tag
                         color={isActive ? "success" : "error"}
-                        style={{ borderRadius: 8, fontWeight: 700, border: "none", fontSize: "0.7rem" }}
+                        icon={isActive ? <CheckCircleIcon className="w-3 h-3" /> : <NoSymbolIcon className="w-3 h-3" />}
+                        style={{ borderRadius: 8, fontWeight: 800, border: "none", fontSize: "0.65rem", display: 'inline-flex', alignItems: 'center', gap: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}
                     >
-                        {isActive ? "● Active" : "● Inactive"}
+                        {isActive ? "Active" : "Inactive"}
                     </Tag>
                 );
             }
@@ -206,10 +224,12 @@ export default function AdminUsersPage() {
             title: <div className="text-right">Actions</div>,
             key: "actions",
             align: "right" as const,
+            width: 140,
+            fixed: 'right' as const,
             render: (_: any, user: any) => {
                 const isActive = user.isActive !== false;
                 return (
-                    <div className="flex gap-1 justify-end">
+                    <div className="flex gap-1 justify-end py-1">
                         <Button
                             type="text"
                             icon={<EyeIcon className="w-4 h-4" />}
@@ -219,24 +239,27 @@ export default function AdminUsersPage() {
                         />
                         <Button
                             type="text"
-                            icon={isActive
-                                ? <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><circle cx="12" cy="12" r="10" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" /></svg>
-                                : <CheckCircleIcon className="w-4 h-4" />
-                            }
+                            icon={isActive ? <UserMinusIcon className="w-4 h-4" /> : <UserPlusIcon className="w-4 h-4" />}
                             className={cn(
                                 "rounded-lg",
-                                isActive ? "text-amber-400 hover:bg-amber-400/10" : "text-emerald-400 hover:bg-emerald-400/10"
+                                isActive ? "text-amber-500 hover:bg-amber-500/10" : "text-emerald-500 hover:bg-emerald-500/10",
+                                user.role === 'admin' && "opacity-20 cursor-not-allowed grayscale"
                             )}
+                            disabled={user.role === 'admin'}
                             onClick={() => handleToggleActive(user)}
-                            title={isActive ? "Deactivate" : "Activate"}
+                            title={user.role === 'admin' ? "Admin cannot be deactivated" : (isActive ? "Deactivate" : "Activate")}
                         />
                         <Button
                             type="text"
                             danger
                             icon={<TrashIcon className="w-4 h-4" />}
-                            className="hover:bg-red-400/10 rounded-lg"
+                            className={cn(
+                                "rounded-lg hover:bg-red-400/10",
+                                user.role === 'admin' && "opacity-20 cursor-not-allowed grayscale"
+                            )}
+                            disabled={user.role === 'admin'}
                             onClick={() => setDeleteTarget({ id: user._id, name: user.name || user.email })}
-                            title="Delete User"
+                            title={user.role === 'admin' ? "Admin cannot be deleted" : "Delete User"}
                         />
                     </div>
                 );
@@ -245,7 +268,7 @@ export default function AdminUsersPage() {
     ];
 
     return (
-        <div style={{ padding: "32px", maxWidth: 1100 }}>
+        <CommonContainer className="py-8">
             {/* Header */}
             <div style={{ marginBottom: 28 }}>
                 <h1 style={{ margin: 0, fontSize: "1.5rem", fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em" }}>
@@ -297,6 +320,7 @@ export default function AdminUsersPage() {
                     columns={columns}
                     dataSource={users}
                     rowKey="_id"
+                    scroll={{ x: 1000 }}
                     loading={isLoading && users.length === 0}
                     pagination={{
                         current: page,
@@ -340,6 +364,6 @@ export default function AdminUsersPage() {
             <style>{`
                 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
             `}</style>
-        </div>
+        </CommonContainer>
     );
 }

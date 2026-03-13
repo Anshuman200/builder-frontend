@@ -119,7 +119,10 @@ export const authApi = {
         fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
+            body: JSON.stringify({
+                ...body,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            }),
         }).then(async (res) => {
             const data = await res.json();
             if (!res.ok) throw new Error(data.message ?? "Login failed");
@@ -127,13 +130,22 @@ export const authApi = {
         }),
 
     register: (body: Record<string, string>) =>
-        request("/auth/register", { method: "POST", body: JSON.stringify(body) }),
+        request("/auth/register", {
+            method: "POST",
+            body: JSON.stringify({
+                ...body,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            })
+        }),
 
     verifyOtp: (body: Record<string, string>) =>
         fetch("/api/auth/verify-otp", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
+            body: JSON.stringify({
+                ...body,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            }),
         }).then(async (res) => {
             const data = await res.json();
             if (!res.ok) throw new Error(data.message ?? "Verification failed");
@@ -150,6 +162,12 @@ export const authApi = {
 
     resetPassword: (body: Record<string, string>) =>
         request("/auth/reset-password", { method: "POST", body: JSON.stringify(body) }),
+
+    updateProfile: (body: { name?: string; profilePic?: string }) =>
+        request("/users/profile", { method: "PATCH", body: JSON.stringify(body) }),
+
+    changePassword: (body: Record<string, string>) =>
+        request("/users/change-password", { method: "POST", body: JSON.stringify(body) }),
 };
 
 export const adminApi = {
@@ -164,10 +182,10 @@ export const adminApi = {
     getUser: (id: string) => request(`/admin/users/${id}`),
 
     activateUser: (id: string) =>
-        request(`/admin/users/${id}/activate`, { method: "PATCH" }),
+        request(`/admin/users/${id}/activate`, { method: "PATCH", body: "{}" }),
 
     deactivateUser: (id: string) =>
-        request(`/admin/users/${id}/deactivate`, { method: "PATCH" }),
+        request(`/admin/users/${id}/deactivate`, { method: "PATCH", body: "{}" }),
 
     deleteUser: (id: string) =>
         request(`/admin/users/${id}`, { method: "DELETE" }),

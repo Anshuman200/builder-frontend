@@ -3,15 +3,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { mediaApi, MediaRecord } from "@/lib/api/media";
 
-export const useMedia = () => {
+export function useMedia(params?: { view?: 'public' }) {
     return useQuery({
-        queryKey: ["media"],
+        queryKey: ["media", params],
         queryFn: async () => {
-            const { data } = await mediaApi.list();
+            const { data } = await mediaApi.list(params);
             return data.media;
         },
     });
-};
+}
 
 export const useCreateMediaMutation = () => {
     const queryClient = useQueryClient();

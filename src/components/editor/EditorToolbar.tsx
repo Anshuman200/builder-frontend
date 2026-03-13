@@ -23,6 +23,7 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { pagesApi } from "@/lib/api/client";
 import { clearLocalDraft } from "@/lib/storage";
 import { useToasts } from "@/hooks/useToasts";
+import { useUpdatePage, useCreatePage, usePublishPage } from "@/lib/api/queries";
 
 
 export default function EditorToolbar() {
@@ -44,6 +45,10 @@ export default function EditorToolbar() {
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const updateMutation = useUpdatePage();
+  const createMutation = useCreatePage();
+  const publishMutation = usePublishPage();
 
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
@@ -71,7 +76,7 @@ export default function EditorToolbar() {
       try {
         const payload = getPlainPayload();
         if (!payload) return;
-        await pagesApi.update(pageId, payload);
+        await updateMutation.mutateAsync({ id: pageId, ...payload });
         markClean();
         clearLocalDraft(pageId);
       } catch (e) {
@@ -95,15 +100,15 @@ export default function EditorToolbar() {
       if (!payload) return;
 
       if (pageId.length < 24) {
-        const res = await pagesApi.create(payload);
-        const newId = res.data.page._id;
+        const res = await createMutation.mutateAsync(payload);
+        const newId = (res as any).data.page._id;
         markClean();
         clearLocalDraft(pageId);
         clearLocalDraft(newId);
         router.replace(`/editor/${newId}`);
         return;
       }
-      await pagesApi.update(pageId, payload);
+      await updateMutation.mutateAsync({ id: pageId, ...payload });
       markClean();
       clearLocalDraft(pageId);
     } catch (e) {
@@ -129,20 +134,20 @@ export default function EditorToolbar() {
         if (!payload) return;
 
         if (pageId.length < 24) {
-          const res = await pagesApi.create(payload);
-          finalPageId = res.data.page._id;
+          const res = await createMutation.mutateAsync(payload);
+          finalPageId = (res as any).data.page._id;
           markClean();
           clearLocalDraft(pageId);
           clearLocalDraft(finalPageId);
         } else {
-          await pagesApi.update(pageId, payload);
+          await updateMutation.mutateAsync({ id: pageId, ...payload });
           markClean();
           clearLocalDraft(pageId);
         }
       }
 
       // Then publish
-      await pagesApi.publish(finalPageId);
+      await publishMutation.mutateAsync(finalPageId);
       alert("Page published successfully!");
 
       if (finalPageId !== pageId) {
@@ -197,6 +202,35 @@ export default function EditorToolbar() {
     { key: "mobile" as const, icon: DevicePhoneMobileIcon, label: "Mobile (390px)" },
   ];
 
+  async function handleLogoClick(e: React.MouseEvent) {
+    e.preventDefault();
+    const target = user?.role === 'admin' ? "/admin/templates" : "/dashboard";
+    
+    // Force commit title if currently editing
+    if (editingTitle) {
+      const t = titleDraft.trim() || "Untitled Page";
+      updateTitle(t);
+      setEditingTitle(false);
+    }
+    
+    if (isDirty && user && pageId && pageId.length >= 24) {
+      setIsSaving(true);
+      try {
+        const payload = getPlainPayload();
+        if (payload) {
+          await updateMutation.mutateAsync({ id: pageId, ...payload });
+          markClean();
+          clearLocalDraft(pageId);
+        }
+      } catch (e) {
+        console.error("Save before navigation failed", e);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+    router.push(target);
+  }
+
   return (
     <header style={{
       height: 52,
@@ -213,7 +247,11 @@ export default function EditorToolbar() {
 
       {/* Left — logo + title */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
-        <Link href="/dashboard" style={{ display: "flex", alignItems: "center", textDecoration: "none", flexShrink: 0 }}>
+        <a 
+          href={user?.role === 'admin' ? "/admin/templates" : "/dashboard"} 
+          onClick={handleLogoClick}
+          style={{ display: "flex", alignItems: "center", textDecoration: "none", flexShrink: 0 }}
+        >
           <div style={{
             width: 28, height: 28, borderRadius: 8,
             background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
@@ -221,7 +259,7 @@ export default function EditorToolbar() {
           }}>
             <ZapIcon style={{ width: 14, height: 14 }} color="#fff" />
           </div>
-        </Link>
+        </a>
         <div style={{ width: 1, height: 20, background: "var(--border)", flexShrink: 0 }} />
         {editingTitle ? (
           <input

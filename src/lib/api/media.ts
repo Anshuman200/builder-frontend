@@ -9,11 +9,15 @@ export interface MediaRecord {
     mimeType: string;
     size: number;
     isPublic: boolean;
+    owner: string;
     createdAt: string;
 }
 
 export const mediaApi = {
-    list: () => request<{ media: MediaRecord[] }>("/media"),
+    list: (params?: { view?: 'public' }) => {
+        const qs = params?.view ? `?view=${params.view}` : "";
+        return request<{ media: MediaRecord[] }>(`/media${qs}`);
+    },
     
     create: (body: Omit<MediaRecord, "_id" | "createdAt" | "url">) => 
         request<{ media: MediaRecord }>("/media", {

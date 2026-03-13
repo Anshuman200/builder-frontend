@@ -1,14 +1,36 @@
 "use client";
 
 import { useState, useDeferredValue, useEffect } from "react";
-import { MagnifyingGlassIcon, ClockIcon } from "@heroicons/react/24/outline";
-import { useAdminTemplates } from "@/lib/api/queries";
+import { 
+    MagnifyingGlassIcon, 
+    ClockIcon, 
+    PlusIcon,
+    EllipsisVerticalIcon,
+    PencilSquareIcon,
+    PencilIcon,
+    TrashIcon,
+    GlobeAltIcon,
+    EyeIcon,
+    Squares2X2Icon,
+    ArrowPathIcon
+} from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
+import { 
+    useAdminTemplates, 
+    useCreatePage,
+    useDeletePage,
+    usePublishPage,
+    useUnpublishPage,
+    useDuplicatePage,
+    useUpdatePage
+} from "@/lib/api/queries";
 import { TemplatePreviewModal } from "@/components/admin/TemplatePreviewModal";
-import { Button, Input, Select, Skeleton } from "antd";
+import { Button, Input, Select, Skeleton, Dropdown, Modal } from "antd";
 import { cn } from "@/lib/utils";
 import { useToasts } from "@/hooks/useToasts";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 import { TemplateCard } from "@/components/templates/TemplateCard";
+import { useCallback } from "react";
 
 function timeAgo(dateStr: string) {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -37,13 +59,25 @@ const VISIBILITY_TABS: { key: Visibility; label: string }[] = [
 ];
 
 export default function AdminTemplatesPage() {
-    const { error: toastError } = useToasts();
+    const { success, error: toastError } = useToasts();
+    const router = useRouter();
     const [search, setSearch] = useState("");
     const [visibility, setVisibility] = useState<Visibility>("all");
     const [sortBy, setSortBy] = useState("updatedAt");
     const [order, setOrder] = useState<"asc" | "desc">("desc");
     const [page, setPage] = useState(1);
     const [preview, setPreview] = useState<{ id: string; title: string } | null>(null);
+
+    const createMutation = useCreatePage();
+    const deleteMutation = useDeletePage();
+    const publishMutation = usePublishPage();
+    const unpublishMutation = useUnpublishPage();
+    const duplicateMutation = useDuplicatePage();
+    const updateMutation = useUpdatePage();
+
+    const [deleteTarget, setDeleteTarget] = useState<{ id: string, title: string } | null>(null);
+    const [renamingId, setRenamingId] = useState<string | null>(null);
+    const [renameValue, setRenameValue] = useState("");
 
     const deferredSearch = useDeferredValue(search);
 
@@ -58,16 +92,84 @@ export default function AdminTemplatesPage() {
         if (isError) toastError((queryError as Error)?.message ?? "Failed to load templates");
     }, [isError]);
 
+    const handleCreate = async () => {
+        try {
+            const payload = {
+                title: "Untitled Page",
+                slug: "untitled-" + Date.now().toString().slice(-4),
+                status: "DRAFT",
+                isPublic: false,
+                content: [],
+                meta: {}
+            };
+            const res = await createMutation.mutateAsync(payload) as any;
+            success("Template created");
+            router.push(`/editor/${res.data.page._id}`);
+        } catch (err) {
+            toastError("Failed to create template");
+        }
+    };
+
+    const handleRenameSubmit = useCallback(async (tpl: any) => {
+        if (!renameValue.trim() || renameValue.trim() === tpl.title) {
+            setRenamingId(null);
+            return;
+        }
+        try {
+            await updateMutation.mutateAsync({ id: tpl._id, title: renameValue.trim() });
+            success("Renamed successfully");
+        } catch {
+            toastError("Failed to rename");
+        }
+        setRenamingId(null);
+    }, [renameValue, updateMutation, success, toastError]);
+
+    const handleTogglePublish = useCallback(async (tpl: any) => {
+        try {
+            if (tpl.status === 'PUBLISHED') {
+                await unpublishMutation.mutateAsync(tpl._id);
+                success("Moved to drafts");
+            } else {
+                await publishMutation.mutateAsync(tpl._id);
+                success("Template is now live!");
+            }
+        } catch {
+            toastError("Failed to update status");
+        }
+    }, [publishMutation, unpublishMutation, success, toastError]);
+
+    const handleDelete = useCallback(async (id: string) => {
+        try {
+            await deleteMutation.mutateAsync(id);
+            success("Template deleted");
+        } catch {
+            toastError("Failed to delete template");
+        }
+        setDeleteTarget(null);
+    }, [deleteMutation, success, toastError]);
+
     return (
         <CommonContainer className="py-8">
             {/* Header */}
-            <div className="mb-7">
-                <h1 className="m-0 text-2xl font-extrabold text-(--text) tracking-tight">
-                    Templates
-                </h1>
-                <p className="mt-1 text-sm text-(--text-muted)">
-                    {data ? `${data.total} total templates` : "Loading..."}
-                </p>
+            <div className="flex items-start justify-between mb-7">
+                <div>
+                    <h1 className="m-0 text-2xl font-extrabold text-(--text) tracking-tight">
+                        Templates
+                    </h1>
+                    <p className="mt-1 text-sm text-(--text-muted)">
+                        {data ? `${data.total} total templates` : "Loading..."}
+                    </p>
+                </div>
+                <Button 
+                    type="primary" 
+                    icon={<PlusIcon className="w-4 h-4" />}
+                    onClick={handleCreate}
+                    loading={createMutation.isPending}
+                    size="large"
+                    className="h-11 px-6 rounded-xl font-bold bg-indigo-500 hover:bg-indigo-600 border-none shadow-lg shadow-indigo-500/20 text-white"
+                >
+                    New Template
+                </Button>
             </div>
 
             {/* Filters row */}
@@ -147,6 +249,29 @@ export default function AdminTemplatesPage() {
                             onClick={() => setPreview({ id: tpl._id, title: tpl.title })}
                             variant="admin"
                             subtitle={timeAgo(tpl.updatedAt)}
+                            isRenaming={renamingId === tpl._id}
+                            renameValue={renameValue}
+                            setRenameValue={setRenameValue}
+                            onRenameSubmit={() => handleRenameSubmit(tpl)}
+                            actions={
+                                <Dropdown
+                                    menu={{
+                                        items: [
+                                            { key: "edit", label: "Edit", icon: <PencilSquareIcon className="w-4 h-4" />, onClick: () => router.push(`/editor/${tpl._id}`) },
+                                            { key: "rename", label: "Rename", icon: <PencilIcon className="w-4 h-4" />, onClick: () => { setRenamingId(tpl._id); setRenameValue(tpl.title); } },
+                                            { key: "preview", label: "Preview", icon: <EyeIcon className="w-4 h-4" />, onClick: () => setPreview({ id: tpl._id, title: tpl.title }) },
+                                            { key: "duplicate", label: "Duplicate", icon: <Squares2X2Icon className="w-4 h-4" />, onClick: () => duplicateMutation.mutate(tpl._id) },
+                                            { key: "publish", label: tpl.status === 'PUBLISHED' ? "Unpublish" : "Go live", icon: <GlobeAltIcon className="w-4 h-4" />, onClick: () => handleTogglePublish(tpl) },
+                                            { key: "delete", label: <span className="text-red-500">Delete</span>, icon: <TrashIcon className="text-red-500 w-4 h-4" />, onClick: () => setDeleteTarget({ id: tpl._id, title: tpl.title }) },
+                                        ]
+                                    }}
+                                    trigger={['click']}
+                                >
+                                    <button className="text-zinc-500 hover:text-white transition-colors bg-transparent border-none cursor-pointer">
+                                        <EllipsisVerticalIcon className="w-5 h-5" />
+                                    </button>
+                                </Dropdown>
+                            }
                         />
                     ))}
                 </div>
@@ -189,6 +314,18 @@ export default function AdminTemplatesPage() {
                     onClose={() => setPreview(null)}
                 />
             )}
+
+            {/* Delete Modal */}
+            <Modal
+                title="Delete Template"
+                open={!!deleteTarget}
+                onOk={() => deleteTarget && handleDelete(deleteTarget.id)}
+                onCancel={() => setDeleteTarget(null)}
+                okText="Delete"
+                okButtonProps={{ danger: true, loading: deleteMutation.isPending }}
+            >
+                <p>Are you sure you want to delete <b>{deleteTarget?.title}</b>? This action cannot be undone.</p>
+            </Modal>
         </CommonContainer>
     );
 }

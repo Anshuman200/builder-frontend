@@ -9,6 +9,7 @@ interface User {
     name: string;
     email: string;
     avatarUrl?: string;
+    profilePic?: string;
     plan: string;
     role?: string;
 }
@@ -42,7 +43,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         try {
             const { data } = await authApi.getProfile();
-            if (data) setUser(data as User);
+            // Handle both { user: ... } and direct user object for robustness
+            const userData = data?.user || (data?._id ? data : null);
+            if (userData) {
+                setUser(userData as User);
+            } else {
+                setUser(null);
+            }
         } catch {
             setUser(null);
         } finally {

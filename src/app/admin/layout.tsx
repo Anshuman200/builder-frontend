@@ -2,23 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { Layout, Menu, Button, ConfigProvider, theme, Drawer } from "antd";
 import {
     UsersIcon,
     DocumentDuplicateIcon,
     BoltIcon,
     ArrowRightOnRectangleIcon,
     ChevronLeftIcon,
-    Squares2X2Icon,
+    ChevronRightIcon,
     PhotoIcon,
+    Bars3Icon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "@/hooks/useAuth";
 
+const { Sider, Content } = Layout;
+
 const NAV = [
-    { href: "/admin/users", label: "Users", icon: UsersIcon, badge: null },
-    { href: "/admin/media", label: "Media", icon: PhotoIcon, badge: null },
-    { href: "/admin/templates", label: "Templates", icon: DocumentDuplicateIcon, badge: null },
-    { href: "/admin/site-pages", label: "Site Pages", icon: DocumentDuplicateIcon, badge: null },
-    { href: "/admin/inquiries", label: "Inquiries", icon: DocumentDuplicateIcon, badge: null },
+    { key: "/admin/users", label: "Users", icon: <UsersIcon className="w-5 h-5" /> },
+    { key: "/admin/media", label: "Media", icon: <PhotoIcon className="w-5 h-5" /> },
+    { key: "/admin/templates", label: "Templates", icon: <DocumentDuplicateIcon className="w-5 h-5" /> },
+    { key: "/admin/site-pages", label: "Site Pages", icon: <DocumentDuplicateIcon className="w-5 h-5" /> },
+    { key: "/admin/inquiries", label: "Inquiries", icon: <DocumentDuplicateIcon className="w-5 h-5" /> },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -26,6 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const router = useRouter();
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
+    const [mobileVisible, setMobileVisible] = useState(false);
 
     useEffect(() => {
         if (!isLoading && user && (user as any).role !== "admin") {
@@ -39,186 +44,180 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     };
 
     if (isLoading || !user) return (
-        <div style={{ height: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
-            <div style={{ width: 32, height: 32, borderRadius: "50%", border: "3px solid #6366f1", borderTopColor: "transparent", animation: "spin 0.8s linear infinite" }} />
+        <div className="h-dvh flex items-center justify-center bg-neutral-950">
+            <div className="w-8 h-8 rounded-full border-3 border-indigo-500 border-t-transparent animate-spin" />
         </div>
     );
     if ((user as any).role !== "admin") return null;
 
-    const sidebarW = collapsed ? 64 : 220;
+    const SidebarContent = () => (
+        <div className="flex flex-col h-full bg-neutral-950 border-r border-white/5">
+            {/* Logo */}
+            <div className={`flex items-center gap-3 h-16 px-5 border-b border-white/5 ${collapsed ? 'justify-center px-0' : ''}`}>
+                <div className="w-8 h-8 shrink-0 rounded-xl bg-linear-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <BoltIcon className="w-5 h-5 text-white" />
+                </div>
+                {!collapsed && (
+                    <div className="overflow-hidden">
+                        <p className="font-black text-sm text-white tracking-tight leading-none">PageCraft</p>
+                        <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mt-0.5">Admin</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Navigation */}
+            <div className="flex-1 overflow-y-auto pt-4 px-2">
+                <Menu
+                    theme="dark"
+                    mode="inline"
+                    selectedKeys={[pathname]}
+                    items={NAV}
+                    onClick={({ key }) => {
+                        router.push(key);
+                        setMobileVisible(false);
+                    }}
+                    className="bg-transparent border-none"
+                    style={{ background: 'transparent' }}
+                />
+            </div>
+
+            {/* Footer / User Profile */}
+            <div className="p-2 sm:p-4 border-t border-white/5 space-y-4">
+                {!collapsed && (
+                    <div 
+                        className="flex items-center gap-3 p-2 sm:p-3 rounded-2xl bg-white/3 border border-white/5 hover:bg-white/5 transition-colors cursor-pointer"
+                        onClick={() => router.push("/admin/profile")}
+                    >
+                        { (user as any)?.profilePic ? (
+                            <img src={(user as any).profilePic} alt="" className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover shrink-0" />
+                        ) : (
+                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-linear-to-br from-indigo-500 to-violet-600 flex items-center justify-center font-black text-white shrink-0">
+                                {(user?.name || "A").charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                        <div className="min-w-0">
+                            <p className="text-[11px] sm:text-xs font-bold text-white truncate">{user?.name || "Admin"}</p>
+                            <p className="text-[9px] sm:text-[10px] text-white/40 truncate">{user?.email}</p>
+                        </div>
+                    </div>
+                )}
+
+                <Button
+                    type="text"
+                    danger
+                    icon={<ArrowRightOnRectangleIcon className="w-5 h-5" />}
+                    onClick={handleLogout}
+                    className={`w-full flex! items-center ${collapsed ? 'justify-center' : 'gap-3 px-3'} h-11 rounded-xl hover:bg-red-500/10! font-bold text-sm text-red-400`}
+                >
+                    {!collapsed && "Log out"}
+                </Button>
+            </div>
+        </div>
+    );
 
     return (
-        <div style={{ display: "flex", height: "100dvh", background: "var(--bg)", overflow: "hidden" }}>
-            {/* ── Sidebar ── */}
-            <aside style={{
-                width: sidebarW,
-                minWidth: sidebarW,
-                height: "100dvh",
-                display: "flex",
-                flexDirection: "column",
-                background: "var(--surface)",
-                borderRight: "1px solid var(--border)",
-                transition: "width 0.2s ease",
-                overflow: "hidden",
-                position: "relative",
-                zIndex: 20,
-            }}>
-                {/* Logo */}
-                <div style={{
-                    display: "flex", alignItems: "center",
-                    gap: 10, padding: collapsed ? "18px 16px" : "18px 20px",
-                    borderBottom: "1px solid var(--border)",
-                    height: 64, minHeight: 64,
-                }}>
-                    <div style={{
-                        width: 32, height: 32, flexShrink: 0, borderRadius: 10,
-                        background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        boxShadow: "0 4px 12px rgba(99,102,241,0.35)",
-                    }}>
-                        <BoltIcon style={{ width: 16, height: 16, color: "white" }} />
+        <ConfigProvider
+            theme={{
+                algorithm: theme.darkAlgorithm,
+                token: {
+                    colorPrimary: '#6366f1',
+                    borderRadius: 12,
+                    colorBgContainer: '#0a0a0a',
+                    colorBorderSecondary: 'rgba(255,255,255,0.05)',
+                },
+                components: {
+                    Menu: {
+                        itemBg: 'transparent',
+                        itemSelectedBg: 'rgba(99,102,241,0.1)',
+                        itemSelectedColor: '#818cf8',
+                        itemHoverBg: 'rgba(255,255,255,0.03)',
+                        itemColor: '#94a3b8',
+                        itemHoverColor: '#f8fafc',
+                        fontFamily: 'inherit',
+                    }
+                }
+            }}
+        >
+            <Layout className="h-dvh bg-neutral-950 overflow-hidden flex flex-col">
+                {/* Mobile Header */}
+                <div className="lg:hidden h-16 px-4 sm:px-6 flex items-center justify-between border-b border-white/5 bg-neutral-950 shrink-0 z-10 sticky top-0">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center">
+                            <BoltIcon className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="font-black text-sm text-white tracking-widest uppercase italic">PageCraft</span>
                     </div>
-                    {!collapsed && (
-                        <div style={{ overflow: "hidden" }}>
-                            <p style={{ margin: 0, fontWeight: 800, fontSize: "0.875rem", color: "var(--text)", whiteSpace: "nowrap", letterSpacing: "-0.02em" }}>
-                                PageCraft
-                            </p>
-                            <p style={{ margin: 0, fontSize: "0.6rem", fontWeight: 700, color: "#818cf8", textTransform: "uppercase", letterSpacing: "0.12em" }}>
-                                Admin
-                            </p>
-                        </div>
-                    )}
+                    <Button
+                        type="text"
+                        icon={<Bars3Icon className="w-7 h-7 text-white" />}
+                        onClick={() => setMobileVisible(true)}
+                        className="hover:bg-white/5!"
+                    />
                 </div>
 
-                {/* Nav */}
-                <nav style={{ flex: 1, padding: "12px 8px", display: "flex", flexDirection: "column", gap: 2, overflowY: "auto" }}>
-                    <div style={{ height: 1, background: "var(--border)", margin: "4px 4px 8px" }} />
-
-                    {NAV.map(({ href, label, icon: Icon }) => {
-                        const active = pathname.startsWith(href);
-                        return (
-                            <button
-                                key={href}
-                                onClick={() => router.push(href)}
-                                style={{
-                                    display: "flex", alignItems: "center", gap: 10,
-                                    padding: collapsed ? "10px" : "10px 12px",
-                                    borderRadius: 10, border: "none", cursor: "pointer",
-                                    width: "100%", textAlign: "left",
-                                    background: active ? "rgba(99,102,241,0.12)" : "transparent",
-                                    color: active ? "#818cf8" : "var(--text-muted)",
-                                    fontWeight: active ? 700 : 500,
-                                    fontSize: "0.85rem",
-                                    transition: "all 0.15s",
-                                    justifyContent: collapsed ? "center" : "flex-start",
-                                    position: "relative",
-                                }}
-                                onMouseEnter={e => {
-                                    if (!active) {
-                                        (e.currentTarget as HTMLElement).style.background = "rgba(99,102,241,0.06)";
-                                        (e.currentTarget as HTMLElement).style.color = "var(--text)";
-                                    }
-                                }}
-                                onMouseLeave={e => {
-                                    if (!active) {
-                                        (e.currentTarget as HTMLElement).style.background = "transparent";
-                                        (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
-                                    }
-                                }}
-                                title={label}
-                            >
-                                {active && (
-                                    <div style={{
-                                        position: "absolute", left: 0, top: "20%", bottom: "20%",
-                                        width: 3, borderRadius: "0 4px 4px 0",
-                                        background: "#6366f1",
-                                    }} />
-                                )}
-                                <Icon style={{ width: 18, height: 18, flexShrink: 0 }} />
-                                {!collapsed && <span>{label}</span>}
-                            </button>
-                        );
-                    })}
-                </nav>
-
-                {/* Footer */}
-                <div style={{ borderTop: "1px solid var(--border)", padding: "12px 8px" }}>
-                    {!collapsed && (
-                        <div style={{
-                            display: "flex", alignItems: "center", gap: 10, marginBottom: 8,
-                            padding: "8px 12px", borderRadius: 10,
-                            background: "rgba(99,102,241,0.06)",
-                        }}>
-                            <div style={{
-                                width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-                                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                fontWeight: 800, fontSize: "0.8rem", color: "white",
-                            }}>
-                                {(user.name || "A").charAt(0).toUpperCase()}
-                            </div>
-                            <div style={{ overflow: "hidden", minWidth: 0 }}>
-                                <p style={{ margin: 0, fontSize: "0.8rem", fontWeight: 700, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                    {user.name || "Admin"}
-                                </p>
-                                <p style={{ margin: 0, fontSize: "0.7rem", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                    {user.email}
-                                </p>
-                            </div>
-                        </div>
-                    )}
-                    <button
-                        onClick={handleLogout}
-                        style={{
-                            display: "flex", alignItems: "center", gap: 10,
-                            padding: collapsed ? "10px" : "10px 12px",
-                            borderRadius: 10, border: "none", cursor: "pointer",
-                            width: "100%", textAlign: "left",
-                            background: "transparent",
-                            color: "#f87171",
-                            fontWeight: 600,
-                            fontSize: "0.85rem",
-                            transition: "all 0.15s",
-                            justifyContent: collapsed ? "center" : "flex-start",
-                        }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(239,68,68,0.08)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-                        title="Log out"
+                <Layout className="flex-1 overflow-hidden relative">
+                    {/* Sidebar Drawer for Mobile */}
+                    <Drawer
+                        placement="left"
+                        onClose={() => setMobileVisible(false)}
+                        open={mobileVisible}
+                        // size="small"
+                        styles={{ body: { padding: 0 } }}
+                        closable={false}
+                        className="bg-neutral-950"
                     >
-                        <ArrowRightOnRectangleIcon style={{ width: 18, height: 18, flexShrink: 0 }} />
-                        {!collapsed && <span>Log out</span>}
-                    </button>
-                </div>
+                        <SidebarContent />
+                    </Drawer>
 
-                {/* Collapse toggle */}
-                <button
-                    onClick={() => setCollapsed(c => !c)}
-                    style={{
-                        position: "absolute", top: "50%", right: -12,
-                        transform: "translateY(-50%)",
-                        width: 24, height: 24, borderRadius: "50%",
-                        background: "var(--surface)", border: "1px solid var(--border)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        cursor: "pointer", zIndex: 30,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                        transition: "all 0.2s",
-                    }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#6366f1"; (e.currentTarget as HTMLElement).style.borderColor = "#6366f1"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--surface)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}
-                >
-                    <ChevronLeftIcon style={{
-                        width: 12, height: 12,
-                        color: "var(--text-muted)",
-                        transform: collapsed ? "rotate(180deg)" : "none",
-                        transition: "transform 0.2s",
-                    }} />
-                </button>
-            </aside>
+                    {/* Sidebar for Desktop */}
+                    <Sider
+                        trigger={null}
+                        collapsible
+                        collapsed={collapsed}
+                        width={240}
+                        collapsedWidth={80}
+                        className="hidden lg:block relative transition-all duration-300 border-r border-white/5"
+                        style={{ background: '#0a0a0a' }}
+                    >
+                        <SidebarContent />
 
-            {/* ── Main Content ── */}
-            <main style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column" }}>
-                {children}
-            </main>
-        </div>
+                        {/* Unique Toggle Button */}
+                        <button
+                            onClick={() => setCollapsed(!collapsed)}
+                            className="absolute -right-3 top-10 w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-500 border border-indigo-400 shadow-[0_0_15px_rgba(79,70,229,0.5)] z-50 transition-all active:scale-90"
+                        >
+                            {collapsed ? <ChevronRightIcon className="w-3.5 h-3.5" /> : <ChevronLeftIcon className="w-3.5 h-3.5" />}
+                        </button>
+                    </Sider>
+
+                    {/* Main Content */}
+                    <Content className="overflow-auto scrollbar-hide bg-neutral-950">
+                        <div className="min-h-full">
+                            {children}
+                        </div>
+                    </Content>
+                </Layout>
+            </Layout>
+
+            <style jsx global>{`
+                .scrollbar-hide::-webkit-scrollbar {
+                    display: none;
+                }
+                .scrollbar-hide {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+                .ant-menu-item {
+                    margin-bottom: 4px !important;
+                    height: 44px !important;
+                    line-height: 44px !important;
+                    border-radius: 12px !important;
+                }
+                .ant-menu-item-icon {
+                    width: 20px !important;
+                    height: 20px !important;
+                }
+            `}</style>
+        </ConfigProvider>
     );
 }

@@ -15,13 +15,14 @@ import {
     useDeleteInquiry
 } from "@/lib/api/adminQuerties";
 import { useToasts } from "@/hooks/useToasts";
+import { CommonContainer } from "@/components/layout/CommonContainer";
 
 export default function AdminInquiriesPage() {
     const { success, error: toastError } = useToasts();
-    
+
     const [search, setSearch] = useState("");
     const deferredSearch = useDeferredValue(search);
-    
+
     const [replyingInquiry, setReplyingInquiry] = useState<any>(null);
     const [deleteTarget, setDeleteTarget] = useState<any>(null);
 
@@ -31,8 +32,8 @@ export default function AdminInquiriesPage() {
     const replyMut = useReplyInquiry();
     const deleteMut = useDeleteInquiry();
 
-    const filteredInquiries = inquiries.filter((i: any) => 
-        i.name.toLowerCase().includes(deferredSearch.toLowerCase()) || 
+    const filteredInquiries = inquiries.filter((i: any) =>
+        i.name.toLowerCase().includes(deferredSearch.toLowerCase()) ||
         i.email.toLowerCase().includes(deferredSearch.toLowerCase()) ||
         i.subject.toLowerCase().includes(deferredSearch.toLowerCase())
     );
@@ -74,14 +75,15 @@ export default function AdminInquiriesPage() {
             title: "Sender",
             dataIndex: "name",
             key: "name",
+            width: 220,
             render: (name: string, record: any) => (
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-bold shrink-0">
                         {name.charAt(0).toUpperCase()}
                     </div>
-                    <div>
-                        <p className="text-sm font-bold text-(--text) m-0 truncate max-w-[150px]">{name}</p>
-                        <p className="text-xs text-(--text-muted) m-0 truncate max-w-[150px]">{record.email}</p>
+                    <div className="min-w-0">
+                        <p className="text-sm font-bold text-(--text) m-0 truncate">{name}</p>
+                        <p className="text-xs text-(--text-muted) m-0 truncate">{record.email}</p>
                     </div>
                 </div>
             )
@@ -90,8 +92,9 @@ export default function AdminInquiriesPage() {
             title: "Subject",
             dataIndex: "subject",
             key: "subject",
+            width: 300,
             render: (subject: string, record: any) => (
-                <div className="max-w-[300px]">
+                <div className="min-w-0">
                     <p className="text-sm font-bold text-(--text) m-0 truncate">{subject}</p>
                     <p className="text-xs text-(--text-muted) m-0 truncate" title={record.message}>{record.message}</p>
                 </div>
@@ -101,12 +104,13 @@ export default function AdminInquiriesPage() {
             title: "Status",
             dataIndex: "status",
             key: "status",
+            width: 120,
             render: (status: string) => (
                 <Tag
                     color={status === 'REPLIED' ? "success" : "processing"}
                     style={{ borderRadius: 8, fontWeight: 700, border: "none", fontSize: "0.7rem", display: 'inline-flex', alignItems: 'center', gap: 4 }}
                 >
-                    {status === 'REPLIED' ? <CheckCircleIcon className="w-3 h-3" /> : <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />} 
+                    {status === 'REPLIED' ? <CheckCircleIcon className="w-3 h-3" /> : <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />}
                     {status}
                 </Tag>
             )
@@ -115,18 +119,26 @@ export default function AdminInquiriesPage() {
             title: "Date",
             dataIndex: "createdAt",
             key: "createdAt",
+            width: 160,
             render: (date: string) => (
-                <span className="text-xs text-(--text-muted)">
-                    {new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                </span>
-            )
+                <div className="flex flex-col whitespace-nowrap">
+                    <span className="text-sm font-medium text-(--text)">
+                        {new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider text-(--text-muted) font-bold">
+                        {new Date(date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                    </span>
+                </div>
+            ),
         },
         {
             title: <div className="text-right">Actions</div>,
             key: "actions",
             align: "right" as const,
+            width: 120,
+            fixed: 'right' as const,
             render: (_: any, record: any) => (
-                <div className="flex gap-1 justify-end">
+                <div className="flex gap-1 justify-end py-1">
                     {record.status === 'PENDING' ? (
                         <Button
                             type="text"
@@ -158,7 +170,7 @@ export default function AdminInquiriesPage() {
     ];
 
     return (
-        <div style={{ padding: "32px", maxWidth: 1200, margin: "0 auto", width: "100%" }}>
+        <CommonContainer className="py-8">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
                 <div>
                     <h1 style={{ margin: 0, fontSize: "1.5rem", fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em" }}>
@@ -189,6 +201,7 @@ export default function AdminInquiriesPage() {
                     columns={columns}
                     dataSource={filteredInquiries}
                     rowKey="_id"
+                    scroll={{ x: 900 }}
                     loading={isLoading}
                     pagination={{ pageSize: 20 }}
                     rowClassName={() => "hover:bg-white/[0.015] transition-colors"}
@@ -298,6 +311,6 @@ export default function AdminInquiriesPage() {
             <style>{`
                 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
             `}</style>
-        </div>
+        </CommonContainer>
     );
 }

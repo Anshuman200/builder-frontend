@@ -97,6 +97,7 @@ export const useCreatePage = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["pages"] });
             queryClient.invalidateQueries({ queryKey: ["templates"] });
+            queryClient.invalidateQueries({ queryKey: ["admin", "templates"] });
         },
     });
 };
@@ -110,6 +111,9 @@ export const useUpdatePage = () => {
             queryClient.invalidateQueries({ queryKey: ["pages"] });
             queryClient.invalidateQueries({ queryKey: ["pages", variables.id] });
             queryClient.invalidateQueries({ queryKey: ["templates"] });
+            queryClient.invalidateQueries({ queryKey: ["admin", "templates"] });
+            // Force refetch to be absolutely sure
+            queryClient.refetchQueries({ queryKey: ["admin", "templates"] });
         },
     });
 };
@@ -121,6 +125,7 @@ export const useDeletePage = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["pages"] });
             queryClient.invalidateQueries({ queryKey: ["templates"] });
+            queryClient.invalidateQueries({ queryKey: ["admin", "templates"] });
         },
     });
 };
@@ -132,6 +137,7 @@ export const useDuplicatePage = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["pages"] });
             queryClient.invalidateQueries({ queryKey: ["templates"] });
+            queryClient.invalidateQueries({ queryKey: ["admin", "templates"] });
         },
     });
 };
@@ -144,6 +150,7 @@ export const usePublishPage = () => {
             queryClient.invalidateQueries({ queryKey: ["pages"] });
             queryClient.invalidateQueries({ queryKey: ["pages", id] });
             queryClient.invalidateQueries({ queryKey: ["templates"] });
+            queryClient.invalidateQueries({ queryKey: ["admin", "templates"] });
         },
     });
 };
@@ -156,6 +163,7 @@ export const useUnpublishPage = () => {
             queryClient.invalidateQueries({ queryKey: ["pages"] });
             queryClient.invalidateQueries({ queryKey: ["pages", id] });
             queryClient.invalidateQueries({ queryKey: ["templates"] });
+            queryClient.invalidateQueries({ queryKey: ["admin", "templates"] });
         },
     });
 };
@@ -262,5 +270,22 @@ export const useAdminTemplates = (params: Record<string, string> = {}) => {
             const { data } = await adminApi.listTemplates(params);
             return data as { templates: any[]; total: number; page: number; pages: number };
         },
+    });
+};
+
+export const useUpdateProfile = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (body: { name?: string; profilePic?: string }) => authApi.updateProfile(body),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["profile"] });
+            queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+        },
+    });
+};
+
+export const useChangePassword = () => {
+    return useMutation({
+        mutationFn: (body: Record<string, string>) => authApi.changePassword(body),
     });
 };

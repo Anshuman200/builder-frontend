@@ -85,12 +85,16 @@ export function UserProfileModal({ userId, onClose }: Props) {
                         <>
                             {/* User intro */}
                             <div className="px-6 py-5 flex gap-4 items-start border-b border-(--border) shrink-0">
-                                <div className={cn(
-                                    "w-14 h-14 rounded-2xl shrink-0 bg-linear-to-br flex items-center justify-center text-xl font-extrabold text-white shadow-lg",
-                                    getGradient(user.name || user.email || "A")
-                                )}>
-                                    {(user.name || user.email || "?")[0].toUpperCase()}
-                                </div>
+                                { user.profilePic ? (
+                                    <img src={user.profilePic} alt="" className="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-lg" />
+                                ) : (
+                                    <div className={cn(
+                                        "w-14 h-14 rounded-2xl shrink-0 bg-linear-to-br flex items-center justify-center text-xl font-extrabold text-white shadow-lg",
+                                        getGradient(user.name || user.email || "A")
+                                    )}>
+                                        {(user.name || user.email || "?")[0].toUpperCase()}
+                                    </div>
+                                )}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap">
                                         <h3 className="text-base font-extrabold text-(--text) m-0">
@@ -153,7 +157,7 @@ export function UserProfileModal({ userId, onClose }: Props) {
                                             key: 'templates',
                                             label: `Templates (${pages.length})`,
                                             children: (
-                                                <div className="overflow-auto px-6 pb-6">
+                                                <div className="overflow-y-auto px-6 pb-6">
                                                     {pages.length === 0 ? (
                                                         <div className="flex items-center justify-center h-32 text-(--text-muted) text-sm">
                                                             This user has no templates yet.

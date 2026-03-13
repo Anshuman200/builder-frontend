@@ -27,6 +27,7 @@ import {
 } from "@/lib/api/adminQuerties";
 import { useToasts } from "@/hooks/useToasts";
 import dynamic from 'next/dynamic';
+import { CommonContainer } from "@/components/layout/CommonContainer";
 
 // Import Jodit safely for client-side only
 const JoditEditor = dynamic(() => import('jodit-react'), { ssr: false });
@@ -137,14 +138,15 @@ export default function AdminSitePagesPage() {
             title: "Title",
             dataIndex: "title",
             key: "title",
+            width: 300,
             render: (title: string, record: SitePageRecord) => (
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 shrink-0">
                         <DocumentTextIcon className="w-4 h-4" />
                     </div>
-                    <div>
-                        <p className="text-sm font-bold text-(--text) m-0">{title}</p>
-                        <p className="text-xs text-(--text-muted) m-0">/{record.slug}</p>
+                    <div className="min-w-0">
+                        <p className="text-sm font-bold text-(--text) m-0 truncate">{title}</p>
+                        <p className="text-xs text-(--text-muted) m-0 truncate">/{record.slug}</p>
                     </div>
                 </div>
             )
@@ -153,6 +155,7 @@ export default function AdminSitePagesPage() {
             title: "Status",
             dataIndex: "isActive",
             key: "isActive",
+            width: 140,
             render: (isActive: boolean, record: SitePageRecord) => (
                 <div className="flex items-center gap-2">
                     <Switch
@@ -160,7 +163,7 @@ export default function AdminSitePagesPage() {
                         checked={isActive}
                         onChange={(checked) => handleTogglePublish(record, checked)}
                     />
-                    <span className={`inline-block text-center w-20 text-xs font-bold py-1 rounded-lg transition-colors duration-300 ${isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-neutral-500/10 text-neutral-400"}`}>
+                    <span className={`inline-block text-center w-20 text-[10px] font-black uppercase tracking-widest py-1 rounded-lg transition-colors duration-300 ${isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-neutral-500/10 text-neutral-400"}`}>
                         {isActive ? "Published" : "Draft"}
                     </span>
                 </div>
@@ -170,18 +173,26 @@ export default function AdminSitePagesPage() {
             title: "Last Updated",
             dataIndex: "updatedAt",
             key: "updatedAt",
+            width: 160,
             render: (date: string) => (
-                <span className="text-xs text-(--text-muted)">
-                    {new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-                </span>
+                <div className="flex flex-col whitespace-nowrap">
+                    <span className="text-sm font-medium text-(--text)">
+                        {new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider text-(--text-muted) font-bold">
+                        {new Date(date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                    </span>
+                </div>
             )
         },
         {
             title: <div className="text-right">Actions</div>,
             key: "actions",
             align: "right" as const,
+            width: 120,
+            fixed: 'right' as const,
             render: (_: unknown, record: SitePageRecord) => (
-                <div className="flex gap-1 justify-end">
+                <div className="flex gap-1 justify-end py-1">
                     <Button
                         type="text"
                         icon={<PencilSquareIcon className="w-4 h-4" />}
@@ -223,7 +234,7 @@ export default function AdminSitePagesPage() {
     };
 
     return (
-        <div style={{ padding: "32px", maxWidth: 1200, margin: "0 auto", width: "100%" }}>
+        <CommonContainer className="py-8">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
                 <div>
                     <h1 style={{ margin: 0, fontSize: "1.5rem", fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em" }}>
@@ -269,6 +280,7 @@ export default function AdminSitePagesPage() {
                     columns={columns}
                     dataSource={filteredPages}
                     rowKey="_id"
+                    scroll={{ x: 800 }}
                     loading={isLoading}
                     pagination={false}
                     rowClassName={() => "hover:bg-white/[0.015] transition-colors"}
@@ -389,6 +401,6 @@ export default function AdminSitePagesPage() {
                     </p>
                 </Modal>
             )}
-        </div>
+        </CommonContainer>
     );
 }

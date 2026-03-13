@@ -4,6 +4,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { XhrHttpHandler } from "@aws-sdk/xhr-http-handler";
 import moment from "moment";
 import { configApi } from "../api/config";
+import { convertHeicToWebp, captureVideoThumbnail } from "../utils/media-utils";
 
 class S3Service {
     private client: S3Client | null = null;
@@ -42,65 +43,6 @@ class S3Service {
         return this.initPromise;
     }
 
-    async convertHeicToWebp(file: File | Blob): Promise<File> {
-        try {
-            const heic2any = (await import("heic2any")).default;
-            const blob = await heic2any({
-                blob: file,
-                toType: "image/webp",
-                quality: 0.8
-            });
-            const blobArray = Array.isArray(blob as any) ? (blob as any)[0] : blob;
-            return new File([blobArray as any], (file as File).name.replace(/\.[^.]+$/, ".webp"), {
-                type: "image/webp",
-            });
-        } catch (error) {
-            console.error("Error converting HEIC to WebP:", error);
-            throw error;
-        }
-    }
-
-    async captureVideoThumbnail(videoFile: File | Blob): Promise<Blob> {
-        return new Promise((resolve, reject) => {
-            const video = document.createElement("video");
-            video.src = URL.createObjectURL(videoFile);
-            video.crossOrigin = "anonymous";
-            video.muted = true;
-            video.playsInline = true;
-
-            const cleanup = () => {
-                URL.revokeObjectURL(video.src);
-                video.remove();
-            };
-
-            video.addEventListener("loadeddata", () => {
-                video.currentTime = 1;
-            });
-
-            video.addEventListener("seeked", () => {
-                const canvas = document.createElement("canvas");
-                canvas.width = 320;
-                canvas.height = 180;
-                const ctx = canvas.getContext("2d");
-                if (ctx) {
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    canvas.toBlob((blob) => {
-                        cleanup();
-                        if (blob) resolve(blob);
-                        else reject(new Error("Failed to capture thumbnail"));
-                    }, "image/jpeg", 0.8);
-                } else {
-                    cleanup();
-                    reject(new Error("Failed to get canvas context"));
-                }
-            });
-
-            video.addEventListener("error", () => {
-                cleanup();
-                reject(new Error("Failed to load video for thumbnail"));
-            });
-        });
-    }
 
     async uploadFile(
         file: File,
@@ -126,7 +68,7 @@ class S3Service {
         if (isHeic) {
             try {
                 console.log(`[S3Service] Converting HEIC: ${fileName}`);
-                finalFile = await this.convertHeicToWebp(file);
+                finalFile = await convertHeicToWebp(file);
                 finalKey = finalKey.replace(/\.(heic|heif)$/i, ".webp");
                 if (!finalKey.endsWith(".webp")) finalKey += ".webp";
                 console.log(`[S3Service] Conversion success: ${finalKey}`);
@@ -135,10 +77,12 @@ class S3Service {
             }
         }
 
+        const uploadStart = performance.now();
         console.log(`[S3Service] Starting Upload: ${finalKey} (${(finalFile.size / 1024).toFixed(1)} KB)`);
 
-        // OPTIMIZATION: Use direct PutObject for small files (< 1MB) to minimize latency
-        if (finalFile.size < 1024 * 1024 && !file.type.startsWith("video/")) {
+        // OPTIMIZATION: Use direct PutObject for files up to 10MB to minimize multipart overhead
+        // 10MB is a sweet spot for single-request reliability vs session overhead
+        if (finalFile.size < 10 * 1024 * 1024) {
             try {
                 const command = new PutObjectCommand({
                     Bucket: this.bucketName,
@@ -147,14 +91,14 @@ class S3Service {
                     ContentType: finalFile.type || "application/octet-stream",
                 });
                 
-                // We don't have a progress event for PutObject, so we just resolve it
                 const result = await this.client.send(command);
-                if (onProgress) onProgress(100);
+                const duration = ((performance.now() - uploadStart) / 1000).toFixed(2);
+                console.log(`[S3Service] Direct Upload SUCCESS: ${finalKey} in ${duration}s`);
                 
+                if (onProgress) onProgress(100);
                 return { ...result, key: finalKey };
             } catch (error) {
                 console.error("[S3Service] Direct upload failed, falling back to Upload manager", error);
-                // Fallback to standard Upload manager if direct PutObject fails
             }
         }
 
@@ -166,18 +110,25 @@ class S3Service {
                 Body: finalFile,
                 ContentType: finalFile.type || "application/octet-stream",
             },
-            queueSize: 1, 
+            queueSize: 4, // Increase concurrency for faster uploads
             partSize: 5 * 1024 * 1024,
             leavePartsOnError: false,
         });
 
         this.activeUploads.set(trackingId, upload);
 
-        const totalSize = finalFile.size;
+        // Start video thumbnail generation early (off main upload thread)
+        let thumbnailPromise: Promise<Blob> | null = null;
+        if (file.type.startsWith("video/")) {
+            thumbnailPromise = captureVideoThumbnail(file).catch(err => {
+                console.warn("[S3Service] Thumbnail generation failed early:", err);
+                return null;
+            }) as any;
+        }
 
+        const totalSize = finalFile.size;
         upload.on("httpUploadProgress", (progress) => {
             if (onProgress && progress.loaded) {
-                // Use absolute file size as denominator to prevent jumping on multipart uploads
                 const percentage = Math.min(99, Math.round((progress.loaded / totalSize) * 100));
                 onProgress(percentage);
             }
@@ -185,32 +136,37 @@ class S3Service {
 
         try {
             const result = await upload.done();
-            if (onProgress) onProgress(100); // Only hit 100% when actually done
+            const duration = ((performance.now() - uploadStart) / 1000).toFixed(2);
+            console.log(`[S3Service] Multipart Upload SUCCESS: ${finalKey} in ${duration}s`);
+            
             this.activeUploads.delete(trackingId);
 
-            // Handle Video Thumbnail
-            if (file.type.startsWith("video/")) {
+            // Handle Video Thumbnail Upload
+            if (thumbnailPromise) {
                 try {
-                    const thumbnailBlob = await this.captureVideoThumbnail(file);
-                    const timestamp = moment().format("YYYYMMDD_HHmmss");
-                    const uniqueId = Math.random().toString(36).substring(2, 8);
-                    thumbnailKey = `thumbnails/${timestamp}_${uniqueId}_thumbnail.jpg`;
+                    const thumbnailBlob = await thumbnailPromise;
+                    if (thumbnailBlob) {
+                        const timestamp = moment().format("YYYYMMDD_HHmmss");
+                        const uniqueId = Math.random().toString(36).substring(2, 8);
+                        thumbnailKey = `thumbnails/${timestamp}_${uniqueId}_thumbnail.jpg`;
 
-                    const thumbUpload = new Upload({
-                        client: this.client,
-                        params: {
-                            Bucket: this.bucketName,
-                            Key: thumbnailKey,
-                            Body: thumbnailBlob,
-                            ContentType: "image/jpeg",
-                        }
-                    });
-                    await thumbUpload.done();
+                        const thumbUpload = new Upload({
+                            client: this.client,
+                            params: {
+                                Bucket: this.bucketName,
+                                Key: thumbnailKey,
+                                Body: thumbnailBlob,
+                                ContentType: "image/jpeg",
+                            }
+                        });
+                        await thumbUpload.done();
+                    }
                 } catch (err) {
                     console.error("Failed to upload video thumbnail:", err);
                 }
             }
 
+            if (onProgress) onProgress(100); 
             return { ...result, key: finalKey, thumbnailKey };
         } catch (error) {
             this.activeUploads.delete(trackingId);
