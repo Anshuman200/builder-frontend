@@ -5,13 +5,25 @@ const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3019/api";
 export async function POST(req: NextRequest) {
     const body = await req.json();
 
-    const res = await fetch(`${BACKEND}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-    });
+    let res;
+    try {
+        res = await fetch(`${BACKEND}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+    } catch (error: any) {
+        console.error("[Login Proxy] Fetch failed:", error);
+        return NextResponse.json({ message: "Failed to connect to backend service.", details: error.message }, { status: 502 });
+    }
 
-    const data = await res.json();
+    let data;
+    try {
+        data = await res.json();
+    } catch (error: any) {
+        console.error("[Login Proxy] JSON parsing failed:", error);
+        return NextResponse.json({ message: "Invalid response from backend service." }, { status: 502 });
+    }
 
     if (!res.ok) {
         return NextResponse.json(data, { status: res.status });
