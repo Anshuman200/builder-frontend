@@ -3,7 +3,7 @@ import type { Block, EditorPage } from "@/@Types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, AnimationPanel } from "./shared";
+import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel } from "./shared";
 import { EDITOR_FEATURES } from "@/lib/editorFeatures";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -146,9 +146,11 @@ export function TeamPanel({ block }: { block: Block }) {
                                     <span style={{ fontSize: 10, color: "#666", fontWeight: 500, paddingTop: 2 }}>Bio</span>
                                     <textarea value={member.description || ""} onChange={(e) => up("members", ((p.members as any[]) || []).map((m, i) => i === idx ? { ...m, description: e.target.value } : m))} placeholder="Short bio or description…" rows={2} style={{ fontSize: 11, padding: 0, background: "transparent", border: "none", outline: "none", color: "#e2e8f0", resize: "vertical", width: "100%", lineHeight: 1.5 }} />
                                 </div>
-                                <div style={{ display: "grid", gridTemplateColumns: "68px 1fr", alignItems: "center", borderBottom: "1px solid #222", padding: "0 10px" }}>
-                                    <span style={{ fontSize: 10, color: "#666", fontWeight: 500 }}>Image URL</span>
-                                    <input value={member.image || ""} onChange={(e) => up("members", ((p.members as any[]) || []).map((m, i) => i === idx ? { ...m, image: e.target.value } : m))} placeholder="https://…" style={{ fontSize: 11, padding: "7px 0", background: "transparent", border: "none", outline: "none", color: "#e2e8f0", width: "100%" }} />
+                                <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", alignItems: "center", borderBottom: "1px solid #222", padding: "0 10px" }}>
+                                    <span style={{ fontSize: 10, color: "#666", fontWeight: 500 }}>Member Image</span>
+                                    <div style={{ padding: "4px 0" }}>
+                                        <MediaInput value={member.image || ""} onChange={(v) => up("members", ((p.members as any[]) || []).map((m, i) => i === idx ? { ...m, image: v } : m))} placeholder="https://…" />
+                                    </div>
                                 </div>
                                 <div style={{ padding: "8px 10px" }}>
                                     <div style={{ fontSize: 10, color: "#555", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Social Links</div>

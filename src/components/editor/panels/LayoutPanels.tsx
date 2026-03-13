@@ -3,7 +3,7 @@ import type { Block } from "@/@Types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, AnimationPanel } from "./shared";
+import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel } from "./shared";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/editorFeatures";
 
@@ -83,7 +83,7 @@ export function HeaderPanel({ block }: { block: Block }) {
                 <Field label="Logo Type"><SelectInput value={(p.logoType as string) || "text"} onChange={(v) => up("logoType", v)} options={[{ label: "Text Only", value: "text" }, { label: "Image", value: "image" }]} /></Field>
                 <Field label="Logo Text"><TextInput value={(p.logoText as string) || "PageCraft"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
                 {p.logoType === "image" && (<>
-                    <Field label="Logo Image URL"><TextInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
+                    <Field label="Logo Image"><MediaInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
                     <Field label="Image Width"><TextInput value={(p.logoWidth as string) || "120px"} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
                 </>)}
             </Section>
@@ -140,7 +140,7 @@ export function FooterPanel({ block }: { block: Block }) {
                 <Field label="Logo Type"><SelectInput value={(p.logoType as string) || "text"} onChange={(v) => up("logoType", v)} options={[{ label: "Text Only", value: "text" }, { label: "Image", value: "image" }]} /></Field>
                 <Field label="Logo Text"><TextInput value={(p.logoText as string) || "PageCraft"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
                 {p.logoType === "image" && (<>
-                    <Field label="Logo Image URL"><TextInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
+                    <Field label="Logo Image"><MediaInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
                     <Field label="Image Width"><TextInput value={(p.logoWidth as string) || "120px"} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
                 </>)}
                 <Field label="Description"><TextareaInput value={(p.description as string) || ""} onChange={(v) => up("description", v)} rows={3} placeholder="Brief company description..." /></Field>

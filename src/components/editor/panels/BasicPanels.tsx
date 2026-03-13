@@ -3,7 +3,7 @@ import type { Block } from "@/@Types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, AnimationPanel } from "./shared";
+import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel } from "./shared";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/editorFeatures";
 
@@ -15,8 +15,8 @@ export function HeroPanel({ block }: { block: Block }) {
         <>
             <Section title="Background">
                 <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#6366f1"} onChange={(v) => up("bgColor", v)} /></Field>
-                <Field label="Background Image URL"><TextInput value={(p.bgImage as string) || ""} onChange={(v) => up("bgImage", v)} placeholder="https://... (overrides color)" /></Field>
-                <Field label="Image Overlay Color"><TextInput value={(p.bgOverlay as string) || "rgba(0,0,0,0.25)"} onChange={(v) => up("bgOverlay", v)} placeholder="rgba(0,0,0,0.25)" /></Field>
+                <Field label="Background Image URL"><MediaInput value={(p.bgImage as string) || ""} onChange={(v) => up("bgImage", v)} placeholder="https://... (overrides color)" /></Field>
+                <Field label="Image Overlay Color"><TextInput value={(p.bgOverlay as string) || "rgba(0,0,0,0.75)"} onChange={(v) => up("bgOverlay", v)} placeholder="rgba(0,0,0,0.25)" /></Field>
             </Section>
             <Section title="Style">
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#ffffff"} onChange={(v) => up("textColor", v)} /></Field>
@@ -71,7 +71,7 @@ export function ImagePanel({ block }: { block: Block }) {
     return (
         <>
             <Section title="Source">
-                <Field label="Image URL"><TextInput value={(p.src as string) || ""} onChange={(v) => up("src", v)} placeholder="https://..." /></Field>
+                <Field label="Image URL"><MediaInput value={(p.src as string) || ""} onChange={(v) => up("src", v)} placeholder="https://..." /></Field>
                 <Field label="Alt Text"><TextInput value={(p.alt as string) || ""} onChange={(v) => up("alt", v)} placeholder="Describe the image" /></Field>
                 <Field label="Caption"><TextInput value={(p.caption as string) || ""} onChange={(v) => up("caption", v)} placeholder="Optional caption..." /></Field>
                 <Field label="Link (clickable)"><TextInput value={(p.link as string) || ""} onChange={(v) => up("link", v)} placeholder="https://..." /></Field>
@@ -155,26 +155,17 @@ export function VideoPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
     const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
-    const ToggleRow = ({ label, propKey }: { label: string; propKey: string }) => (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0" }}>
-            <span style={{ fontSize: 11, color: "#ededed" }}>{label}</span>
-            <div style={{ display: "flex", background: "#222", borderRadius: 4, overflow: "hidden", border: "1px solid #2a2a2a" }}>
-                <button onClick={() => up(propKey, true)} style={{ padding: "3px 10px", fontSize: 11, background: !!(p[propKey]) ? "#333" : "transparent", color: !!(p[propKey]) ? "#fff" : "#888", border: "none", cursor: "pointer" }}>Yes</button>
-                <button onClick={() => up(propKey, false)} style={{ padding: "3px 10px", fontSize: 11, background: !(p[propKey]) ? "#333" : "transparent", color: !(p[propKey]) ? "#fff" : "#888", border: "none", cursor: "pointer" }}>No</button>
-            </div>
-        </div>
-    );
     return (
         <>
             <Section title="Video Source">
-                <Field label="Video URL"><TextInput value={(p.url as string) || ""} onChange={(v) => up("url", v)} placeholder="YouTube / Vimeo / .mp4" /></Field>
+                <Field label="Video URL"><MediaInput value={(p.url as string) || ""} onChange={(v) => up("url", v)} placeholder="YouTube / Vimeo / .mp4" type="video" /></Field>
                 <div style={{ fontSize: 10, color: "var(--text-subtle)", marginTop: 4 }}>Supports YouTube, Vimeo, and direct .mp4 links.</div>
             </Section>
             <Section title="Playback Options">
-                <ToggleRow label="AutoPlay" propKey="autoPlay" />
-                <ToggleRow label="Loop" propKey="loop" />
-                <ToggleRow label="Muted" propKey="muted" />
-                <ToggleRow label="Show Controls" propKey="controls" />
+                <ToggleInput label="AutoPlay" value={!!(p.autoPlay)} onChange={(v: boolean) => up("autoPlay", v)} />
+                <ToggleInput label="Loop" value={!!(p.loop)} onChange={(v: boolean) => up("loop", v)} />
+                <ToggleInput label="Muted" value={!!(p.muted) === true} onChange={(v: boolean) => up("muted", v)} />
+                <ToggleInput label="Show Controls" value={!!(p.controls) === true} onChange={(v: boolean) => up("controls", v)} />
             </Section>
             <Section title="Dimensions & Style">
                 <Field label="Width"><TextInput value={(p.width as string) || "100%"} onChange={(v) => up("width", v)} placeholder="100%" /></Field>

@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { useToasts } from "@/hooks/useToasts";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 import { TemplateCard } from "@/components/templates/TemplateCard";
+import PillSegmented from "@/components/ui/PillSegmented";
 import { useCallback } from "react";
 
 function timeAgo(dateStr: string) {
@@ -175,22 +176,11 @@ export default function AdminTemplatesPage() {
             {/* Filters row */}
             <div className="flex gap-3 mb-6 flex-wrap items-center">
                 {/* Visibility tabs */}
-                <div className="flex bg-(--surface) border border-(--border) rounded-xl p-1 gap-0.5">
-                    {VISIBILITY_TABS.map(({ key, label }) => (
-                        <button
-                            key={key}
-                            onClick={() => { setVisibility(key); setPage(1); }}
-                            className={cn(
-                                "px-4 py-1.5 rounded-lg border-none cursor-pointer font-semibold text-xs transition-all",
-                                visibility === key
-                                    ? "bg-linear-to-br from-indigo-500 to-indigo-600 text-white shadow-lg"
-                                    : "bg-transparent text-(--text-muted) hover:text-(--text)"
-                            )}
-                        >
-                            {label}
-                        </button>
-                    ))}
-                </div>
+                <PillSegmented
+                    value={visibility}
+                    onChange={(v) => { setVisibility(v as Visibility); setPage(1); }}
+                    options={VISIBILITY_TABS.map(tab => ({ label: tab.label, value: tab.key }))}
+                />
 
                 {/* Search */}
                 <div className="flex-1 min-w-[220px]">

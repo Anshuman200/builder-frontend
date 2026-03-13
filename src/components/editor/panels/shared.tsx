@@ -9,13 +9,111 @@ import type { Block, EditorPage } from "@/@Types";
  */
 
 import React from "react";
-import { ChevronDownIcon, CheckIcon, SwatchIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 import { useEditorStore } from "@/stores/editorStore";
-import { Dropdown, Popover } from "antd";
+import { Dropdown, Popover, Tooltip } from "antd";
+import MediaPicker from "../MediaPicker";
+import PillSegmented from "../../ui/PillSegmented";
 
 export type { Block, EditorPage };
 export { useEditorStore };
+
+// ... (keep constants)
+
+// ─── MediaInput ───────────────────────────────────────────────────────────────
+
+export function MediaInput({ value, onChange, placeholder, type = "image" }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: "image" | "video" }) {
+    const [pickerOpen, setPickerOpen] = React.useState(false);
+
+    const isVideo = type === "video" || (value && (value.endsWith(".mp4") || value.includes("youtube.com") || value.includes("vimeo.com")));
+
+    return (
+        <div style={{ width: "100%" }}>
+            {!value ? (
+                <button
+                    onClick={() => setPickerOpen(true)}
+                    style={{
+                        width: "100%",
+                        height: 60,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 4,
+                        background: PANEL_COLORS.inputBg,
+                        border: `1px dashed ${PANEL_COLORS.inputBorder}`,
+                        borderRadius: 8,
+                        color: PANEL_COLORS.muted,
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--primary)"; e.currentTarget.style.color = "var(--text)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; e.currentTarget.style.color = PANEL_COLORS.muted; }}
+                >
+                    {type === "video" ? <VideoCameraIcon style={{ width: 18, height: 18 }} /> : <PhotoIcon style={{ width: 18, height: 18 }} />}
+                    <span style={{ fontSize: 10, fontWeight: 500 }}>Select {type === "video" ? "Video" : "Image"}</span>
+                </button>
+            ) : (
+                <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: 8,
+                    background: PANEL_COLORS.inputBg,
+                    border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                    borderRadius: 8,
+                    overflow: "hidden"
+                }}>
+                    <div style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 4,
+                        background: "#121212",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        overflow: "hidden",
+                        flexShrink: 0,
+                        border: "1px solid rgba(255,255,255,0.05)"
+                    }}>
+                        {isVideo ? (
+                            <VideoCameraIcon style={{ width: 16, height: 16, color: "var(--primary)" }} />
+                        ) : (
+                            <img src={value} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { (e.target as any).src = "https://placehold.co/100x100?text=Error"; }} />
+                        )}
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="flex flex-col">
+                            <button
+                                onClick={() => setPickerOpen(true)}
+                                style={{ background: "none", border: "none", padding: 0, color: "var(--primary)", fontSize: 10, cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}
+                            >
+                                <ArrowPathIcon style={{ width: 10, height: 10 }} /> Change
+                            </button>
+                            <button
+                                onClick={() => onChange("")}
+                                style={{ background: "none", border: "none", padding: 0, color: "#ef4444", fontSize: 10, cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}
+                            >
+                                <TrashIcon style={{ width: 10, height: 10 }} /> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {pickerOpen && (
+                <MediaPicker
+                    open={pickerOpen}
+                    onClose={() => setPickerOpen(false)}
+                    onSelect={onChange}
+                    title={type === "image" ? "Select Image" : "Select Video"}
+                />
+            )}
+        </div>
+    );
+}
 
 // ─── Theme constants ──────────────────────────────────────────────────────────
 
@@ -291,10 +389,16 @@ export function ColorInput({ value, onChange }: { value: string; onChange: (v: s
 
 export function ToggleInput({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label?: string }) {
     const control = (
-        <div style={{ display: "flex", alignItems: "center", width: "100%", height: 26, background: PANEL_COLORS.inputBg, borderRadius: 4, padding: 2, border: `1px solid ${PANEL_COLORS.inputBorder}` }}>
-            <button onClick={() => onChange(true)} style={{ flex: 1, height: "100%", borderRadius: 3, fontSize: 11, fontWeight: 500, background: value ? "#333333" : "transparent", color: value ? "#ffffff" : PANEL_COLORS.muted, border: "none", cursor: "pointer", transition: "all 0.15s", boxShadow: value ? "0 1px 2px rgba(0,0,0,0.5)" : "none" }}>Yes</button>
-            <button onClick={() => onChange(false)} style={{ flex: 1, height: "100%", borderRadius: 3, fontSize: 11, fontWeight: 500, background: !value ? "#333333" : "transparent", color: !value ? "#ffffff" : PANEL_COLORS.muted, border: "none", cursor: "pointer", transition: "all 0.15s", boxShadow: !value ? "0 1px 2px rgba(0,0,0,0.5)" : "none" }}>No</button>
-        </div>
+        <PillSegmented
+            value={value}
+            onChange={(v) => onChange(v as boolean)}
+            block
+            size="small"
+            options={[
+                { label: "Yes", value: true },
+                { label: "No", value: false },
+            ]}
+        />
     );
     if (label) {
         return (

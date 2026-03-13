@@ -15,7 +15,8 @@ import {
     RectangleStackIcon,
     EyeIcon
 } from "@heroicons/react/24/outline";
-import { Button, Progress, Tag, Segmented, Tooltip, Input, Modal, Empty, Image as AntImage } from "antd";
+import { Button, Progress, Tag, Tooltip, Input, Modal, Empty, Image as AntImage } from "antd";
+import PillSegmented from "@/components/ui/PillSegmented";
 import { s3Service } from "@/lib/services/s3-service";
 import MediaEditor from "./MediaEditor";
 import {
@@ -69,7 +70,7 @@ function MediaPreloader({ assets, currentIndex }: { assets: MediaRecord[], curre
     );
 }
 
-export default function MediaLibraryView({ onSelect }: { onSelect?: (url: string) => void }) {
+export default function MediaLibraryView({ onSelect, hideBatchActions = false }: { onSelect?: (url: string) => void, hideBatchActions?: boolean }) {
     const [tab, setTab] = useState<'my' | 'public' | 'upload'>('my');
     const [search, setSearch] = useState("");
     const [editingFile, setEditingFile] = useState<MediaUploadFile | null>(null);
@@ -202,7 +203,7 @@ export default function MediaLibraryView({ onSelect }: { onSelect?: (url: string
             {/* Header / Tabs */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/5">
                 <div className="flex items-center gap-4">
-                    <Segmented
+                    <PillSegmented
                         value={tab}
                         onChange={(v) => {
                             setTab(v as any);
@@ -227,7 +228,7 @@ export default function MediaLibraryView({ onSelect }: { onSelect?: (url: string
                         className="bg-white/5 border-none text-white w-full md:w-64 rounded-xl h-11"
                         variant="filled"
                     />
-                    {tab !== 'upload' && filteredMedia.length > 0 && (
+                    {tab !== 'upload' && filteredMedia.length > 0 && !hideBatchActions && (
                         <Button
                             onClick={() => {
                                 if (selectionMode) {
@@ -330,7 +331,7 @@ export default function MediaLibraryView({ onSelect }: { onSelect?: (url: string
                                                         size="small"
                                                         showInfo={false}
                                                         strokeColor="#6366f1"
-                                                        trailColor="rgba(255,255,255,0.05)"
+                                                        railColor="rgba(255,255,255,0.05)"
                                                         className="flex-1"
                                                     />
                                                     <span className="text-[10px] font-black text-indigo-400">{uploadProgress[f.id] || 0}%</span>

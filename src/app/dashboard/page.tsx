@@ -27,6 +27,7 @@ import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 import { TemplateCard } from "@/components/templates/TemplateCard";
 import MediaLibraryView from "@/components/media/MediaLibraryView";
+import PillSegmented from "@/components/ui/PillSegmented";
 
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -287,10 +288,16 @@ export default function DashboardPage() {
       </header>
 
       <CommonContainer className="py-8">
-        <div style={{ display: "flex", gap: 24, marginBottom: 32, borderBottom: "1px solid var(--border)" }}>
-          <button onClick={() => setMainTab("projects")} style={{ padding: "12px 16px", background: "transparent", border: "none", borderBottom: mainTab === "projects" ? "2px solid #6366f1" : "none", color: mainTab === "projects" ? "#6366f1" : "var(--text-muted)", fontWeight: 700, cursor: "pointer" }}>My Projects</button>
-          <button onClick={() => setMainTab("templates")} style={{ padding: "12px 16px", background: "transparent", border: "none", borderBottom: mainTab === "templates" ? "2px solid #6366f1" : "none", color: mainTab === "templates" ? "#6366f1" : "var(--text-muted)", fontWeight: 700, cursor: "pointer" }}>Templates</button>
-          <button onClick={() => setMainTab("media")} style={{ padding: "12px 16px", background: "transparent", border: "none", borderBottom: mainTab === "media" ? "2px solid #6366f1" : "none", color: mainTab === "media" ? "#6366f1" : "var(--text-muted)", fontWeight: 700, cursor: "pointer" }}>Media</button>
+        <div style={{ marginBottom: 32 }}>
+          <PillSegmented
+            value={mainTab}
+            onChange={(v) => setMainTab(v as any)}
+            options={[
+              { label: "My Projects", value: "projects" },
+              { label: "Templates", value: "templates" },
+              { label: "Media", value: "media" },
+            ]}
+          />
         </div>
 
         {items.length === 0 ? (

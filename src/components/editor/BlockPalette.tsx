@@ -13,6 +13,7 @@ import { BLOCK_TYPES, createBlock } from "@/lib/blockConfig";
 import { SECTION_TEMPLATES } from "@/lib/sectionTemplates";
 import { useEditorStore } from "@/stores/editorStore";
 import { EDITOR_FEATURES } from "@/lib/editorFeatures";
+import PillSegmented from "@/components/ui/PillSegmented";
 
 // ─── Category display order ───────────────────────────────────────────────────
 const CATEGORY_ORDER = ["Navigation", "Hero", "Logos", "Team", "Gallery", "Features", "Pricing", "Testimonial", "FAQ", "Contact", "Footer"];
@@ -71,24 +72,16 @@ export default function BlockPalette() {
         zIndex: 2,
       }}>
         {/* Tab bar */}
-        <div style={{ display: "flex", padding: "8px 8px 0", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
-          {(["elements", "sections"] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => { setActiveTab(tab); setDrawerCategory(null); }}
-              style={{
-                flex: 1, padding: "10px 0",
-                background: "transparent", border: "none",
-                borderBottom: activeTab === tab ? "2px solid var(--primary)" : "2px solid transparent",
-                color: activeTab === tab ? "var(--text)" : "var(--text-muted)",
-                fontWeight: activeTab === tab ? 600 : 500,
-                fontSize: 12, cursor: "pointer", transition: "all 0.2s",
-                textTransform: "capitalize",
-              }}
-            >
-              {tab === "elements" ? "Elements" : "Sections"}
-            </button>
-          ))}
+        <div style={{ padding: "12px 10px 4px", flexShrink: 0 }}>
+          <PillSegmented
+            value={activeTab}
+            onChange={(v) => { setActiveTab(v as any); setDrawerCategory(null); }}
+            block
+            options={[
+              { label: "Elements", value: "elements" },
+              { label: "Sections", value: "sections" },
+            ]}
+          />
         </div>
 
         {/* Search (elements only) */}

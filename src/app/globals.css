@@ -681,3 +681,46 @@ label.jodit-ui-label {
   background: var(--bg) !important;
   color: var(--danger) !important;
 }
+
+/* ─── PillSegmented (Ant Design Overrides) ─────────────────────────────────── */
+.pc-segmented.ant-segmented {
+  background: #111111 !important;
+  padding: 4px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.pc-segmented .ant-segmented-item {
+  color: #888888 !important;
+  transition: all 0.2s ease !important;
+  border-radius: 999px !important;
+}
+
+.pc-segmented .ant-segmented-item:hover {
+  color: #ffffff !important;
+}
+
+.pc-segmented .ant-segmented-item-selected {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+  border-radius: 999px !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+}
+
+.pc-segmented .ant-segmented-item-label {
+  padding: 0 16px !important;
+  font-weight: 700 !important;
+  text-transform: capitalize !important;
+  font-size: 13px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  height: 32px !important;
+}
+
+.pc-segmented .ant-segmented-thumb {
+  background: #6366f1 !important;
+  border-radius: 999px !important;
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
+}

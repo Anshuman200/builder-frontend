@@ -17,7 +17,7 @@ import { useEditorStore } from "@/stores/editorStore";
 import { Section, Field, TextInput } from "./panels/shared";
 
 // ─── Shared panel primitives re-export ───────────────────────────────────────
-export { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, PANEL_COLORS } from "./panels/shared";
+export { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, PANEL_COLORS } from "./panels/shared";
 
 // ─── Per-panel imports ────────────────────────────────────────────────────────
 import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPanel, VideoPanel, ColumnsPanel } from "./panels/BasicPanels";
