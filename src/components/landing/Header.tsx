@@ -55,22 +55,52 @@ export function Header({ onLoginClick }: HeaderProps) {
 
           {/* Right Section: Auth */}
           <div className="flex items-center gap-2 md:gap-4">
-            <button
-              onClick={onLoginClick}
-              className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-white/60 hover:text-white transition-all"
-            >
-              Log in
-            </button>
+            {!user ? (
+              <>
+                <button
+                  onClick={onLoginClick}
+                  className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-white/60 hover:text-white transition-all"
+                >
+                  Log in
+                </button>
 
-            <Link
-              href="/editor"
-              className="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-bold text-white! no-underline shadow-lg transition-all hover:scale-105 active:scale-95 bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500"
-              style={{
-                boxShadow: "0 4px 20px -5px rgba(99,102,241,0.6)",
-              }}
-            >
-              Start Free
-            </Link>
+                <Link
+                  href="/editor"
+                  className="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-bold text-white! no-underline shadow-lg transition-all hover:scale-105 active:scale-95 bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500"
+                  style={{
+                    boxShadow: "0 4px 20px -5px rgba(99,102,241,0.6)",
+                  }}
+                >
+                  Start Free
+                </Link>
+              </>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Link
+                  href={(user as any).role === 'admin' ? "/admin" : "/home"}
+                  className="hidden sm:inline-flex px-5 py-2.5 rounded-full text-sm font-bold text-white! no-underline bg-white/10 hover:bg-white/20 transition-all"
+                >
+                  Dashboard
+                </Link>
+                
+                <Link
+                   href="/home/profile"
+                   className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 p-px cursor-pointer hover:scale-105 transition-transform overflow-hidden relative"
+                >
+                  <div className="w-full h-full rounded-full bg-neutral-950 flex items-center justify-center overflow-hidden">
+                    {(user as any)?.profilePic ? (
+                      <img 
+                        src={(user as any).profilePic} 
+                        alt="" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white font-black text-sm">{(user?.name || "U").charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
+                </Link>
+              </div>
+            )}
 
             {/* Mobile Menu Toggle */}
             <button
@@ -95,19 +125,40 @@ export function Header({ onLoginClick }: HeaderProps) {
           >
 
             <div className="flex flex-col gap-3">
-              <button
-                onClick={() => { onLoginClick?.(); setMobileOpen(false); }}
-                className="w-full py-4 rounded-2xl bg-white/5 text-white font-semibold hover:bg-white/10 transition-colors"
-              >
-                Log in
-              </button>
-              <Link
-                href="/editor"
-                className="w-full py-4 rounded-2xl text-center font-bold text-white! bg-linear-to-r from-indigo-600 to-violet-600"
-                onClick={() => setMobileOpen(false)}
-              >
-                Start Free
-              </Link>
+              {!user ? (
+                <>
+                  <button
+                    onClick={() => { onLoginClick?.(); setMobileOpen(false); }}
+                    className="w-full py-4 rounded-2xl bg-white/5 text-white font-semibold hover:bg-white/10 transition-colors"
+                  >
+                    Log in
+                  </button>
+                  <Link
+                    href="/editor"
+                    className="w-full py-4 rounded-2xl text-center font-bold text-white! bg-linear-to-r from-indigo-600 to-violet-600"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Start Free
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href={(user as any).role === 'admin' ? "/admin" : "/home"}
+                    className="w-full py-4 rounded-2xl text-center font-bold text-white! bg-white/5 hover:bg-white/10"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Go to Dashboard
+                  </Link>
+                  <Link
+                    href="/home/profile"
+                    className="w-full py-4 rounded-2xl text-center font-bold text-white! bg-linear-to-r from-indigo-600 to-violet-600"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Edit Profile
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -625,7 +625,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                 okButtonProps={{ danger: true, className: "bg-red-500 font-bold h-10 rounded-xl", loading: isDeleting }}
                 cancelButtonProps={{ className: "bg-white/5 border-none text-white h-10 rounded-xl", disabled: isDeleting }}
                 closable={!isDeleting}
-                maskClosable={!isDeleting}
+                mask={{ closable: !isDeleting }}
                 className="[&_.ant-modal-content]:bg-neutral-900 border border-white/10 rounded-4xl overflow-hidden [&_.ant-modal-header]:bg-transparent [&_.ant-modal-header]:border-none [&_.ant-modal-close]:text-white/50"
             >
                 <p className="text-white/50 py-4 font-medium tracking-tight">Are you sure you want to delete this asset? This will remove it from all pages using it.</p>
