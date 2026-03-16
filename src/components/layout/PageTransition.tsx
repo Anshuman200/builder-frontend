@@ -15,14 +15,15 @@ export const PageTransition = ({ children, pathname, className }: PageTransition
         <AnimatePresence mode="popLayout">
             <motion.div
                 key={pathname}
-                initial={{ opacity: 0, scale: 0.995 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.995 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
                 transition={{
-                    duration: 0.35,
-                    ease: "easeInOut"
+                    duration: 0.3,
+                    ease: [0.4, 0, 0.2, 1],
+                    opacity: { duration: 0.2 }
                 }}
-                className={cn("absolute inset-0 h-full w-full", className)}
+                className={cn("w-full relative", className)}
             >
                 {children}
             </motion.div>
