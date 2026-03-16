@@ -390,13 +390,13 @@ export function ColorInput({ value, onChange }: { value: string; onChange: (v: s
 export function ToggleInput({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label?: string }) {
     const control = (
         <PillSegmented
-            value={value}
-            onChange={(v) => onChange(v as boolean)}
+            value={value ? "yes" : "no"}
+            onChange={(v) => onChange(v === "yes")}
             block
             size="small"
             options={[
-                { label: "Yes", value: true },
-                { label: "No", value: false },
+                { label: "Yes", value: "yes" },
+                { label: "No", value: "no" },
             ]}
         />
     );

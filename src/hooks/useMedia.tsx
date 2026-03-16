@@ -1,14 +1,31 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { mediaApi, MediaRecord } from "@/lib/api/media";
 
-export function useMedia(params?: { view?: 'public' }) {
+export function useMedia(params?: { view?: 'public'; page?: number; limit?: number; search?: string; type?: string }) {
     return useQuery({
         queryKey: ["media", params],
         queryFn: async () => {
             const { data } = await mediaApi.list(params);
-            return data.media;
+            return data;
+        },
+    });
+}
+
+export function useInfiniteMedia(params: { view?: 'public'; limit?: number; search?: string; type?: string }) {
+    return useInfiniteQuery({
+        queryKey: ["media", "infinite", params],
+        queryFn: async ({ pageParam = 1 }) => {
+            const { data } = await mediaApi.list({ ...params, page: pageParam });
+            return data;
+        },
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) => {
+            if (lastPage.pagination.page < lastPage.pagination.pages) {
+                return lastPage.pagination.page + 1;
+            }
+            return undefined;
         },
     });
 }

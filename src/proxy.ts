@@ -14,13 +14,13 @@ export default function proxy(request: NextRequest) {
     // Redirect logged-in users away from the landing page
     if (pathname === '/' && isAuthed) {
         const url = request.nextUrl.clone();
-        url.pathname = isAdmin ? '/admin' : '/dashboard';
+        url.pathname = isAdmin ? '/admin' : '/home';
         url.search = '';
         return NextResponse.redirect(url);
     }
 
     // Redirect unauthenticated users away from protected routes
-    const protectedPaths = ['/dashboard', '/admin'];
+    const protectedPaths = ['/home', '/admin', '/templates', '/media'];
     const isProtected = protectedPaths.some(p => pathname.startsWith(p));
 
     if (isProtected && !isAuthed) {
@@ -33,7 +33,7 @@ export default function proxy(request: NextRequest) {
     // Redirect non-admin users away from /admin
     if (pathname.startsWith('/admin') && isAuthed && !isAdmin) {
         const url = request.nextUrl.clone();
-        url.pathname = '/dashboard';
+        url.pathname = '/home';
         return NextResponse.redirect(url);
     }
 

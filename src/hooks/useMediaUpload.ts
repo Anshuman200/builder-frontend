@@ -10,8 +10,69 @@ export interface MediaUploadFile {
     progress: number;
     url?: string;
     previewUrl?: string;
+    placeholder?: string;
     isPublic: boolean;
 }
+
+const generatePlaceholder = async (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+        const size = 20; // 20px for blurry placeholder
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        if (file.type.startsWith('image/')) {
+            const img = new Image();
+            img.onload = () => {
+                ctx?.drawImage(img, 0, 0, size, size);
+                resolve(canvas.toDataURL('image/jpeg', 0.5));
+            };
+            img.src = URL.createObjectURL(file);
+        } else if (file.type.startsWith('video/')) {
+            const video = document.createElement('video');
+            video.muted = true;
+            video.playsInline = true;
+            
+            const cleanup = () => {
+                video.pause();
+                video.src = "";
+                video.load();
+                video.remove();
+            };
+
+            const timeout = setTimeout(() => {
+                cleanup();
+                resolve("");
+            }, 5000);
+
+            video.onloadeddata = () => {
+                video.currentTime = 0.1; // Seek slightly in to avoid black frames
+            };
+
+            video.onseeked = () => {
+                clearTimeout(timeout);
+                try {
+                    ctx?.drawImage(video, 0, 0, size, size);
+                    resolve(canvas.toDataURL('image/jpeg', 0.5));
+                } catch (e) {
+                    resolve("");
+                }
+                cleanup();
+            };
+
+            video.onerror = () => {
+                clearTimeout(timeout);
+                cleanup();
+                resolve("");
+            };
+
+            video.src = URL.createObjectURL(file);
+        } else {
+            resolve("");
+        }
+    });
+};
 
 export function useMediaUpload(onSelect?: (url: string) => void) {
     const [files, setFiles] = useState<MediaUploadFile[]>([]);
@@ -19,18 +80,20 @@ export function useMediaUpload(onSelect?: (url: string) => void) {
     const toasts = useToasts();
     const createMediaMut = useCreateMediaMutation();
 
-    const addFiles = useCallback((newFiles: File[]) => {
-        const mapped = newFiles.map((f, index) => {
+    const addFiles = useCallback(async (newFiles: File[]) => {
+        const mapped = await Promise.all(newFiles.map(async (f, index) => {
             const previewUrl = f.type.startsWith('image/') ? URL.createObjectURL(f) : undefined;
+            const placeholder = await generatePlaceholder(f);
             return {
                 id: `${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
                 file: f,
                 status: 'idle' as const,
                 progress: 0,
                 previewUrl,
+                placeholder,
                 isPublic: true
             };
-        });
+        }));
         setFiles(prev => [...prev, ...mapped]);
     }, []);
 
@@ -66,6 +129,7 @@ export function useMediaUpload(onSelect?: (url: string) => void) {
                     name: mediaFile.file.name,
                     key: (uploadResult as any).key,
                     thumbnailKey: (uploadResult as any).thumbnailKey,
+                    placeholder: mediaFile.placeholder,
                     mimeType: mediaFile.file.type,
                     size: mediaFile.file.size,
                     isPublic: true
@@ -75,10 +139,11 @@ export function useMediaUpload(onSelect?: (url: string) => void) {
             setFiles(prev => prev.map(f => f.id === mediaFile.id ? { ...f, status: 'completed', url: url || '' } : f));
             if (onSelect && url) onSelect(url);
         } catch (err: any) {
-            if (err.name === 'AbortError') {
+            if (err.name === 'AbortError' || err.message === 'AbortError') {
                 console.log(`[useMediaUpload] Upload ${mediaFile.id} aborted`);
                 return;
             }
+            console.error(`[useMediaUpload] Upload failed for ${mediaFile.id}:`, err);
             setFiles(prev => prev.map(f => f.id === mediaFile.id ? { ...f, status: 'error' } : f));
             toasts.error(`Failed to upload ${mediaFile.file.name}`);
         }
@@ -88,11 +153,17 @@ export function useMediaUpload(onSelect?: (url: string) => void) {
         const filesToUpload = files.filter(f => f.status === 'idle' || f.status === 'error');
         if (filesToUpload.length === 0) return;
 
-        setFiles(prev => prev.map(f => filesToUpload.some(u => u.id === f.id) ? { ...f, status: 'uploading' } : f));
+        // Process files in batches (concurrency of 3) to balance speed and reliability
+        const CONCURRENCY = 10;
+        const queue = [...filesToUpload];
+        const workers = Array(Math.min(CONCURRENCY, queue.length)).fill(null).map(async () => {
+            while (queue.length > 0) {
+                const file = queue.shift();
+                if (file) await handleUpload(file);
+            }
+        });
 
-        await Promise.all(filesToUpload.map(async (mediaFile) => {
-            await handleUpload(mediaFile);
-        }));
+        await Promise.all(workers);
     }, [files, handleUpload]);
 
     const handleCancel = useCallback((mediaFile: MediaUploadFile) => {

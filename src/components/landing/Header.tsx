@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { Bars3Icon, XMarkIcon, BoltIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
 
 interface HeaderProps {
   onLoginClick?: () => void;
 }
 
 export function Header({ onLoginClick }: HeaderProps) {
+  const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -33,7 +35,10 @@ export function Header({ onLoginClick }: HeaderProps) {
           }
         >
           {/* Logo Section */}
-          <Link href="/" className="group flex items-center gap-2 no-underline shrink-0">
+          <Link 
+            href={!user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home"}
+            className="group flex items-center gap-2 no-underline shrink-0"
+          >
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
               style={{
@@ -59,7 +64,7 @@ export function Header({ onLoginClick }: HeaderProps) {
 
             <Link
               href="/editor"
-              className="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-bold !text-white no-underline shadow-lg transition-all hover:scale-105 active:scale-95 bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500"
+              className="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-bold text-white! no-underline shadow-lg transition-all hover:scale-105 active:scale-95 bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500"
               style={{
                 boxShadow: "0 4px 20px -5px rgba(99,102,241,0.6)",
               }}
@@ -98,7 +103,7 @@ export function Header({ onLoginClick }: HeaderProps) {
               </button>
               <Link
                 href="/editor"
-                className="w-full py-4 rounded-2xl text-center font-bold !text-white bg-linear-to-r from-indigo-600 to-violet-600"
+                className="w-full py-4 rounded-2xl text-center font-bold text-white! bg-linear-to-r from-indigo-600 to-violet-600"
                 onClick={() => setMobileOpen(false)}
               >
                 Start Free

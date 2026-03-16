@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     const response = NextResponse.json({
         user,
-        redirectTo: isAdmin ? '/admin' : '/dashboard'
+        redirectTo: isAdmin ? '/admin' : '/home'
     });
 
     // httpOnly refreshToken — cannot be read by JS (secure from XSS)

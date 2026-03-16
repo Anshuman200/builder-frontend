@@ -25,7 +25,7 @@ export function HeroBlock({ block }: BlockProps) {
     if (bgImage) {
         background = bgImage.startsWith("linear-gradient") || bgImage.startsWith("radial-gradient")
             ? bgImage
-            : `linear-gradient(${bgOverlay}, ${bgOverlay}), url(${bgImage}) center/cover no-repeat`;
+            : `linear-gradient(${bgOverlay}, ${bgOverlay}), url("${bgImage}") center/cover no-repeat`;
     } else {
         background = bgColor;
     }

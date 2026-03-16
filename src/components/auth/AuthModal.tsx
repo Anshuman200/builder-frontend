@@ -44,8 +44,8 @@ export function AuthModal({ open, onClose, defaultTab = "login" }: AuthModalProp
   const handleLogin = async (email: string, password: string) => {
     const result = await login(email, password);
     handleClose();
-    if (window.location.pathname === "/" || window.location.pathname === "/dashboard") {
-      router.push(result?.redirectTo ?? "/dashboard");
+    if (window.location.pathname === "/" || window.location.pathname === "/home") {
+      router.push(result?.redirectTo ?? "/home");
     }
   };
 
@@ -58,7 +58,7 @@ export function AuthModal({ open, onClose, defaultTab = "login" }: AuthModalProp
   const handleVerify = async (email: string, otp: string) => {
     await verifyOtp(email, otp);
     handleClose();
-    if (window.location.pathname === "/") router.push("/dashboard");
+    if (window.location.pathname === "/") router.push("/home");
   };
 
   const handleForgotPassword = async (email: string) => {

@@ -6,6 +6,7 @@ export interface MediaRecord {
     url: string;
     key: string;
     thumbnailKey?: string;
+    placeholder?: string;
     mimeType: string;
     size: number;
     isPublic: boolean;
@@ -14,9 +15,19 @@ export interface MediaRecord {
 }
 
 export const mediaApi = {
-    list: (params?: { view?: 'public' }) => {
-        const qs = params?.view ? `?view=${params.view}` : "";
-        return request<{ media: MediaRecord[] }>(`/media${qs}`);
+    list: (params?: { view?: 'public'; page?: number; limit?: number; search?: string; type?: string }) => {
+        const sp = new URLSearchParams();
+        if (params?.view) sp.append('view', params.view);
+        if (params?.page) sp.append('page', params.page.toString());
+        if (params?.limit) sp.append('limit', params.limit.toString());
+        if (params?.search) sp.append('search', params.search);
+        if (params?.type) sp.append('type', params.type);
+        
+        const qs = sp.toString() ? `?${sp.toString()}` : "";
+        return request<{ 
+            media: MediaRecord[];
+            pagination: { total: number; page: number; limit: number; pages: number }
+        }>(`/media${qs}`);
     },
     
     create: (body: Omit<MediaRecord, "_id" | "createdAt" | "url">) => 

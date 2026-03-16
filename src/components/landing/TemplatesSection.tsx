@@ -33,7 +33,7 @@ export function TemplatesSection() {
                     </div>
 
                     <button
-                        onClick={() => router.push("/templates")}
+                        onClick={() => router.push("/explore")}
                         className="group flex items-center gap-3 px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-bold transition-all hover:bg-white/10 hover:border-indigo-500/30 hover:scale-105 active:scale-95"
                     >
                         View All <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

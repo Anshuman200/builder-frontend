@@ -204,7 +204,7 @@ export default function EditorToolbar() {
 
   async function handleLogoClick(e: React.MouseEvent) {
     e.preventDefault();
-    const target = user?.role === 'admin' ? "/admin/templates" : "/dashboard";
+    const target = !user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home";
     
     // Force commit title if currently editing
     if (editingTitle) {
@@ -248,7 +248,7 @@ export default function EditorToolbar() {
       {/* Left — logo + title */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
         <a 
-          href={user?.role === 'admin' ? "/admin/templates" : "/dashboard"} 
+          href={!user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home"} 
           onClick={handleLogoClick}
           style={{ display: "flex", alignItems: "center", textDecoration: "none", flexShrink: 0 }}
         >
