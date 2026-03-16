@@ -26,7 +26,7 @@ export function FeaturesPanel({ block }: { block: Block }) {
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#1e293b"} onChange={(v) => up("textColor", v)} /></Field>
             </Section>
             <Section title="Card Styling">
-                <Field label="Card Style"><SelectInput value={(p.cardStyle as string) || "none"} onChange={(v) => up("cardStyle", v)} options={[{ label: "None (Text Only)", value: "none" }, { label: "Raised Shadow", value: "raised" }, { label: "Outlined", value: "outlined" }, { label: "Filled / Tinted", value: "filled" }]} /></Field>
+                <Field label="Card Style"><SelectInput value={(p.cardStyle as string) || "raised"} onChange={(v) => up("cardStyle", v)} options={[{ label: "None (Text Only)", value: "none" }, { label: "Raised Shadow", value: "raised" }, { label: "Outlined", value: "outlined" }, { label: "Filled / Tinted", value: "filled" }]} /></Field>
                 {(p.cardStyle === "raised" || p.cardStyle === "outlined") && (<Field label="Card Background"><ColorInput value={(p.cardBg as string) || "#ffffff"} onChange={(v) => up("cardBg", v)} /></Field>)}
                 {p.cardStyle !== "none" && (<Field label="Border Radius"><BorderRadiusInput value={(p.cardRadius as string) || "16px"} onChange={(v) => up("cardRadius", v)} /></Field>)}
                 {p.cardStyle === "raised" && (<>
@@ -94,7 +94,7 @@ export function TeamPanel({ block }: { block: Block }) {
                 <Field label="Text Alignment"><SelectInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>
             </Section>
             <Section title="Card Styling">
-                <Field label="Card Style"><SelectInput value={(p.cardStyle as string) || "none"} onChange={(v) => up("cardStyle", v)} options={[{ label: "None", value: "none" }, { label: "Raised Shadow", value: "raised" }, { label: "Outlined", value: "outlined" }, { label: "Filled / Tinted", value: "filled" }]} /></Field>
+                <Field label="Card Style"><SelectInput value={(p.cardStyle as string) || "raised"} onChange={(v) => up("cardStyle", v)} options={[{ label: "None", value: "none" }, { label: "Raised Shadow", value: "raised" }, { label: "Outlined", value: "outlined" }, { label: "Filled / Tinted", value: "filled" }]} /></Field>
                 {(p.cardStyle === "raised" || p.cardStyle === "outlined" || p.cardStyle === "filled") && (<Field label="Card Background"><ColorInput value={(p.cardBg as string) || "#ffffff"} onChange={(v) => up("cardBg", v)} /></Field>)}
                 <Field label="Radius"><BorderRadiusInput value={(p.cardRadius as string) || "16px"} onChange={(v) => up("cardRadius", v)} /></Field>
                 <Field label="Card Height"><TextInput value={(p.cardHeight as string) || "auto"} onChange={(v) => up("cardHeight", v)} placeholder="auto or 400px" /></Field>

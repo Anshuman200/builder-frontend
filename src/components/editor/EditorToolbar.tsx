@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   BoltIcon as ZapIcon,
   ComputerDesktopIcon,
@@ -12,8 +12,9 @@ import {
   EllipsisHorizontalCircleIcon,
   EyeIcon,
   ArrowRightOnRectangleIcon,
+  CameraIcon,
 } from "@heroicons/react/24/outline";
-import { Popover, Dropdown, MenuProps } from "antd";
+import { Popover, Dropdown } from "antd";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEditorStore } from "@/stores/editorStore";
@@ -24,6 +25,7 @@ import { pagesApi } from "@/lib/api/client";
 import { clearLocalDraft } from "@/lib/storage";
 import { useToasts } from "@/hooks/useToasts";
 import { useUpdatePage, useCreatePage, usePublishPage } from "@/lib/api/queries";
+import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
 
 
 export default function EditorToolbar() {
@@ -45,6 +47,9 @@ export default function EditorToolbar() {
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showCapturePicker, setShowCapturePicker] = useState(false);
+  const [currentThumbnail, setCurrentThumbnail] = useState<string | null>((page as any)?.thumbnail || null);
+  const [capturedThumbnails, setCapturedThumbnails] = useState<string[]>((page as any)?.thumbnails || []);
 
   const updateMutation = useUpdatePage();
   const createMutation = useCreatePage();
@@ -54,10 +59,10 @@ export default function EditorToolbar() {
   const canRedo = historyIndex < history.length - 1;
 
   // Helper to format payload for backend
-  const getPlainPayload = () => {
+  const getPlainPayload = (thumbnailUrl?: string | null) => {
     if (!page) return null;
 
-    return {
+    const payload: any = {
       title: page.title,
       slug: page.slug,
       content: page.content || [],
@@ -65,7 +70,31 @@ export default function EditorToolbar() {
       category: page.category || 'Other',
       status: page.status || 'DRAFT'
     };
+
+    if (thumbnailUrl !== undefined) {
+      payload.thumbnail = thumbnailUrl;
+    }
+
+    return payload;
   };
+
+  // Handle thumbnail selection from capture or media library
+  const handleUpdateThumbnails = async (newThumbnails: string[], active: string | null) => {
+    setCapturedThumbnails(newThumbnails);
+    setCurrentThumbnail(active);
+    if (!pageId || pageId.length < 24) return;
+    try {
+      await updateMutation.mutateAsync({
+        id: pageId,
+        thumbnail: active || undefined,
+        thumbnails: newThumbnails,
+      } as any);
+      success('Thumbnail saved!');
+    } catch (e) {
+      console.error('Thumbnail save failed', e);
+    }
+  };
+
 
   // Auto-save effect
   useEffect(() => {
@@ -87,6 +116,18 @@ export default function EditorToolbar() {
     return () => clearTimeout(timeoutId);
   }, [page, user, pageId, isDirty, isSaving, markClean]);
 
+  // Sync thumbnail when page loads from API
+  useEffect(() => {
+    if (page) {
+      if ((page as any).thumbnail && !currentThumbnail) {
+        setCurrentThumbnail((page as any).thumbnail);
+      }
+      if ((page as any).thumbnails?.length > 0 && capturedThumbnails.length === 0) {
+        setCapturedThumbnails((page as any).thumbnails);
+      }
+    }
+  }, [page]);
+
   async function handleSave() {
     if (!user) {
       setShowAuthModal(true);
@@ -96,10 +137,9 @@ export default function EditorToolbar() {
 
     setIsSaving(true);
     try {
-      const payload = getPlainPayload();
-      if (!payload) return;
-
       if (pageId.length < 24) {
+        const payload = getPlainPayload();
+        if (!payload) return;
         const res = await createMutation.mutateAsync(payload);
         const newId = (res as any).data.page._id;
         markClean();
@@ -108,6 +148,8 @@ export default function EditorToolbar() {
         router.replace(`/editor/${newId}`);
         return;
       }
+      const payload = getPlainPayload();
+      if (!payload) return;
       await updateMutation.mutateAsync({ id: pageId, ...payload });
       markClean();
       clearLocalDraft(pageId);
@@ -390,6 +432,40 @@ export default function EditorToolbar() {
           {isPublishing ? "Publishing..." : "Publish"}
         </button>
 
+        {/* Thumbnail capture button */}
+        {user && (
+          <button
+            onClick={() => setShowCapturePicker(true)}
+            title="Capture page thumbnail"
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "5px 10px",
+              background: currentThumbnail ? "rgba(99,102,241,0.15)" : "var(--surface)",
+              color: currentThumbnail ? "#818cf8" : "var(--text-muted)",
+              border: `1px solid ${currentThumbnail ? "rgba(99,102,241,0.4)" : "var(--border)"}`,
+              borderRadius: 7,
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 0.15s",
+              position: "relative",
+            }}
+          >
+            {currentThumbnail ? (
+              <span style={{ position: "relative", width: 14, height: 14, flexShrink: 0 }}>
+                <img
+                  src={currentThumbnail}
+                  alt=""
+                  style={{ width: 14, height: 14, borderRadius: 3, objectFit: "cover" }}
+                />
+              </span>
+            ) : (
+              <CameraIcon style={{ width: 13, height: 13 }} />
+            )}
+            Thumbnail
+          </button>
+        )}
+
         {/* Preview button */}
         <button
           onClick={openPreview}
@@ -462,6 +538,47 @@ export default function EditorToolbar() {
                       placeholder="https://..."
                     />
                   </SettingField>
+
+                  {user && (
+                    <SettingField label="Page Thumbnail">
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {currentThumbnail ? (
+                          <div style={{ position: "relative", borderRadius: 6, overflow: "hidden", border: "1px solid var(--border)" }}>
+                            <img
+                              src={currentThumbnail}
+                              alt="Thumbnail"
+                              style={{ width: "100%", height: 70, objectFit: "cover", objectPosition: "top", display: "block" }}
+                            />
+                          </div>
+                        ) : (
+                          <div style={{
+                            height: 50, borderRadius: 6,
+                            border: "1.5px dashed var(--border)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 11, color: "var(--text-muted)"
+                          }}>
+                            No thumbnail set
+                          </div>
+                        )}
+                        <button
+                          onClick={() => setShowCapturePicker(true)}
+                          style={{
+                            padding: "5px 10px",
+                            background: "var(--surface)",
+                            color: "var(--text)",
+                            border: "1px solid var(--border)",
+                            borderRadius: 6,
+                            fontSize: 11,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            width: "100%",
+                          }}
+                        >
+                          {currentThumbnail ? "Change Thumbnail" : "Choose Thumbnail"}
+                        </button>
+                      </div>
+                    </SettingField>
+                  )}
                 </div>
               </div>
             }
@@ -525,6 +642,20 @@ export default function EditorToolbar() {
       </div>
 
       <AuthModal open={showAuthModal} onClose={() => setShowAuthModal(false)} defaultTab="login" />
+
+      {/* Capture Preview Modal */}
+      {user && pageId && pageId.length >= 24 && (
+        <CapturePreviewModal
+          open={showCapturePicker}
+          onClose={() => setShowCapturePicker(false)}
+          pageId={pageId}
+          previewUrl={typeof window !== 'undefined' ? `${window.location.origin}/preview/${pageId}` : `/preview/${pageId}`}
+          currentThumbnail={currentThumbnail}
+          existingThumbnails={capturedThumbnails}
+          onSelect={(url) => { setCurrentThumbnail(url); }}
+          onUpdateThumbnails={handleUpdateThumbnails}
+        />
+      )}
     </header>
   );
 }

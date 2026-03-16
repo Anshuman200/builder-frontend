@@ -58,16 +58,31 @@ export function TemplateCard({
                     variant === "public" ? "h-[220px] sm:h-[280px]" : "h-32 sm:h-40",
                     isLocked ? "bg-linear-to-br from-zinc-800 to-zinc-900" : ""
                 )}
-                style={!isLocked ? { background: getGradient(template.title) } : {}}
+                style={!isLocked && !(template as any).thumbnail ? { background: getGradient(template.title) } : {}}
             >
-                <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-white/10 opacity-30" />
-
-                <div className={cn(
-                    "font-black text-white/10 select-none z-10 pointer-events-none italic transition-transform duration-500",
-                    variant === "public" ? "text-7xl sm:text-9xl group-hover:scale-110" : "text-5xl group-hover:scale-105",
-                )}>
-                    {isLocked ? "🔒" : (template.title || "T")[0].toUpperCase()}
-                </div>
+                {/* Actual Page Screenshot */}
+                {!isLocked && (template as any).thumbnail ? (
+                    <div className="absolute inset-0 bg-neutral-950 flex items-center justify-center p-1">
+                        <img
+                            src={(template as any).thumbnail}
+                            alt={template.title}
+                            className="max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-105"
+                            loading="lazy"
+                        />
+                        {/* Subtle gradient overlay for text readability */}
+                        <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                    </div>
+                ) : (
+                    <>
+                        <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-white/10 opacity-30" />
+                        <div className={cn(
+                            "font-black text-white/10 select-none z-10 pointer-events-none italic transition-transform duration-500",
+                            variant === "public" ? "text-7xl sm:text-9xl group-hover:scale-110" : "text-5xl group-hover:scale-105",
+                        )}>
+                            {isLocked ? "🔒" : (template.title || "T")[0].toUpperCase()}
+                        </div>
+                    </>
+                )}
 
                 {/* Status Badges (Admin / Dashboard) */}
                 <div className="absolute top-3 left-3 flex gap-1.5 z-20">

@@ -112,6 +112,7 @@ export default function EditorCanvas() {
 
       {/* Page canvas — dark class scoped here so only blocks are affected */}
       <div
+        id="editor-canvas-root"
         ref={canvasRef}
         className={isDark ? "dark" : undefined}
         style={{
