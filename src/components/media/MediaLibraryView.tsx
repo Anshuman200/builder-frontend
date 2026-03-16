@@ -681,7 +681,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
 
             {/* Floating Bottom Action Bar */}
             {selectionMode && (
-                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 duration-500">
+                <div className="fixed bottom-14 md:bottom-10 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 duration-500">
                     <div className="bg-neutral-900/80 backdrop-blur-2xl border border-white/10 rounded-4xl p-3 pl-8 flex items-center gap-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/5">
                         <div className="flex flex-col">
                             <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Selected</span>

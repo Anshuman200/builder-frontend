@@ -1,13 +1,16 @@
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-    title: "Editor | PageCraft",
-};
+import { usePathname } from "next/navigation";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 export default function EditorLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    
     return (
         <div className="h-screen overflow-hidden flex flex-col dark">
-            {children}
+            <PageTransition pathname={pathname} className="h-full relative">
+                {children}
+            </PageTransition>
         </div>
     );
 }

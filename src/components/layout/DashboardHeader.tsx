@@ -165,8 +165,6 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
           );
         })}
       </nav>
-      {/* Spacer for bottom nav on mobile */}
-      <div className="h-16 lg:hidden" />
     </>
   );
 };

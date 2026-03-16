@@ -6,15 +6,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTemplates, useCreatePage } from "@/lib/api/queries";
 import { useToasts } from "@/hooks/useToasts";
 import {
-  Squares2X2Icon,
   MagnifyingGlassIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  EyeIcon
 } from "@heroicons/react/24/outline";
-import { Dropdown } from "antd";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 import { TemplateCard } from "@/components/templates/TemplateCard";
-import { DashboardHeader } from "@/components/layout/DashboardHeader";
-import { EyeIcon } from "@heroicons/react/24/outline";
 
 export default function TemplatesPage() {
   const { isLoading: authLoading } = useAuth();
@@ -22,32 +19,12 @@ export default function TemplatesPage() {
   const router = useRouter();
 
   const { data: templates = [], isLoading: loading } = useTemplates();
-  const createMutation = useCreatePage();
-
   const [search, setSearch] = useState("");
 
-  const handleCreate = useCallback(async () => {
-    try {
-      const payload = {
-        title: "Untitled Page",
-        slug: "untitled-" + Date.now().toString().slice(-4),
-        status: "DRAFT",
-        isPublic: false,
-        content: [],
-        meta: {}
-      };
-      const res = await createMutation.mutateAsync(payload) as any;
-      success("Project created");
-      router.push(`/editor/${res.data.page._id}`);
-    } catch {
-      toastError("Failed to create project");
-    }
-  }, [createMutation, router, success, toastError]);
-
-  if (authLoading || (loading && templates.length === 0)) {
+  if (loading && templates.length === 0) {
     return (
-      <div className="h-screen flex items-center justify-center bg-neutral-950 text-white/20">
-        <ArrowPathIcon className="w-10 h-10 animate-spin" />
+      <div className="h-[60vh] flex items-center justify-center">
+        <ArrowPathIcon className="w-10 h-10 animate-spin text-white/20" />
       </div>
     );
   }
@@ -55,12 +32,7 @@ export default function TemplatesPage() {
   const filtered = templates.filter((p: any) => !search || p.title?.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white selection:bg-indigo-500/30">
-      <DashboardHeader 
-        onCreatePage={handleCreate} 
-      />
-
-      <CommonContainer className="pt-20 pb-24">
+      <CommonContainer className="pt-5 pb-24">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8 px-2">
             <div className="max-w-2xl">
                 <h2 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight text-white italic mb-4">Templates</h2>
@@ -104,6 +76,5 @@ export default function TemplatesPage() {
           </div>
         )}
       </CommonContainer>
-    </div>
   );
 }

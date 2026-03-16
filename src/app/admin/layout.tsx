@@ -15,6 +15,7 @@ import {
     Bars3Icon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "@/hooks/useAuth";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 const NAV = [
     { key: "/admin/users", label: "Users", icon: UsersIcon },
@@ -190,9 +191,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </div>
 
                     <main className="flex-1 overflow-auto scrollbar-hide bg-neutral-950 relative">
-                        <div className="min-h-full p-4 sm:p-8 lg:p-12 animate-in fade-in duration-500">
+                        <PageTransition pathname={pathname} className="min-h-full p-4 sm:p-8 lg:p-12">
                             {children}
-                        </div>
+                        </PageTransition>
                     </main>
                 </div>
             </div>

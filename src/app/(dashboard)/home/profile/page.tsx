@@ -1,15 +1,9 @@
-"use client";
-
 import { ProfileSettingsForm } from "@/components/auth/ProfileSettingsForm";
 import { UserIcon } from "@heroicons/react/24/outline";
-import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 
 export default function UserProfilePage() {
   return (
-    <div className="min-h-screen bg-neutral-950 text-white selection:bg-indigo-500/30">
-      <DashboardHeader />
-
       <CommonContainer className="py-12">
         <div className="max-w-2xl mx-auto">
           <div className="mb-12">
@@ -29,6 +23,5 @@ export default function UserProfilePage() {
           </div>
         </div>
       </CommonContainer>
-    </div>
   );
 }

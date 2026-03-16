@@ -5,6 +5,8 @@ import { Header as CustomHeader } from "@/components/landing/Header";
 import { Footer as CustomFooter } from "@/components/landing/Footer";
 import { useState } from "react";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { usePathname } from "next/navigation";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 const { Content } = Layout;
 
@@ -14,6 +16,7 @@ export default function PublicLayout({
     children: React.ReactNode;
 }) {
     const [authOpen, setAuthOpen] = useState(false);
+    const pathname = usePathname();
 
     return (
         <Layout className="min-h-screen bg-[#080808] relative overflow-x-hidden font-sans">
@@ -28,8 +31,10 @@ export default function PublicLayout({
             <CustomHeader onLoginClick={() => setAuthOpen(true)} />
 
             {/* Main Content Area */}
-            <Content className="relative z-10 flex flex-col">
-                {children}
+            <Content className="relative z-10 flex flex-col min-h-screen">
+                <PageTransition pathname={pathname}>
+                    {children}
+                </PageTransition>
             </Content>
 
             {/* Shared Footer Component */}
