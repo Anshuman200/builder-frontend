@@ -19,7 +19,7 @@ export function Footer() {
   const FOOTER_LINKS = {
     Product: [
       { label: "Templates", href: "/explore" },
-      { label: "Features", href: "/#features" },
+      { label: "Media", href: "/explore/media" },
     ],
     Company: [
       { label: "Contact", href: "/contact" },

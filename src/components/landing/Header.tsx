@@ -135,6 +135,24 @@ export function Header({ onLoginClick }: HeaderProps) {
           >
 
             <div className="flex flex-col gap-3">
+              {/* Nav links — always shown regardless of auth state */}
+              <div className="flex flex-col gap-1 pb-2 border-b border-white/5">
+                <Link
+                  href="/explore"
+                  className="py-3 px-4 rounded-2xl text-left font-semibold text-white/70 hover:text-white hover:bg-white/5 transition-all no-underline"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  📐 Templates
+                </Link>
+                <Link
+                  href="/explore/media"
+                  className="py-3 px-4 rounded-2xl text-left font-semibold text-white/70 hover:text-white hover:bg-white/5 transition-all no-underline"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  🖼️ Media
+                </Link>
+              </div>
+
               {!user ? (
                 <>
                   <button
