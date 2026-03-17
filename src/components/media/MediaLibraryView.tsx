@@ -13,7 +13,8 @@ import {
     MagnifyingGlassIcon,
     UserCircleIcon,
     RectangleStackIcon,
-    EyeIcon
+    EyeIcon,
+    ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import { Button, Progress, Tag, Tooltip, Input, Modal, Empty, Image as AntImage } from "antd";
 import PillSegmented from "@/components/ui/PillSegmented";
@@ -23,7 +24,8 @@ import {
     useMedia,
     useInfiniteMedia,
     useUpdateMediaMutation,
-    useDeleteMediaMutation
+    useDeleteMediaMutation,
+    useForkMediaMutation,
 } from "@/hooks/useMedia";
 import { useMediaUpload, MediaUploadFile } from "@/hooks/useMediaUpload";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,7 +39,7 @@ import { useInView } from "react-intersection-observer";
 
 export default function MediaLibraryView({ onSelect, hideBatchActions = false }: { onSelect?: (url: string) => void, hideBatchActions?: boolean }) {
     // Default to 'public' for guests initially, otherwise 'my'
-    const [tab, setTab] = useState<'my' | 'public' | 'upload'>(() => {
+    const [tab, setTab] = useState<'my' | 'public' | 'upload' | 'shared'>(() => {
         if (typeof window !== "undefined") {
             const hasSession = !!document.cookie.includes("hasSession");
             return hasSession ? 'my' : 'public';
@@ -84,6 +86,8 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
         }
     }, [user, authLoading, tab]);
 
+    const forkMediaMut = useForkMediaMutation();
+
     const {
         files,
         setFiles,
@@ -104,7 +108,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
         isLoading: isMediaLoading,
         refetch
     } = useInfiniteMedia({
-        view: tab === 'public' ? 'public' : undefined,
+        view: tab === 'public' ? 'public' : tab === 'shared' ? 'shared' : undefined,
         limit: 24,
         search: debouncedSearch,
         type: filterType === 'all' ? undefined : filterType
@@ -127,6 +131,29 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
 
     const updateMediaMut = useUpdateMediaMutation();
     const deleteMediaMut = useDeleteMediaMutation();
+
+    /**
+     * When a public asset is selected, fork it first so the user gets
+     * their own persistent copy. Falls back to direct URL on error.
+     */
+    const handleForkAndSelect = async (media: any, assetUrl: string) => {
+        // Owners are matched using both _id and id for robustness
+        const userId = user?._id || (user as any)?.id;
+        if (!userId || media.owner === userId || media.isForked) {
+            // Already own it, or it's already a fork - use directly
+            onSelect?.(assetUrl);
+            return;
+        }
+        try {
+            const { data } = await forkMediaMut.mutateAsync(media._id);
+            const { s3Service: s3 } = await import('@/lib/services/s3-service');
+            const forkedUrl = s3Service.getPublicUrl(data.media.key) || assetUrl;
+            onSelect?.(forkedUrl);
+        } catch (e) {
+            // If forking fails, fall back to the original URL
+            onSelect?.(assetUrl);
+        }
+    };
 
     // --- Unified Media Synchronization ---
     // (Obsolete: Removed manual sync in favor of useInfiniteMedia pages memo)
@@ -153,7 +180,8 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
     };
 
     const handleDelete = (id: string, record: MediaRecord) => {
-        if (record.owner !== user?._id) {
+        const userId = user?._id || (user as any)?.id;
+        if (!userId || record.owner !== userId) {
             toasts.error("You don't have permission to delete this asset.");
             return;
         }
@@ -232,6 +260,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
         return [
             { label: <div className="flex items-center gap-2 px-1 md:px-2 min-w-max"><UserCircleIcon className="w-4 h-4" /> <span className="text-[10px] md:text-xs">My Media</span></div>, value: 'my' },
             { label: <div className="flex items-center gap-2 px-1 md:px-2 min-w-max"><GlobeAltIcon className="w-4 h-4" /> <span className="text-[10px] md:text-xs">Public Assets</span></div>, value: 'public' },
+            { label: <div className="flex items-center gap-2 px-1 md:px-2 min-w-max"><ArrowDownTrayIcon className="w-4 h-4" /> <span className="text-[10px] md:text-xs">Shared</span></div>, value: 'shared' },
             { label: <div className="flex items-center gap-2 px-1 md:px-2 min-w-max"><CloudArrowUpIcon className="w-4 h-4" /> <span className="text-[10px] md:text-xs">Upload</span></div>, value: 'upload' },
         ].filter(opt => user || opt.value === 'public');
     }, [user]);
@@ -437,7 +466,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                     <div className="space-y-6 animate-in fade-in duration-500">
                         <div className="flex items-center justify-between px-2">
                             <div className="text-xs font-black text-white/30 uppercase tracking-[0.3em]">
-                                {tab === 'my' ? 'My Library' : 'Global Public Assets'} — {filteredMedia.length} Items
+                                {tab === 'my' ? 'My Library' : tab === 'shared' ? 'Shared Assets (Forked)' : 'Global Public Assets'} — {filteredMedia.length} Items
                             </div>
                         </div>
 
@@ -460,7 +489,8 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                                     <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4 sm:gap-6">
                                         {allMedia.map((m, index) => {
                                             const isSelected = selectedMediaIds.includes(m._id);
-                                            const isOwner = m.owner === user?._id;
+                                            const userId = user?._id || (user as any)?.id;
+                                            const isOwner = !!userId && m.owner === userId;
                                             const assetUrl = s3Service.getPublicUrl(m.key) || m.url || '';
                                             const isVideo = m.mimeType?.startsWith('video/');
                                             const thumbnail = m.thumbnailKey 
@@ -476,7 +506,12 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                                                             e.stopPropagation();
                                                             toggleMediaSelection(m._id);
                                                         } else if (onSelect) {
-                                                            onSelect?.(assetUrl);
+                                                            if (tab === 'public') {
+                                                                // Fork-on-select: create the user's own copy
+                                                                handleForkAndSelect(m, assetUrl);
+                                                            } else {
+                                                                onSelect?.(assetUrl);
+                                                            }
                                                         }
                                                     }}
                                                 >

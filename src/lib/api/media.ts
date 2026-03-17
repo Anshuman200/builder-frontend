@@ -12,10 +12,13 @@ export interface MediaRecord {
     isPublic: boolean;
     owner: string;
     createdAt: string;
+    // Forking
+    isForked?: boolean;
+    forkedFrom?: string;
 }
 
 export const mediaApi = {
-    list: (params?: { view?: 'public'; page?: number; limit?: number; search?: string; type?: string }) => {
+    list: (params?: { view?: 'public' | 'shared'; page?: number; limit?: number; search?: string; type?: string }) => {
         const sp = new URLSearchParams();
         if (params?.view) sp.append('view', params.view);
         if (params?.page) sp.append('page', params.page.toString());
@@ -54,4 +57,9 @@ export const mediaApi = {
         }),
         
     getUsage: (id: string) => request<{ isUsed: boolean, pages: any[] }>(`/media/${id}/usage`),
+
+    fork: (id: string) =>
+        request<{ media: MediaRecord }>(`/media/${id}/fork`, {
+            method: 'POST',
+        }),
 };

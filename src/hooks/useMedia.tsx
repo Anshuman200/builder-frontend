@@ -13,7 +13,7 @@ export function useMedia(params?: { view?: 'public'; page?: number; limit?: numb
     });
 }
 
-export function useInfiniteMedia(params: { view?: 'public'; limit?: number; search?: string; type?: string }) {
+export function useInfiniteMedia(params: { view?: 'public' | 'shared'; limit?: number; search?: string; type?: string }) {
     return useInfiniteQuery({
         queryKey: ["media", "infinite", params],
         queryFn: async ({ pageParam = 1 }) => {
@@ -72,5 +72,13 @@ export const useMediaUsage = (id: string | null) => {
             return data;
         },
         enabled: !!id,
+    });
+};
+
+export const useForkMediaMutation = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => mediaApi.fork(id),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["media"] }),
     });
 };

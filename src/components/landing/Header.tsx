@@ -53,6 +53,16 @@ export function Header({ onLoginClick }: HeaderProps) {
             </span>
           </Link>
 
+          {/* Centre Nav Links */}
+          <nav className="hidden md:flex items-center gap-1">
+            <Link href="/explore" className="px-4 py-2 text-sm font-semibold text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all no-underline">
+              Templates
+            </Link>
+            <Link href="/explore/media" className="px-4 py-2 text-sm font-semibold text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all no-underline">
+              Media
+            </Link>
+          </nav>
+
           {/* Right Section: Auth */}
           <div className="flex items-center gap-2 md:gap-4">
             {!user ? (
