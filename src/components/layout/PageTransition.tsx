@@ -2,7 +2,7 @@
 
 // import React from "react";
 // import { AnimatePresence, motion } from "framer-motion";
-// import { cn } from "@/lib/utils/common";
+// import { cn } from "@/lib/utils";
 
 // interface PageTransitionProps {
 //     children: React.ReactNode;
@@ -35,7 +35,7 @@
 
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { cn } from "@/lib/utils/common";
+import { cn } from "@/lib/utils";
 
 interface PageTransitionProps {
     children: React.ReactNode;

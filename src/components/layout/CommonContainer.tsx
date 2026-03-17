@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { cn } from "@/lib/utils/common";
+import { cn } from "@/lib/utils";
 
 interface CommonContainerProps {
     className?: string;

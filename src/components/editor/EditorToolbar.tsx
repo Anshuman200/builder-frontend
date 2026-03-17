@@ -18,7 +18,7 @@ import { Popover, Dropdown } from "antd";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEditorStore } from "@/stores/editorStore";
-import { slugify } from "@/lib/utils/common";
+import { slugify } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { pagesApi } from "@/lib/api/client";

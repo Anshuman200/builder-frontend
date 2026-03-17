@@ -5,7 +5,7 @@ import { ArrowRightIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { Template } from "@/types/templates";
 import { getGradient } from "@/lib/utils/gradients";
-import { cn } from "@/lib/utils/common";
+import { cn } from "@/lib/utils";
 import React from "react";
 
 interface TemplateCardProps {

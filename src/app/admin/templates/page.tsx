@@ -28,7 +28,7 @@ import {
 import { TemplatePreviewModal } from "@/components/admin/TemplatePreviewModal";
 import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
 import { Button, Input, Select, Skeleton, Dropdown, Modal } from "antd";
-import { cn } from "@/lib/utils/common";
+import { cn } from "@/lib/utils";
 import { useToasts } from "@/hooks/useToasts";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 import { TemplateCard } from "@/components/templates/TemplateCard";

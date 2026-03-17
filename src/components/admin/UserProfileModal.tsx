@@ -4,7 +4,7 @@ import { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ClockIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import { Modal, Button, Tabs, Tag, Skeleton, Divider } from "antd";
-import { cn } from "@/lib/utils/common";
+import { cn } from "@/lib/utils";
 import { useAdminUser } from "@/lib/api/queries";
 import { TemplatePreviewModal } from "./TemplatePreviewModal";
 

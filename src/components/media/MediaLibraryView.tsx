@@ -36,7 +36,15 @@ import { useInView } from "react-intersection-observer";
 // --- Helpers -----------------------------------------------------------------
 
 export default function MediaLibraryView({ onSelect, hideBatchActions = false }: { onSelect?: (url: string) => void, hideBatchActions?: boolean }) {
-    const [tab, setTab] = useState<'my' | 'public' | 'upload'>('my');
+    // Default to 'public' for guests initially, otherwise 'my'
+    const [tab, setTab] = useState<'my' | 'public' | 'upload'>(() => {
+        if (typeof window !== "undefined") {
+            const hasSession = !!document.cookie.includes("hasSession");
+            return hasSession ? 'my' : 'public';
+        }
+        return 'my';
+    });
+
     // --- Pagination & Search State ---
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
@@ -66,8 +74,15 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
     // Gallery Preloading State
     const [currentPreviewIndex, setCurrentPreviewIndex] = useState<number | null>(null);
 
-    const { user } = useAuth();
+    const { user, isLoading: authLoading } = useAuth();
     const toasts = useToasts();
+
+    // Make sure 'tab' updates safely if user loads later
+    useEffect(() => {
+        if (!authLoading && !user && tab !== 'public') {
+            setTab('public');
+        }
+    }, [user, authLoading, tab]);
 
     const {
         files,
@@ -213,6 +228,14 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
         }
     };
 
+    const segmentedOptions = useMemo(() => {
+        return [
+            { label: <div className="flex items-center gap-2 px-1 md:px-2 min-w-max"><UserCircleIcon className="w-4 h-4" /> <span className="text-[10px] md:text-xs">My Media</span></div>, value: 'my' },
+            { label: <div className="flex items-center gap-2 px-1 md:px-2 min-w-max"><GlobeAltIcon className="w-4 h-4" /> <span className="text-[10px] md:text-xs">Public Assets</span></div>, value: 'public' },
+            { label: <div className="flex items-center gap-2 px-1 md:px-2 min-w-max"><CloudArrowUpIcon className="w-4 h-4" /> <span className="text-[10px] md:text-xs">Upload</span></div>, value: 'upload' },
+        ].filter(opt => user || opt.value === 'public');
+    }, [user]);
+
     return (
         <div className="space-y-8 min-h-[600px]">
             {/* Header / Tabs */}
@@ -228,11 +251,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                                 setFilterType('all');
                             }}
                             size="large"
-                            options={[
-                                { label: <div className="flex items-center gap-2 px-1 md:px-2 min-w-max"><UserCircleIcon className="w-4 h-4" /> <span className="text-[10px] md:text-xs">My Media</span></div>, value: 'my' },
-                                { label: <div className="flex items-center gap-2 px-1 md:px-2 min-w-max"><GlobeAltIcon className="w-4 h-4" /> <span className="text-[10px] md:text-xs">Public Assets</span></div>, value: 'public' },
-                                { label: <div className="flex items-center gap-2 px-1 md:px-2 min-w-max"><CloudArrowUpIcon className="w-4 h-4" /> <span className="text-[10px] md:text-xs">Upload</span></div>, value: 'upload' },
-                            ]}
+                            options={segmentedOptions}
                         />
                     </div>
 
