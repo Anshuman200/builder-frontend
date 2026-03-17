@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { loadPage, savePage, hasLocalDraft } from "@/lib/storage";
+import { loadPage, savePage, hasLocalDraft } from "@/lib/utils/storage";
 import EditorShell from "@/components/editor/EditorShell";
 import { useToasts } from "@/hooks/useToasts";
 import { usePage } from "@/lib/api/queries";

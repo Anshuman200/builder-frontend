@@ -1,5 +1,5 @@
 import type { SectionTemplate } from "@/@Types";
-import { makeBlock } from "../blockConfig";
+import { makeBlock } from "../config/blocks";
 
 const dummyFaqsFull = [
     { id: "1", title: "Eiusmod incididunt ut labore dolore?", content: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur." },
@@ -142,98 +142,6 @@ export const faqSections: SectionTemplate[] = [
                                 itemBorderColor: "#e2e8f0",
                                 iconColor: "#22c55e",
                                 titleColor: "#0f172a",
-                                contentColor: "#64748b",
-                                titleSize: "16px",
-                                titleWeight: "600",
-                                descSize: "15px",
-                                iconStyle: "chevron",
-                                iconSize: "20px",
-                            }),
-                        ],
-                    }),
-                ],
-            }),
-    },
-    {
-        id: "faq-categories",
-        category: "FAQ",
-        name: "FAQ with Categories",
-        preview: `<div style="font-family:sans-serif;background:#fff;padding:2rem 1rem;display:flex;gap:1rem;">
-       <div style="flex:1;text-align:left;">
-         <h3 style="margin:0 0 0.5rem 0;font-size:1.1rem;">Frequently Asked Questions</h3>
-         <div style="color:#64748b;font-size:0.8rem;margin-bottom:1rem;">Technical</div>
-         <div style="color:#64748b;font-size:0.8rem;margin-bottom:1rem;font-weight:bold;">Billing</div>
-       </div>
-       <div style="flex:2;">
-         <div style="border-bottom:1px solid #ccc;padding:0.5rem;font-size:0.8rem;">Q. Billing question?</div>
-         <div style="border-bottom:1px solid #ccc;padding:0.5rem;font-size:0.8rem;">Q. Another billing question?</div>
-       </div>
-    </div>`,
-        create: () =>
-            makeBlock("container", {
-                padding: "64px 24px",
-                bgColor: "#ffffff",
-                maxWidth: "1000px",
-                childBlocks: [
-                    makeBlock("text", {
-                        content: "FAQ",
-                        tag: "p",
-                        align: "center",
-                        fontSize: "0.875rem",
-                        color: "#64748b",
-                        bold: true,
-                        letterSpacing: "0.1em",
-                    }),
-                    makeBlock("text", {
-                        content: "Frequently Asked Questions",
-                        tag: "h2",
-                        align: "center",
-                        fontSize: "2.5rem",
-                        color: "#0f172a",
-                        bold: true,
-                        padding: "0 0 40px 0",
-                    }),
-                    makeBlock("columns", {
-                        leftWidth: 30,
-                        gap: "2rem",
-                        col0: [
-                            makeBlock("text", {
-                                content: "Technical",
-                                tag: "h4",
-                                align: "left",
-                                fontSize: "1.125rem",
-                                color: "#94a3b8",
-                                bold: true,
-                                padding: "16px 0",
-                            }),
-                            makeBlock("text", {
-                                content: "Billing",
-                                tag: "h4",
-                                align: "left",
-                                fontSize: "1.125rem",
-                                color: "#0f172a",
-                                bold: true,
-                                padding: "16px 0",
-                            }),
-                            makeBlock("text", {
-                                content: "Account",
-                                tag: "h4",
-                                align: "left",
-                                fontSize: "1.125rem",
-                                color: "#94a3b8",
-                                bold: true,
-                                padding: "16px 0",
-                            }),
-                        ],
-                        col1: [
-                            makeBlock("accordion", {
-                                items: dummyFaqsShort,
-                                variant: "minimal",
-                                divider: "line",
-                                itemBgColor: "transparent",
-                                itemBorderColor: "#e2e8f0",
-                                iconColor: "#cbd5e1",
-                                titleColor: "#334155",
                                 contentColor: "#64748b",
                                 titleSize: "16px",
                                 titleWeight: "600",

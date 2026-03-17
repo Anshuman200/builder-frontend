@@ -7,12 +7,12 @@ import {
   MagnifyingGlassIcon, XMarkIcon, PlusIcon, FaceFrownIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { getIcon } from "@/lib/icons";
+import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
-import { BLOCK_TYPES, createBlock } from "@/lib/blockConfig";
-import { SECTION_TEMPLATES } from "@/lib/sectionTemplates";
+import { BLOCK_TYPES, createBlock } from "@/lib/config/blocks";
+import { SECTION_TEMPLATES } from "@/lib/config/sections";
 import { useEditorStore } from "@/stores/editorStore";
-import { EDITOR_FEATURES } from "@/lib/editorFeatures";
+import { EDITOR_FEATURES } from "@/lib/config/features";
 import PillSegmented from "@/components/ui/PillSegmented";
 
 // ─── Category display order ───────────────────────────────────────────────────

@@ -5,21 +5,21 @@ import { useEditorStore } from "@/stores/editorStore";
 
 import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel } from "./shared";
 import { IconPicker } from "@/components/editor/IconPicker";
-import { EDITOR_FEATURES } from "@/lib/editorFeatures";
+import { EDITOR_FEATURES } from "@/lib/config/features";
 
 export function HeroPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     return (
         <>
             <Section title="Background">
-                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#6366f1"} onChange={(v) => up("bgColor", v)} /></Field>
+                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "var(--primary)"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
                 <Field label="Background Image URL"><MediaInput value={(p.bgImage as string) || ""} onChange={(v) => up("bgImage", v)} placeholder="https://... (overrides color)" /></Field>
-                <Field label="Image Overlay Color"><TextInput value={(p.bgOverlay as string) || "rgba(0,0,0,0.75)"} onChange={(v) => up("bgOverlay", v)} placeholder="rgba(0,0,0,0.25)" /></Field>
+                <Field label="Image Overlay Color"><ColorInput value={(p.bgOverlay as string) || "var(--overlay)"} onChange={(v) => up("bgOverlay", v)} onBlur={(v) => up("bgOverlay", v, true)} /></Field>
             </Section>
             <Section title="Style">
-                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#ffffff"} onChange={(v) => up("textColor", v)} /></Field>
+                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#ffffff"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
                 <Field label="Min Height"><TextInput value={(p.minHeight as string) || "480px"} onChange={(v) => up("minHeight", v)} placeholder="480px" /></Field>
                 <Field label="Content Alignment"><SelectInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "0px"} onChange={(v) => up("borderRadius", v)} /></Field>
@@ -41,7 +41,7 @@ export function HeroPanel({ block }: { block: Block }) {
 export function TextPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     return (
         <>
             <Section title="Content">
@@ -50,7 +50,7 @@ export function TextPanel({ block }: { block: Block }) {
             </Section>
             <Section title="Typography">
                 <Field label="Alignment"><SelectInput value={(p.align as string) || "left"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>
-                <Field label="Color"><ColorInput value={(p.color as string) || "#0f172a"} onChange={(v) => up("color", v)} /></Field>
+                <Field label="Color"><ColorInput value={(p.color as string) || "#0f172a"} onChange={(v) => up("color", v)} onBlur={(v) => up("color", v, true)} /></Field>
                 <Field label="Line Height"><TextInput value={(p.lineHeight as string) || "1.6"} onChange={(v) => up("lineHeight", v)} placeholder="1.6" /></Field>
                 <Field label="Letter Spacing"><TextInput value={(p.letterSpacing as string) || ""} onChange={(v) => up("letterSpacing", v)} placeholder="0em" /></Field>
             </Section>
@@ -67,7 +67,7 @@ export function TextPanel({ block }: { block: Block }) {
 export function ImagePanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     return (
         <>
             <Section title="Source">
@@ -94,12 +94,12 @@ export function ImagePanel({ block }: { block: Block }) {
 export function DividerPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     return (
         <>
             <Section title="Style">
                 <Field label="Line Style"><SelectInput value={(p.style as string) || "solid"} onChange={(v) => up("style", v)} options={[{ label: "Solid", value: "solid" }, { label: "Dashed", value: "dashed" }, { label: "Dotted", value: "dotted" }]} /></Field>
-                <Field label="Color"><ColorInput value={(p.color as string) || "#e2e8f0"} onChange={(v) => up("color", v)} /></Field>
+                <Field label="Color"><ColorInput value={(p.color as string) || "#e2e8f0"} onChange={(v) => up("color", v)} onBlur={(v) => up("color", v, true)} /></Field>
                 <Field label="Thickness"><TextInput value={(p.thickness as string) || "1px"} onChange={(v) => up("thickness", v)} placeholder="1px" /></Field>
                 <Field label="Vertical Margin"><TextInput value={(p.marginY as string) || "1rem"} onChange={(v) => up("marginY", v)} placeholder="1rem" /></Field>
             </Section>
@@ -111,7 +111,7 @@ export function DividerPanel({ block }: { block: Block }) {
 export function ContainerPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     return (
         <>
             <Section title="Padding (Responsive)">
@@ -124,7 +124,7 @@ export function ContainerPanel({ block }: { block: Block }) {
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "0px"} onChange={(v) => up("borderRadius", v)} /></Field>
             </Section>
             <Section title="Style">
-                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || ""} onChange={(v) => up("bgColor", v)} /></Field>
+                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || ""} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
             </Section>
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
         </>
@@ -134,13 +134,13 @@ export function ContainerPanel({ block }: { block: Block }) {
 export function IconPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     return (
         <>
             <Section title="Icon settings">
                 <Field label="Icon"><IconPicker value={(p.iconName as string) || "Star"} onChange={(v) => up("iconName", v)} /></Field>
                 <Field label="Size"><TextInput value={(p.size as string) || "24"} onChange={(v) => up("size", v)} placeholder="24" /></Field>
-                <Field label="Color"><ColorInput value={(p.color as string) || "#6366f1"} onChange={(v) => up("color", v)} /></Field>
+                <Field label="Color"><ColorInput value={(p.color as string) || "var(--primary)"} onChange={(v) => up("color", v)} onBlur={(v) => up("color", v, true)} /></Field>
             </Section>
             <Section title="Layout & Spacing">
                 <Field label="Alignment"><SelectInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>
@@ -154,7 +154,7 @@ export function IconPanel({ block }: { block: Block }) {
 export function VideoPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     return (
         <>
             <Section title="Video Source">
@@ -182,7 +182,7 @@ export function VideoPanel({ block }: { block: Block }) {
 export function ColumnsPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     return (
         <>
             <Section title="Layout">

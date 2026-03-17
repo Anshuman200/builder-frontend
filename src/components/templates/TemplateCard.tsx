@@ -5,7 +5,7 @@ import { ArrowRightIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { Template } from "@/types/templates";
 import { getGradient } from "@/lib/utils/gradients";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/common";
 import React from "react";
 
 interface TemplateCardProps {
@@ -72,6 +72,16 @@ export function TemplateCard({
                         {/* Subtle gradient overlay for text readability */}
                         <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
                     </div>
+                ) : isLocked ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-zinc-950/40 backdrop-blur-sm group-hover:bg-zinc-950/20 transition-all duration-700">
+                        <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-2xl relative overflow-hidden group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                            <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-white/10 opacity-30" />
+                            <span className="text-3xl filter drop-shadow-lg">🔒</span>
+                        </div>
+                        <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[8px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors">
+                            Premium Asset
+                        </div>
+                    </div>
                 ) : (
                     <>
                         <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-white/10 opacity-30" />
@@ -79,7 +89,7 @@ export function TemplateCard({
                             "font-black text-white/10 select-none z-10 pointer-events-none italic transition-transform duration-500",
                             variant === "public" ? "text-7xl sm:text-9xl group-hover:scale-110" : "text-5xl group-hover:scale-105",
                         )}>
-                            {isLocked ? "🔒" : (template.title || "T")[0].toUpperCase()}
+                            {(template.title || "T")[0].toUpperCase()}
                         </div>
                     </>
                 )}

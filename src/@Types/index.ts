@@ -39,6 +39,8 @@ export interface ThemeConfig {
         textMuted: string;
         border: string;
         accent: string;
+        buttonText?: string;
+        overlay?: string;
     };
     fonts: { heading: string; body: string };
     borderRadius: "none" | "sm" | "md" | "lg" | "full" | string;

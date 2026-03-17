@@ -15,12 +15,14 @@ export const DEFAULT_THEME: ThemeConfig = {
         textMuted: "#64748b",
         border: "#e2e8f0",
         accent: "#f59e0b",
+        buttonText: "#ffffff",
+        overlay: "rgba(0,0,0,0.25)",
     },
     fonts: { heading: "Inter", body: "Inter" },
     borderRadius: "md",
     spacing: "normal",
     layout: {
-        maxWidth: "100dvw",
+        maxWidth: "1200px",
         paddingX: "32px",
         tabletPaddingX: "24px",
         mobilePaddingX: "16px",
@@ -45,6 +47,12 @@ interface EditorStore {
     isDirty: boolean;
     isSaving: boolean;
     viewMode: "desktop" | "tablet" | "mobile";
+    iconPicker: {
+        open: boolean;
+        value: string;
+        onSelect: (name: string) => void;
+        anchorRect: { top: number; left: number; width: number; height: number } | null;
+    };
 
     // ─ Actions ────────────────────────────────────────────────────────────────
     setPage: (page: EditorPage) => void;
@@ -53,17 +61,23 @@ interface EditorStore {
     setViewMode: (mode: "desktop" | "tablet" | "mobile") => void;
     setIsSaving: (v: boolean) => void;
 
+    showIconPicker: (params: { value: string; onSelect: (name: string) => void; anchorRect: { top: number; left: number; width: number; height: number } }) => void;
+    hideIconPicker: () => void;
+    setIconPickerValue: (value: string) => void;
+
     addBlock: (block: Block, parentId?: string) => void;
-    updateBlock: (id: string, props: Partial<Block["props"]>) => void;
-    updateBlockStyle: (id: string, style: Partial<BlockStyle>) => void;
+    updateBlock: (id: string, props: Partial<Block["props"]>, commit?: boolean) => void;
+    updateBlockStyle: (id: string, style: Partial<BlockStyle>, commit?: boolean) => void;
     deleteBlock: (id: string) => void;
     moveBlock: (activeId: string, overId: string, position?: "before" | "after" | "inside", childProp?: string) => void;
 
-    updateTheme: (theme: Partial<ThemeConfig>) => void;
+    updateTheme: (theme: Partial<ThemeConfig>, commit?: boolean) => void;
     updateMeta: (meta: Partial<MetaConfig>) => void;
     updateSlug: (slug: string) => void;
     updateTitle: (title: string) => void;
     updatePageData: (data: Partial<Pick<EditorPage, "isTemplate" | "isPublic" | "isLocked" | "category">>) => void;
+    migrateThemeColors: () => void;
+    pushHistory: () => void;
 
     undo: () => void;
     redo: () => void;
@@ -206,6 +220,51 @@ function insertBlockDeep(
     return { newBlocks, inserted };
 }
 
+/**
+ * Recursively migrates hardcoded old default hex colors to CSS variables.
+ */
+function migrateBlockColors(blocks: Block[]): Block[] {
+    const OLD_PRIMARY = ["#6366f1", "#6366F1"];
+    const OLD_SECONDARY = ["#8b5cf6", "#8b5cf6"];
+    const OLD_BUTTON_TEXT = ["#ffffff", "#FFFFFF", "#fff", "#FFF"];
+    const OLD_OVERLAY = ["rgba(0,0,0,0.25)"];
+
+    return blocks.map(b => {
+        const p = { ...b.props };
+        let changed = false;
+
+        // Traverse props for color fields
+        Object.keys(p).forEach(key => {
+            const val = p[key];
+            if (typeof val === 'string') {
+                if (OLD_PRIMARY.includes(val)) { p[key] = "var(--primary)"; changed = true; }
+                else if (OLD_SECONDARY.includes(val)) { p[key] = "var(--secondary)"; changed = true; }
+                else if (OLD_OVERLAY.includes(val)) { p[key] = "var(--overlay)"; changed = true; }
+                // For button text, we only replace it if it's explicitly white, 
+                // but we should be careful not to break other white text.
+                // In our templates, ctaTextColor/buttonTextColor use these.
+                else if ((key.toLowerCase().includes('text') || key.toLowerCase().includes('button')) && OLD_BUTTON_TEXT.includes(val)) {
+                    p[key] = "var(--button-text)"; changed = true;
+                }
+            }
+            // Recurse into array props (cols)
+            if (Array.isArray(val) && val.length > 0 && (val[0] as any)?.id) {
+                const migratedArr = migrateBlockColors(val as Block[]);
+                if (migratedArr !== val) { p[key] = migratedArr; changed = true; }
+            }
+        });
+
+        const updatedBlock = changed ? { ...b, props: p } : b;
+        if (updatedBlock.children) {
+            const migratedChildren = migrateBlockColors(updatedBlock.children);
+            if (migratedChildren !== updatedBlock.children) {
+                return { ...updatedBlock, children: migratedChildren };
+            }
+        }
+        return updatedBlock;
+    });
+}
+
 export const useEditorStore = create<EditorStore>()(
     immer((set, get) => ({
         page: null,
@@ -216,21 +275,44 @@ export const useEditorStore = create<EditorStore>()(
         isDirty: false,
         isSaving: false,
         viewMode: "desktop",
+        iconPicker: {
+            open: false,
+            value: "Star",
+            onSelect: () => { },
+            anchorRect: null,
+        },
 
         setPage: (page) =>
-            set((s) => {
-                s.page = { ...page, content: page.content || [] };
-                s.history = [s.page];
-                s.historyIndex = 0;
-                s.isDirty = false;
+            set((state) => {
+                state.page = page;
+                state.isDirty = false;
+                state.history = [JSON.parse(JSON.stringify(page))];
+                state.historyIndex = 0;
             }),
 
-        selectBlock: (id) => set((s) => { s.selectedBlockId = id; }),
-        hoverBlock: (id) => set((s) => { s.hoveredBlockId = id; }),
-        setViewMode: (mode) => set((s) => { s.viewMode = mode; }),
-        setIsSaving: (v) => set((s) => { s.isSaving = v; }),
+        selectBlock: (id) => set({ selectedBlockId: id }),
+        hoverBlock: (id) => set({ hoveredBlockId: id }),
+        setViewMode: (mode) => set({ viewMode: mode }),
+        setIsSaving: (v) => set({ isSaving: v }),
 
-        addBlock: (block, parentId) =>
+        showIconPicker: (params) => set((state) => {
+            state.iconPicker = {
+                open: true,
+                value: params.value,
+                onSelect: params.onSelect,
+                anchorRect: params.anchorRect,
+            };
+        }),
+
+        hideIconPicker: () => set((state) => {
+            state.iconPicker.open = false;
+        }),
+
+        setIconPickerValue: (value) => set((state) => {
+            state.iconPicker.value = value;
+        }),
+
+        addBlock: (block, parentId) => {
             set((s) => {
                 if (!s.page) return;
                 if (!s.page.content) s.page.content = [];
@@ -243,37 +325,41 @@ export const useEditorStore = create<EditorStore>()(
                     s.page.content.push(block);
                 }
                 s.isDirty = true;
-                const snapshot = JSON.parse(JSON.stringify(s.page));
-                s.history = s.history.slice(0, s.historyIndex + 1);
-                s.history.push(snapshot);
-                s.historyIndex++;
-            }),
+            });
+            get().pushHistory();
+        },
 
-        updateBlock: (id, props) =>
+        updateBlock: (id, props, commit) => {
             set((s) => {
                 if (!s.page) return;
                 s.page.content = findAndUpdate(s.page.content, id, (b) => ({
                     ...b, props: { ...b.props, ...props },
                 }));
                 s.isDirty = true;
-            }),
+            });
+            if (commit) get().pushHistory();
+        },
 
-        updateBlockStyle: (id, style) =>
+        updateBlockStyle: (id, style, commit) => {
             set((s) => {
                 if (!s.page) return;
                 s.page.content = findAndUpdate(s.page.content, id, (b) => ({
                     ...b, style: { ...b.style, ...style },
                 }));
                 s.isDirty = true;
-            }),
+            });
+            if (commit) get().pushHistory();
+        },
 
-        deleteBlock: (id) =>
+        deleteBlock: (id) => {
             set((s) => {
                 if (!s.page) return;
                 s.page.content = findAndDelete(s.page.content, id);
                 if (s.selectedBlockId === id) s.selectedBlockId = null;
                 s.isDirty = true;
-            }),
+            });
+            get().pushHistory();
+        },
 
         moveBlock: (activeId, overId, position = "after", childProp?) =>
             set((s) => {
@@ -300,12 +386,14 @@ export const useEditorStore = create<EditorStore>()(
                 s.isDirty = true;
             }),
 
-        updateTheme: (theme) =>
+        updateTheme: (theme, commit) => {
             set((s) => {
                 if (!s.page) return;
                 s.page.theme = { ...s.page.theme, ...theme };
                 s.isDirty = true;
-            }),
+            });
+            if (commit) get().pushHistory();
+        },
 
         updateMeta: (meta) =>
             set((s) => {
@@ -352,5 +440,35 @@ export const useEditorStore = create<EditorStore>()(
             }),
 
         markClean: () => set((s) => { s.isDirty = false; }),
+
+        // ─ Internal Helper ──────────────────────────────────────────────────────
+        pushHistory: () => set((s) => {
+            if (!s.page) return;
+            const snapshot = JSON.parse(JSON.stringify(s.page));
+            // Only push if content/theme actually changed from the last history entry
+            const last = s.history[s.historyIndex];
+            if (last && JSON.stringify(last) === JSON.stringify(snapshot)) return;
+
+            s.history = s.history.slice(0, s.historyIndex + 1);
+            s.history.push(snapshot);
+            // Limit history to 50 states
+            if (s.history.length > 50) {
+                s.history.shift();
+            } else {
+                s.historyIndex++;
+            }
+            s.isDirty = true;
+        }),
+
+        migrateThemeColors: () => set((s) => {
+            if (!s.page) return;
+            s.page.content = migrateBlockColors(s.page.content);
+            const get = (s as any).get; // zustand type workaround if needed, but immer 's' is the state
+            // Trigger history push
+            const snapshot = JSON.parse(JSON.stringify(s.page));
+            s.history = s.history.slice(0, s.historyIndex + 1);
+            s.history.push(snapshot);
+            s.historyIndex++;
+        }),
     }))
 );

@@ -32,7 +32,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
 
     const titleColor = (block.props.titleColor as string) || "#0f172a";
     const contentColor = (block.props.contentColor as string) || "#475569";
-    const iconColor = (block.props.iconColor as string) || "#6366f1";
+    const iconColor = (block.props.iconColor as string) || "var(--primary)";
 
     const divider = (block.props.divider as string) || "line";
     const variant = (block.props.variant as string) || "contained";

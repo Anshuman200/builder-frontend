@@ -7,11 +7,13 @@ import { useParams } from "next/navigation";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { DndContext } from "@dnd-kit/core";
 import { useEditorStore } from "@/stores/editorStore";
-import { loadPage } from "@/lib/storage";
+import { loadPage } from "@/lib/utils/storage";
 import { BlockRenderer, PreviewProvider } from "@/components/editor/blocks";
 import ScrollToTop from "@/components/shared/ScrollToTop";
 import ThemeSwitcher from "@/components/shared/ThemeSwitcher";
 import { pagesApi } from "@/lib/api/client";
+import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
+import React from "react";
 
 
 /**
@@ -21,8 +23,8 @@ import { pagesApi } from "@/lib/api/client";
 export default function PreviewPage() {
     const { pageId } = useParams<{ pageId: string }>();
     const { page, setPage } = useEditorStore();
-
     const [loading, setLoading] = useState(!page);
+    const mainRef = React.useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         async function load() {
@@ -50,6 +52,12 @@ export default function PreviewPage() {
         load();
     }, [pageId, setPage]);
 
+    useEffect(() => {
+        if (mainRef.current && page?.theme) {
+            applyThemeToElement(mainRef.current, page.theme);
+        }
+    }, [page?.theme]);
+
     if (loading || !page) {
         return (
             <div style={{
@@ -67,7 +75,10 @@ export default function PreviewPage() {
         // DndContext is required because blocks.tsx calls useDroppable (even if it returns null in preview)
         <DndContext>
             <PreviewProvider>
-                <main style={{ background: "var(--bg)", minHeight: "100vh" }}>
+                <main 
+                    ref={mainRef}
+                    style={{ background: "var(--background)", color: "var(--text)", minHeight: "100vh" }}
+                >
                     {page.content.map((block) => (
                         <BlockRenderer key={block.id} block={block} />
                     ))}

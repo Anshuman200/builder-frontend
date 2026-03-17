@@ -8,16 +8,25 @@ export function ContainerBlock({ block }: BlockProps) {
     const p = block.props;
     const childBlocks = (p.childBlocks as any[]) ?? [];
     const rawBg = p.bgColor as string;
+    const bgImage = p.bgImage as string;
 
     const viewMode = useEditorStore((s) => s.viewMode);
     const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
 
     const isPreview = React.useContext(PreviewContext);
 
-    let bgColor = rawBg || "transparent";
-    const LIGHT_BGS = ["#ffffff", "#fff", "#f8fafc", "#f1f5f9"];
-    if (isDark && LIGHT_BGS.includes(bgColor.toLowerCase())) {
-        bgColor = bgColor.toLowerCase() === "#f8fafc" || bgColor.toLowerCase() === "#f1f5f9" ? "#09090b" : "transparent";
+    let background: string;
+    if (bgImage) {
+        background = bgImage.startsWith("linear-gradient") || bgImage.startsWith("radial-gradient")
+            ? bgImage
+            : `url("${bgImage}") center/cover no-repeat`;
+    } else {
+        let bgColor = rawBg || "transparent";
+        const LIGHT_BGS = ["#ffffff", "#fff", "#f8fafc", "#f1f5f9"];
+        if (isDark && LIGHT_BGS.includes(bgColor.toLowerCase())) {
+            bgColor = bgColor.toLowerCase() === "#f8fafc" || bgColor.toLowerCase() === "#f1f5f9" ? "#09090b" : "transparent";
+        }
+        background = bgColor;
     }
 
     const desktopPadding = (p.padding as string) || "24px";
@@ -37,7 +46,7 @@ export function ContainerBlock({ block }: BlockProps) {
             <div
                 id={(p.sectionId as string) || `block-${block.id}`}
                 className={isPreview ? `container-${block.id}` : undefined}
-                style={{ padding: isPreview ? undefined : editorPadding, background: bgColor || "transparent", maxWidth: (p.maxWidth as string) || "100%", width: "100%", margin: "0 auto", borderRadius: (p.borderRadius as string) || "0px", boxSizing: "border-box", border: childBlocks.length === 0 ? "1px dashed #cbd5e1" : "none" }}
+                style={{ padding: isPreview ? undefined : editorPadding, background: background || "transparent", maxWidth: (p.maxWidth as string) || "100%", width: "100%", margin: "0 auto", borderRadius: (p.borderRadius as string) || "0px", boxSizing: "border-box", border: childBlocks.length === 0 ? "1px dashed #cbd5e1" : "none" }}
             >
                 {childBlocks.length === 0 && (
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, paddingBottom: 8, color: "#94a3b8" }}>

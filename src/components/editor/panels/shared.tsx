@@ -12,7 +12,7 @@ import React from "react";
 import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 import { useEditorStore } from "@/stores/editorStore";
-import { Dropdown, Popover, Tooltip } from "antd";
+import { ColorPicker, Dropdown, Popover, Tooltip } from "antd";
 import MediaPicker from "../MediaPicker";
 import PillSegmented from "../../ui/PillSegmented";
 
@@ -340,38 +340,33 @@ function toHex(color: string): string {
     return "#" + m.slice(0, 3).map(n => Number(n).toString(16).padStart(2, "0")).join("");
 }
 
-export function ColorInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+export function ColorInput({ value, onChange, onBlur }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void }) {
     const displayValue = resolveColor(value);
-    const hexValue = toHex(value);
 
     return (
-        <Popover
-            placement="bottomRight"
-            trigger="click"
-            styles={{ root: { zIndex: 9999, padding: 12, background: "#1e1e1e", border: `1px solid ${PANEL_COLORS.border}`, borderRadius: 6, boxShadow: "0 8px 24px rgba(0,0,0,0.4)", display: "flex", flexDirection: "column", gap: 12, width: 220 } }}
-            content={
-                <>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <SwatchIcon style={{ width: 14, height: 14, color: PANEL_COLORS.muted }} />
-                        <span style={{ fontSize: 11, fontWeight: 500, color: PANEL_COLORS.text }}>Color Picker</span>
-                    </div>
-                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                        <div style={{ position: "relative", width: 26, height: 26, borderRadius: 4, overflow: "hidden", border: `1px solid ${PANEL_COLORS.border}` }}>
-                            <input type="color" value={hexValue} onChange={(e) => onChange(e.target.value)} style={{ position: "absolute", top: -8, left: -8, width: 44, height: 44, cursor: "pointer", border: "none", padding: 0 }} />
-                        </div>
-                        <input value={displayValue} onChange={(e) => onChange(e.target.value)} placeholder="#000000" spellCheck={false}
-                            style={{ flex: 1, height: 26, padding: "0 8px", fontSize: 11, fontFamily: "monospace", background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none" }}
-                            onFocus={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.primary; }}
-                            onBlur={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; }}
-                        />
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 6 }}>
-                        {["#ffffff", "#f8fafc", "#f1f5f9", "#e2e8f0", "#cbd5e1", "#1e1e1e", "#64748b", "#475569", "#334155", "#1e293b", "#0f172a", "#020617", "#ef4444", "#f97316", "#eab308", "#22c55e", "#0ea5e9", "#0099ff"].map(c => (
-                            <button key={c} onClick={() => onChange(c)} style={{ width: 24, height: 24, borderRadius: 4, background: c, border: c === "#ffffff" || c === "#f8fafc" ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.05)", cursor: "pointer", padding: 0 }} title={c} />
-                        ))}
-                    </div>
-                </>
-            }
+        <ColorPicker
+            value={value}
+            onChange={(color) => {
+                // Return rgb/rgba string to preserve transparency
+                const val = color.toRgbString();
+                onChange(val);
+            }}
+            onChangeComplete={(color) => {
+                if (onBlur) onBlur(color.toRgbString());
+            }}
+            showText={(color) => (
+                <span style={{ fontSize: 10, color: PANEL_COLORS.muted }}>{color.toRgbString()}</span>
+            )}
+            presets={[
+                {
+                    label: 'Brand Colors',
+                    colors: ["#6366f1", "#0ea5e9", "#22c55e", "#eab308", "#f97316", "#ef4444", "#0099ff"],
+                },
+                {
+                    label: 'Grayscale',
+                    colors: ["#ffffff", "#f8fafc", "#f1f5f9", "#e2e8f0", "#cbd5e1", "#94a3b8", "#64748b", "#475569", "#1e293b", "#0f172a", "#000000"],
+                }
+            ]}
         >
             <button
                 style={{ display: "flex", gap: 8, alignItems: "center", width: "100%", height: 26, padding: "0 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", transition: "background 0.15s" }}
@@ -381,7 +376,7 @@ export function ColorInput({ value, onChange }: { value: string; onChange: (v: s
                 <div style={{ width: 14, height: 14, borderRadius: 3, background: displayValue, border: "1px solid rgba(255,255,255,0.15)" }} />
                 <span style={{ flex: 1, textAlign: "left", fontFamily: "monospace", fontSize: 11, opacity: 0.9 }}>{displayValue}</span>
             </button>
-        </Popover>
+        </ColorPicker>
     );
 }
 

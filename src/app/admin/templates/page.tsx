@@ -12,7 +12,8 @@ import {
     GlobeAltIcon,
     EyeIcon,
     Squares2X2Icon,
-    ArrowPathIcon
+    ArrowPathIcon,
+    CameraIcon
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import { 
@@ -25,8 +26,9 @@ import {
     useUpdatePage
 } from "@/lib/api/queries";
 import { TemplatePreviewModal } from "@/components/admin/TemplatePreviewModal";
+import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
 import { Button, Input, Select, Skeleton, Dropdown, Modal } from "antd";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/common";
 import { useToasts } from "@/hooks/useToasts";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 import { TemplateCard } from "@/components/templates/TemplateCard";
@@ -79,6 +81,9 @@ export default function AdminTemplatesPage() {
     const [deleteTarget, setDeleteTarget] = useState<{ id: string, title: string } | null>(null);
     const [renamingId, setRenamingId] = useState<string | null>(null);
     const [renameValue, setRenameValue] = useState("");
+
+    const [showCapturePicker, setShowCapturePicker] = useState(false);
+    const [captureTarget, setCaptureTarget] = useState<any | null>(null);
 
     const deferredSearch = useDeferredValue(search);
 
@@ -138,6 +143,21 @@ export default function AdminTemplatesPage() {
             toastError("Failed to update status");
         }
     }, [publishMutation, unpublishMutation, success, toastError]);
+
+    const handleUpdateThumbnails = async (newThumbnails: string[], active: string | null) => {
+        if (!captureTarget) return;
+        try {
+            await updateMutation.mutateAsync({
+                id: captureTarget._id,
+                thumbnail: active || undefined,
+                thumbnails: newThumbnails,
+            } as any);
+            success('Thumbnail updated!');
+        } catch (e) {
+            console.error('Thumbnail update failed', e);
+            toastError('Failed to save thumbnail');
+        }
+    };
 
     const handleDelete = useCallback(async (id: string) => {
         try {
@@ -249,6 +269,7 @@ export default function AdminTemplatesPage() {
                                         items: [
                                             { key: "edit", label: "Edit", icon: <PencilSquareIcon className="w-4 h-4" />, onClick: () => router.push(`/editor/${tpl._id}`) },
                                             { key: "rename", label: "Rename", icon: <PencilIcon className="w-4 h-4" />, onClick: () => { setRenamingId(tpl._id); setRenameValue(tpl.title); } },
+                                            { key: "capture", label: "Update Thumbnail", icon: <CameraIcon className="w-4 h-4" />, onClick: () => { setCaptureTarget(tpl); setShowCapturePicker(true); } },
                                             { key: "preview", label: "Preview", icon: <EyeIcon className="w-4 h-4" />, onClick: () => setPreview({ id: tpl._id, title: tpl.title }) },
                                             { key: "duplicate", label: "Duplicate", icon: <Squares2X2Icon className="w-4 h-4" />, onClick: () => duplicateMutation.mutate(tpl._id) },
                                             { key: "publish", label: tpl.status === 'PUBLISHED' ? "Unpublish" : "Go live", icon: <GlobeAltIcon className="w-4 h-4" />, onClick: () => handleTogglePublish(tpl) },
@@ -316,6 +337,19 @@ export default function AdminTemplatesPage() {
             >
                 <p>Are you sure you want to delete <b>{deleteTarget?.title}</b>? This action cannot be undone.</p>
             </Modal>
+
+            {captureTarget && (
+                <CapturePreviewModal
+                    open={showCapturePicker}
+                    onClose={() => { setShowCapturePicker(false); setCaptureTarget(null); }}
+                    pageId={captureTarget._id}
+                    previewUrl={typeof window !== 'undefined' ? `${window.location.origin}/preview/${captureTarget._id}` : `/preview/${captureTarget._id}`}
+                    currentThumbnail={captureTarget.thumbnail}
+                    existingThumbnails={captureTarget.thumbnails || []}
+                    onSelect={() => {}} 
+                    onUpdateThumbnails={handleUpdateThumbnails}
+                />
+            )}
         </CommonContainer>
     );
 }

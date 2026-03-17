@@ -1,4 +1,4 @@
-import { getCookie } from "@/lib/utils";
+import { getCookie } from "@/lib/utils/common";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3019/api";
 

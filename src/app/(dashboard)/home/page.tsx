@@ -13,11 +13,13 @@ import {
   GlobeAltIcon,
   MagnifyingGlassIcon,
   EyeIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  CameraIcon
 } from "@heroicons/react/24/outline";
 import { Dropdown, Modal } from "antd";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 import { TemplateCard } from "@/components/templates/TemplateCard";
+import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 
 interface Page {
@@ -58,6 +60,9 @@ export default function HomePage() {
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
 
+  const [showCapturePicker, setShowCapturePicker] = useState(false);
+  const [captureTarget, setCaptureTarget] = useState<any | null>(null);
+
   const handleDelete = useCallback(async (page: Page) => {
     try {
       await deleteMutation.mutateAsync(page._id);
@@ -95,6 +100,21 @@ export default function HomePage() {
       toastError("Failed to update status");
     }
   }, [publishMutation, unpublishMutation, success, toastError]);
+
+  const handleUpdateThumbnails = async (newThumbnails: string[], active: string | null) => {
+    if (!captureTarget) return;
+    try {
+      await updateMutation.mutateAsync({
+        id: captureTarget._id,
+        thumbnail: active || undefined,
+        thumbnails: newThumbnails,
+      } as any);
+      success('Thumbnail updated!');
+    } catch (e) {
+      console.error('Thumbnail update failed', e);
+      toastError('Failed to save thumbnail');
+    }
+  };
 
   if (loading && pages.length === 0) {
     return (
@@ -153,6 +173,7 @@ export default function HomePage() {
                         items: [
                           { key: "edit", label: "Edit", icon: <PencilSquareIcon className="w-4 h-4" />, onClick: () => router.push(`/editor/${p._id}`) },
                           { key: "rename", label: "Rename", icon: <PencilIcon className="w-4 h-4" />, onClick: () => { setRenamingId(p._id); setRenameValue(p.title); } },
+                          { key: "capture", label: "Update Thumbnail", icon: <CameraIcon className="w-4 h-4" />, onClick: () => { setCaptureTarget(p); setShowCapturePicker(true); } },
                           { key: "preview", label: "Preview", icon: <EyeIcon className="w-4 h-4" />, onClick: () => window.open(`/preview/${p._id}`, "_blank") },
                           { key: "duplicate", label: "Duplicate", icon: <Squares2X2Icon className="w-4 h-4" />, onClick: () => duplicateMutation.mutate(p._id) },
                           { key: "publish", label: p.status === 'PUBLISHED' ? "Unpublish" : "Go live", icon: <GlobeAltIcon className="w-4 h-4" />, onClick: () => handleTogglePublish(p) },
@@ -185,6 +206,19 @@ export default function HomePage() {
       >
         <p className="text-white/60 text-sm py-4">Are you sure you want to delete <b className="text-white">{deleteTarget?.title}</b>? This action cannot be undone.</p>
       </Modal>
+
+      {captureTarget && (
+        <CapturePreviewModal
+          open={showCapturePicker}
+          onClose={() => { setShowCapturePicker(false); setCaptureTarget(null); }}
+          pageId={captureTarget._id}
+          previewUrl={typeof window !== 'undefined' ? `${window.location.origin}/preview/${captureTarget._id}` : `/preview/${captureTarget._id}`}
+          currentThumbnail={captureTarget.thumbnail}
+          existingThumbnails={captureTarget.thumbnails || []}
+          onSelect={() => {}} // We handle update in onUpdateThumbnails
+          onUpdateThumbnails={handleUpdateThumbnails}
+        />
+      )}
     </>
   );
 }

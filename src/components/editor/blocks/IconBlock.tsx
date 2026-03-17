@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { getIcon } from "@/lib/icons";
+import { getIcon } from "@/lib/utils/icons";
 import { BlockProps } from "./shared";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 

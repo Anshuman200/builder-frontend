@@ -1,16 +1,17 @@
 "use client";
 import type { Block, EditorPage } from "@/@Types";
 import React from "react";
-import { useEditorStore } from "@/stores/editorStore";
+import { useEditorStore, DEFAULT_THEME } from "@/stores/editorStore";
 
 import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel } from "./shared";
-import { EDITOR_FEATURES } from "@/lib/editorFeatures";
+import { IconPicker } from "../IconPicker";
+import { EDITOR_FEATURES } from "@/lib/config/features";
 import { useAuth } from "@/hooks/useAuth";
 
 export function FeaturesPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
     return (
         <>
@@ -22,15 +23,15 @@ export function FeaturesPanel({ block }: { block: Block }) {
                 <Field label="Columns"><SelectInput value={String(p.columns || "3")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>
                 <Field label="Gap"><TextInput value={(p.gap as string) || "2rem"} onChange={(v) => up("gap", v)} placeholder="2rem" /></Field>
                 <Field label="Text Alignment"><SelectInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>
-                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} /></Field>
-                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#1e293b"} onChange={(v) => up("textColor", v)} /></Field>
+                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
+                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#1e293b"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
             <Section title="Card Styling">
                 <Field label="Card Style"><SelectInput value={(p.cardStyle as string) || "raised"} onChange={(v) => up("cardStyle", v)} options={[{ label: "None (Text Only)", value: "none" }, { label: "Raised Shadow", value: "raised" }, { label: "Outlined", value: "outlined" }, { label: "Filled / Tinted", value: "filled" }]} /></Field>
-                {(p.cardStyle === "raised" || p.cardStyle === "outlined") && (<Field label="Card Background"><ColorInput value={(p.cardBg as string) || "#ffffff"} onChange={(v) => up("cardBg", v)} /></Field>)}
+                {(p.cardStyle === "raised" || p.cardStyle === "outlined") && (<Field label="Card Background"><ColorInput value={(p.cardBg as string) || "#ffffff"} onChange={(v) => up("cardBg", v)} onBlur={(v) => up("cardBg", v, true)} /></Field>)}
                 {p.cardStyle !== "none" && (<Field label="Border Radius"><BorderRadiusInput value={(p.cardRadius as string) || "16px"} onChange={(v) => up("cardRadius", v)} /></Field>)}
                 {p.cardStyle === "raised" && (<>
-                    <Field label="Card Shadow"><TextInput value={(p.cardShadow as string) || ""} onChange={(v) => up("cardShadow", v)} placeholder="0 4px 24px rgba(0,0,0,0.08)" /></Field>
+                    <Field label="Card Shadow"><TextInput value={(p.cardShadow as string) || ""} onChange={(v) => up("cardShadow", v)} placeholder="0 16px 48px #00000033, 0 4px 16px #00000026" /></Field>
                     <Field label="Card Hover Shadow"><TextInput value={(p.cardShadowHover as string) || ""} onChange={(v) => up("cardShadowHover", v)} placeholder="0 12px 40px rgba(0,0,0,0.12)" /></Field>
                 </>)}
             </Section>
@@ -42,10 +43,10 @@ export function FeaturesPanel({ block }: { block: Block }) {
             </Section>
             <Section title="Icon Styling">
                 <Field label="Icon Size"><TextInput value={String(p.iconSize || 24)} onChange={(v) => up("iconSize", Number(v) || 24)} placeholder="24" /></Field>
-                <Field label="Icon Color"><ColorInput value={(p.iconColor as string) || "#6366f1"} onChange={(v) => up("iconColor", v)} /></Field>
+                <Field label="Icon Color"><ColorInput value={(p.iconColor as string) || "var(--primary)"} onChange={(v) => up("iconColor", v)} onBlur={(v) => up("iconColor", v, true)} /></Field>
                 <Field label="Wrapper Size"><TextInput value={String(p.iconWrapperSize || 52)} onChange={(v) => up("iconWrapperSize", Number(v) || 52)} placeholder="52" /></Field>
                 <Field label="Wrapper Radius"><BorderRadiusInput value={(p.iconRadius as string) || "14px"} onChange={(v) => up("iconRadius", v)} /></Field>
-                <Field label="Wrapper Background"><TextInput value={(p.iconBg as string) || "linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1))"} onChange={(v) => up("iconBg", v)} placeholder="linear-gradient(...) or color" /></Field>
+                <Field label="Wrapper Background"><ColorInput value={(p.iconBg as string) || "rgba(var(--primary-rgb), 0.15)"} onChange={(v) => up("iconBg", v)} onBlur={(v) => up("iconBg", v, true)} /></Field>
             </Section>
             <Section title="Padding (Responsive)">
                 <Field label="Desktop"><TextInput value={(p.padding as string) || ""} onChange={(v) => up("padding", v)} placeholder="64px 24px" /></Field>
@@ -63,7 +64,26 @@ export function FeaturesPanel({ block }: { block: Block }) {
                             </div>
                             <input value={feature.title} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], title: e.target.value }; up("features", nF); }} placeholder="Feature Title" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
                             <textarea value={feature.description} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], description: e.target.value }; up("features", nF); }} placeholder="Feature Description" rows={2} style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)", resize: "vertical" }} />
-                            <input value={feature.icon} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], icon: e.target.value }; up("features", nF); }} placeholder="Lucide Icon (e.g. Star)" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
+                            <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                                <div style={{ flex: 1 }}>
+                                    <SelectInput 
+                                        value={feature.iconType || "icon"} 
+                                        onChange={(v) => { 
+                                            const nF = [...((p.features as any[]) || [])]; 
+                                            nF[idx] = { ...nF[idx], iconType: v }; 
+                                            up("features", nF); 
+                                        }} 
+                                        options={[{ label: "Icon", value: "icon" }, { label: "Image", value: "image" }]} 
+                                    />
+                                </div>
+                                <div style={{ flex: 2 }}>
+                                    {feature.iconType === "image" ? (
+                                        <MediaInput value={feature.image || ""} onChange={(v) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], image: v }; up("features", nF); }} placeholder="Image URL" />
+                                    ) : (
+                                        <IconPicker value={feature.icon || "Star"} onChange={(v) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], icon: v }; up("features", nF); }} />
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     ))}
                     <button onClick={() => { const nF = [...((p.features as any[]) || [])]; nF.push({ id: crypto.randomUUID(), title: "New Feature", description: "Describe it here.", icon: "Star" }); up("features", nF); }} style={{ padding: "6px 0", background: "var(--primary-light)", color: "var(--primary)", border: "none", borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>+ Add Feature</button>
@@ -77,7 +97,7 @@ export function FeaturesPanel({ block }: { block: Block }) {
 export function TeamPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
     return (
         <>
@@ -95,12 +115,12 @@ export function TeamPanel({ block }: { block: Block }) {
             </Section>
             <Section title="Card Styling">
                 <Field label="Card Style"><SelectInput value={(p.cardStyle as string) || "raised"} onChange={(v) => up("cardStyle", v)} options={[{ label: "None", value: "none" }, { label: "Raised Shadow", value: "raised" }, { label: "Outlined", value: "outlined" }, { label: "Filled / Tinted", value: "filled" }]} /></Field>
-                {(p.cardStyle === "raised" || p.cardStyle === "outlined" || p.cardStyle === "filled") && (<Field label="Card Background"><ColorInput value={(p.cardBg as string) || "#ffffff"} onChange={(v) => up("cardBg", v)} /></Field>)}
+                {(p.cardStyle === "raised" || p.cardStyle === "outlined" || p.cardStyle === "filled") && (<Field label="Card Background"><ColorInput value={(p.cardBg as string) || "#ffffff"} onChange={(v) => up("cardBg", v)} onBlur={(v) => up("cardBg", v, true)} /></Field>)}
                 <Field label="Radius"><BorderRadiusInput value={(p.cardRadius as string) || "16px"} onChange={(v) => up("cardRadius", v)} /></Field>
                 <Field label="Card Height"><TextInput value={(p.cardHeight as string) || "auto"} onChange={(v) => up("cardHeight", v)} placeholder="auto or 400px" /></Field>
                 <Field label="Card Padding"><SelectInput value={(p.cardPadding as string) || "2rem 1.75rem"} onChange={(v) => up("cardPadding", v)} options={[{ label: "None", value: "0px" }, { label: "Compact (0.75rem 1rem)", value: "0.75rem 1rem" }, { label: "Small (1rem 1.25rem)", value: "1rem 1.25rem" }, { label: "Medium (1.5rem 1.5rem)", value: "1.5rem 1.5rem" }, { label: "Large (2rem 1.75rem)", value: "2rem 1.75rem" }, { label: "XL (3rem 2rem)", value: "3rem 2rem" }]} /></Field>
                 <Field label="Text Padding"><SelectInput value={(p.cardContentPadding as string) || "1rem 1.25rem"} onChange={(v) => up("cardContentPadding", v)} options={[{ label: "None", value: "0px" }, { label: "Tight (0.5rem 0.75rem)", value: "0.5rem 0.75rem" }, { label: "Small (0.75rem 1rem)", value: "0.75rem 1rem" }, { label: "Medium (1rem 1.25rem)", value: "1rem 1.25rem" }, { label: "Large (1.5rem 1.5rem)", value: "1.5rem 1.5rem" }, { label: "XL (2rem 1.75rem)", value: "2rem 1.75rem" }]} /></Field>
-                {(p.cardStyle === "raised" || p.cardStyle === "outlined") && (<Field label="Card Shadow"><SelectInput value={(p.cardShadow as string) || "0 4px 24px #0000001a"} onChange={(v) => up("cardShadow", v)} options={[{ label: "None", value: "none" }, { label: "Subtle", value: "0 1px 4px #0000001a" }, { label: "Soft", value: "0 4px 16px #0000001a" }, { label: "Medium (Default)", value: "0 4px 24px #0000001a, 0 1px 6px #0000000f" }, { label: "Elevated", value: "0 8px 32px #00000026, 0 2px 8px #0000001a" }, { label: "Deep", value: "0 16px 48px #00000033, 0 4px 16px #00000026" }, { label: "Glow Blue", value: "0 4px 32px #3b82f640, 0 1px 8px #3b82f626" }, { label: "Glow Purple", value: "0 4px 32px #8b5cf640, 0 1px 8px #8b5cf626" }]} /></Field>)}
+                {(p.cardStyle === "raised" || p.cardStyle === "outlined") && (<Field label="Card Shadow"><SelectInput value={(p.cardShadow as string) || "0 16px 48px #00000033, 0 4px 16px #00000026"} onChange={(v) => up("cardShadow", v)} options={[{ label: "None", value: "none" }, { label: "Subtle", value: "0 1px 4px #0000001a" }, { label: "Soft", value: "0 4px 16px #0000001a" }, { label: "Medium", value: "0 4px 24px #0000001a, 0 1px 6px #0000000f" }, { label: "Elevated", value: "0 8px 32px #00000026, 0 2px 8px #0000001a" }, { label: "Deep (Default)", value: "0 16px 48px #00000033, 0 4px 16px #00000026" }, { label: "Glow Blue", value: "0 4px 32px #3b82f640, 0 1px 8px #3b82f626" }, { label: "Glow Purple", value: "0 4px 32px #8b5cf640, 0 1px 8px #8b5cf626" }]} /></Field>)}
             </Section>
             <Section title="Image Styling">
                 <Field label="Image Style"><SelectInput value={(p.imageStyle as string) || "circle"} onChange={(v) => up("imageStyle", v)} options={[{ label: "Circle", value: "circle" }, { label: "Square", value: "square" }, { label: "Floating Cutout", value: "float" }, { label: "Card Cover", value: "cover" }]} /></Field>
@@ -182,8 +202,10 @@ export function TeamPanel({ block }: { block: Block }) {
 export function PageSettingsPanel({ page }: { page: EditorPage }) {
     const { updateTheme, updatePageData } = useEditorStore();
     const { user } = useAuth();
-    const l = page.theme?.layout || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
-    const f = page.theme?.features || { scrollToTop: false, scrollToTopPosition: "bottom-right", scrollToTopColor: "#6366f1", themeSwitcher: true, themeSwitcherPosition: "bottom-left" };
+    const theme = page.theme || DEFAULT_THEME;
+    const l = theme.layout || DEFAULT_THEME.layout!;
+    const f = theme.features || DEFAULT_THEME.features!;
+    const c = theme.colors || DEFAULT_THEME.colors;
     const upL = (key: string, val: string) => updateTheme({ layout: { ...l, [key]: val } });
     const upF = (key: string, val: unknown) => updateTheme({ features: { ...f, [key]: val } });
     const upP = (key: string, val: unknown) => updatePageData({ [key]: val });
@@ -194,6 +216,43 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                 <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Page Settings</p>
                 <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--text)", fontWeight: 600 }}>Global Configuration</p>
             </div>
+            <Section title="Global Theme">
+                <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Synchronize colors across all components.</div>
+                <Field label="Primary Color">
+                    <ColorInput 
+                        value={c.primary} 
+                        onChange={(v) => updateTheme({ colors: { ...c, primary: v } })} 
+                        onBlur={(v) => { updateTheme({ colors: { ...c, primary: v } }, true); useEditorStore.getState().migrateThemeColors(); }} 
+                    />
+                </Field>
+                <Field label="Secondary Color">
+                    <ColorInput 
+                        value={c.secondary} 
+                        onChange={(v) => updateTheme({ colors: { ...c, secondary: v } })} 
+                        onBlur={(v) => updateTheme({ colors: { ...c, secondary: v } }, true)} 
+                    />
+                </Field>
+                <Field label="Button Text">
+                    <ColorInput 
+                        value={c.buttonText || "#ffffff"} 
+                        onChange={(v) => updateTheme({ colors: { ...c, buttonText: v } })} 
+                        onBlur={(v) => updateTheme({ colors: { ...c, buttonText: v } }, true)} 
+                    />
+                </Field>
+                <Field label="Overlay Tint">
+                    <ColorInput 
+                        value={c.overlay || "rgba(0,0,0,0.25)"} 
+                        onChange={(v) => updateTheme({ colors: { ...c, overlay: v } })} 
+                        onBlur={(v) => updateTheme({ colors: { ...c, overlay: v } }, true)} 
+                    />
+                </Field>
+                <button 
+                  onClick={() => useEditorStore.getState().migrateThemeColors()}
+                  style={{ marginTop: 8, padding: "4px 8px", fontSize: 10, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 4, cursor: "pointer", color: "var(--text)" }}
+                >
+                  Sync all components now
+                </button>
+            </Section>
             <Section title="Visibility & Access">
                 <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Make this page public for others to view and duplicate.</div>
                 <ToggleInput value={!!page.isPublic} onChange={(v) => { upP("isPublic", v); if (v) upP("isTemplate", true); }} label="Make Public" />
@@ -246,12 +305,12 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
 export function ContactFormPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
     return (
         <>
             <Section title="Destination Email">
-                <Field label="Receiver Email"><TextInput value={(p.receiverEmail as string) || ""} onChange={(v) => up("receiverEmail", v)} placeholder="hello@yourdomain.com" /></Field>
+                <Field label="Receiver Email"><TextInput value={(p.receiverEmail as string) || "ansh.official03@gmail.com"} onChange={(v) => up("receiverEmail", v)} placeholder="hello@yourdomain.com" /></Field>
             </Section>
 
             <Section title="Form Setup">
@@ -330,7 +389,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
 export function AccordionPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
     return (
         <>
@@ -367,7 +426,7 @@ export function AccordionPanel({ block }: { block: Block }) {
             <Section title="Icon">
                 <Field label="Icon Style"><SelectInput value={(p.iconStyle as string) || "chevron"} onChange={(v) => up("iconStyle", v)} options={[{ label: "Chevron", value: "chevron" }, { label: "Plus / Minus", value: "plus" }]} /></Field>
                 <Field label="Icon Size"><TextInput value={(p.iconSize as string) || "20px"} onChange={(v) => up("iconSize", v)} placeholder="20px" /></Field>
-                <Field label="Icon Color"><ColorInput value={(p.iconColor as string) || "#6366f1"} onChange={(v) => up("iconColor", v)} /></Field>
+                <Field label="Icon Color"><ColorInput value={(p.iconColor as string) || "var(--primary)"} onChange={(v) => up("iconColor", v)} /></Field>
             </Section>
 
 

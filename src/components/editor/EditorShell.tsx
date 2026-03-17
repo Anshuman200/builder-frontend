@@ -15,13 +15,14 @@ import {
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
 import { useEditorStore } from "@/stores/editorStore";
-import { createBlock } from "@/lib/blockConfig";
-import { SECTION_TEMPLATES } from "@/lib/sectionTemplates";
+import { createBlock } from "@/lib/config/blocks";
+import { SECTION_TEMPLATES } from "@/lib/config/sections";
 import EditorToolbar from "./EditorToolbar";
 import BlockPalette from "./BlockPalette";
 import EditorCanvas from "./EditorCanvas";
 import PropertiesPanel from "./PropertiesPanel";
 import { BlockRenderer } from "./blocks";
+import { GlobalIconPicker } from "./GlobalIconPicker";
 
 export default function EditorShell() {
   const { page, undo, redo, deleteBlock, selectedBlockId, historyIndex, history, addBlock, moveBlock, selectBlock, updateBlock } =
@@ -249,6 +250,7 @@ export default function EditorShell() {
           </div>
         )}
       </DragOverlay>
+      <GlobalIconPicker />
     </DndContext>
   );
 }

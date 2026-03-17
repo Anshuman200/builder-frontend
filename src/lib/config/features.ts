@@ -23,7 +23,6 @@ export const EDITOR_FEATURES = {
         "Navigation",
         "Hero",
         "Team",
-        "Logos",
         "Gallery",
         "Features",
         "Pricing",

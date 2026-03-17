@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { getIcon } from "@/lib/icons";
+import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { PreviewContext, BlockProps } from "./shared";
@@ -26,7 +26,7 @@ export function FeaturesBlock({ block }: BlockProps) {
     const gap = (p.gap as string) || "2rem";
     const features = (p.features as any[]) || [];
 
-    const cardStyle = (p.cardStyle as string) || "none";
+    const cardStyle = (p.cardStyle as string) || "raised";
     const rawCardBg = (p.cardBg as string) || "#ffffff";
     const cardBg = isDark && LIGHT_BGS.includes(rawCardBg.toLowerCase()) ? "#18181b" : rawCardBg;
     const cardRadius = (p.cardRadius as string) || "16px";
@@ -40,8 +40,8 @@ export function FeaturesBlock({ block }: BlockProps) {
     const iconSize = Number(p.iconSize) || 24;
     const iconWrapperSize = Number(p.iconWrapperSize) || 52;
     const iconRadius = (p.iconRadius as string) || "14px";
-    const iconColor = (p.iconColor as string) || "#6366f1";
-    const iconBg = (p.iconBg as string) || "linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1))";
+    const iconColor = (p.iconColor as string) || "var(--primary)";
+    const iconBg = (p.iconBg as string) || "rgba(var(--primary-rgb), 0.15)";
 
     const desktopPadding = (p.padding as string) || "64px 24px";
     const tabletPadding = (p.tabletPadding as string) || "48px 16px";
@@ -53,7 +53,7 @@ export function FeaturesBlock({ block }: BlockProps) {
         const base: React.CSSProperties = { display: "flex", flexDirection: "column", alignItems: align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start", textAlign: align as any, padding: cardStyle !== "none" ? "2rem 1.75rem" : "0.5rem", borderRadius: cardStyle !== "none" ? cardRadius : 0, transition: "transform 0.2s ease, box-shadow 0.2s ease" };
         if (cardStyle === "raised") return { ...base, background: cardBg, boxShadow: cardShadow };
         if (cardStyle === "outlined") return { ...base, background: cardBg, border: `1.5px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}` };
-        if (cardStyle === "filled") return { ...base, background: isDark ? "rgba(255,255,255,0.05)" : "rgba(99,102,241,0.06)" };
+        if (cardStyle === "filled") return { ...base, background: isDark ? "rgba(255,255,255,0.05)" : "rgba(var(--primary-rgb), 0.08)" };
         return base;
     };
 
@@ -80,8 +80,12 @@ export function FeaturesBlock({ block }: BlockProps) {
                             const IconCmp = getIcon(feature.icon);
                             return (
                                 <div key={feature.id || idx} className={isPreview ? `features-card-${block.id}` : undefined} style={isPreview ? { display: "flex", flexDirection: "column", alignItems: align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start", textAlign: align as any } : getCardStyle()}>
-                                    <div style={{ width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, color: iconColor, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.25rem", flexShrink: 0, boxShadow: "0 2px 8px rgba(99,102,241,0.15)" }}>
-                                        {IconCmp ? <IconCmp style={{ width: iconSize, height: iconSize, color: iconColor }} /> : <Square2StackIcon style={{ width: iconSize, height: iconSize }} />}
+                                    <div style={{ width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, color: iconColor, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.25rem", flexShrink: 0, boxShadow: "0 2px 8px rgba(99,102,241,0.15)", overflow: "hidden" }}>
+                                        {feature.iconType === "image" && feature.image ? (
+                                            <img src={feature.image} alt={feature.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                        ) : (
+                                            IconCmp ? <IconCmp style={{ width: iconSize, height: iconSize, color: iconColor }} /> : <Square2StackIcon style={{ width: iconSize, height: iconSize }} />
+                                        )}
                                     </div>
                                     <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.5rem 0", letterSpacing: "-0.01em" }}>{feature.title}</h3>
                                     <p style={{ fontSize: cardDescSize, opacity: 0.65, margin: 0, lineHeight: 1.65 }}>{feature.description}</p>

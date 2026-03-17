@@ -14,6 +14,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { EllipsisHorizontalIcon, TrashIcon, Squares2X2Icon, MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
+import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { BlockRenderer } from "./blocks";
 
 
@@ -43,37 +44,8 @@ export default function EditorCanvas() {
 
   // Apply theme object to CSS variables on mount and whenever theme changes
   React.useEffect(() => {
-    if (!canvasRef.current || !page?.theme) return;
-    const { colors, fonts, borderRadius, spacing } = page.theme;
-    const el = canvasRef.current;
-
-    // Apply colors
-    if (colors) {
-      el.style.setProperty("--primary", colors.primary);
-      el.style.setProperty("--secondary", colors.secondary);
-      el.style.setProperty("--background", colors.background);
-      el.style.setProperty("--surface", colors.surface);
-      el.style.setProperty("--text", colors.text);
-      el.style.setProperty("--text-muted", colors.textMuted);
-      el.style.setProperty("--border", colors.border);
-      el.style.setProperty("--accent", colors.accent);
-    }
-
-    // Apply Fonts
-    if (fonts) {
-      el.style.setProperty("--font-heading", `"${fonts.heading}", sans-serif`);
-      el.style.setProperty("--font-body", `"${fonts.body}", sans-serif`);
-    }
-
-    // Apply geometry
-    if (borderRadius) {
-      const radiusMap = { none: "0px", sm: "4px", md: "8px", lg: "16px", full: "9999px" };
-      el.style.setProperty("--radius", radiusMap[borderRadius as keyof typeof radiusMap] || "8px");
-    }
-    if (spacing) {
-      const spaceMap = { compact: "0.75rem", normal: "1rem", relaxed: "1.5rem" };
-      el.style.setProperty("--spacing-base", spaceMap[spacing as keyof typeof spaceMap] || "1rem");
-    }
+    if (!canvasRef.current) return;
+    applyThemeToElement(canvasRef.current, page?.theme || DEFAULT_THEME);
   }, [page?.theme]);
 
   return (

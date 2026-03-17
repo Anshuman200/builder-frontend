@@ -1,7 +1,7 @@
 import type { EditorPage } from "@/@Types";
 
 import { DEFAULT_THEME } from "@/stores/editorStore";
-import { slugify } from "@/lib/utils";
+import { slugify } from "@/lib/utils/common";
 
 const KEY = (id: string) => `pagecraft:page:${id}`;
 

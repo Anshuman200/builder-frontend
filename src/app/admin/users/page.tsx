@@ -25,7 +25,7 @@ import {
 import { Table, Input, Select, Tag, Button, Modal } from "antd";
 import { UserProfileModal } from "@/components/admin/UserProfileModal";
 import { useToasts } from "@/hooks/useToasts";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/common";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 
 const GRADIENTS = [

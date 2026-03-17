@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { getIcon } from "@/lib/icons";
+import { getIcon } from "@/lib/utils/icons";
 import { PreviewContext, BlockProps } from "./shared";
 
 const BTN_SIZES: Record<string, { padding: string; fontSize: string; iconSize: number }> = {
@@ -26,14 +26,14 @@ export function ButtonBlock({ block }: BlockProps) {
     const radius = (p.borderRadius as string) || "9999px";
     const bWidth = (p.borderWidth as string) || "2px";
 
-    let background = "#6366f1", color = "#ffffff", border = "none";
+    let background = "var(--primary)", color = "var(--button-text)", border = "none";
     switch (variant) {
-        case "solid": background = (p.bgColor as string) || "#6366f1"; color = (p.textColor as string) || "#ffffff"; break;
-        case "outline": background = "transparent"; color = (p.textColor as string) || (p.bgColor as string) || "#6366f1"; border = `${bWidth} solid ${(p.borderColor as string) || (p.bgColor as string) || "#6366f1"}`; break;
-        case "ghost": background = (p.bgColor as string) ? `${p.bgColor}18` : "rgba(99,102,241,0.08)"; color = (p.textColor as string) || (p.bgColor as string) || "#6366f1"; break;
-        case "soft": background = (p.bgColor as string) ? `${p.bgColor}22` : "rgba(99,102,241,0.13)"; color = (p.textColor as string) || (p.bgColor as string) || "#6366f1"; border = `${bWidth} solid ${(p.borderColor as string) || ((p.bgColor as string) ? `${p.bgColor}55` : "rgba(99,102,241,0.3)")}`; break;
-        case "gradient": background = `linear-gradient(${(p.gradientDir as string) || "to right"}, ${(p.gradientFrom as string) || "#6366f1"}, ${(p.gradientTo as string) || "#8b5cf6"})`; color = (p.textColor as string) || "#ffffff"; break;
-        case "link": background = "transparent"; color = (p.textColor as string) || (p.bgColor as string) || "#6366f1"; break;
+        case "solid": background = (p.bgColor as string) || "var(--primary)"; color = (p.textColor as string) || "var(--button-text)"; break;
+        case "outline": background = "transparent"; color = (p.textColor as string) || (p.bgColor as string) || "var(--primary)"; border = `${bWidth} solid ${(p.borderColor as string) || (p.bgColor as string) || "var(--primary)"}`; break;
+        case "ghost": background = (p.bgColor as string) ? `${p.bgColor}18` : "rgba(99,102,241,0.08)"; color = (p.textColor as string) || (p.bgColor as string) || "var(--primary)"; break;
+        case "soft": background = (p.bgColor as string) ? `${p.bgColor}22` : "rgba(99,102,241,0.13)"; color = (p.textColor as string) || (p.bgColor as string) || "var(--primary)"; border = `${bWidth} solid ${(p.borderColor as string) || ((p.bgColor as string) ? `${p.bgColor}55` : "rgba(99,102,241,0.3)")}`; break;
+        case "gradient": background = `linear-gradient(${(p.gradientDir as string) || "to right"}, ${(p.gradientFrom as string) || "var(--primary)"}, ${(p.gradientTo as string) || "var(--secondary)"})`; color = (p.textColor as string) || "var(--button-text)"; break;
+        case "link": background = "transparent"; color = (p.textColor as string) || (p.bgColor as string) || "var(--primary)"; break;
     }
 
     const IconLeft = (p.iconLeft as string) ? getIcon(p.iconLeft as string) : null;

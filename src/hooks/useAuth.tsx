@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, createContext, useContext, useCallback } from "react";
-import { clearTokens, getCookie } from "@/lib/utils";
+import { clearTokens, getCookie } from "@/lib/utils/common";
 import { authApi } from "@/lib/api/client";
 
 interface User {

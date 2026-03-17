@@ -5,12 +5,12 @@ import { useEditorStore } from "@/stores/editorStore";
 
 import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel } from "./shared";
 import { IconPicker } from "@/components/editor/IconPicker";
-import { EDITOR_FEATURES } from "@/lib/editorFeatures";
+import { EDITOR_FEATURES } from "@/lib/config/features";
 
 export function ButtonPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     const variant = (p.variant as string) || "solid";
 
     return (
@@ -26,14 +26,14 @@ export function ButtonPanel({ block }: { block: Block }) {
                 <ToggleInput value={!!(p.fullWidth)} onChange={(v) => up("fullWidth", v)} label="Full Width" />
             </Section>
             <Section title="Colors">
-                <Field label={variant === "gradient" ? "Unused (see Gradient)" : "Background Color"}><ColorInput value={(p.bgColor as string) || "#6366f1"} onChange={(v) => up("bgColor", v)} /></Field>
-                <Field label="Text Color"><ColorInput value={(p.textColor as string) || ""} onChange={(v) => up("textColor", v)} /></Field>
-                <Field label="Border Color"><ColorInput value={(p.borderColor as string) || ""} onChange={(v) => up("borderColor", v)} /></Field>
+                <Field label={variant === "gradient" ? "Unused (see Gradient)" : "Background Color"}><ColorInput value={(p.bgColor as string) || "#6366f1"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
+                <Field label="Text Color"><ColorInput value={(p.textColor as string) || ""} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
+                <Field label="Border Color"><ColorInput value={(p.borderColor as string) || ""} onChange={(v) => up("borderColor", v)} onBlur={(v) => up("borderColor", v, true)} /></Field>
             </Section>
             {variant === "gradient" && (
                 <Section title="Gradient">
-                    <Field label="From Color"><ColorInput value={(p.gradientFrom as string) || "#6366f1"} onChange={(v) => up("gradientFrom", v)} /></Field>
-                    <Field label="To Color"><ColorInput value={(p.gradientTo as string) || "#8b5cf6"} onChange={(v) => up("gradientTo", v)} /></Field>
+                    <Field label="From Color"><ColorInput value={(p.gradientFrom as string) || "#6366f1"} onChange={(v) => up("gradientFrom", v)} onBlur={(v) => up("gradientFrom", v, true)} /></Field>
+                    <Field label="To Color"><ColorInput value={(p.gradientTo as string) || "#8b5cf6"} onChange={(v) => up("gradientTo", v)} onBlur={(v) => up("gradientTo", v, true)} /></Field>
                     <Field label="Direction"><SelectInput value={(p.gradientDir as string) || "to right"} onChange={(v) => up("gradientDir", v)} options={[{ label: "→ Right", value: "to right" }, { label: "← Left", value: "to left" }, { label: "↓ Bottom", value: "to bottom" }, { label: "↗ Top Right", value: "to top right" }, { label: "↘ Bottom Right", value: "to bottom right" }]} /></Field>
                 </Section>
             )}
@@ -61,7 +61,7 @@ export function ButtonPanel({ block }: { block: Block }) {
 export function HeaderPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     const updateProps = (newProps: Record<string, unknown>) => updateBlock(block.id, newProps);
 
     return (
@@ -71,8 +71,8 @@ export function HeaderPanel({ block }: { block: Block }) {
                 <ToggleInput label="Full Width Container" value={!!p.fullWidth} onChange={(v) => updateProps({ fullWidth: v })} />
                 <Field label="Position"><SelectInput value={(p.position as string) || "static"} onChange={(v) => updateProps({ position: v })} options={[{ label: "Static (Normal flow)", value: "static" }, { label: "Sticky (Stays at top)", value: "sticky" }, { label: "Fixed (Overlays content)", value: "fixed" }]} /></Field>
                 <Field label="Background Style"><SelectInput value={(p.style as string) || "solid"} onChange={(v) => up("style", v)} options={[{ label: "Solid Color", value: "solid" }, { label: "Glassmorphism (Blur)", value: "glass" }, { label: "Transparent", value: "transparent" }]} /></Field>
-                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} /></Field>
-                <Field label="Text/Link Color"><ColorInput value={(p.textColor as string) || "#0f172a"} onChange={(v) => up("textColor", v)} /></Field>
+                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
+                <Field label="Text/Link Color"><ColorInput value={(p.textColor as string) || "#0f172a"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
             <Section title="Padding (Responsive)">
                 <Field label="Desktop"><TextInput value={(p.padding as string) || ""} onChange={(v) => up("padding", v)} placeholder="16px 32px" /></Field>
@@ -93,8 +93,8 @@ export function HeaderPanel({ block }: { block: Block }) {
                     <Field label="Button Text"><TextInput value={(p.ctaText as string) || "Get Started"} onChange={(v) => up("ctaText", v)} placeholder="Get Started" /></Field>
                     <Field label="Button URL"><TextInput value={(p.ctaUrl as string) || "#"} onChange={(v) => up("ctaUrl", v)} placeholder="https://..." /></Field>
                     <Field label="Design Style"><SelectInput value={(p.ctaVariant as string) || "solid"} onChange={(v) => up("ctaVariant", v)} options={[{ label: "Solid Filled", value: "solid" }, { label: "Outline", value: "outline" }]} /></Field>
-                    <Field label="Base Color"><ColorInput value={(p.ctaBgColor as string) || "#6366f1"} onChange={(v) => up("ctaBgColor", v)} /></Field>
-                    {p.ctaVariant === "solid" && (<Field label="Text Color"><ColorInput value={(p.ctaTextColor as string) || "#ffffff"} onChange={(v) => up("ctaTextColor", v)} /></Field>)}
+                    <Field label="Base Color"><ColorInput value={(p.ctaBgColor as string) || "#6366f1"} onChange={(v) => up("ctaBgColor", v)} onBlur={(v) => up("ctaBgColor", v, true)} /></Field>
+                    {p.ctaVariant === "solid" && (<Field label="Text Color"><ColorInput value={(p.ctaTextColor as string) || "#ffffff"} onChange={(v) => up("ctaTextColor", v)} onBlur={(v) => up("ctaTextColor", v, true)} /></Field>)}
                 </>)}
             </Section>
             <Section title="Navigation Links">
@@ -121,15 +121,15 @@ export function HeaderPanel({ block }: { block: Block }) {
 export function FooterPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
-    const up = (key: string, val: unknown) => updateBlock(block.id, { [key]: val });
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     const updateProps = (newProps: Record<string, unknown>) => updateBlock(block.id, newProps);
 
     return (
         <>
             <Section title="Layout & Styling">
                 <ToggleInput label="Full Width Container" value={!!p.fullWidth} onChange={(v) => updateProps({ fullWidth: v })} />
-                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#0f172a"} onChange={(v) => up("bgColor", v)} /></Field>
-                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#f8fafc"} onChange={(v) => up("textColor", v)} /></Field>
+                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#0f172a"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
+                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#f8fafc"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
             <Section title="Padding (Responsive)">
                 <Field label="Desktop"><TextInput value={(p.padding as string) || ""} onChange={(v) => up("padding", v)} placeholder="48px 32px" /></Field>

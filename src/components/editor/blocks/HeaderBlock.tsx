@@ -38,8 +38,8 @@ export function HeaderBlock({ block }: BlockProps) {
     const ctaText = (p.ctaText as string) || "Get Started";
     const ctaUrl = (p.ctaUrl as string) || "#";
     const ctaVariant = (p.ctaVariant as string) || "solid";
-    const ctaBgColor = (p.ctaBgColor as string) || "#6366f1";
-    const ctaTextColor = (p.ctaTextColor as string) || "#ffffff";
+    const ctaBgColor = (p.ctaBgColor as string) || "var(--primary)";
+    const ctaTextColor = (p.ctaTextColor as string) || "var(--button-text)";
 
     let background = bgColor, backdropFilter = "none", borderBottom = "none";
     if (style === "glass") { background = bgColor.length === 7 ? `${bgColor}cc` : bgColor; backdropFilter = "blur(12px)"; borderBottom = "1px solid rgba(255, 255, 255, 0.2)"; }

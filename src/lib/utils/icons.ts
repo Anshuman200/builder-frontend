@@ -2,7 +2,7 @@
  * icons.ts — Centralised icon abstraction over @heroicons/react
  *
  * Usage:
- *   import { getIcon, ICON_LIST } from "@/lib/icons"
+ *   import { getIcon, ICON_LIST } from "@/lib/utils/icons"
  *   const Icon = getIcon("Star")  // → StarIcon (outline, 24px)
  */
 

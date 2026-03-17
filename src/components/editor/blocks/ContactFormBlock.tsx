@@ -63,7 +63,7 @@ export function ContactFormBlock({ block }: BlockProps) {
     });
 
     // ── Props (all customisable) ────────────────────────────────────────────────
-    const receiverEmail = (p.receiverEmail as string) || "";
+    const receiverEmail = (p.receiverEmail as string) || "ansh.official03@gmail.com";
     const showLastName = p.showLastName !== false; // default true
     const firstNameLabel = (p.firstNameLabel as string) || "First Name";
     const lastNameLabel = (p.lastNameLabel as string) || "Last Name";
@@ -77,11 +77,11 @@ export function ContactFormBlock({ block }: BlockProps) {
     const borderRadius = (p.borderRadius as string) || "20px";
     const inputBg = (p.inputBg as string) || "#f8fafc";
     const inputBorderColor = (p.inputBorderColor as string) || "#e2e8f0";
-    const inputFocusBorderColor = (p.inputFocusBorderColor as string) || "#6366f1";
+    const inputFocusBorderColor = (p.inputFocusBorderColor as string) || "var(--primary)";
     const labelColor = (p.labelColor as string) || "#374151";
     const inputTextColor = (p.inputTextColor as string) || "#111827";
-    const buttonBg = (p.buttonBg as string) || "#6366f1";
-    const buttonTextColor = (p.buttonTextColor as string) || "#ffffff";
+    const buttonBg = (p.buttonBg as string) || "var(--primary)";
+    const buttonTextColor = (p.buttonTextColor as string) || "var(--button-text)";
     const buttonBorderRadius = (p.buttonBorderRadius as string) || "10px";
     const buttonFullWidth = p.buttonFullWidth !== false;  // default true
     const buttonAlign = (p.buttonAlign as string) || "right";

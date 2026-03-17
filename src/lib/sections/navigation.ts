@@ -1,5 +1,5 @@
 // sections/navigation.ts
-import { makeBlock } from "../blockConfig";
+import { makeBlock } from "../config/blocks";
 import type { SectionTemplate } from "@/@Types";
 
 export const navigationSections: SectionTemplate[] = [

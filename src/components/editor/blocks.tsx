@@ -46,6 +46,7 @@ import { VideoBlock } from "./blocks/VideoBlock";
 import { FeaturesBlock } from "./blocks/FeaturesBlock";
 import { TeamBlock } from "./blocks/TeamBlock";
 import { ContactFormBlock } from "./blocks/ContactFormBlock";
+import { ContactInfoBlock } from "./blocks/ContactInfoBlock";
 import AccordionBlock from "./blocks/AccordionBlock";
 
 // ─── Block Renderer dispatch ──────────────────────────────────────────────────
@@ -66,6 +67,7 @@ export function BlockRenderer({ block }: { block: Block }) {
     case "team": return <TeamBlock block={block} />;
     case "columns": return <ColumnsBlock block={block} />;
     case "contactForm": return <ContactFormBlock block={block} />;
+    case "contactInfo": return <ContactInfoBlock block={block} />;
     case "accordion": return <AccordionBlock block={block} />;
     case "footer":
     case "footer-2": return <FooterBlock block={block} />;

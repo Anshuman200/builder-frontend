@@ -18,11 +18,11 @@ import { Popover, Dropdown } from "antd";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEditorStore } from "@/stores/editorStore";
-import { slugify } from "@/lib/utils";
+import { slugify } from "@/lib/utils/common";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { pagesApi } from "@/lib/api/client";
-import { clearLocalDraft } from "@/lib/storage";
+import { clearLocalDraft } from "@/lib/utils/storage";
 import { useToasts } from "@/hooks/useToasts";
 import { useUpdatePage, useCreatePage, usePublishPage } from "@/lib/api/queries";
 import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
@@ -115,6 +115,24 @@ export default function EditorToolbar() {
 
     return () => clearTimeout(timeoutId);
   }, [page, user, pageId, isDirty, isSaving, markClean]);
+
+  // Keyboard shortcuts for Undo/Redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // ⌘Z or Ctrl+Z for Undo
+      if ((e.metaKey || e.ctrlKey) && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        if (canUndo) undo();
+      }
+      // ⌘⇧Z or Ctrl+Shift+Z or ⌘Y for Redo
+      if (((e.metaKey || e.ctrlKey) && e.key === "z" && e.shiftKey) || ((e.metaKey || e.ctrlKey) && e.key === "y")) {
+        e.preventDefault();
+        if (canRedo) redo();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [canUndo, canRedo, undo, redo]);
 
   // Sync thumbnail when page loads from API
   useEffect(() => {

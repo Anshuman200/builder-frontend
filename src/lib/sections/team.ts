@@ -1,5 +1,5 @@
 // sections/team.ts
-import { makeBlock } from "../blockConfig";
+import { makeBlock } from "../config/blocks";
 import type { SectionTemplate } from "@/@Types";
 
 // Placeholder images for diverse team members
@@ -44,7 +44,7 @@ export const teamSections: SectionTemplate[] = [
       root.props.childBlocks = [
         makeBlock("team", {
           title: "Meet the Team", subtitle: "The talented people behind the scenes.", bgColor: "transparent",
-          layout: "grid", columns: 3, imageStyle: "circle", imageSize: "160px", cardStyle: "none", align: "center",
+          layout: "grid", columns: 3, imageStyle: "circle", imageSize: "160px", cardStyle: "raised", align: "center",
           members: [teamData[0], teamData[1], teamData[2], teamData[3], teamData[4], teamData[5]]
         }),
       ];
@@ -71,7 +71,7 @@ export const teamSections: SectionTemplate[] = [
       root.props.childBlocks = [
         makeBlock("team", {
           title: "Our Team", subtitle: "Leading the industry forward.", bgColor: "transparent",
-          layout: "grid", columns: 2, imageStyle: "square", imageSize: "100%", imageRadius: "12px", cardStyle: "none", align: "left",
+          layout: "grid", columns: 2, imageStyle: "square", imageSize: "100%", imageRadius: "12px", cardStyle: "raised", align: "left",
           members: [teamData[4], teamData[5]]
         }),
       ];
@@ -127,7 +127,7 @@ export const teamSections: SectionTemplate[] = [
         makeBlock("team", {
           title: "Our leadership team", subtitle: "With over 100 years of combined experience, we've got a well-seasoned team at the helm.",
           bgColor: "transparent", layout: "grid", columns: 3, gap: "3rem",
-          cardStyle: "none", align: "left",
+          cardStyle: "raised", align: "left",
           imageStyle: "square", imageSize: "100%", imageRadius: "0px",
           members: [teamData[6], teamData[7], teamData[1], teamData[2], teamData[3], teamData[0]]
         }),
@@ -153,7 +153,7 @@ export const teamSections: SectionTemplate[] = [
         makeBlock("team", {
           title: "MEET THE TEAM", subtitle: "", bgColor: "transparent",
           layout: "grid", columns: 3, gap: "1.5rem",
-          cardStyle: "none", align: "center", cardHeight: "450px",
+          cardStyle: "raised", align: "center", cardHeight: "450px",
           imageStyle: "cover", imageSize: "400px", imageRadius: "24px",
           coverGradientBottom: "#e11d48f2", // pinkish hex
           nameColor: "#ffffff", roleColor: "#cccccc", descColor: "#e2e8f0",

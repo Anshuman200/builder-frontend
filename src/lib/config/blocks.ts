@@ -37,7 +37,8 @@ export const DEFAULT_CONFIG = {
     duration: 0.6,
     delay: 0,
     playback: "once"
-  }
+  },
+  cardShadow: "0 16px 48px #00000033, 0 4px 16px #00000026",
 };
 
 // ✅ Block definitions
@@ -50,8 +51,8 @@ export const BLOCK_TYPES: BlockConfig[] = [
       layout: "standard",       // standard | centered | split
       position: "static",       // static | sticky | fixed
       style: "solid",           // solid | glass | transparent
-      bgColor: "#1e293b",
-      textColor: "#fff",
+      bgColor: "var(--primary)",
+      textColor: "var(--button-text)",
       padding: "16px 32px",
       tabletPadding: "16px 24px",
       mobilePadding: "12px 16px",
@@ -75,8 +76,8 @@ export const BLOCK_TYPES: BlockConfig[] = [
       ctaText: "Get Started",
       ctaUrl: "#",
       ctaVariant: "solid",
-      ctaBgColor: "#6366f1",
-      ctaTextColor: "#ffffff",
+      ctaBgColor: "var(--primary)",
+      ctaTextColor: "var(--button-text)",
 
       // Animation
       animationType: DEFAULT_CONFIG.animationHeader.type,
@@ -91,9 +92,9 @@ export const BLOCK_TYPES: BlockConfig[] = [
     icon: "Sparkles",
     defaultProps: {
       align: "center",
-      bgColor: "#6366f1",
+      bgColor: "var(--primary)",
       bgImage: "",
-      bgOverlay: "rgba(0,0,0,0.25)",
+      bgOverlay: "var(--overlay)",
       textColor: "#ffffff",
       minHeight: "480px",
       padding: "4rem 2rem",
@@ -117,6 +118,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
       tabletPadding: "",
       mobilePadding: "16px",
       bgColor: "",
+      bgImage: "",
       maxWidth: "100%",
       borderRadius: "0px",
       childBlocks: [],
@@ -139,7 +141,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
       fontSize: "1rem",
       mobileFontSize: "",
       tabletFontSize: "",
-      color: "#000",
+      color: "var(--text)",
       bold: false,
       italic: false,
       letterSpacing: "",
@@ -246,12 +248,12 @@ export const BLOCK_TYPES: BlockConfig[] = [
       maxWidth: "800px",
       padding: "24px",
       bgColor: "transparent",
-      itemBgColor: "#ffffff",
-      itemBorderColor: "#e2e8f0",
+      itemBgColor: "var(--surface)",
+      itemBorderColor: "var(--border)",
       itemRadius: "8px",
-      titleColor: "#0f172a",
-      contentColor: "#475569",
-      iconColor: "#6366f1",
+      titleColor: "var(--text)",
+      contentColor: "var(--text-muted)",
+      iconColor: "var(--primary)",
       divider: "line",     // line | none | seamless
       variant: "contained", // contained | separated | minimal
       titleSize: "16px",
@@ -273,7 +275,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
     defaultProps: {
       iconName: "Star",
       size: "24",
-      color: "#6366f1",
+      color: "var(--primary)",
       align: "center",
       padding: "16px",
 
@@ -312,8 +314,8 @@ export const BLOCK_TYPES: BlockConfig[] = [
     label: "Features",
     icon: "LayoutList",
     defaultProps: {
-      bgColor: "#ffffff",
-      textColor: "#1e293b",
+      bgColor: "transparent",
+      textColor: "var(--text)",
       padding: "64px 24px",
       tabletPadding: "48px 16px",
       mobilePadding: "32px 16px",
@@ -323,10 +325,18 @@ export const BLOCK_TYPES: BlockConfig[] = [
       columns: 3,
       gap: "2rem",
       features: [
-        { id: "1", title: "Fast", description: "Lightning fast performance.", icon: "Zap" },
-        { id: "2", title: "Secure", description: "Your data is always safe.", icon: "Shield" },
-        { id: "3", title: "Reliable", description: "99.9% uptime guaranteed.", icon: "CheckCircle" },
+        { id: "1", title: "Fast", description: "Lightning fast performance.", icon: "Zap", iconType: "icon", image: "" },
+        { id: "2", title: "Secure", description: "Your data is always safe.", icon: "Shield", iconType: "icon", image: "" },
+        { id: "3", title: "Reliable", description: "99.9% uptime guaranteed.", icon: "CheckCircle", iconType: "icon", image: "" },
       ],
+
+      // Card Styling
+      cardStyle: "raised", // none | raised | outlined | filled
+      cardBg: "var(--surface)",
+      cardRadius: "16px",
+      cardHeight: "auto",
+      cardPadding: "2rem 1.75rem",
+      cardShadow: DEFAULT_CONFIG.cardShadow,
 
       // Animation
       animationType: DEFAULT_CONFIG.animation.type,
@@ -360,8 +370,8 @@ export const BLOCK_TYPES: BlockConfig[] = [
     label: "Team",
     icon: "Users",
     defaultProps: {
-      bgColor: "#ffffff",
-      textColor: "#1e293b",
+      bgColor: "transparent",
+      textColor: "var(--text)",
       padding: "64px 24px",
       tabletPadding: "48px 16px",
       mobilePadding: "32px 16px",
@@ -375,12 +385,12 @@ export const BLOCK_TYPES: BlockConfig[] = [
       gap: "2rem",
 
       // Card Styling
-      cardStyle: "none", // none | raised | outlined | filled
-      cardBg: "#ffffff",
+      cardStyle: "raised", // none | raised | outlined | filled
+      cardBg: "var(--surface)",
       cardRadius: "16px",
       cardHeight: "auto",
       cardPadding: "2rem 1.75rem",
-      cardShadow: "0 4px 24px #0000001a, 0 1px 6px #0000000f",
+      cardShadow: DEFAULT_CONFIG.cardShadow,
 
       // Image Styling
       imageStyle: "circle", // circle | square | cover | float
@@ -390,10 +400,10 @@ export const BLOCK_TYPES: BlockConfig[] = [
       imagePosition: "center",
 
       // Colors
-      nameColor: "#0f172a",
-      roleColor: "#64748b",
-      descColor: "#475569",
-      socialColor: "#94a3b8",
+      nameColor: "var(--text)",
+      roleColor: "var(--primary)",
+      descColor: "var(--text-muted)",
+      socialColor: "var(--text-subtle)",
 
       // Data
       members: [
@@ -470,7 +480,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
     label: "Contact Form",
     icon: "BookOpen",
     defaultProps: {
-      apiUrl: "https://apidev.solidappmaker.in/api/v1/contactus",
+      receiverEmail: "ansh.official03@gmail.com",
       showLastName: true,
       firstNameLabel: "First Name",
       lastNameLabel: "Last Name",
@@ -483,29 +493,57 @@ export const BLOCK_TYPES: BlockConfig[] = [
       submitLabel: "Send Message →",
       successMessage: "Thanks! We'll get back to you shortly.",
       errorMessage: "Something went wrong. Please try again.",
-      buttonBg: "#6366f1",
-      buttonTextColor: "#ffffff",
+      buttonBg: "var(--primary)",
+      buttonTextColor: "var(--button-text)",
       buttonBorderRadius: "10px",
       buttonFullWidth: true,
       buttonAlign: "right",
-      bgColor: "#ffffff",
+      bgColor: "var(--surface)",
       padding: "3rem 2rem",
       borderRadius: "20px",
       inputBg: "#f8fafc",
       inputBorderColor: "#e2e8f0",
-      inputFocusBorderColor: "#6366f1",
+      inputFocusBorderColor: "var(--primary)",
       labelColor: "#374151",
-      inputTextColor: "#111827",
+      inputTextColor: "var(--text)",
       titleText: "",
       subtitleText: "",
-      titleColor: "#0f172a",
-      subtitleColor: "#64748b",
+      titleColor: "var(--text)",
+      subtitleColor: "var(--text-muted)",
 
       // Animation
-      animationType: DEFAULT_CONFIG.animation.type,
-      animationDuration: DEFAULT_CONFIG.animation.duration,
-      animationDelay: DEFAULT_CONFIG.animation.delay,
       animationPlayback: DEFAULT_CONFIG.animation.playback,
+    },
+  },
+  {
+    type: "contactInfo",
+    label: "Contact Info",
+    icon: "Megaphone",
+    defaultProps: {
+      bgColor: "transparent",
+      textColor: "var(--text)",
+      padding: "16px 0",
+      items: [
+        { id: "1", title: "Email", content: "hello@example.com", icon: "Mail", color: "#6366f1" },
+        { id: "2", title: "Phone", content: "+1 (555) 000-0000", icon: "Phone", color: "#8b5cf6" },
+        { id: "3", title: "Address", content: "123 Business St, New York", icon: "MapPin", color: "#ec4899" },
+      ],
+      layout: "list", // list | grid
+      columns: 1,
+      gap: "1.5rem",
+      itemBg: "rgba(255,255,255,0.05)",
+      itemRadius: "12px",
+      itemPadding: "1rem 1.25rem",
+      showIcons: true,
+      iconSize: "24",
+      titleSize: "0.9rem",
+      contentSize: "1rem",
+
+      // Animation
+      animationType: DEFAULT_CONFIG.animationFade.type,
+      animationDuration: DEFAULT_CONFIG.animationFade.duration,
+      animationDelay: DEFAULT_CONFIG.animationFade.delay,
+      animationPlayback: DEFAULT_CONFIG.animationFade.playback,
     },
   },
 ];

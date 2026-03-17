@@ -1,5 +1,5 @@
 // sections/contact.ts
-import { makeBlock } from "../blockConfig";
+import { makeBlock } from "../config/blocks";
 import type { SectionTemplate } from "@/@Types";
 
 // ─── Helper: build a frosted info card (hero block) ─────────────────────────
@@ -556,21 +556,6 @@ export const contactSections: SectionTemplate[] = [
       });
 
       const glassCols = makeBlock("columns", { leftWidth: "38", gap: "3rem" });
-
-      // Left — Contact Information
-      glassCols.props.col0 = [
-        makeBlock("text", { content: "Contact Information", tag: "h3", fontSize: "1.4rem", fontWeight: "800", color: "#ffffff", lineHeight: "1.2" }),
-        makeBlock("text", { content: "Fill up the form and our team will get back to you within 24 hours.", tag: "p", fontSize: "0.875rem", color: "#94a3b8", lineHeight: "1.6", marginTop: "0.75rem" }),
-        makeBlock("divider", { marginY: "1.75rem", color: "rgba(255,255,255,0.08)" }),
-        makeBlock("icon", { iconName: "Mail", size: "18", color: "#94a3b8", align: "left", padding: "0" }),
-        makeBlock("text", { content: "contact@company.com", tag: "p", fontSize: "0.875rem", color: "#e2e8f0", marginTop: "0.35rem" }),
-        makeBlock("divider", { marginY: "1rem", color: "rgba(255,255,255,0.08)" }),
-        makeBlock("icon", { iconName: "MapPin", size: "18", color: "#94a3b8", align: "left", padding: "0" }),
-        makeBlock("text", { content: "08 Triveni Tower 3rd Floor\nCentral Avenue, Nagpur 440002, India", tag: "p", fontSize: "0.875rem", color: "#e2e8f0", lineHeight: "1.5", marginTop: "0.35rem" }),
-        makeBlock("divider", { marginY: "1.5rem", color: "rgba(255,255,255,0.08)" }),
-        makeBlock("text", { content: "Follow us", tag: "p", fontSize: "0.75rem", fontWeight: "700", color: "#94a3b8", letterSpacing: "0.08em" }),
-        makeBlock("text", { content: "🐦  𝕏 Twitter  |  📸 Instagram  |  💼 LinkedIn", tag: "p", fontSize: "0.8rem", color: "#c7d2fe", marginTop: "0.5rem" }),
-      ];
 
       const rightPanel = makeBlock("contactForm", {
         bgColor: "transparent", padding: "0",

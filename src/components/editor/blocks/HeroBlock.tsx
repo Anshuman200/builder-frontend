@@ -7,9 +7,9 @@ import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip } from "./
 export function HeroBlock({ block }: BlockProps) {
     const p = block.props;
     const align = (p.align as string) || "center";
-    const bgColor = (p.bgColor as string) || "#6366f1";
+    const bgColor = (p.bgColor as string) || "var(--primary)";
     const bgImage = p.bgImage as string;
-    const bgOverlay = (p.bgOverlay as string) || "rgba(0,0,0,0.25)";
+    const bgOverlay = (p.bgOverlay as string) || "var(--overlay)";
     const childBlocks = (p.childBlocks as any[]) ?? [];
 
     const viewMode = useEditorStore((s) => s.viewMode);
