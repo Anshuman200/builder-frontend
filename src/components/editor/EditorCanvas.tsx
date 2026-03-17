@@ -198,7 +198,7 @@ const DropZone = memo(function DropZone({ blocks }: { blocks: Block[] }) {
 
       const isRootOnly = data?.type === "section" || data?.blockType === "header" || data?.blockType === "footer" || data?.blockType === "hero" || data?.blockType === "features";
       const colMatch = overId.match(/^col-([01])-(.+)$/);
-      const childZoneMatch = overId.match(/^(?:hero|container)-(.+)$/);
+      const childZoneMatch = overId.match(/^(?:hero|container|wave)-(.+)$/);
 
       if (isRootOnly) {
         if (colMatch) overId = colMatch[2];

@@ -20,7 +20,7 @@ import { Section, Field, TextInput } from "./panels/shared";
 export { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, PANEL_COLORS } from "./panels/shared";
 
 // ─── Per-panel imports ────────────────────────────────────────────────────────
-import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPanel, VideoPanel, ColumnsPanel } from "./panels/BasicPanels";
+import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPanel, VideoPanel, ColumnsPanel, WavePanel, CarouselPanel } from "./panels/BasicPanels";
 import { ButtonPanel, HeaderPanel, FooterPanel } from "./panels/LayoutPanels";
 import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel, AccordionPanel } from "./panels/ContentPanels";
 
@@ -79,6 +79,8 @@ export default function PropertiesPanel() {
             {selectedBlock.type === "footer" && <FooterPanel block={selectedBlock} />}
             {selectedBlock.type === "contactForm" && <ContactFormPanel block={selectedBlock} />}
             {selectedBlock.type === "accordion" && <AccordionPanel block={selectedBlock} />}
+            {selectedBlock.type === "wave" && <WavePanel block={selectedBlock} />}
+            {selectedBlock.type === "carousel" && <CarouselPanel block={selectedBlock} />}
 
             {/* Generic Section ID field for all blocks */}
             <Section title="Advanced">

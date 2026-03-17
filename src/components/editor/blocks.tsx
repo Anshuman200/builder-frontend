@@ -48,6 +48,8 @@ import { TeamBlock } from "./blocks/TeamBlock";
 import { ContactFormBlock } from "./blocks/ContactFormBlock";
 import { ContactInfoBlock } from "./blocks/ContactInfoBlock";
 import AccordionBlock from "./blocks/AccordionBlock";
+import { CarouselBlock } from "./blocks/CarouselBlock";
+import { WaveBlock } from "./blocks/WaveBlock";
 
 // ─── Block Renderer dispatch ──────────────────────────────────────────────────
 
@@ -69,6 +71,8 @@ export function BlockRenderer({ block }: { block: Block }) {
     case "contactForm": return <ContactFormBlock block={block} />;
     case "contactInfo": return <ContactInfoBlock block={block} />;
     case "accordion": return <AccordionBlock block={block} />;
+    case "carousel": return <CarouselBlock block={block} />;
+    case "wave": return <WaveBlock block={block} />;
     case "footer":
     case "footer-2": return <FooterBlock block={block} />;
     default: return (

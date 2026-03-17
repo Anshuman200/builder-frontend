@@ -546,6 +546,55 @@ export const BLOCK_TYPES: BlockConfig[] = [
       animationPlayback: DEFAULT_CONFIG.animationFade.playback,
     },
   },
+  {
+    type: "carousel",
+    label: "Carousel",
+    icon: "Square3Stack3D",
+    defaultProps: {
+      padding: "24px",
+      tabletPadding: "16px",
+      mobilePadding: "12px",
+      bgColor: "transparent",
+      slidesCount: 3,
+      autoplay: true,
+      dots: true,
+      arrows: true,
+      fade: false,
+      speed: 500,
+      autoplaySpeed: 3000,
+      childBlocks: [], // Each slide is a child block container
+
+      // Animation
+      animationType: DEFAULT_CONFIG.animation.type,
+      animationDuration: DEFAULT_CONFIG.animation.duration,
+      animationDelay: DEFAULT_CONFIG.animation.delay,
+      animationPlayback: DEFAULT_CONFIG.animation.playback,
+    },
+  },
+  {
+    type: "wave",
+    label: "Wave Divider",
+    icon: "ArrowsUpDown",
+    defaultProps: {
+      pattern: "smooth",
+      layers: 1,
+      fillColor: "var(--primary)",
+      secondaryColor: "",
+      bgColor: "transparent",
+      height: "100px",
+      flipHorizontal: false,
+      flipVertical: false,
+      animated: false,
+      padding: "24px",
+      childBlocks: [],
+      
+      // Animation
+      animationType: DEFAULT_CONFIG.animation.type,
+      animationDuration: DEFAULT_CONFIG.animation.duration,
+      animationDelay: DEFAULT_CONFIG.animation.delay,
+      animationPlayback: DEFAULT_CONFIG.animation.playback,
+    },
+  },
 ];
 
 // ─── Helper to make a bare block with fresh ID ────────────────────────────────

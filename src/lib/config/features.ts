@@ -18,6 +18,8 @@ export const EDITOR_FEATURES = {
         "team",
         "contactForm",
         "footer",
+        "carousel",
+        "wave",
     ],
     allowedSectionCategories: [
         "Navigation",

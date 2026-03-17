@@ -201,3 +201,75 @@ export function ColumnsPanel({ block }: { block: Block }) {
         </>
     );
 }
+
+export function WavePanel({ block }: { block: Block }) {
+    const { updateBlock } = useEditorStore();
+    const p = block.props;
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
+    
+    return (
+        <>
+            <Section title="Design">
+                <Field label="Pattern">
+                    <SelectInput 
+                        value={(p.pattern as string) || "smooth"} 
+                        onChange={(v) => up("pattern", v)} 
+                        options={[
+                            { label: "Smooth Curve", value: "smooth" }, 
+                            { label: "Layered Depth", value: "layered" }, 
+                            { label: "Sharp & Jagged", value: "sharp" },
+                            { label: "Asymmetric Curve", value: "curve" },
+                            { label: "Swoosh", value: "swoosh" },
+                            { label: "Water Level", value: "water" },
+                            { label: "Blob Drop", value: "blob" },
+                            { label: "Deep Valley", value: "valley" }
+                        ]} 
+                    />
+                </Field>
+                <Field label="Density (Layers)">
+                    <input type="range" min={1} max={3} step={1} value={Number(p.layers || 1)} onChange={(e) => up("layers", parseInt(e.target.value))} style={{ width: "100%", accentColor: "var(--primary)" }} />
+                    <span style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center" }}>{String(p.layers ?? 1)}</span>
+                </Field>
+                <Field label="Primary Color"><ColorInput value={(p.fillColor as string) || "var(--primary)"} onChange={(v) => up("fillColor", v)} onBlur={(v) => up("fillColor", v, true)} /></Field>
+                <Field label="Secondary Color (Layers)"><ColorInput value={(p.secondaryColor as string) || ""} onChange={(v) => up("secondaryColor", v)} onBlur={(v) => up("secondaryColor", v, true)} /></Field>
+                <Field label="Height"><TextInput value={(p.height as string) || "100px"} onChange={(v) => up("height", v)} placeholder="100px or 15vw" /></Field>
+                <Field label="Background Context Color"><ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
+            </Section>
+            <Section title="Orientation & Animation">
+                <Field label="Padding"><TextInput value={(p.padding as string) || "24px"} onChange={(v) => up("padding", v)} placeholder="24px" /></Field>
+                <ToggleInput label="Flip Horizontal" value={!!p.flipHorizontal} onChange={(v: boolean) => up("flipHorizontal", v)} />
+                <ToggleInput label="Flip Vertical" value={!!p.flipVertical} onChange={(v: boolean) => up("flipVertical", v)} />
+                <ToggleInput label="CSS Drift Animation" value={!!p.animated} onChange={(v: boolean) => up("animated", v)} />
+            </Section>
+            {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
+        </>
+    );
+}
+
+export function CarouselPanel({ block }: { block: Block }) {
+    const { updateBlock } = useEditorStore();
+    const p = block.props;
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
+    
+    return (
+        <>
+            <Section title="Carousel Settings">
+                <Field label="Number of Slides">
+                    <input type="range" min={1} max={10} step={1} value={Number(p.slidesCount || 3)} onChange={(e) => up("slidesCount", parseInt(e.target.value))} style={{ width: "100%", accentColor: "var(--primary)" }} />
+                    <span style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center" }}>{String(p.slidesCount ?? 3)}</span>
+                </Field>
+                <ToggleInput label="AutoPlay" value={!!p.autoplay} onChange={(v: boolean) => up("autoplay", v)} />
+                <ToggleInput label="Show Dots" value={!!p.dots} onChange={(v: boolean) => up("dots", v)} />
+                <ToggleInput label="Show Arrows" value={!!p.arrows} onChange={(v: boolean) => up("arrows", v)} />
+                <ToggleInput label="Fade Transition" value={!!p.fade} onChange={(v: boolean) => up("fade", v)} />
+            </Section>
+            <Section title="Timing & Spacing">
+                <Field label="Transition Speed (ms)"><TextInput value={String(p.speed || 500)} onChange={(v) => up("speed", Number(v))} placeholder="500" /></Field>
+                <Field label="AutoPlay Delay (ms)"><TextInput value={String(p.autoplaySpeed || 3000)} onChange={(v) => up("autoplaySpeed", Number(v))} placeholder="3000" /></Field>
+                <Field label="Padding"><TextInput value={(p.padding as string) || "24px"} onChange={(v) => up("padding", v)} placeholder="24px" /></Field>
+                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
+            </Section>
+            {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
+        </>
+    );
+}

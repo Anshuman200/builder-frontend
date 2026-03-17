@@ -81,7 +81,7 @@ export default function EditorShell() {
 
     // Determine target location params based on dropzone IDs
     const colMatch = overId.match(/^col-([01])-(.+)$/);
-    const childZoneMatch = overId.match(/^(?:hero|container)-(.+)$/);
+    const childZoneMatch = overId.match(/^(?:hero|container|wave)-(.+)$/);
 
     const isRootOnly = data.type === "section" || data.blockType === "header" || data.blockType === "footer" || data.blockType === "hero" || data.blockType === "features";
 
