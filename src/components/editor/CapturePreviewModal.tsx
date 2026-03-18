@@ -81,13 +81,14 @@ export default function CapturePreviewModal({
         cacheBust: true,
         skipFonts: true,
         backgroundColor: '#ffffff',
+        // Fallback for broken images (avoids capture failure if an external image is 404/DNS error)
+        imagePlaceholder: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
       };
 
       // Target the iframe content directly - this is most reliable for "Visible Area" captures
       const sourceNode = iframeDoc.documentElement || iframeDoc.body;
       
       // Explicitly set width/height to match the visible viewport
-      // If mobile, this will be 375x667. If desktop, it will be the iframe's client dimensions.
       captureOptions.width = iframe.clientWidth;
       captureOptions.height = iframe.clientHeight;
 
@@ -111,7 +112,7 @@ export default function CapturePreviewModal({
       iframeDoc.head.appendChild(style);
 
       // Let Styles settle
-      await new Promise(r => setTimeout(r, 150));
+      await new Promise(r => setTimeout(r, 300));
 
       try {
         const dataUrl = await toPng(sourceNode, captureOptions);
@@ -150,7 +151,9 @@ export default function CapturePreviewModal({
       }
     } catch (err: any) {
       console.error("[STUDIO CAPTURE ERROR]", err);
-      setCaptureError(`Capture failed: ${err.message}`);
+      // Robust error reporting to catch non-standard error objects
+      const errorMessage = err instanceof Error ? err.message : (typeof err === 'string' ? err : JSON.stringify(err));
+      setCaptureError(`Capture failed: ${errorMessage || "Unknown Error"}`);
     } finally {
       setIsCapturing(false);
     }

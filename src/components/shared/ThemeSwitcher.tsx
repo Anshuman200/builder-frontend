@@ -19,11 +19,17 @@ export default function ThemeSwitcher() {
     // Prevent hydration errors by only rendering the correct icon after mount
     useEffect(() => {
         setMounted(true);
-        // On mount, check if user has a persisted theme override
+        // On mount, check if user has a persisted theme override, 
+        // but only if the page doesn't already have a preference (or it matches)
         try {
             const savedTheme = localStorage.getItem("pagecraft_theme");
-            if (savedTheme && (savedTheme === "light" || savedTheme === "dark") && savedTheme !== themeMode) {
-                updateTheme({ mode: savedTheme });
+            if (savedTheme && (savedTheme === "light" || savedTheme === "dark")) {
+                // If library theme is different from saved, we might want to sync, 
+                // but for building, the PAGE theme should win if it's explicitly set.
+                // For now, we only update if the current store mode is default/unset
+                if (themeMode !== savedTheme) {
+                   // Optional: updateTheme({ mode: savedTheme }); 
+                }
             }
         } catch (e) { }
     }, []);

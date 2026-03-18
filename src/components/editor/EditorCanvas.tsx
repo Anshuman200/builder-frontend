@@ -171,7 +171,7 @@ const DropZone = memo(function DropZone({ blocks }: { blocks: Block[] }) {
   // Track which block is being hovered over
   const [dropInfo, setDropInfo] = useState<{
     overId: string | null;
-    position: "before" | "after";
+    position: "before" | "after" | "inside";
     isDraggingFromPalette: boolean;
   }>({ overId: null, position: "after", isDraggingFromPalette: false });
 
@@ -188,6 +188,7 @@ const DropZone = memo(function DropZone({ blocks }: { blocks: Block[] }) {
     },
     onDragMove(event) {
       const { over, active } = event;
+
       if (!over) {
         setDropInfo({ overId: null, position: "after", isDraggingFromPalette: false });
         return;
@@ -196,7 +197,7 @@ const DropZone = memo(function DropZone({ blocks }: { blocks: Block[] }) {
       const isPalette = data?.type === "palette" || data?.type === "section";
       let overId = over.id as string;
 
-      const isRootOnly = data?.type === "section" || data?.blockType === "header" || data?.blockType === "footer" || data?.blockType === "hero" || data?.blockType === "features";
+      const isRootOnly = data?.blockType === "header" || data?.blockType === "footer";
       const colMatch = overId.match(/^col-([01])-(.+)$/);
       const childZoneMatch = overId.match(/^(?:hero|container|wave)-(.+)$/);
 
@@ -205,22 +206,43 @@ const DropZone = memo(function DropZone({ blocks }: { blocks: Block[] }) {
         else if (childZoneMatch) overId = childZoneMatch[1];
       }
 
-      if (!blockIds.includes(overId) && overId !== "canvas-root") {
+      let effectiveOverId = overId;
+      if (colMatch) effectiveOverId = colMatch[2];
+      else if (childZoneMatch) effectiveOverId = childZoneMatch[1];
+
+      if (!blockIds.includes(effectiveOverId) && effectiveOverId !== "canvas-root") {
         setDropInfo({ overId: null, position: "after", isDraggingFromPalette: isPalette });
         return;
       }
 
-      let position: "before" | "after" = "after";
+      let position: "before" | "after" | "inside" = "after";
       const overRect = over.rect;
       const activeRect = active.rect.current?.translated;
 
       if (overRect && activeRect) {
-        const overCenterY = overRect.top + overRect.height / 2;
         const activeCenterY = activeRect.top + activeRect.height / 2;
-        position = activeCenterY < overCenterY ? "before" : "after";
+        const relativeY = (activeCenterY - overRect.top) / overRect.height;
+        
+        const isContainer = ["wave", "hero", "container", "features"].includes(over.data.current?.blockType as string || "");
+
+        if (colMatch || childZoneMatch) {
+          if (relativeY < 0.15) position = "before";
+          else if (relativeY > 0.85) position = "after";
+          else position = "inside";
+        } else if (relativeY < 0.20) {
+          position = "before";
+        } else if (relativeY > 0.80) {
+          position = "after";
+        } else {
+          if (isContainer && !isRootOnly) {
+            position = "inside";
+          } else {
+            position = relativeY < 0.5 ? "before" : "after";
+          }
+        }
       }
 
-      setDropInfo({ overId, position, isDraggingFromPalette: isPalette });
+      setDropInfo({ overId: effectiveOverId, position, isDraggingFromPalette: isPalette });
     },
     onDragEnd() {
       setDropInfo({ overId: null, position: "after", isDraggingFromPalette: false });
@@ -314,7 +336,7 @@ const CanvasBlock = memo(function CanvasBlock({
   isFirst: boolean;
   isDraggingFromPalette: boolean;
   activeHeight: number;
-  dropPosition: "before" | "after";
+  dropPosition: "before" | "after" | "inside";
 }) {
   const { selectedBlockId, hoveredBlockId, selectBlock, hoverBlock, deleteBlock } =
     useEditorStore();
@@ -323,7 +345,7 @@ const CanvasBlock = memo(function CanvasBlock({
   const isHovered = hoveredBlockId === block.id;
   const showControls = isSelected || isHovered;
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } =
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({
       id: block.id,
       data: { type: "canvas", blockType: block.type },
@@ -332,6 +354,7 @@ const CanvasBlock = memo(function CanvasBlock({
   const showDropHighlight = isDropTarget && isDraggingFromPalette;
   const isBefore = showDropHighlight && dropPosition === "before";
   const isAfter = showDropHighlight && dropPosition === "after";
+  const isInside = showDropHighlight && dropPosition === "inside";
 
   return (
     <>
@@ -347,27 +370,53 @@ const CanvasBlock = memo(function CanvasBlock({
           transform: CSS.Transform.toString(transform),
           transition,
           opacity: isDragging ? 0.25 : 1,
-          boxShadow: showDropHighlight
-            ? "inset 0 0 0 2px rgba(99,102,241,0.45)"
-            : undefined,
+          boxShadow: isInside
+            ? "inset 0 0 0 2px #6366f1, 0 0 15px rgba(99,102,241,0.2)"
+            : showDropHighlight
+              ? "inset 0 0 0 2px rgba(99,102,241,0.25)"
+              : undefined,
+          borderRadius: isInside ? 8 : 4,
         }}
         onClick={(e) => { e.stopPropagation(); selectBlock(block.id); }}
         onMouseEnter={() => hoverBlock(block.id)}
         onMouseLeave={() => hoverBlock(null)}
       >
         {/* Drop zone label — top or bottom edge */}
-        {showDropHighlight && (
+        {(isBefore || isAfter) && (
           <div style={{
             position: "absolute",
             top: isBefore ? 0 : undefined,
             bottom: isAfter ? 0 : undefined,
             left: 0,
             right: 0,
-            height: 3,
+            height: 4,
             background: "linear-gradient(90deg, #6366f1, #8b5cf6)",
             zIndex: 5,
             boxShadow: "0 0 8px rgba(99,102,241,0.5)",
           }} />
+        )}
+
+        {/* Inner drop label for containers */}
+        {isInside && (
+          <div style={{
+            position: "absolute",
+            top: 12,
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "#6366f1",
+            color: "#fff",
+            padding: "4px 12px",
+            borderRadius: 99,
+            fontSize: 10,
+            fontWeight: 700,
+            zIndex: 100,
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            boxShadow: "0 4px 12px rgba(99,102,241,0.3)",
+            pointerEvents: "none",
+          }}>
+            Drop Inside
+          </div>
         )}
 
         {/* Outline overlay — use inset box-shadow so it's not clipped by overflow:hidden */}

@@ -17,9 +17,10 @@ interface AuthModalProps {
   open: boolean;
   onClose: () => void;
   defaultTab?: Tab;
+  redirectOnSuccess?: boolean;
 }
 
-export function AuthModal({ open, onClose, defaultTab = "login" }: AuthModalProps) {
+export function AuthModal({ open, onClose, defaultTab = "login", redirectOnSuccess = true }: AuthModalProps) {
   const [tab, setTab] = useState<Tab>(defaultTab);
 
   // Keep these two states to pass the email between steps
@@ -44,8 +45,10 @@ export function AuthModal({ open, onClose, defaultTab = "login" }: AuthModalProp
   const handleLogin = async (email: string, password: string) => {
     const result = await login(email, password);
     handleClose();
-    // Always redirect to dashboard after a manual login from a public page
-    router.push(result?.redirectTo ?? "/home");
+    // Only redirect if requested
+    if (redirectOnSuccess) {
+        router.push(result?.redirectTo ?? "/home");
+    }
   };
 
   const handleRegister = async (name: string, email: string, password: string) => {
@@ -57,8 +60,10 @@ export function AuthModal({ open, onClose, defaultTab = "login" }: AuthModalProp
   const handleVerify = async (email: string, otp: string) => {
     await verifyOtp(email, otp);
     handleClose();
-    // Redirect to home after successful verification
-    router.push("/home");
+    // Only redirect if requested
+    if (redirectOnSuccess) {
+        router.push("/home");
+    }
   };
 
   const handleForgotPassword = async (email: string) => {
@@ -165,7 +170,7 @@ export function AuthModal({ open, onClose, defaultTab = "login" }: AuthModalProp
                 <div key={tab} style={{ animation: "tab-slide 0.2s ease" }}>
                   {tab === "login" && (
                     <LoginForm
-                      handleLogin={handleLogin} setTab={setTab}
+                      handleLogin={handleLogin} setTab={setTab} isLoading={isLoading}
                     />
                   )}
                   {tab === "register" && (

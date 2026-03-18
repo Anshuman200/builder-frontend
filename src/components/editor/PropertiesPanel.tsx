@@ -56,7 +56,7 @@ export default function PropertiesPanel() {
     }
 
     return (
-        <aside style={{ width: 300, flexShrink: 0, background: "var(--bg-secondary)", borderLeft: "1px solid var(--border)", overflowY: "auto", display: "flex", flexDirection: "column" }}>
+        <aside style={{ width: 380, flexShrink: 0, background: "var(--bg-secondary)", borderLeft: "1px solid var(--border)", overflowY: "auto", display: "flex", flexDirection: "column" }}>
             {/* Panel Header */}
             <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--border)" }}>
                 <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Properties</p>

@@ -50,11 +50,10 @@ const SidebarContent = ({ collapsed, pathname, router, setMobileVisible, user, h
                             router.push(item.key);
                             setMobileVisible(false);
                         }}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all duration-200 group ${
-                            isActive 
-                                ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' 
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all duration-200 group ${isActive
+                                ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
                                 : 'text-white/40 hover:text-white hover:bg-white/5'
-                        } ${collapsed ? 'justify-center px-0' : ''}`}
+                            } ${collapsed ? 'justify-center px-0' : ''}`}
                     >
                         <div className={`shrink-0 ${isActive ? 'text-white' : 'text-white/30 group-hover:text-indigo-400'}`}>
                             <Icon className="w-5 h-5" />
@@ -67,11 +66,11 @@ const SidebarContent = ({ collapsed, pathname, router, setMobileVisible, user, h
 
         <div className="p-3 border-t border-white/5 flex flex-col gap-3">
             {!collapsed && (
-                <button 
+                <button
                     className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group overflow-hidden"
                     onClick={() => router.push("/admin/profile")}
                 >
-                    { (user as any)?.profilePic ? (
+                    {(user as any)?.profilePic ? (
                         <img src={(user as any).profilePic} alt="" className="w-9 h-9 rounded-xl object-cover shrink-0 ring-1 ring-white/10" />
                     ) : (
                         <div className="w-9 h-9 rounded-xl bg-linear-to-br from-indigo-500 to-violet-600 flex items-center justify-center font-black text-white shrink-0 shadow-lg shadow-indigo-500/20">
@@ -136,7 +135,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         >
             <div className="h-screen bg-neutral-950 overflow-hidden flex flex-col font-sans selection:bg-indigo-500/30 text-white">
                 <div className="lg:hidden h-16 px-6 flex items-center justify-between border-b border-white/5 bg-neutral-950 shrink-0 z-40">
-                    <Link 
+                    <Link
                         href={!user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home"}
                         className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                     >
@@ -161,26 +160,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         styles={{ body: { padding: 0 } }}
                         closable={false}
                         className="[&_.ant-drawer-content]:bg-neutral-950"
-                        width={280}
+                        size={280}
                     >
-                        <SidebarContent 
-                            collapsed={false} 
-                            pathname={pathname} 
-                            router={router} 
-                            setMobileVisible={setMobileVisible} 
-                            user={user} 
-                            handleLogout={handleLogout} 
+                        <SidebarContent
+                            collapsed={false}
+                            pathname={pathname}
+                            router={router}
+                            setMobileVisible={setMobileVisible}
+                            user={user}
+                            handleLogout={handleLogout}
                         />
                     </Drawer>
 
                     <div className={`hidden lg:flex flex-col relative transition-all duration-500 ease-in-out border-r border-white/5 bg-neutral-950 ${collapsed ? 'w-20' : 'w-64'}`}>
-                        <SidebarContent 
-                            collapsed={collapsed} 
-                            pathname={pathname} 
-                            router={router} 
-                            setMobileVisible={setMobileVisible} 
-                            user={user} 
-                            handleLogout={handleLogout} 
+                        <SidebarContent
+                            collapsed={collapsed}
+                            pathname={pathname}
+                            router={router}
+                            setMobileVisible={setMobileVisible}
+                            user={user}
+                            handleLogout={handleLogout}
                         />
                         <button
                             onClick={() => setCollapsed(!collapsed)}

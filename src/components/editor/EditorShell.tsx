@@ -10,6 +10,7 @@ import {
   useSensor,
   useSensors,
   closestCenter,
+  pointerWithin,
   type DragStartEvent,
   type DragEndEvent,
 } from "@dnd-kit/core";
@@ -25,17 +26,12 @@ import { BlockRenderer } from "./blocks";
 import { GlobalIconPicker } from "./GlobalIconPicker";
 
 export default function EditorShell() {
-  const { page, undo, redo, deleteBlock, selectedBlockId, historyIndex, history, addBlock, moveBlock, selectBlock, updateBlock } =
-    useEditorStore();
+  const {
+    page, undo, redo, deleteBlock, selectedBlockId, historyIndex,
+    history, addBlock, moveBlock, selectBlock, updateBlock,
+    activeDrag, setActiveDrag
+  } = useEditorStore();
   const blocks = page?.content ?? [];
-
-  // ── Active drag state (for DragOverlay ghost) ──────────────────────────────
-  const [activeDrag, setActiveDrag] = useState<{
-    type: "palette" | "canvas" | "section";
-    blockType?: string;
-    templateId?: string;
-    block?: Block;
-  } | null>(null);
 
   // ── Sensors ────────────────────────────────────────────────────────────────
   const sensors = useSensors(
@@ -58,7 +54,6 @@ export default function EditorShell() {
     }
   }
 
-  // ── Drag handlers ──────────────────────────────────────────────────────────
   function handleDragStart(event: DragStartEvent) {
     const data = event.active.data.current as { type: "palette" | "canvas" | "section"; blockType?: string; templateId?: string };
     if (data?.type === "palette") {
@@ -79,37 +74,62 @@ export default function EditorShell() {
     const data = active.data.current as { type: "palette" | "canvas" | "section"; blockType?: string; templateId?: string };
     const overId = over.id as string;
 
-    // Determine target location params based on dropzone IDs
-    const colMatch = overId.match(/^col-([01])-(.+)$/);
-    const childZoneMatch = overId.match(/^(?:hero|container|wave)-(.+)$/);
-
-    const isRootOnly = data.type === "section" || data.blockType === "header" || data.blockType === "footer" || data.blockType === "hero" || data.blockType === "features";
-
     let targetId = overId;
     let position: "before" | "after" | "inside" = "after";
     let childProp: string | undefined = undefined;
 
-    // Determine before/after based on the dragged item's center point vs the target's center
-    // We always compute this because root-only elements need it even when hovered over a container/hero
+    const isRootOnly = data.blockType === "header" || data.blockType === "footer";
+
+    // 1. Map nested zones to parent block but track if it was an internal zone
+    const colMatch = overId.match(/^col-([01])-(.+)$/);
+    const childZoneMatch = overId.match(/^(?:hero|container|wave)-(.+)$/);
+
+    let effectiveTargetId = overId;
+    if (colMatch) effectiveTargetId = colMatch[2];
+    else if (childZoneMatch) effectiveTargetId = childZoneMatch[1];
+
+    // 2. Calculate position using the target block's rect (or the strip's rect)
     const overRect = over.rect;
     const activeRect = active.rect.current?.translated;
-    if (overRect && activeRect) {
-      const overCenterY = overRect.top + overRect.height / 2;
-      const activeCenterY = activeRect.top + activeRect.height / 2;
-      position = activeCenterY < overCenterY ? "before" : "after";
-    }
 
-    if (colMatch) {
-      targetId = colMatch[2];
-      if (!isRootOnly) {
-        position = "inside";
-        childProp = `col${colMatch[1]}`;
-      }
-    } else if (childZoneMatch) {
-      targetId = childZoneMatch[1];
-      if (!isRootOnly) {
-        position = "inside";
-        childProp = "childBlocks";
+    if (overRect && activeRect) {
+      const activeCenterY = activeRect.top + activeRect.height / 2;
+      const relativeY = (activeCenterY - overRect.top) / overRect.height;
+
+      const isContainer = ["wave", "hero", "container", "features"].includes(over.data.current?.blockType as string || "");
+
+      if (colMatch || childZoneMatch) {
+        // Use a 15/70/15 split on the strip itself to allow "breaking out" of nesting
+        if (relativeY < 0.15) {
+          position = "before";
+          targetId = effectiveTargetId;
+          childProp = undefined;
+        } else if (relativeY > 0.85) {
+          position = "after";
+          targetId = effectiveTargetId;
+          childProp = undefined;
+        } else {
+          position = "inside";
+          if (colMatch) {
+            targetId = colMatch[2];
+            childProp = `col${colMatch[1]}`;
+          } else if (childZoneMatch) {
+            targetId = childZoneMatch[1];
+            childProp = "childBlocks";
+          }
+        }
+      } else if (relativeY < 0.20) {
+        position = "before";
+      } else if (relativeY > 0.80) {
+        position = "after";
+      } else {
+        // Middle 60% of a standard block
+        if (isContainer && !isRootOnly) {
+          position = "inside";
+          childProp = "childBlocks";
+        } else {
+          position = relativeY < 0.5 ? "before" : "after";
+        }
       }
     }
 
@@ -201,7 +221,7 @@ export default function EditorShell() {
       <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
         <EditorToolbar />
         <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-          <BlockPalette />
+          <PropertiesPanel />
           <div
             className="flex-1 flex flex-col overflow-hidden bg-gray-100 p-2 border-2 border-dashed"
             onClick={(e) => {
@@ -212,7 +232,6 @@ export default function EditorShell() {
           >
             <EditorCanvas />
           </div>
-          <PropertiesPanel />
         </div>
       </div>
 

@@ -34,13 +34,18 @@ const WAVE_PATHS = {
   valley: [
     "M0,320L120,282.7C240,245,480,171,720,170.7C960,171,1200,245,1320,282.7L1440,320L1440,320L1320,320C1200,320,960,320,720,320C480,320,240,320,120,320L0,320Z",
     "M0,224L120,224C240,224,480,224,720,186.7C960,149,1200,75,1320,37.3L1440,0L1440,320L1320,320C1200,320,960,320,720,320C480,320,240,320,120,320L0,320Z"
+  ],
+  deep: [
+    "M0,192L48,181.3C96,171,192,149,288,149.3C384,149,480,171,576,202.7C672,235,768,277,864,282.7C960,288,1056,256,1152,240C1248,224,1344,224,1392,224L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z",
+    "M0,128L48,138.7C96,149,192,171,288,208C384,245,480,299,576,304C672,309,768,267,864,240C960,213,1056,203,1152,213.3C1248,224,1344,256,1392,272L1440,288L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z",
+    "M0,64L48,80C96,96,192,128,288,170.7C384,213,480,267,576,277.3C672,288,768,256,864,229.3C960,203,1056,181,1152,181.3C1248,181,1344,203,1392,213.3L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
   ]
 };
 
 export function WaveBlock({ block }: BlockProps) {
   const { props } = block;
   const isPreview = React.useContext(PreviewContext);
-  
+
   // Extract props with new customization defaults
   const childBlocks = (props.childBlocks as Block[]) || [];
   const pattern = (props.pattern as keyof typeof WAVE_PATHS) || "smooth";
@@ -48,14 +53,14 @@ export function WaveBlock({ block }: BlockProps) {
   const fillColor = (props.fillColor as string) || "var(--primary)";
   const secondaryColor = (props.secondaryColor as string) || "";
   const bgColor = (props.bgColor as string) || "transparent";
-  const height = (props.height as string) || "100px";
+  const height = (props.height as string) || "120px";
   const flipHorizontal = props.flipHorizontal as boolean ?? false;
   const flipVertical = props.flipVertical as boolean ?? false;
   const animated = props.animated as boolean ?? false;
-  
+
   // Select paths based on pattern
   let paths = WAVE_PATHS[pattern] || WAVE_PATHS["smooth"];
-  
+
   // Adjust paths based on density (layers)
   if (pattern === "layered") {
     // layered pattern actually has 3 paths. We pick based on 'layers' prop
@@ -68,7 +73,7 @@ export function WaveBlock({ block }: BlockProps) {
       paths = Array(Math.min(layers, 3)).fill(paths[0]);
     }
   }
-  
+
   // Base styling for the container
   const style: React.CSSProperties = {
     backgroundColor: bgColor,
@@ -80,19 +85,19 @@ export function WaveBlock({ block }: BlockProps) {
     overflow: "hidden",
     minHeight: height,
   };
-  
+
   // To flip the SVG visually
   const transform = [
     flipHorizontal ? "scaleX(-1)" : "",
     flipVertical ? "scaleY(-1)" : ""
   ].filter(Boolean).join(" ");
-  
+
   const svgStyle: React.CSSProperties = {
     position: "absolute",
     left: 0,
     bottom: flipVertical ? "auto" : 0,
     top: flipVertical ? 0 : "auto",
-    width: "100%", 
+    width: "100%",
     height: height,
     transform: transform || "none",
     transition: "fill 0.3s ease, height 0.3s ease",
@@ -103,9 +108,9 @@ export function WaveBlock({ block }: BlockProps) {
 
   return (
     <div style={style}>
-      <svg 
-        viewBox="0 0 1440 320" 
-        preserveAspectRatio="none" 
+      <svg
+        viewBox="0 0 1440 320"
+        preserveAspectRatio="none"
         style={svgStyle}
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -125,25 +130,25 @@ export function WaveBlock({ block }: BlockProps) {
           // Calculate opacity based on index to create depth (if multiple layers)
           const isTopLayer = i === paths.length - 1;
           const opacity = isTopLayer ? 1 : (0.3 + (i * 0.2));
-          
+
           // Apply secondary color to back layers if provided
           const currentFill = (!isTopLayer && secondaryColor) ? secondaryColor : fillColor;
-          
+
           return (
-            <path 
+            <path
               key={`${pattern}-${i}`}
-              fill={currentFill} 
-              fillOpacity={opacity} 
+              fill={currentFill}
+              fillOpacity={opacity}
               d={d}
               style={{
-                animation: animated && !isTopLayer ? `wave-drift ${8 + i*2}s linear infinite alternate` : "none",
+                animation: animated && !isTopLayer ? `wave-drift ${8 + i * 2}s linear infinite alternate` : "none",
                 transformOrigin: "bottom"
               }}
             />
           );
         })}
       </svg>
-      
+
       {/* Content Layer (Above the SVG contextually) */}
       <div style={{ position: "relative", zIndex: 1, width: "100%", display: "flex", flexDirection: "column", flex: 1 }}>
         {childBlocks.map((child: Block) => (

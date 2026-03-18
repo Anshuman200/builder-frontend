@@ -222,7 +222,8 @@ export function WavePanel({ block }: { block: Block }) {
                             { label: "Swoosh", value: "swoosh" },
                             { label: "Water Level", value: "water" },
                             { label: "Blob Drop", value: "blob" },
-                            { label: "Deep Valley", value: "valley" }
+                            { label: "Deep Valley", value: "valley" },
+                            { label: "Deep Ocean", value: "deep" }
                         ]} 
                     />
                 </Field>

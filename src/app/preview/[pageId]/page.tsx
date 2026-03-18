@@ -53,8 +53,8 @@ export default function PreviewPage() {
     }, [pageId, setPage]);
 
     useEffect(() => {
-        if (mainRef.current && page?.theme) {
-            applyThemeToElement(mainRef.current, page.theme);
+        if (mainRef.current) {
+            applyThemeToElement(mainRef.current, page?.theme || DEFAULT_THEME);
         }
     }, [page?.theme]);
 

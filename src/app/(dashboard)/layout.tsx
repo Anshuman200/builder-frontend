@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useCreatePage } from "@/lib/api/queries";
@@ -8,6 +8,42 @@ import { useToasts } from "@/hooks/useToasts";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { PageTransition } from "@/components/layout/PageTransition";
+import NewPageWizard from "@/components/editor/NewPageWizard";
+import { SECTION_TEMPLATES } from "@/lib/config/sections";
+
+// ─── Map wizard section IDs → section template category prefixes ──────────────
+const SECTION_ID_MAP: Record<string, string> = {
+  header: "nav-",
+  hero: "hero-",
+  features: "features-",
+  stats: "stats-",
+  team: "team-",
+  testimonials: "testimonials-",
+  pricing: "pricing-",
+  contact: "contact-",
+  cta: "cta-",
+  gallery: "gallery-",
+  faq: "faq-",
+  footer: "footer-",
+};
+
+// Pick the first matching template for each section ID, ensuring header is first and footer is last
+function buildContentFromSections(sectionIds: string[]) {
+  // Sort: header first, footer last, rest in selection order
+  const sorted = [
+    ...sectionIds.filter((id) => id === "header"),
+    ...sectionIds.filter((id) => id !== "header" && id !== "footer"),
+    ...sectionIds.filter((id) => id === "footer"),
+  ];
+  return sorted
+    .map((id) => {
+      const prefix = SECTION_ID_MAP[id];
+      if (!prefix) return null;
+      const template = SECTION_TEMPLATES.find((t) => t.id.startsWith(prefix));
+      return template ? template.create() : null;
+    })
+    .filter(Boolean);
+}
 
 export default function DashboardLayout({
   children,
@@ -20,18 +56,26 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const createMutation = useCreatePage();
 
-  const handleCreate = useCallback(async () => {
+  const [wizardOpen, setWizardOpen] = useState(false);
+
+  const handleCreate = useCallback(() => {
+    setWizardOpen(true);
+  }, []);
+
+  const handleWizardSubmit = useCallback(async (title: string, slug: string, selectedSections: string[]) => {
     try {
+      const content = buildContentFromSections(selectedSections);
       const payload = {
-        title: "Untitled Page",
-        slug: "untitled-" + Date.now().toString().slice(-4),
+        title,
+        slug: slug || "page-" + Date.now().toString().slice(-4),
         status: "DRAFT",
         isPublic: false,
-        content: [],
+        content,
         meta: {}
       };
       const res = await createMutation.mutateAsync(payload) as any;
-      success("Project created");
+      success("Project created!");
+      setWizardOpen(false);
       router.push(`/editor/${res.data.page._id}`);
     } catch {
       toastError("Failed to create project");
@@ -49,7 +93,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-neutral-950 text-white selection:bg-indigo-500/30">
       <DashboardHeader onCreatePage={handleCreate} />
-      
+
       <main className="relative">
         <PageTransition pathname={pathname}>
           {children}
@@ -58,6 +102,13 @@ export default function DashboardLayout({
 
       {/* Persistent mobile navigation spacer */}
       <div className="h-16 lg:hidden shrink-0" />
+
+      <NewPageWizard
+        open={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        onSubmit={handleWizardSubmit}
+        isSubmitting={createMutation.isPending}
+      />
     </div>
   );
 }

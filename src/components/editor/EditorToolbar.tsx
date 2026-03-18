@@ -26,6 +26,7 @@ import { clearLocalDraft } from "@/lib/utils/storage";
 import { useToasts } from "@/hooks/useToasts";
 import { useUpdatePage, useCreatePage, usePublishPage } from "@/lib/api/queries";
 import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
+import BlockPalette from "./BlockPalette";
 
 
 export default function EditorToolbar() {
@@ -145,6 +146,14 @@ export default function EditorToolbar() {
       }
     }
   }, [page]);
+
+  // Sync / Auto-save on Login
+  useEffect(() => {
+    // If user just logged in and has unsaved changes, persist them!
+    if (user && isDirty && !isSaving) {
+      handleSave();
+    }
+  }, [user]);
 
   async function handleSave() {
     if (!user) {
@@ -363,6 +372,8 @@ export default function EditorToolbar() {
             {page?.title || "Untitled Page"}
           </button>
         )}
+        <div style={{ width: 1, height: 20, background: "var(--border)", flexShrink: 0, margin: "0 4px" }} />
+        <BlockPalette />
       </div>
 
       {/* Center — viewport switcher */}
@@ -609,8 +620,8 @@ export default function EditorToolbar() {
           </Popover>
         </div>
 
-        {/* User Menu Popover (if logged in) */}
-        {user && (
+        {/* User Menu / Login Button */}
+        {user ? (
           <div style={{ position: "relative" }}>
             <Dropdown
               trigger={['click']}
@@ -656,10 +667,35 @@ export default function EditorToolbar() {
               </button>
             </Dropdown>
           </div>
+        ) : (
+          <button
+            onClick={() => setShowAuthModal(true)}
+            style={{
+              padding: "6px 14px",
+              borderRadius: 8,
+              background: "var(--primary)",
+              color: "white",
+              border: "none",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "opacity 0.2s",
+              boxShadow: "0 2px 6px rgba(99,102,241,0.25)"
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
+            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+          >
+            Sign In
+          </button>
         )}
       </div>
 
-      <AuthModal open={showAuthModal} onClose={() => setShowAuthModal(false)} defaultTab="login" />
+      <AuthModal 
+        open={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+        defaultTab="login" 
+        redirectOnSuccess={false} 
+      />
 
       {/* Capture Preview Modal */}
       {user && pageId && pageId.length >= 24 && (

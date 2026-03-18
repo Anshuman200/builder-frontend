@@ -24,6 +24,8 @@ export { testimonialSections } from "../sections/testimonial";
 export { footerSections } from "../sections/footer";
 export { contactSections } from "../sections/contact";
 export { faqSections } from "../sections/faq";
+export { statsSections } from "../sections/stats";
+export { ctaSections } from "../sections/cta";
 
 // ─── Combined array (ordered display) ────────────────────────────────────────
 
@@ -37,6 +39,8 @@ import { testimonialSections } from "../sections/testimonial";
 import { footerSections } from "../sections/footer";
 import { contactSections } from "../sections/contact";
 import { faqSections } from "../sections/faq";
+import { statsSections } from "../sections/stats";
+import { ctaSections } from "../sections/cta";
 
 export const SECTION_TEMPLATES: SectionTemplate[] = [
     ...navigationSections,
@@ -49,4 +53,6 @@ export const SECTION_TEMPLATES: SectionTemplate[] = [
     ...footerSections,
     ...contactSections,
     ...faqSections,
+    ...statsSections,
+    ...ctaSections,
 ];

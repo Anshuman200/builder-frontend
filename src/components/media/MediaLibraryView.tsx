@@ -157,7 +157,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
 
     // --- Unified Media Synchronization ---
     // (Obsolete: Removed manual sync in favor of useInfiniteMedia pages memo)
-    
+
     // Debounce search
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -181,7 +181,10 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
 
     const handleDelete = (id: string, record: MediaRecord) => {
         const userId = user?._id || (user as any)?.id;
-        if (!userId || record.owner !== userId) {
+        const isAdmin = (user as any)?.role === 'admin';
+        const ownerId = typeof record.owner === 'object' ? (record.owner as any)?._id || (record.owner as any)?.id : record.owner;
+
+        if (!userId || (ownerId !== userId && !isAdmin)) {
             toasts.error("You don't have permission to delete this asset.");
             return;
         }
@@ -193,7 +196,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
         if (mediaToDelete) {
             setIsDeleting(true);
             const record = allMedia.find(m => m._id === mediaToDelete);
-            
+
             if (record) {
                 try {
                     await s3Service.deleteFile(record.key);
@@ -299,13 +302,13 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                 {tab !== 'upload' && (
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide w-full sm:w-auto pb-2 sm:pb-0 -mx-2 px-2">
-                            <button 
+                            <button
                                 onClick={() => setFilterType('all')}
                                 className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterType === 'all' ? 'bg-indigo-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                             >
                                 All Assets
                             </button>
-                            <button 
+                            <button
                                 onClick={() => setFilterType('image')}
                                 className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterType === 'image' ? 'bg-indigo-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                             >
@@ -314,7 +317,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                                     <span>Images</span>
                                 </div>
                             </button>
-                            <button 
+                            <button
                                 onClick={() => setFilterType('video')}
                                 className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterType === 'video' ? 'bg-indigo-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
                             >
@@ -327,7 +330,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
 
                         {!hideBatchActions && (
                             <div className="flex items-center gap-2 w-full sm:w-auto">
-                                <Button 
+                                <Button
                                     onClick={() => {
                                         if (selectionMode) {
                                             setSelectionMode(false);
@@ -490,16 +493,18 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                                         {allMedia.map((m, index) => {
                                             const isSelected = selectedMediaIds.includes(m._id);
                                             const userId = user?._id || (user as any)?.id;
-                                            const isOwner = !!userId && m.owner === userId;
+                                            const ownerId = typeof m.owner === 'object' ? (m.owner as any)?._id || (m.owner as any)?.id : m.owner;
+                                            const isAdmin = (user as any)?.role === 'admin';
+                                            const isOwner = !!userId && (ownerId === userId || isAdmin);
                                             const assetUrl = s3Service.getPublicUrl(m.key) || m.url || '';
                                             const isVideo = m.mimeType?.startsWith('video/');
-                                            const thumbnail = m.thumbnailKey 
-                                                ? (s3Service.getPublicUrl(m.thumbnailKey) || '') 
+                                            const thumbnail = m.thumbnailKey
+                                                ? (s3Service.getPublicUrl(m.thumbnailKey) || '')
                                                 : (isVideo && m.placeholder ? m.placeholder : assetUrl);
 
                                             return (
                                                 <div
-                                                    key={m._id}
+                                                    key={index || m._id}
                                                     className={`group relative aspect-square rounded-4xl overflow-hidden bg-white/5 border transition-all duration-300 shadow-2xl flex items-center justify-center ${selectionMode && isSelected ? 'border-indigo-500 scale-95 ring-4 ring-indigo-500/20' : 'border-white/5 hover:border-white/20 hover:scale-[1.02]'}`}
                                                     onClick={(e) => {
                                                         if (selectionMode) {
@@ -526,10 +531,10 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                                                             placeholder={!m.mimeType?.startsWith('video/') && m.placeholder ? "blur" : undefined}
                                                             blurDataURL={m.placeholder}
                                                         />
-                                                        
+
                                                         {/* Hidden AntImage for Preview Trigger (or custom click handler for video) */}
                                                         {!(selectionMode || onSelect) && (
-                                                            <div 
+                                                            <div
                                                                 className="absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
                                                                 onClick={() => {
                                                                     // If we know it's a video OR if it has a thumbnail (which implies video), intercept preview
@@ -537,7 +542,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                                                                     if (isVideoInfo) {
                                                                         setVideoPreviewUrl(assetUrl);
                                                                         // thumbnail already prioritizes thumbKey > placeholder > assetUrl
-                                                                        setVideoPreviewPoster(thumbnail); 
+                                                                        setVideoPreviewPoster(thumbnail);
                                                                         setVideoPreviewVisible(true);
                                                                     }
                                                                 }}
@@ -546,25 +551,25 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                                                                 {!(m.mimeType?.startsWith('video/') || !!m.thumbnailKey) ? (
                                                                     <AntImage
                                                                         src={assetUrl}
-                                                                    preview={{
-                                                                        cover: (
-                                                                            <div className="flex flex-col items-center gap-2 font-black text-[10px] tracking-widest text-white">
-                                                                                <div className="w-10 h-10 rounded-full bg-indigo-500/30 flex items-center justify-center border border-white/10">
-                                                                                    <EyeIcon className="w-5 h-5" />
+                                                                        preview={{
+                                                                            cover: (
+                                                                                <div className="flex flex-col items-center gap-2 font-black text-[10px] tracking-widest text-white">
+                                                                                    <div className="w-10 h-10 rounded-full bg-indigo-500/30 flex items-center justify-center border border-white/10">
+                                                                                        <EyeIcon className="w-5 h-5" />
+                                                                                    </div>
+                                                                                    PREVIEW
                                                                                 </div>
-                                                                                PREVIEW
-                                                                            </div>
-                                                                        ),
-                                                                    }}
-                                                                    className="hidden"
-                                                                    rootClassName="absolute inset-0 w-full h-full! [&_.ant-image-mask]:rounded-4xl"
-                                                                />
+                                                                            ),
+                                                                        }}
+                                                                        className="hidden"
+                                                                        rootClassName="absolute inset-0 w-full h-full! [&_.ant-image-mask]:rounded-4xl"
+                                                                    />
                                                                 ) : (
                                                                     <div className="flex flex-col items-center justify-center w-full h-full bg-black/40">
                                                                         <div className="flex flex-col items-center gap-2 font-black text-[10px] tracking-widest text-white">
                                                                             <div className="w-10 h-10 rounded-full bg-indigo-500/80 flex items-center justify-center border border-white/20">
                                                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1">
-                                                                                  <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
+                                                                                    <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
                                                                                 </svg>
                                                                             </div>
                                                                             PLAY
@@ -619,7 +624,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                                             );
                                         })}
                                     </div>
-                                    
+
                                     {/* Infinite Scroll Sentinel */}
                                     <div ref={loadMoreRef} className="h-20 w-full flex items-center justify-center">
                                         {(hasNextPage || isFetchingNextPage) && (
@@ -702,11 +707,11 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
             >
                 {videoPreviewUrl && (
                     <div className="rounded-3xl overflow-hidden bg-black/50 backdrop-blur-3xl border border-white/10 shadow-2xl relative">
-                        <video 
-                            src={videoPreviewUrl} 
+                        <video
+                            src={videoPreviewUrl}
                             poster={videoPreviewPoster || undefined}
-                            controls 
-                            autoPlay 
+                            controls
+                            autoPlay
                             className="w-full h-auto max-h-[80vh] object-contain"
                         />
                     </div>

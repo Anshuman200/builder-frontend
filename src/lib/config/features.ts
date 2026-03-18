@@ -20,6 +20,8 @@ export const EDITOR_FEATURES = {
         "footer",
         "carousel",
         "wave",
+        "stats",
+        "cta",
     ],
     allowedSectionCategories: [
         "Navigation",
@@ -27,11 +29,13 @@ export const EDITOR_FEATURES = {
         "Team",
         "Gallery",
         "Features",
+        "Stats",
         "Pricing",
         "Testimonial",
         "Footer",
         "Contact",
         "FAQ",
+        "CTA",
     ],
 
     // Properties Panel Features

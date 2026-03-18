@@ -53,6 +53,12 @@ interface EditorStore {
         onSelect: (name: string) => void;
         anchorRect: { top: number; left: number; width: number; height: number } | null;
     };
+    activeDrag: {
+        type: "palette" | "canvas" | "section";
+        blockType?: string;
+        templateId?: string;
+        block?: Block;
+    } | null;
 
     // ─ Actions ────────────────────────────────────────────────────────────────
     setPage: (page: EditorPage) => void;
@@ -60,6 +66,7 @@ interface EditorStore {
     hoverBlock: (id: string | null) => void;
     setViewMode: (mode: "desktop" | "tablet" | "mobile") => void;
     setIsSaving: (v: boolean) => void;
+    setActiveDrag: (drag: EditorStore["activeDrag"]) => void;
 
     showIconPicker: (params: { value: string; onSelect: (name: string) => void; anchorRect: { top: number; left: number; width: number; height: number } }) => void;
     hideIconPicker: () => void;
@@ -281,6 +288,7 @@ export const useEditorStore = create<EditorStore>()(
             onSelect: () => { },
             anchorRect: null,
         },
+        activeDrag: null,
 
         setPage: (page) =>
             set((state) => {
@@ -294,6 +302,7 @@ export const useEditorStore = create<EditorStore>()(
         hoverBlock: (id) => set({ hoveredBlockId: id }),
         setViewMode: (mode) => set({ viewMode: mode }),
         setIsSaving: (v) => set({ isSaving: v }),
+        setActiveDrag: (drag: EditorStore["activeDrag"]) => set({ activeDrag: drag }),
 
         showIconPicker: (params) => set((state) => {
             state.iconPicker = {

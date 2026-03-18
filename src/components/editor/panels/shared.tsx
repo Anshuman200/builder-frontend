@@ -272,7 +272,7 @@ export function BorderRadiusInput({ value, onChange }: { value: string; onChange
     };
 
     const presets = ["0px", "4px", "8px", "12px", "16px", "999px"];
-    const presetLabels = ["0", "4", "8", "12", "16", "∞"];
+    const presetLabels = ["0", "4", "8", "12", "16", "Full"];
     const corners: Array<{ key: "tl" | "tr" | "br" | "bl"; val: string }> = [
         { key: "tl", val: tl }, { key: "tr", val: tr }, { key: "bl", val: bl }, { key: "br", val: br },
     ];

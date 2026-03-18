@@ -33,7 +33,30 @@ import { useToasts } from "@/hooks/useToasts";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 import { TemplateCard } from "@/components/templates/TemplateCard";
 import PillSegmented from "@/components/ui/PillSegmented";
+import NewPageWizard from "@/components/editor/NewPageWizard";
+import { SECTION_TEMPLATES } from "@/lib/config/sections";
 import { useCallback } from "react";
+
+const SECTION_ID_MAP: Record<string, string> = {
+    header: "nav-", hero: "hero-", features: "features-",
+    stats: "stats-", team: "team-", testimonials: "testimonials-",
+    pricing: "pricing-", contact: "contact-", cta: "cta-",
+    gallery: "gallery-", faq: "faq-", footer: "footer-",
+};
+
+function buildContentFromSections(sectionIds: string[]) {
+    const sorted = [
+        ...sectionIds.filter((id) => id === "header"),
+        ...sectionIds.filter((id) => id !== "header" && id !== "footer"),
+        ...sectionIds.filter((id) => id === "footer"),
+    ];
+    return sorted.map((id) => {
+        const prefix = SECTION_ID_MAP[id];
+        if (!prefix) return null;
+        const template = SECTION_TEMPLATES.find((t) => t.id.startsWith(prefix));
+        return template ? template.create() : null;
+    }).filter(Boolean);
+}
 
 function timeAgo(dateStr: string) {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -85,6 +108,7 @@ export default function AdminTemplatesPage() {
     const [showCapturePicker, setShowCapturePicker] = useState(false);
     const [captureTarget, setCaptureTarget] = useState<any | null>(null);
 
+    const [wizardOpen, setWizardOpen] = useState(false);
     const deferredSearch = useDeferredValue(search);
 
     const params: Record<string, string> = { visibility, sortBy, order, page: String(page), limit: "24" };
@@ -98,23 +122,27 @@ export default function AdminTemplatesPage() {
         if (isError) toastError((queryError as Error)?.message ?? "Failed to load templates");
     }, [isError]);
 
-    const handleCreate = async () => {
+    const handleCreate = () => setWizardOpen(true);
+
+    const handleWizardSubmit = useCallback(async (title: string, slug: string, selectedSections: string[]) => {
         try {
+            const content = buildContentFromSections(selectedSections);
             const payload = {
-                title: "Untitled Page",
-                slug: "untitled-" + Date.now().toString().slice(-4),
+                title,
+                slug: slug || "template-" + Date.now().toString().slice(-4),
                 status: "DRAFT",
                 isPublic: false,
-                content: [],
+                content,
                 meta: {}
             };
             const res = await createMutation.mutateAsync(payload) as any;
-            success("Template created");
+            success("Template created!");
+            setWizardOpen(false);
             router.push(`/editor/${res.data.page._id}`);
         } catch (err) {
             toastError("Failed to create template");
         }
-    };
+    }, [createMutation, router, success, toastError]);
 
     const handleRenameSubmit = useCallback(async (tpl: any) => {
         if (!renameValue.trim() || renameValue.trim() === tpl.title) {
@@ -181,11 +209,10 @@ export default function AdminTemplatesPage() {
                         {data ? `${data.total} total templates` : "Loading..."}
                     </p>
                 </div>
-                <Button 
-                    type="primary" 
+                <Button
+                    type="primary"
                     icon={<PlusIcon className="w-4 h-4" />}
                     onClick={handleCreate}
-                    loading={createMutation.isPending}
                     size="large"
                     className="h-11 px-6 rounded-xl font-bold bg-indigo-500 hover:bg-indigo-600 border-none shadow-lg shadow-indigo-500/20 text-white"
                 >
@@ -346,10 +373,17 @@ export default function AdminTemplatesPage() {
                     previewUrl={typeof window !== 'undefined' ? `${window.location.origin}/preview/${captureTarget._id}` : `/preview/${captureTarget._id}`}
                     currentThumbnail={captureTarget.thumbnail}
                     existingThumbnails={captureTarget.thumbnails || []}
-                    onSelect={() => {}} 
+                    onSelect={() => {}}
                     onUpdateThumbnails={handleUpdateThumbnails}
                 />
             )}
+
+            <NewPageWizard
+                open={wizardOpen}
+                onClose={() => setWizardOpen(false)}
+                onSubmit={handleWizardSubmit}
+                isSubmitting={createMutation.isPending}
+            />
         </CommonContainer>
     );
 }
