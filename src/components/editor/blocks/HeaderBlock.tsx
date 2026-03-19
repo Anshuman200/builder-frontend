@@ -3,6 +3,7 @@ import React from "react";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { PreviewContext, BlockProps } from "./shared";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function HeaderBlock({ block }: BlockProps) {
     const p = block.props;
@@ -38,8 +39,13 @@ export function HeaderBlock({ block }: BlockProps) {
     const ctaText = (p.ctaText as string) || "Get Started";
     const ctaUrl = (p.ctaUrl as string) || "#";
     const ctaVariant = (p.ctaVariant as string) || "solid";
-    const ctaBgColor = (p.ctaBgColor as string) || "var(--primary)";
-    const ctaTextColor = (p.ctaTextColor as string) || "var(--button-text)";
+    
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const defaultPrimary = theme.colors?.primary || "#6366f1";
+    const defaultText = theme.colors?.buttonText || "#ffffff";
+
+    const ctaBgColor = (p.ctaBgColor as string) || defaultPrimary;
+    const ctaTextColor = (p.ctaTextColor as string) || defaultText;
 
     let background = bgColor, backdropFilter = "none", borderBottom = "none";
     if (style === "glass") { background = bgColor.length === 7 ? `${bgColor}cc` : bgColor; backdropFilter = "blur(12px)"; borderBottom = "1px solid rgba(255, 255, 255, 0.2)"; }

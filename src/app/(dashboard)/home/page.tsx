@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { usePages, useCreatePage, useDeletePage, usePublishPage, useUnpublishPage, useDuplicatePage, useUpdatePage } from "@/lib/api/queries";
+import { usePages, useCreatePage, useDeletePage, usePublishPage, useUnpublishPage, useDuplicatePage, useUpdatePage, useGoLivePage, useStopLivePage } from "@/lib/api/queries";
 import { useToasts } from "@/hooks/useToasts";
 import {
   Squares2X2Icon,
@@ -30,6 +30,7 @@ interface Page {
   updatedAt: string;
   previewUrl?: string;
   isPublic?: boolean;
+  isLive?: boolean;
 }
 
 function timeAgo(dateStr: string) {
@@ -54,6 +55,8 @@ export default function HomePage() {
   const unpublishMutation = useUnpublishPage();
   const duplicateMutation = useDuplicatePage();
   const updateMutation = useUpdatePage();
+  const goLiveMutation = useGoLivePage();
+  const stopLiveMutation = useStopLivePage();
 
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Page | null>(null);
@@ -89,17 +92,19 @@ export default function HomePage() {
 
   const handleTogglePublish = useCallback(async (page: Page) => {
     try {
-      if (page.status === 'PUBLISHED') {
+      if (page.isPublic) {
         await unpublishMutation.mutateAsync(page._id);
-        success("Page moved to drafts");
+        success("Template is now private");
       } else {
         await publishMutation.mutateAsync(page._id);
-        success("Page is now live!");
+        success("Template is now public!");
       }
-    } catch {
-      toastError("Failed to update status");
+    } catch (err: any) {
+      toastError(err.message || "Failed to update public status");
     }
   }, [publishMutation, unpublishMutation, success, toastError]);
+
+  // Removing handleToggleLive as requested to merge it into Connect Domain
 
   const handleUpdateThumbnails = async (newThumbnails: string[], active: string | null) => {
     if (!captureTarget) return;
@@ -176,7 +181,7 @@ export default function HomePage() {
                           { key: "capture", label: "Update Thumbnail", icon: <CameraIcon className="w-4 h-4" />, onClick: () => { setCaptureTarget(p); setShowCapturePicker(true); } },
                           { key: "preview", label: "Preview", icon: <EyeIcon className="w-4 h-4" />, onClick: () => window.open(`/preview/${p._id}`, "_blank") },
                           { key: "duplicate", label: "Duplicate", icon: <Squares2X2Icon className="w-4 h-4" />, onClick: () => duplicateMutation.mutate(p._id) },
-                          { key: "publish", label: p.status === 'PUBLISHED' ? "Unpublish" : "Go live", icon: <GlobeAltIcon className="w-4 h-4" />, onClick: () => handleTogglePublish(p) },
+                          { key: "publish", label: p.isPublic ? "Make private" : "Make public", icon: <GlobeAltIcon className="w-4 h-4" />, onClick: () => handleTogglePublish(p) },
                           { key: "delete", label: <span className="text-red-400 font-bold">Delete</span>, icon: <TrashIcon className="text-red-400 w-4 h-4" />, onClick: () => setDeleteTarget(p) },
                         ].filter(Boolean) as any,
                         className: "[&_.ant-dropdown-menu]:bg-neutral-900 [&_.ant-dropdown-menu]:border [&_.ant-dropdown-menu]:border-white/10 [&_.ant-dropdown-menu]:rounded-2xl p-2",

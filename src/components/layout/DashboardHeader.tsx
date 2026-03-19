@@ -12,7 +12,8 @@ import {
   PlusIcon,
   PencilIcon,
   ArrowRightOnRectangleIcon,
-  UserIcon
+  UserIcon,
+  GlobeAltIcon
 } from "@heroicons/react/24/outline";
 import { Dropdown } from "antd";
 
@@ -29,6 +30,7 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
     { id: 'projects', label: 'Projects', href: '/home', icon: Squares2X2Icon },
     { id: 'templates', label: 'Templates', href: '/templates', icon: BoltIcon },
     { id: 'media', label: 'Media', href: '/media', icon: ListBulletIcon },
+    { id: 'domains', label: 'Domains', href: '/domains', icon: GlobeAltIcon },
     { id: 'profile', label: 'Profile', href: '/home/profile', icon: UserIcon }
   ];
 

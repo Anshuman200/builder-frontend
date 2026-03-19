@@ -3,13 +3,18 @@ import React from "react";
 
 import { useEditorStore } from "@/stores/editorStore";
 import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip } from "./shared";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function HeroBlock({ block }: BlockProps) {
     const p = block.props;
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const defaultPrimary = theme.colors?.primary || "#6366f1";
+    const defaultOverlay = theme.colors?.overlay || "rgba(0,0,0,0.25)";
+
     const align = (p.align as string) || "center";
-    const bgColor = (p.bgColor as string) || "var(--primary)";
+    const bgColor = (p.bgColor as string) || defaultPrimary;
     const bgImage = p.bgImage as string;
-    const bgOverlay = (p.bgOverlay as string) || "var(--overlay)";
+    const bgOverlay = (p.bgOverlay as string) || defaultOverlay;
     const childBlocks = (p.childBlocks as any[]) ?? [];
 
     const viewMode = useEditorStore((s) => s.viewMode);

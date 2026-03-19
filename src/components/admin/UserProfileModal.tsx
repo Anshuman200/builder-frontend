@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ClockIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
-import { Modal, Button, Tabs, Tag, Skeleton, Divider } from "antd";
+import { Modal, Button, Tabs, Tag, Skeleton, Divider, InputNumber, message } from "antd";
 import { cn } from "@/lib/utils";
-import { useAdminUser } from "@/lib/api/queries";
+import { useAdminUser, useUpdateUserLimit } from "@/lib/api/queries";
 import { TemplatePreviewModal } from "./TemplatePreviewModal";
 
 function timeAgo(dateStr: string) {
@@ -33,7 +33,9 @@ interface Props {
 
 export function UserProfileModal({ userId, onClose }: Props) {
     const { data, isLoading } = useAdminUser(userId);
+    const updateLimitMut = useUpdateUserLimit();
     const [previewPageId, setPreviewPageId] = useState<string | null>(null);
+    const [isUpdatingLimit, setIsUpdatingLimit] = useState(false);
 
     const user = data?.user;
     const pages = data?.pages ?? [];
@@ -111,7 +113,7 @@ export function UserProfileModal({ userId, onClose }: Props) {
                                             { label: "Region", value: user.region || "Unknown" },
                                             { label: "Joined", value: new Date(user.createdAt).toLocaleDateString() },
                                             { label: "Role", value: user.role || "user", capitalize: true },
-                                            { label: "Templates", value: String(pages.length) },
+                                            { label: "Live Limit", value: user.publishLimit + " Sites" },
                                         ].map(({ label, value, capitalize }) => (
                                             <div key={label}>
                                                 <p className="text-[10px] font-semibold text-(--text-muted) uppercase tracking-widest">{label}</p>
@@ -149,6 +151,26 @@ export function UserProfileModal({ userId, onClose }: Props) {
                                                                 <p className={cn("text-sm font-bold text-(--text) mt-1 truncate mb-0", capitalize && "capitalize")}>{value}</p>
                                                             </div>
                                                         ))}
+
+                                                        {/* Live Limit Update */}
+                                                        <div className="bg-(--bg) rounded-xl border border-indigo-500/30 px-4 py-3 col-span-2">
+                                                            <p className="text-[10px] font-semibold text-indigo-400 uppercase tracking-widest m-0 mb-2">Manage Live Sites Limit</p>
+                                                            <div className="flex items-center gap-3">
+                                                                <InputNumber
+                                                                    min={1}
+                                                                    max={100}
+                                                                    defaultValue={user.publishLimit || 5}
+                                                                    onChange={(val) => {
+                                                                        if (val) {
+                                                                            updateLimitMut.mutate({ id: userId, publishLimit: val });
+                                                                            message.success("Limit updated");
+                                                                        }
+                                                                    }}
+                                                                    className="flex-1 bg-black/20 border-white/10 text-white rounded-lg"
+                                                                />
+                                                                <span className="text-xs text-white/40 font-bold uppercase tracking-tighter">Sites Max</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )
@@ -170,10 +192,10 @@ export function UserProfileModal({ userId, onClose }: Props) {
                                                                     onClick={() => setPreviewPageId(page._id)}
                                                                     className="flex items-center gap-3 p-3 rounded-xl bg-(--bg) border border-(--border) cursor-pointer hover:border-indigo-500/50 transition-colors group"
                                                                 >
-                                                                    <div className={cn(
-                                                                        "w-10 h-10 rounded-xl shrink-0 bg-gradient-to-br flex items-center justify-center font-extrabold text-white text-base",
-                                                                        getGradient(page.title || "A")
-                                                                    )}>
+                                                                     <div className={cn(
+                                                                         "w-10 h-10 rounded-xl shrink-0 bg-linear-to-br flex items-center justify-center font-extrabold text-white text-base",
+                                                                         getGradient(page.title || "A")
+                                                                     )}>
                                                                         {(page.title || "T")[0].toUpperCase()}
                                                                     </div>
                                                                     <div className="flex-1 min-w-0">
@@ -183,13 +205,13 @@ export function UserProfileModal({ userId, onClose }: Props) {
                                                                         <div className="flex items-center gap-2 mt-0.5 text-xs text-(--text-muted)">
                                                                             <ClockIcon className="w-3 h-3" />
                                                                             {timeAgo(page.updatedAt)}
-                                                                            <span className={page.status === "PUBLISHED" ? "text-emerald-400" : "text-amber-400"}>
-                                                                                • {page.status}
+                                                                            <span className={page.isLive ? "text-emerald-400" : page.isPublic ? "text-indigo-400" : "text-amber-400"}>
+                                                                                • {page.isLive ? "LIVE" : page.isPublic ? "PUBLIC" : "DRAFT"}
                                                                             </span>
                                                                         </div>
                                                                     </div>
-                                                                    <Tag color={page.isPublic ? "success" : "processing"} style={{ borderRadius: 10, fontWeight: 700, border: "none", alignSelf: "center", margin: 0 }}>
-                                                                        {page.isPublic ? "PUBLIC" : "PRIVATE"}
+                                                                    <Tag color={page.isLive ? "success" : page.isPublic ? "processing" : "default"} style={{ borderRadius: 10, fontWeight: 700, border: "none", alignSelf: "center", margin: 0 }}>
+                                                                        {page.isLive ? "LIVE" : page.isPublic ? "PUBLIC" : "PRIVATE"}
                                                                     </Tag>
                                                                 </div>
                                                             ))}

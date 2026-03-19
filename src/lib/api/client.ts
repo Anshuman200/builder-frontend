@@ -111,6 +111,12 @@ export const pagesApi = {
 
     unpublish: (id: string) =>
         request(`/pages/${id}/unpublish`, { method: "POST", body: "{}" }),
+
+    goLive: (id: string) =>
+        request(`/pages/${id}/go-live`, { method: "POST", body: "{}" }),
+
+    stopLive: (id: string) =>
+        request(`/pages/${id}/stop-live`, { method: "POST", body: "{}" }),
 };
 
 export const authApi = {
@@ -189,6 +195,9 @@ export const adminApi = {
 
     deleteUser: (id: string) =>
         request(`/admin/users/${id}`, { method: "DELETE" }),
+
+    updateUserLimit: (id: string, publishLimit: number) =>
+        request(`/admin/users/${id}/limit`, { method: "PATCH", body: JSON.stringify({ publishLimit }) }),
 
     // Templates
     listTemplates: (params: Record<string, string> = {}) => {

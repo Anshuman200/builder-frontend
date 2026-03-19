@@ -37,7 +37,15 @@ import { useInView } from "react-intersection-observer";
 
 // --- Helpers -----------------------------------------------------------------
 
-export default function MediaLibraryView({ onSelect, hideBatchActions = false }: { onSelect?: (url: string) => void, hideBatchActions?: boolean }) {
+export default function MediaLibraryView({ 
+    onSelect, 
+    hideBatchActions = false,
+    initialType = 'all'
+}: { 
+    onSelect?: (url: string) => void, 
+    hideBatchActions?: boolean,
+    initialType?: 'all' | 'image' | 'video'
+}) {
     // Default to 'public' for guests initially, otherwise 'my'
     const [tab, setTab] = useState<'my' | 'public' | 'upload' | 'shared'>(() => {
         if (typeof window !== "undefined") {
@@ -51,7 +59,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
-    const [filterType, setFilterType] = useState<'all' | 'image' | 'video'>('all');
+    const [filterType, setFilterType] = useState<'all' | 'image' | 'video'>(initialType);
     // We'll keep allMedia purely derived from the infinite query now
     // const [allMedia, setAllMedia] = useState<MediaRecord[]>([]);
 
@@ -280,7 +288,9 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                                 setTab(v as any);
                                 setSelectionMode(false);
                                 setSelectedMediaIds([]);
-                                setFilterType('all');
+                                if (initialType === 'all') {
+                                    setFilterType('all');
+                                }
                             }}
                             size="large"
                             options={segmentedOptions}
@@ -301,32 +311,34 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
 
                 {tab !== 'upload' && (
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide w-full sm:w-auto pb-2 sm:pb-0 -mx-2 px-2">
-                            <button
-                                onClick={() => setFilterType('all')}
-                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterType === 'all' ? 'bg-indigo-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
-                            >
-                                All Assets
-                            </button>
-                            <button
-                                onClick={() => setFilterType('image')}
-                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterType === 'image' ? 'bg-indigo-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
-                            >
-                                <div className="flex items-center gap-2">
-                                    <PhotoIcon className="w-3.5 h-3.5" />
-                                    <span>Images</span>
-                                </div>
-                            </button>
-                            <button
-                                onClick={() => setFilterType('video')}
-                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterType === 'video' ? 'bg-indigo-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
-                            >
-                                <div className="flex items-center gap-2">
-                                    <RectangleStackIcon className="w-3.5 h-3.5" />
-                                    <span>Videos</span>
-                                </div>
-                            </button>
-                        </div>
+                        {initialType === 'all' && (
+                            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide w-full sm:w-auto pb-2 sm:pb-0 -mx-2 px-2">
+                                <button
+                                    onClick={() => setFilterType('all')}
+                                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterType === 'all' ? 'bg-indigo-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                                >
+                                    All Assets
+                                </button>
+                                <button
+                                    onClick={() => setFilterType('image')}
+                                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterType === 'image' ? 'bg-indigo-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <PhotoIcon className="w-3.5 h-3.5" />
+                                        <span>Images</span>
+                                    </div>
+                                </button>
+                                <button
+                                    onClick={() => setFilterType('video')}
+                                    className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterType === 'video' ? 'bg-indigo-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <RectangleStackIcon className="w-3.5 h-3.5" />
+                                        <span>Videos</span>
+                                    </div>
+                                </button>
+                            </div>
+                        )}
 
                         {!hideBatchActions && (
                             <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -339,7 +351,7 @@ export default function MediaLibraryView({ onSelect, hideBatchActions = false }:
                                             setSelectionMode(true);
                                         }
                                     }}
-                                    className={`h-11! px-6 rounded-xl font-bold transition-all flex-1 sm:flex-none ${selectionMode ? 'bg-indigo-500 text-white border-none shadow-[0_0_20px_rgba(99,102,241,0.4)]' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
+                                    className={`h-11! px-6 rounded-md font-bold transition-all flex-1 sm:flex-none ${selectionMode ? 'bg-indigo-500 text-white border-none shadow-[0_0_20px_rgba(99,102,241,0.4)]' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}
                                 >
                                     {selectionMode ? 'Exit Selection' : 'Batch Actions'}
                                 </Button>

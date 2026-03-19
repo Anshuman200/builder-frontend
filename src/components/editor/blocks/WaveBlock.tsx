@@ -3,6 +3,8 @@
 import React from "react";
 import type { Block } from "@/@Types";
 import { ChildBlockWrapper, DropZoneStrip, PreviewContext, type BlockProps } from "./shared";
+import { useEditorStore } from "@/stores/editorStore";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 const WAVE_PATHS = {
   smooth: [
@@ -50,7 +52,11 @@ export function WaveBlock({ block }: BlockProps) {
   const childBlocks = (props.childBlocks as Block[]) || [];
   const pattern = (props.pattern as keyof typeof WAVE_PATHS) || "smooth";
   const layers = (props.layers as number) ?? 1; // 1 to 3
-  const fillColor = (props.fillColor as string) || "var(--primary)";
+  
+  const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+  const defaultPrimary = theme.colors?.primary || "#6366f1";
+
+  const fillColor = (props.fillColor as string) || defaultPrimary;
   const secondaryColor = (props.secondaryColor as string) || "";
   const bgColor = (props.bgColor as string) || "transparent";
   const height = (props.height as string) || "120px";

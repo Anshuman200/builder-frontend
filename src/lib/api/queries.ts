@@ -168,6 +168,40 @@ export const useUnpublishPage = () => {
     });
 };
 
+export const useStopLivePage = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => pagesApi.stopLive(id),
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: ["pages"] });
+            queryClient.invalidateQueries({ queryKey: ["pages", id] });
+        },
+    });
+};
+
+export const useGoLivePage = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => pagesApi.goLive(id),
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: ["pages"] });
+            queryClient.invalidateQueries({ queryKey: ["pages", id] });
+        },
+    });
+};
+
+export const useUpdateUserLimit = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, publishLimit }: { id: string; publishLimit: number }) =>
+            adminApi.updateUserLimit(id, publishLimit),
+        onSuccess: (_, { id }) => {
+            queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+            queryClient.invalidateQueries({ queryKey: ["admin", "users", id] });
+        },
+    });
+};
+
 // ─── Auth Queries ────────────────────────────────────────────────────────────
 
 export const useProfile = () => {

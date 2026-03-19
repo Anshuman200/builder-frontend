@@ -3,6 +3,8 @@ import type { Block } from "@/@Types";
 import React, { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { ChildBlockWrapper } from "./shared";
+import { useEditorStore } from "@/stores/editorStore";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 
 export default function AccordionBlock({ block }: { block: Block }) {
@@ -30,9 +32,12 @@ export default function AccordionBlock({ block }: { block: Block }) {
     const itemBorderColor = (block.props.itemBorderColor as string) || "#e2e8f0";
     const itemRadius = (block.props.itemRadius as string) || "8px";
 
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const defaultPrimary = theme.colors?.primary || "#6366f1";
+
     const titleColor = (block.props.titleColor as string) || "#0f172a";
     const contentColor = (block.props.contentColor as string) || "#475569";
-    const iconColor = (block.props.iconColor as string) || "var(--primary)";
+    const iconColor = (block.props.iconColor as string) || defaultPrimary;
 
     const divider = (block.props.divider as string) || "line";
     const variant = (block.props.variant as string) || "contained";

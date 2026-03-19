@@ -9,12 +9,13 @@ interface MediaPickerProps {
     onClose: () => void;
     onSelect: (url: string) => void;
     title?: string;
+    type?: 'all' | 'image' | 'video';
 }
 
 /**
  * MediaPicker — A modal wrapper for MediaLibraryView to be used within the editor.
  */
-export default function MediaPicker({ open, onClose, onSelect, title = "Select Media" }: MediaPickerProps) {
+export default function MediaPicker({ open, onClose, onSelect, title = "Select Media", type = "all" }: MediaPickerProps) {
     return (
         <Modal
             title={<span style={{ color: "var(--text)", fontWeight: 700, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.05em" }}>{title}</span>}
@@ -51,9 +52,11 @@ export default function MediaPicker({ open, onClose, onSelect, title = "Select M
             <div className="media-picker-content">
                 <MediaLibraryView 
                     hideBatchActions={true}
+                    initialType={type}
                     onSelect={(url) => {
                         onSelect(url);
-                        onClose();
+                        // Using a micro-task delay to ensure state updates in the parent flow through before modal closes
+                        setTimeout(() => onClose(), 10);
                     }} 
                 />
             </div>

@@ -4,6 +4,7 @@ import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { PreviewContext, BlockProps } from "./shared";
+import { DEFAULT_THEME, hexToRgb } from "@/lib/utils/theme";
 
 export function FeaturesBlock({ block }: BlockProps) {
     const p = block.props;
@@ -40,8 +41,13 @@ export function FeaturesBlock({ block }: BlockProps) {
     const iconSize = Number(p.iconSize) || 24;
     const iconWrapperSize = Number(p.iconWrapperSize) || 52;
     const iconRadius = (p.iconRadius as string) || "14px";
-    const iconColor = (p.iconColor as string) || "var(--primary)";
-    const iconBg = (p.iconBg as string) || "rgba(var(--primary-rgb), 0.15)";
+    
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const defaultPrimary = theme.colors?.primary || "#6366f1";
+    const primaryRgb = hexToRgb(defaultPrimary) || "99, 102, 241";
+
+    const iconColor = (p.iconColor as string) || defaultPrimary;
+    const iconBg = (p.iconBg as string) || `rgba(${primaryRgb}, 0.15)`;
 
     const desktopPadding = (p.padding as string) || "64px 24px";
     const tabletPadding = (p.tabletPadding as string) || "48px 16px";

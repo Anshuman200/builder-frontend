@@ -13,6 +13,7 @@ import ScrollToTop from "@/components/shared/ScrollToTop";
 import ThemeSwitcher from "@/components/shared/ThemeSwitcher";
 import { pagesApi } from "@/lib/api/client";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
+import { useLiveHead } from "@/hooks/useLiveHead";
 import React from "react";
 
 
@@ -25,6 +26,9 @@ export default function PreviewPage() {
     const { page, setPage } = useEditorStore();
     const [loading, setLoading] = useState(!page);
     const mainRef = React.useRef<HTMLDivElement>(null);
+
+    // Sync title and favicon live
+    useLiveHead(page);
 
     useEffect(() => {
         async function load() {

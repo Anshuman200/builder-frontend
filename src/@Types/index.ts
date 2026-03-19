@@ -66,6 +66,7 @@ export interface MetaConfig {
     ogImage?: string;
     robots?: string;
     favicon?: string;
+    keywords?: string;
 }
 
 export interface EditorPage {

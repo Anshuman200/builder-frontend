@@ -4,6 +4,7 @@ import axios from "axios";
 import type { BlockProps } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { PreviewContext } from "./shared";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 // ─── Toast Component ──────────────────────────────────────────────────────────
 
@@ -77,11 +78,16 @@ export function ContactFormBlock({ block }: BlockProps) {
     const borderRadius = (p.borderRadius as string) || "20px";
     const inputBg = (p.inputBg as string) || "#f8fafc";
     const inputBorderColor = (p.inputBorderColor as string) || "#e2e8f0";
-    const inputFocusBorderColor = (p.inputFocusBorderColor as string) || "var(--primary)";
+    
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const defaultPrimary = theme.colors?.primary || "#6366f1";
+    const defaultText = theme.colors?.buttonText || "#ffffff";
+
+    const inputFocusBorderColor = (p.inputFocusBorderColor as string) || defaultPrimary;
     const labelColor = (p.labelColor as string) || "#374151";
     const inputTextColor = (p.inputTextColor as string) || "#111827";
-    const buttonBg = (p.buttonBg as string) || "var(--primary)";
-    const buttonTextColor = (p.buttonTextColor as string) || "var(--button-text)";
+    const buttonBg = (p.buttonBg as string) || defaultPrimary;
+    const buttonTextColor = (p.buttonTextColor as string) || defaultText;
     const buttonBorderRadius = (p.buttonBorderRadius as string) || "10px";
     const buttonFullWidth = p.buttonFullWidth !== false;  // default true
     const buttonAlign = (p.buttonAlign as string) || "right";

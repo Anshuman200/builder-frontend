@@ -13,6 +13,7 @@ interface TemplateCardProps {
         isLocked?: boolean;
         status?: string;
         isPublic?: boolean;
+        isLive?: boolean;
         updatedAt?: string;
     };
     onClick: () => void;
@@ -46,7 +47,8 @@ export function TemplateCard({
     setRenameValue,
     onRenameSubmit
 }: TemplateCardProps) {
-    const isPublished = template.status?.toUpperCase() === "PUBLISHED" || template.status?.toUpperCase() === "LIVE";
+    const isPublished = template.status?.toUpperCase() === "PUBLISHED";
+    const isLive = !!template.isLive;
     const isLocked = template.isLocked;
 
     const cardContent = (
@@ -100,12 +102,14 @@ export function TemplateCard({
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-md text-white border border-white/10 flex items-center gap-1.5 shadow-lg">
                             {isLocked ? "ENCRYPTED" : (
                                 <>
-                                    {isPublished ? (
+                                    {isLive ? (
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                    ) : isPublished ? (
                                         <CheckCircleIcon className="w-3 h-3 text-emerald-500" />
                                     ) : (
                                         <div className="w-2 h-2 rounded-full bg-amber-500" />
                                     )}
-                                    {isPublished ? "LIVE" : "DRAFT"}
+                                    {isLive ? "LIVE" : isPublished ? "PUBLISHED" : "DRAFT"}
                                 </>
                             )}
                         </span>
@@ -124,7 +128,7 @@ export function TemplateCard({
             </div>
 
             {/* Content / Metadata Section */}
-            <div className="p-4 sm:p-6 flex flex-col flex-1 relative bg-zinc-900/50">
+            <div className="p-2 sm:p-4 flex flex-col flex-1 relative bg-zinc-900/50">
                 <div className="flex justify-between items-start gap-3">
                     <div className="flex-1 min-w-0">
                         {isRenaming && setRenameValue && onRenameSubmit ? (

@@ -13,8 +13,13 @@ import {
   EyeIcon,
   ArrowRightOnRectangleIcon,
   CameraIcon,
+  PhotoIcon,
+  TrashIcon,
+  MoonIcon,
+  SunIcon,
+  ArrowsRightLeftIcon,
 } from "@heroicons/react/24/outline";
-import { Popover, Dropdown } from "antd";
+import { Popover, Dropdown, Drawer, Switch, ColorPicker } from "antd";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEditorStore } from "@/stores/editorStore";
@@ -27,6 +32,8 @@ import { useToasts } from "@/hooks/useToasts";
 import { useUpdatePage, useCreatePage, usePublishPage } from "@/lib/api/queries";
 import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
 import BlockPalette from "./BlockPalette";
+import MediaPicker from "@/components/editor/MediaPicker";
+import { DEFAULT_THEME } from "@/stores/editorStore";
 
 
 export default function EditorToolbar() {
@@ -34,7 +41,7 @@ export default function EditorToolbar() {
     page, viewMode, isDirty,
     historyIndex, history,
     setViewMode, undo, redo,
-    updateTitle, updateSlug, updateMeta, markClean,
+    updateTitle, updateSlug, updateMeta, updateTheme, updatePageData, markClean,
   } = useEditorStore();
   const { pageId } = useParams<{ pageId: string }>() ?? {};
   const router = useRouter();
@@ -49,6 +56,11 @@ export default function EditorToolbar() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showCapturePicker, setShowCapturePicker] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mediaPickerType, setMediaPickerType] = useState<"favicon" | "ogImage" | null>(null);
+
+  const theme = page?.theme || DEFAULT_THEME;
+  const colors = theme.colors || DEFAULT_THEME.colors;
   const [currentThumbnail, setCurrentThumbnail] = useState<string | null>((page as any)?.thumbnail || null);
   const [capturedThumbnails, setCapturedThumbnails] = useState<string[]>((page as any)?.thumbnails || []);
 
@@ -135,17 +147,15 @@ export default function EditorToolbar() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [canUndo, canRedo, undo, redo]);
 
-  // Sync thumbnail when page loads from API
+  // Sync thumbnail when page loads from API or changes
   useEffect(() => {
-    if (page) {
-      if ((page as any).thumbnail && !currentThumbnail) {
-        setCurrentThumbnail((page as any).thumbnail);
-      }
-      if ((page as any).thumbnails?.length > 0 && capturedThumbnails.length === 0) {
-        setCapturedThumbnails((page as any).thumbnails);
-      }
+    if (page && pageId) {
+      // Always sync state with the page object to prevent mismatches
+      // when navigating between different projects
+      setCurrentThumbnail((page as any).thumbnail || null);
+      setCapturedThumbnails((page as any).thumbnails || []);
     }
-  }, [page]);
+  }, [page?.id]);
 
   // Sync / Auto-save on Login
   useEffect(() => {
@@ -517,107 +527,25 @@ export default function EditorToolbar() {
           Preview
         </button>
 
-        {/* Page settings popover */}
         <div style={{ position: "relative" }}>
-          <Popover
-            placement="bottomRight"
-            trigger="click"
-            styles={{ root: { background: 'var(--bg-secondary)', border: '1px solid var(--border)', padding: '4px', maxWidth: '280px' } }}
-            content={
-              <div className="w-56">
-                <div style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)", marginBottom: "4px" }}>
-                  <p className="text-(--text)" style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>Page Settings</p>
-                </div>
-
-                <div style={{ padding: "4px 8px" }}>
-                  <SettingField label="Title">
-                    <input
-                      className="input-dark"
-                      defaultValue={page?.title}
-                      onBlur={(e) => updateTitle(e.target.value)}
-                      placeholder="Page title"
-                    />
-                  </SettingField>
-
-                  <SettingField label="Slug">
-                    <input
-                      className="input-dark"
-                      defaultValue={page?.slug}
-                      onBlur={(e) => updateSlug(slugify(e.target.value))}
-                      placeholder="page-slug"
-                    />
-                  </SettingField>
-
-                  <SettingField label="Meta Description">
-                    <textarea
-                      className="input-dark"
-                      defaultValue={page?.meta?.description || ""}
-                      onBlur={(e) => updateMeta({ description: e.target.value })}
-                      rows={2}
-                      style={{ resize: "none" }}
-                      placeholder="Brief description for search engines"
-                    />
-                  </SettingField>
-
-                  <SettingField label="OG Image URL">
-                    <input
-                      className="input-dark"
-                      defaultValue={page?.meta?.ogImage || ""}
-                      onBlur={(e) => updateMeta({ ogImage: e.target.value })}
-                      placeholder="https://..."
-                    />
-                  </SettingField>
-
-                  {user && (
-                    <SettingField label="Page Thumbnail">
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {currentThumbnail ? (
-                          <div style={{ position: "relative", borderRadius: 6, overflow: "hidden", border: "1px solid var(--border)" }}>
-                            <img
-                              src={currentThumbnail}
-                              alt="Thumbnail"
-                              style={{ width: "100%", height: 70, objectFit: "cover", objectPosition: "top", display: "block" }}
-                            />
-                          </div>
-                        ) : (
-                          <div style={{
-                            height: 50, borderRadius: 6,
-                            border: "1.5px dashed var(--border)",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 11, color: "var(--text-muted)"
-                          }}>
-                            No thumbnail set
-                          </div>
-                        )}
-                        <button
-                          onClick={() => setShowCapturePicker(true)}
-                          style={{
-                            padding: "5px 10px",
-                            background: "var(--surface)",
-                            color: "var(--text)",
-                            border: "1px solid var(--border)",
-                            borderRadius: 6,
-                            fontSize: 11,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            width: "100%",
-                          }}
-                        >
-                          {currentThumbnail ? "Change Thumbnail" : "Choose Thumbnail"}
-                        </button>
-                      </div>
-                    </SettingField>
-                  )}
-                </div>
-              </div>
-            }
+          <button
+            onClick={() => setDrawerOpen(true)}
+            title="Page settings"
+            style={{
+              width: 32, height: 32,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              background: "none",
+              border: "1px solid var(--border)",
+              borderRadius: 6,
+              cursor: "pointer",
+              color: "var(--text-muted)",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
           >
-            <div>
-              <IconBtn title="Page settings">
-                <AdjustmentsHorizontalIcon style={{ width: 14, height: 14, color: "currentColor" }} />
-              </IconBtn>
-            </div>
-          </Popover>
+            <AdjustmentsHorizontalIcon style={{ width: 16, height: 16 }} />
+          </button>
         </div>
 
         {/* User Menu / Login Button */}
@@ -710,6 +638,202 @@ export default function EditorToolbar() {
           onUpdateThumbnails={handleUpdateThumbnails}
         />
       )}
+
+      {/* Media Picker for Favicon/OG Image */}
+      <MediaPicker
+        open={!!mediaPickerType}
+        onClose={() => setMediaPickerType(null)}
+        title={mediaPickerType === 'favicon' ? 'Select Favicon' : 'Select OG Image'}
+        onSelect={(url) => {
+          if (mediaPickerType === 'favicon') updateMeta({ favicon: url });
+          else if (mediaPickerType === 'ogImage') updateMeta({ ogImage: url });
+        }}
+        type={mediaPickerType ? "image" : "all"}
+      />
+      {/* Bottom Drawer for Page Settings */}
+      <Drawer
+        placement="bottom"
+        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
+        height="auto"
+        styles={{
+          body: { padding: 0, backgroundColor: 'var(--bg-secondary)' },
+          header: { 
+            borderBottom: '1px solid var(--border)', 
+            padding: '12px 24px',
+            backgroundColor: 'var(--bg-secondary)' 
+          },
+          content: {
+            backgroundColor: 'var(--bg-secondary)',
+            borderTop: '1px solid var(--border)',
+            borderRadius: '24px 24px 0 0',
+            overflow: 'hidden'
+          }
+        }}
+        closeIcon={<span className="text-(--text-muted)">×</span>}
+        title={<span className="text-(--text) uppercase tracking-wider font-bold text-sm">Page Settings</span>}
+      >
+        <div className="max-w-4xl mx-auto p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Section 1: Page Identity */}
+          <div className="space-y-6">
+            <h3 className="text-(--text-muted) text-xs font-bold uppercase tracking-widest border-b border-(--border) pb-2 mb-4">Page Identity</h3>
+            <SettingField label="Page Title">
+              <input
+                className="w-full bg-(--surface) border border-(--border) rounded-lg px-3 py-2 text-sm text-(--text) focus:ring-1 focus:ring-(--primary) outline-none"
+                defaultValue={page?.title}
+                onBlur={(e) => updateTitle(e.target.value)}
+                placeholder="e.g. My Awesome Page"
+              />
+            </SettingField>
+            <SettingField label="URL Slug">
+              <input
+                className="w-full bg-(--surface) border border-(--border) rounded-lg px-3 py-2 text-sm text-(--text) focus:ring-1 focus:ring-(--primary) outline-none"
+                defaultValue={page?.slug}
+                onBlur={(e) => updateSlug(slugify(e.target.value))}
+                placeholder="page-slug"
+              />
+            </SettingField>
+            
+            {user && (
+              <SettingField label="Page Thumbnail">
+                <div className="space-y-3">
+                  {currentThumbnail ? (
+                    <div className="relative rounded-xl overflow-hidden border border-(--border) bg-(--surface) group">
+                      <img src={currentThumbnail} alt="Thumbnail" className="w-full h-32 object-cover object-top" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                         <button onClick={() => setShowCapturePicker(true)} className="p-2 bg-white/20 blur-sm rounded-lg hover:bg-white/40 transition-colors"><ArrowsRightLeftIcon className="w-5 h-5 text-white" /></button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-32 rounded-xl border-2 border-dashed border-(--border) flex flex-col items-center justify-center text-(--text-subtle) space-y-2">
+                       <CameraIcon className="w-6 h-6 opacity-40" />
+                       <span className="text-[10px] font-medium">No thumbnail set</span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setShowCapturePicker(true)}
+                    className="w-full py-2 bg-(--primary) text-white text-xs font-bold rounded-lg hover:opacity-90 transition-all shadow-lg shadow-blue-500/20"
+                  >
+                    {currentThumbnail ? "Change Thumbnail" : "Choose Thumbnail"}
+                  </button>
+                </div>
+              </SettingField>
+            )}
+          </div>
+
+          {/* Section 2: SEO & Branding */}
+          <div className="space-y-6">
+            <h3 className="text-(--text-muted) text-xs font-bold uppercase tracking-widest border-b border-(--border) pb-2 mb-4">SEO & Branding</h3>
+            <SettingField label="Meta Description">
+              <textarea
+                className="w-full bg-(--surface) border border-(--border) rounded-lg px-3 py-2 text-sm text-(--text) focus:ring-1 focus:ring-(--primary) outline-none resize-none"
+                defaultValue={page?.meta?.description || ""}
+                onBlur={(e) => updateMeta({ description: e.target.value })}
+                rows={3}
+                placeholder="Brief description for search engines..."
+              />
+            </SettingField>
+            
+            <SettingField label="Keywords">
+              <input
+                className="w-full bg-(--surface) border border-(--border) rounded-lg px-3 py-2 text-sm text-(--text) focus:ring-1 focus:ring-(--primary) outline-none"
+                defaultValue={page?.meta?.keywords || ""}
+                onBlur={(e) => updateMeta({ keywords: e.target.value })}
+                placeholder="e.g. blog, tech, design"
+              />
+            </SettingField>
+
+            <div className="grid grid-cols-2 gap-4">
+              <SettingField label="Favicon">
+                <MediaPreview 
+                  url={page?.meta?.favicon} 
+                  onChoose={() => setMediaPickerType("favicon")} 
+                  onClear={() => updateMeta({ favicon: "" })}
+                  label="Favicon"
+                  allowRemove={false}
+                />
+              </SettingField>
+              <SettingField label="Social Preview (OG)">
+                <MediaPreview 
+                  url={page?.meta?.ogImage} 
+                  onChoose={() => setMediaPickerType("ogImage")} 
+                  onClear={() => updateMeta({ ogImage: "" })}
+                  label="OG Image"
+                  allowRemove={false}
+                />
+              </SettingField>
+            </div>
+          </div>
+
+          {/* Section 3: Global Configuration */}
+          <div className="space-y-6">
+            <h3 className="text-(--text-muted) text-xs font-bold uppercase tracking-widest border-b border-(--border) pb-2 mb-4">Global Configuration</h3>
+            
+            <div className="bg-(--surface) border border-(--border) rounded-xl p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-(--bg-primary) rounded-lg border border-(--border)">
+                    {theme.mode === 'dark' ? <MoonIcon className="w-4 h-4 text-blue-400" /> : <SunIcon className="w-4 h-4 text-amber-400" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-(--text)">Theme Mode</p>
+                    <p className="text-[10px] text-(--text-muted)">Toggle Dark/Light</p>
+                  </div>
+                </div>
+                <Switch 
+                  checked={theme.mode === 'dark'} 
+                  onChange={(v) => updateTheme({ mode: v ? 'dark' : 'light' }, true)} 
+                  size="small"
+                />
+              </div>
+
+              <div className="h-px bg-(--border)" />
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-(--bg-primary) rounded-lg border border-(--border)">
+                    <div 
+                      className="w-4 h-4 rounded-full shadow-inner" 
+                      style={{ backgroundColor: colors.primary }} 
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-(--text)">Primary Color</p>
+                    <p className="text-[10px] text-(--text-muted)">Site accent color</p>
+                  </div>
+                </div>
+                <ColorPicker
+                  value={colors.primary}
+                  onChange={(v) => updateTheme({ colors: { ...colors, primary: v.toHexString() } })}
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      updateTheme({ colors: { ...colors, primary: colors.primary } }, true);
+                      useEditorStore.getState().migrateThemeColors();
+                    }
+                  }}
+                  size="small"
+                />
+              </div>
+            </div>
+
+            <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 flex gap-3">
+              <div className="p-2 bg-blue-500/10 rounded-lg h-fit">
+                <ZapIcon className="w-4 h-4 text-blue-500" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-(--text)">One-Click Sync</p>
+                <p className="text-[10px] text-(--text-muted) leading-relaxed">Instantly propagate theme changes across all page components.</p>
+                <button 
+                  onClick={() => useEditorStore.getState().migrateThemeColors()}
+                  className="mt-2 text-(--primary) text-[10px] font-bold hover:underline"
+                >
+                  Sync Now &rarr;
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Drawer>
     </header>
   );
 }
@@ -755,6 +879,54 @@ function SettingField({ label, children }: { label: string; children: React.Reac
         {label}
       </label>
       {children}
+    </div>
+  );
+}
+
+function MediaPreview({ 
+  url, 
+  onChoose, 
+  onClear, 
+  label,
+  allowRemove=true
+}: { 
+  url?: string; 
+  onChoose: () => void; 
+  onClear: () => void;
+  label: string;
+  allowRemove?: boolean;
+}) {
+  return (
+    <div className="space-y-2">
+      {url ? (
+        <div className="relative group rounded-lg overflow-hidden border border-(--border) bg-(--surface) aspect-square flex items-center justify-center">
+          <img src={url} alt={label} className="w-full h-full object-contain p-2" />
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+            <button 
+              onClick={onChoose}
+              className="p-1.5 bg-white/20 rounded-md hover:bg-white/30 transition-colors"
+              title="Change"
+            >
+              <ArrowsRightLeftIcon className="w-4 h-4 text-white" />
+            </button>
+            {allowRemove && <button 
+              onClick={onClear}
+              className="p-1.5 bg-red-500/40 rounded-md hover:bg-red-500/60 transition-colors"
+              title="Remove"
+            >
+              <TrashIcon className="w-4 h-4 text-white" />
+            </button>}
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={onChoose}
+          className="w-full aspect-square rounded-lg border-2 border-dashed border-(--border) hover:border-(--primary) hover:bg-(--surface) transition-all flex flex-col items-center justify-center gap-1.5 text-(--text-subtle)"
+        >
+          <PhotoIcon className="w-5 h-5 opacity-40" />
+          <span className="text-[10px] font-medium">Choose</span>
+        </button>
+      )}
     </div>
   );
 }

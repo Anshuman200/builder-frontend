@@ -10,6 +10,7 @@ import { loadPage, savePage, hasLocalDraft } from "@/lib/utils/storage";
 import EditorShell from "@/components/editor/EditorShell";
 import { useToasts } from "@/hooks/useToasts";
 import { usePage } from "@/lib/api/queries";
+import { useLiveHead } from "@/hooks/useLiveHead";
 
 /**
  * Editor Page — The main workspace for building/editing.
@@ -20,6 +21,9 @@ export default function EditorPage() {
   const { pageId } = useParams<{ pageId: string }>() ?? {};
   const { error: toastError } = useToasts();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync title and favicon live
+  useLiveHead(page);
 
   const { data: apiPage, isLoading: apiLoading, isError } = usePage(pageId, !!pageId && pageId.length >= 24);
 
