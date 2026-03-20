@@ -557,14 +557,79 @@ export const BLOCK_TYPES: BlockConfig[] = [
       tabletPadding: "16px",
       mobilePadding: "12px",
       bgColor: "transparent",
-      slidesCount: 3,
+      childBlocks: [
+        { 
+          id: "slide-1", 
+          type: "container", 
+          props: { 
+            padding: "40px 24px", 
+            bgColor: "rgba(255,255,255,0.03)", 
+            borderRadius: "12px", 
+            maxWidth: "100%", 
+            contentAlign: "center", 
+            contentJustify: "center", 
+            childBlocks: [
+              {
+                id: "slide-1-cols",
+                type: "columns",
+                props: {
+                  gap: "2rem",
+                  leftWidth: 50,
+                  col0: [
+                    { id: "slide-1-text-1", type: "text", props: { content: "Your Product Here", tag: "h2", fontSize: "2.5rem", bold: true, align: "left" } },
+                    { id: "slide-1-text-2", type: "text", props: { content: "Describe the key benefits and features that make your product stand out.", tag: "p", fontSize: "1.2rem", align: "left", marginTop: "1rem" } }
+                  ],
+                  col1: [
+                    { id: "slide-1-img", type: "image", props: { src: "https://placehold.co/600x400?text=Slide+1+Image", height: "350px", borderRadius: "16px" } }
+                  ]
+                }
+              }
+            ] 
+          } 
+        },
+        { 
+          id: "slide-2", 
+          type: "container", 
+          props: { 
+            padding: "40px 24px", 
+            bgColor: "rgba(255,255,255,0.03)", 
+            borderRadius: "12px", 
+            maxWidth: "100%", 
+            contentAlign: "center", 
+            contentJustify: "center", 
+            childBlocks: [
+              {
+                id: "slide-2-cols",
+                type: "columns",
+                props: {
+                  gap: "2rem",
+                  leftWidth: 50,
+                  col0: [
+                    { id: "slide-2-text-1", type: "text", props: { content: "Innovation & Design", tag: "h2", fontSize: "2.5rem", bold: true, align: "left" } },
+                    { id: "slide-2-text-2", type: "text", props: { content: "Highlight your unique value proposition with stunning visuals and clear messaging.", tag: "p", fontSize: "1.2rem", align: "left", marginTop: "1rem" } }
+                  ],
+                  col1: [
+                    { id: "slide-2-img", type: "image", props: { src: "https://placehold.co/600x400?text=Slide+2+Image", height: "350px", borderRadius: "16px" } }
+                  ]
+                }
+              }
+            ] 
+          } 
+        },
+      ],
       autoplay: true,
       dots: true,
       arrows: true,
       fade: false,
       speed: 500,
       autoplaySpeed: 3000,
-      childBlocks: [], // Each slide is a child block container
+      height: "500px",
+      arrowColor: "var(--primary)",
+      dotColor: "rgba(255,255,255,0.2)",
+      activeDotColor: "var(--primary)",
+      arrowSize: "24px",
+      arrowPosition: "middle", // "top", "middle", "bottom" or "offset"
+      mediaFit: "cover", // "cover", "contain", "fill"
 
       // Animation
       animationType: DEFAULT_CONFIG.animation.type,
@@ -601,6 +666,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
     type: "masonry",
     label: "Masonry Gallery",
     icon: "Squares2X2",
+    hidden: true,
     defaultProps: {
       columns: { xs: 2, sm: 2, md: 3, lg: 4 },
       gap: 16,
@@ -616,6 +682,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
     type: "media-picker",
     label: "Add Media",
     icon: "PlusCircle",
+    hidden: true,
     defaultProps: {
       padding: "0px",
       borderRadius: "12px",

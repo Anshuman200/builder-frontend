@@ -15,10 +15,10 @@ import { useEditorStore } from "@/stores/editorStore";
 import { Popover } from "antd";
 
 // ─── Category display order ───────────────────────────────────────────────────
-const CATEGORY_ORDER = ["Navigation", "Hero", "Logos", "Team", "Gallery", "Features", "Stats", "Pricing", "Testimonial", "FAQ", "Contact", "CTA", "Footer"];
+const CATEGORY_ORDER = ["Navigation", "Hero", "Carousel", "Logos", "Team", "Gallery", "Features", "Stats", "Pricing", "Testimonial", "FAQ", "Contact", "CTA", "Footer"];
 
 const CATEGORY_ICONS: Record<string, string> = {
-  Navigation: "🧭", Hero: "⭐", Logos: "🏷️", Team: "👥",
+  Navigation: "🧭", Hero: "⭐", Carousel: "🎠", Logos: "🏷️", Team: "👥",
   Gallery: "🖼️", Features: "✨", Stats: "📊", Pricing: "💰",
   Testimonial: "💬", Contact: "📬", Footer: "📄", FAQ: "❓", CTA: "⚡",
 };
@@ -151,6 +151,7 @@ function ElementsPanel({ onClose }: { onClose: () => void }) {
 
   const filteredElements = React.useMemo(
     () => BLOCK_TYPES.filter(b =>
+      !b.hidden &&
       !SECTION_COVERED_TYPES.has(b.type) &&
       (!search || b.label.toLowerCase().includes(search.toLowerCase()))
     ),
@@ -209,7 +210,7 @@ export default function BlockPalette() {
         trigger={"hover"}
         placement="bottomLeft"
         arrow={false}
-        overlayInnerStyle={{ padding: 0, borderRadius: 14, overflow: "hidden", background: "var(--bg-secondary)", border: "1px solid var(--border)", boxShadow: "0 16px 48px rgba(0,0,0,0.3)" }}
+        styles={{ content: { padding: 0, borderRadius: 14, overflow: "hidden", background: "var(--bg-secondary)", border: "1px solid var(--border)", boxShadow: "0 16px 48px rgba(0,0,0,0.3)" } }}
         content={<SectionsPanel onClose={() => setOpenPopover(null)} />}
       >
         <button
@@ -233,7 +234,7 @@ export default function BlockPalette() {
         trigger="hover"
         placement="bottomLeft"
         arrow={false}
-        overlayInnerStyle={{ padding: 0, borderRadius: 14, overflow: "hidden", background: "var(--bg-secondary)", border: "1px solid var(--border)", boxShadow: "0 16px 48px rgba(0,0,0,0.3)" }}
+        styles={{ content: { padding: 0, borderRadius: 14, overflow: "hidden", background: "var(--bg-secondary)", border: "1px solid var(--border)", boxShadow: "0 16px 48px rgba(0,0,0,0.3)" } }}
         content={<ElementsPanel onClose={() => setOpenPopover(null)} />}
       >
         <button

@@ -29,7 +29,7 @@ export default function MediaPicker({
             title={<span style={{ color: "var(--text)", fontWeight: 700, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.05em" }}>{title}</span>}
             open={open}
             onCancel={onClose}
-            maskClosable={true}
+            mask={{ closable: true }}
             footer={null}
             width={1000}
             centered
@@ -66,24 +66,18 @@ export default function MediaPicker({
                     initialType={type}
                     multiple={multiple}
                     onSelect={(urlOrUrls) => {
-                        const urls = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
-                        onSelect(urls);
+                        if (multiple) {
+                            onSelect(Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls]);
+                        } else {
+                            const singleUrl = Array.isArray(urlOrUrls) ? urlOrUrls[0] : urlOrUrls;
+                            // @ts-ignore - parent might expect string[] or string
+                            onSelect(singleUrl);
+                        }
                         // Using a micro-task delay to ensure state updates in the parent flow through before modal closes
                         setTimeout(() => onClose(), 10);
                     }} 
                 />
             </div>
-            
-            <style jsx global>{`
-                .media-picker-content .ant-input {
-                    background: var(--bg-primary) !important;
-                    border: 1px solid var(--border) !important;
-                    color: var(--text) !important;
-                }
-                .media-picker-content .ant-input-prefix {
-                    color: var(--text-muted) !important;
-                }
-            `}</style>
         </Modal>
     );
 }

@@ -91,6 +91,7 @@ export interface BlockConfig {
     label: string;
     icon: IconName;
     defaultProps: Record<string, unknown>;
+    hidden?: boolean;
 }
 
 export interface SectionTemplate {

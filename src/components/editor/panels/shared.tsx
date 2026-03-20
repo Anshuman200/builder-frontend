@@ -19,14 +19,26 @@ import PillSegmented from "../../ui/PillSegmented";
 export type { Block, EditorPage };
 export { useEditorStore };
 
-// ... (keep constants)
+// ─── Theme constants ──────────────────────────────────────────────────────────
+
+export const PANEL_COLORS = {
+    bg: "#111111",
+    sectionBg: "#1a1a1a",
+    border: "#2a2a2a",
+    text: "#ededed",
+    muted: "#888888",
+    inputBg: "#222222",
+    inputBorder: "transparent",
+    inputHoverBg: "#2a2a2a",
+    primary: "#0099ff",
+};
 
 // ─── MediaInput ───────────────────────────────────────────────────────────────
 
 export function MediaInput({ value, onChange, placeholder, type = "image" }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: "image" | "video" }) {
     const [pickerOpen, setPickerOpen] = React.useState(false);
 
-    const isVideo = type === "video" || (value && (value.endsWith(".mp4") || value.includes("youtube.com") || value.includes("vimeo.com")));
+    const isVideo = type === "video" || (value && (value?.endsWith(".mp4") || value?.includes("youtube.com") || value?.includes("vimeo.com")));
 
     return (
         <div style={{ width: "100%" }}>
@@ -107,27 +119,13 @@ export function MediaInput({ value, onChange, placeholder, type = "image" }: { v
                 <MediaPicker
                     open={pickerOpen}
                     onClose={() => setPickerOpen(false)}
-                    onSelect={onChange}
+                    onSelect={(urls) => onChange(urls[0])}
                     title={type === "image" ? "Select Image" : "Select Video"}
                 />
             )}
         </div>
     );
 }
-
-// ─── Theme constants ──────────────────────────────────────────────────────────
-
-export const PANEL_COLORS = {
-    bg: "#111111",
-    sectionBg: "#1a1a1a",
-    border: "#2a2a2a",
-    text: "#ededed",
-    muted: "#888888",
-    inputBg: "#222222",
-    inputBorder: "transparent",
-    inputHoverBg: "#2a2a2a",
-    primary: "#0099ff",
-};
 
 // ─── Field ────────────────────────────────────────────────────────────────────
 

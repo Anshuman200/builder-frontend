@@ -234,7 +234,7 @@ export function ImagePanel({ block }: { block: Block }) {
             </Section>
             <Section title="Style">
                 <Field label="Alignment"><SelectInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>
-                <Field label="Object Fit"><SelectInput value={(p.objectFit as string) || "cover"} onChange={(v) => up("objectFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "None", value: "none" }]} /></Field>
+                <Field label="Object Fit"><SelectInput value={(p.objectFit as string) || "cover"} onChange={(v) => up("objectFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "0px"} onChange={(v) => up("borderRadius", v)} /></Field>
             </Section>
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
@@ -473,21 +473,86 @@ export function CarouselPanel({ block }: { block: Block }) {
 
     return (
         <>
-            <Section title="Carousel Settings">
-                <Field label="Number of Slides">
-                    <input type="range" min={1} max={10} step={1} value={Number(p.slidesCount || 3)} onChange={(e) => up("slidesCount", parseInt(e.target.value))} style={{ width: "100%", accentColor: "var(--primary)" }} />
-                    <span style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center" }}>{String(p.slidesCount ?? 3)}</span>
-                </Field>
+            <Section title="Carousel Slides">
+                <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Add or remove slides below. Each slide is a fully editable container.</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {((p.childBlocks as any[]) || []).map((slide, idx) => (
+                        <div key={slide.id || idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <span style={{ fontSize: 11, fontWeight: 600 }}>Slide {idx + 1}</span>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    const next = [...((p.childBlocks as any[]) || [])];
+                                    next.splice(idx, 1);
+                                    up("childBlocks", next, true);
+                                }}
+                                style={{ background: "transparent", border: "none", color: "var(--error, red)", cursor: "pointer", fontSize: 14 }}
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    ))}
+                    <button
+                        onClick={() => {
+                            const next = [...((p.childBlocks as any[]) || [])];
+                            next.push({
+                                id: crypto.randomUUID(),
+                                type: "container",
+                                props: {
+                                    padding: "40px 24px",
+                                    bgColor: "rgba(255,255,255,0.03)",
+                                    borderRadius: "12px",
+                                    maxWidth: "100%",
+                                    contentAlign: "center",
+                                    contentJustify: "center",
+                                    childBlocks: [
+                                        {
+                                            id: crypto.randomUUID(),
+                                            type: "columns",
+                                            props: {
+                                                gap: "2rem",
+                                                leftWidth: 50,
+                                                col0: [
+                                                    { id: crypto.randomUUID(), type: "text", props: { content: "Slide Heading", tag: "h2", fontSize: "2.5rem", bold: true, align: "left" } },
+                                                    { id: crypto.randomUUID(), type: "text", props: { content: "Describe your product or service in detail here. This is a fully editable template.", tag: "p", fontSize: "1.2rem", align: "left", marginTop: "1rem" } }
+                                                ],
+                                                col1: [
+                                                    { id: crypto.randomUUID(), type: "image", props: { src: "https://placehold.co/600x400?text=Product+Image", height: "350px", borderRadius: "16px" } }
+                                                ]
+                                            }
+                                        }
+                                    ],
+                                },
+                            });
+                            up("childBlocks", next, true);
+                        }}
+                        style={{ padding: "8px 0", background: "var(--primary-light)", color: "var(--primary)", border: "none", borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: "pointer" }}
+                    >
+                        + Add Slide
+                    </button>
+                </div>
+            </Section>
+            <Section title="Settings">
                 <ToggleInput label="AutoPlay" value={!!p.autoplay} onChange={(v: boolean) => up("autoplay", v)} />
                 <ToggleInput label="Show Dots" value={!!p.dots} onChange={(v: boolean) => up("dots", v)} />
                 <ToggleInput label="Show Arrows" value={!!p.arrows} onChange={(v: boolean) => up("arrows", v)} />
                 <ToggleInput label="Fade Transition" value={!!p.fade} onChange={(v: boolean) => up("fade", v)} />
             </Section>
-            <Section title="Timing & Spacing">
+            <Section title="Visuals">
+                <Field label="Height"><TextInput value={(p.height as string) || "500px"} onChange={(v) => up("height", v)} placeholder="500px" /></Field>
+                <Field label="Arrow Color"><ColorInput value={(p.arrowColor as string) || "var(--primary)"} onChange={(v) => up("arrowColor", v)} onBlur={(v) => up("arrowColor", v, true)} /></Field>
+                <Field label="Arrow Size"><TextInput value={(p.arrowSize as string) || "24px"} onChange={(v) => up("arrowSize", v)} placeholder="24px" /></Field>
+                <Field label="Arrow Position"><SelectInput value={(p.arrowPosition as string) || "middle"} onChange={(v) => up("arrowPosition", v)} options={[{ label: "Top", value: "top" }, { label: "Middle", value: "middle" }, { label: "Bottom", value: "bottom" }, { label: "Bottom (Aside Dots)", value: "bottom-dots" }]} /></Field>
+                <Field label="Dot Color"><ColorInput value={(p.dotColor as string) || "rgba(255,255,255,0.2)"} onChange={(v) => up("dotColor", v)} onBlur={(v) => up("dotColor", v, true)} /></Field>
+                <Field label="Active Dot Color"><ColorInput value={(p.activeDotColor as string) || "var(--primary)"} onChange={(v) => up("activeDotColor", v)} onBlur={(v) => up("activeDotColor", v, true)} /></Field>
+                <Field label="Media Fit"><SelectInput value={(p.mediaFit as string) || "cover"} onChange={(v) => up("mediaFit", v)} options={[{ label: "Cover (Crop)", value: "cover" }, { label: "Contain (Letterbox)", value: "contain" }]} /></Field>
+                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
+                <Field label="Padding"><TextInput value={(p.padding as string) || "24px"} onChange={(v) => up("padding", v)} placeholder="24px" /></Field>
+            </Section>
+            <Section title="Timing">
                 <Field label="Transition Speed (ms)"><TextInput value={String(p.speed || 500)} onChange={(v) => up("speed", Number(v))} placeholder="500" /></Field>
                 <Field label="AutoPlay Delay (ms)"><TextInput value={String(p.autoplaySpeed || 3000)} onChange={(v) => up("autoplaySpeed", Number(v))} placeholder="3000" /></Field>
-                <Field label="Padding"><TextInput value={(p.padding as string) || "24px"} onChange={(v) => up("padding", v)} placeholder="24px" /></Field>
-                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
             </Section>
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
         </>
