@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { loadPage, savePage, hasLocalDraft } from "@/lib/utils/storage";
+import { migrateProjectName } from "@/lib/config/blocks";
 import EditorShell from "@/components/editor/EditorShell";
 import { useToasts } from "@/hooks/useToasts";
 import { usePage } from "@/lib/api/queries";
@@ -39,21 +40,25 @@ export default function EditorPage() {
     if (!pageId) return;
 
     if (isGuest) {
-      setPage(loadPage(pageId));
+      const p = loadPage(pageId);
+      const migrated = { ...p, content: migrateProjectName(p.content ?? [], p.title ?? "") };
+      setPage(migrated);
+      savePage(pageId, migrated); // persist so reload shows correct name
       markClean();
     } else if (apiPage && !hasLoadedApi) {
       if (hasLocalDraft(pageId)) {
-        // Recover local draft if available (protects against accidental refresh)
         const local = loadPage(pageId);
-        setPage(local);
+        const migrated = { ...local, content: migrateProjectName(local.content ?? [], local.title ?? "") };
+        setPage(migrated);
+        savePage(pageId, migrated); // persist migrated version
         setHasLoadedApi(true);
-        // Do NOT markClean here, so it eventually auto-saves back to the DB!
+        // Do NOT markClean — auto-save will push to DB.
       } else {
         const pageData = apiPage.page || apiPage;
-        setPage({
-          ...pageData,
-          content: Array.isArray(pageData.content) ? pageData.content : []
-        });
+        const content = Array.isArray(pageData.content) ? pageData.content : [];
+        const migrated = { ...pageData, content: migrateProjectName(content, pageData.title ?? "") };
+        setPage(migrated);
+        savePage(pageId, migrated); // persist migrated version to local
         markClean();
         setHasLoadedApi(true);
       }
@@ -66,7 +71,7 @@ export default function EditorPage() {
       toastError("Failed to load page from server. It may have been deleted.");
       const local = loadPage(pageId);
       if (local && local.content) {
-        setPage(local);
+        setPage({ ...local, content: migrateProjectName(local.content, local.title ?? "") });
       } else {
         setPage({
           id: pageId, title: "Untitled", slug: "untitled", status: "DRAFT",

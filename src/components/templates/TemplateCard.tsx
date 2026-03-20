@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRightIcon, ClockIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon, ClockIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { Template } from "@/types/templates";
 import { getGradient } from "@/lib/utils/gradients";
@@ -14,6 +14,7 @@ interface TemplateCardProps {
         status?: string;
         isPublic?: boolean;
         isLive?: boolean;
+        domain?: string;
         updatedAt?: string;
     };
     onClick: () => void;
@@ -47,7 +48,6 @@ export function TemplateCard({
     setRenameValue,
     onRenameSubmit
 }: TemplateCardProps) {
-    const isPublished = template.status?.toUpperCase() === "PUBLISHED";
     const isLive = !!template.isLive;
     const isLocked = template.isLocked;
 
@@ -98,18 +98,14 @@ export function TemplateCard({
 
                 {/* Status Badges (Admin / Dashboard) */}
                 <div className="absolute top-3 left-3 flex gap-1.5 z-20">
-                    {variant !== "public" && (
+                    {variant !== "public" && (isLive) && (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-md text-white border border-white/10 flex items-center gap-1.5 shadow-lg">
                             {isLocked ? "ENCRYPTED" : (
                                 <>
                                     {isLive ? (
                                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                    ) : isPublished ? (
-                                        <CheckCircleIcon className="w-3 h-3 text-emerald-500" />
-                                    ) : (
-                                        <div className="w-2 h-2 rounded-full bg-amber-500" />
-                                    )}
-                                    {isLive ? "LIVE" : isPublished ? "PUBLISHED" : "DRAFT"}
+                                    ) : null}
+                                    {isLive ? "LIVE" : null}
                                 </>
                             )}
                         </span>
@@ -142,12 +138,26 @@ export function TemplateCard({
                                 className="w-full bg-black/40 border-2 border-indigo-500/50 rounded-lg px-3 py-1.5 text-sm font-bold text-white outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all"
                             />
                         ) : (
+                        <div className="flex items-center gap-2 mb-1.5 min-w-0">
                             <h3 className={cn(
-                                "font-bold text-white leading-tight transition-colors group-hover:text-indigo-400 truncate mb-1.5",
+                                "font-bold text-white leading-tight transition-colors group-hover:text-indigo-400 truncate",
                                 variant === "public" ? "text-lg sm:text-2xl" : "text-sm sm:text-base"
                             )}>
                                 {template.title || "Untitled"}
                             </h3>
+                            {isLive && (template as any).domain && (
+                                <a
+                                    href={`https://${(template as any).domain}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="p-1 rounded-md hover:bg-white/10 text-white/40 hover:text-indigo-400 transition-all shrink-0"
+                                    title="Visit live site"
+                                >
+                                    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                                </a>
+                            )}
+                        </div>
                         )}
 
                         {(variant === "public" || variant === "admin") && !isRenaming && (

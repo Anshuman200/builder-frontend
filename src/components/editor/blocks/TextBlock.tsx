@@ -23,11 +23,56 @@ export function TextBlock({ block }: BlockProps) {
         finalColor = ["#64748b", "#6b7280", "#475569", "#4b5563"].includes(finalColor.toLowerCase()) ? "#94a3b8" : "#f8fafc";
     }
 
+    const wrapperStyle: React.CSSProperties = {
+        padding: (p.padding as string) || "12px 24px",
+        width: "100%",
+        marginTop: (p.marginTop as string) || "0",
+        marginLeft: (p.marginLeft as string) || "0",
+        marginRight: (p.marginRight as string) || "0",
+        marginBottom: (p.marginBottom as string) || "0",
+        position: (p.position as any) || "relative",
+        top: (p.top as string) || "auto",
+        left: (p.left as string) || "auto",
+        right: (p.right as string) || "auto",
+        bottom: (p.bottom as string) || "auto",
+        zIndex: (p.zIndex as number) || "auto",
+        opacity: p.opacity !== undefined ? Number(p.opacity) : 1,
+        transform: (p.transform as string) || "none",
+    };
+
+    const rawContent = (p.content as string) || "";
+    // Split content on real newlines so each line renders as a separate element
+    const lines = rawContent.split("\n");
+    const tagStyle: React.CSSProperties = {
+        margin: 0,
+        width: "100%",
+        fontSize,
+        fontWeight: p.bold ? 700 : tag.startsWith("h") ? 700 : (p.fontWeight as number) || 400,
+        fontStyle: p.italic ? "italic" : "normal",
+        textDecoration: p.underline ? "underline" : p.strikethrough ? "line-through" : undefined,
+        color: finalColor,
+        textAlign: (p.align as React.CSSProperties["textAlign"]) || "left",
+        lineHeight: (p.lineHeight as string) || 1.6,
+        letterSpacing: (p.letterSpacing as string) || undefined,
+        whiteSpace: "pre-wrap",
+        wordBreak: "break-word",
+        listStylePosition: "inside",
+    };
+
     return (
-        <div id={(p.sectionId as string) || `block-${block.id}`} style={{ padding: "12px 24px", width: "100%" }}>
-            <Tag style={{ margin: 0, width: "100%", fontSize, fontWeight: p.bold ? 700 : tag.startsWith("h") ? 700 : 400, fontStyle: p.italic ? "italic" : "normal", color: finalColor, textAlign: (p.align as React.CSSProperties["textAlign"]) || "left", lineHeight: (p.lineHeight as string) || 1.6, letterSpacing: (p.letterSpacing as string) || undefined }}>
-                {(p.content as string) || (<span style={{ fontStyle: "italic", opacity: 0.5 }}>Click to edit text…</span>)}
-            </Tag>
+        <div id={(p.sectionId as string) || `block-${block.id}`} style={wrapperStyle}>
+            {rawContent ? (
+                <Tag style={tagStyle}>
+                    {lines.map((line, i) => (
+                        <React.Fragment key={i}>
+                            {line || "\u00A0" /* nbsp for blank lines */}
+                            {i < lines.length - 1 && <br />}
+                        </React.Fragment>
+                    ))}
+                </Tag>
+            ) : (
+                <Tag style={tagStyle}><span style={{ fontStyle: "italic", opacity: 0.5 }}>Click to edit text…</span></Tag>
+            )}
         </div>
     );
 }

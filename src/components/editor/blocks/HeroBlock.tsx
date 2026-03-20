@@ -35,12 +35,16 @@ export function HeroBlock({ block }: BlockProps) {
         background = bgColor;
     }
 
+    const layout = (p.layout as string) || "centered";
+    const innerMaxWidth = layout === "narrow" ? "800px" : layoutObj.maxWidth;
+    const sectionMinHeight = layout === "fullscreen" ? "100dvh" : (p.minHeight as string) || "80dvh";
+
     return (
         <>
             {isPreview && (
                 <style>{`
           .hero-${block.id} { padding: ${desktopPadding}; padding-left: 0; padding-right: 0; }
-          .hero-inner-${block.id} { max-width: ${layoutObj.maxWidth}; padding-left: ${layoutObj.paddingX}; padding-right: ${layoutObj.paddingX}; margin: 0 auto; width: 100%; box-sizing: border-box; }
+          .hero-inner-${block.id} { max-width: ${innerMaxWidth}; padding-left: ${layoutObj.paddingX}; padding-right: ${layoutObj.paddingX}; margin: 0 auto; width: 100%; box-sizing: border-box; }
           @media (max-width: 1024px) { .hero-${block.id} { padding: ${tabletPadding}; padding-left: 0; padding-right: 0; } .hero-inner-${block.id} { padding-left: ${layoutObj.tabletPaddingX}; padding-right: ${layoutObj.tabletPaddingX}; } }
           @media (max-width: 768px) { .hero-${block.id} { padding: ${mobilePadding}; padding-left: 0; padding-right: 0; } .hero-inner-${block.id} { padding-left: ${layoutObj.mobilePaddingX}; padding-right: ${layoutObj.mobilePaddingX}; } }
         `}</style>
@@ -48,11 +52,11 @@ export function HeroBlock({ block }: BlockProps) {
             <section
                 id={(p.sectionId as string) || `block-${block.id}`}
                 className={isPreview ? `hero-${block.id}` : undefined}
-                style={{ minHeight: (p.minHeight as string) || "80dvh", background, borderRadius: (p.borderRadius as string) || "0px", overflow: "hidden", color: (p.textColor as string) || "#ffffff", display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "center", padding: isPreview ? undefined : editorPadding, paddingLeft: isPreview ? undefined : 0, paddingRight: isPreview ? undefined : 0, textAlign: align as React.CSSProperties["textAlign"], position: "relative" }}
+                style={{ minHeight: sectionMinHeight, background, borderRadius: (p.borderRadius as string) || "0px", overflow: "hidden", color: (p.textColor as string) || "#ffffff", display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "center", padding: isPreview ? undefined : editorPadding, paddingLeft: isPreview ? undefined : 0, paddingRight: isPreview ? undefined : 0, textAlign: align as React.CSSProperties["textAlign"], position: "relative" }}
             >
                 <div
                     className={isPreview ? `hero-inner-${block.id}` : undefined}
-                    style={{ maxWidth: layoutObj.maxWidth, margin: "0 auto", width: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "stretch", gap: 4, paddingLeft: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), paddingRight: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX) }}
+                    style={{ maxWidth: innerMaxWidth, margin: "0 auto", width: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "stretch", gap: 4, paddingLeft: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), paddingRight: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX) }}
                 >
                     {childBlocks.map((child) => (
                         <ChildBlockWrapper key={child.id} block={child} outlineColor="rgba(255,255,255,0.9)" outlineColorHover="rgba(255,255,255,0.5)" />

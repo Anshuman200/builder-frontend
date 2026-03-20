@@ -31,35 +31,36 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
     { id: 'templates', label: 'Templates', href: '/templates', icon: BoltIcon },
     { id: 'media', label: 'Media', href: '/media', icon: ListBulletIcon },
     { id: 'domains', label: 'Domains', href: '/domains', icon: GlobeAltIcon },
-    { id: 'profile', label: 'Profile', href: '/home/profile', icon: UserIcon }
+    // { id: 'profile', label: 'Profile', href: '/home/profile', icon: UserIcon }
   ];
 
   return (
     <>
-      <header className="h-16 border-b border-white/5 flex items-center px-4 lg:px-6 gap-3 lg:gap-6 sticky top-0 bg-neutral-950/80 backdrop-blur-xl z-50">
-        <Link 
-          href={!user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home"}
-          className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity"
-        >
-          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
-            <BoltIcon className="w-6 h-6 text-indigo-400" />
-          </div>
-          <h1 className="text-lg font-black tracking-tighter text-white hidden sm:block">PageCraft</h1>
-        </Link>
+      <header className="h-16 border-b border-white/5 flex justify-between items-center px-4 lg:px-6 gap-3 lg:gap-6 sticky top-0 bg-neutral-950/80 backdrop-blur-xl z-50">
+        <div className="">
+          <Link
+            href={!user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home"}
+            className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+              <BoltIcon className="w-6 h-6 text-indigo-400" />
+            </div>
+            <h1 className="text-lg font-black tracking-tighter text-white hidden sm:block">PageCraft</h1>
+          </Link>
+        </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-1 bg-white/5 p-1 rounded-2xl border border-white/5">
-          {navItems.filter(item => item.id !== 'profile').map((item) => {
+        <nav className="hidden lg:flex items-center gap-1">
+          {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.id}
                 href={item.href}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${
-                  isActive 
-                    ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' 
-                    : 'text-white/40 hover:text-white hover:bg-white/5'
-                }`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${isActive
+                  ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                  : 'text-white/40 hover:text-white hover:bg-white/5'
+                  }`}
               >
                 <item.icon className="w-4 h-4" />
                 {item.label}
@@ -68,12 +69,10 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
           })}
         </nav>
 
-        <div className="flex-1" />
-
         <div className="flex items-center gap-3 lg:gap-4 shrink-0">
           {onCreatePage && (
-            <button 
-              onClick={onCreatePage} 
+            <button
+              onClick={onCreatePage}
               className="hidden lg:flex items-center gap-2 bg-white text-black px-6 py-2.5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-xl shadow-white/10"
             >
               <PlusIcon className="w-4 h-4" />
@@ -123,9 +122,9 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
               >
                 <div className="w-full h-full rounded-2xl bg-neutral-900 flex items-center justify-center overflow-hidden">
                   {(user as any)?.profilePic ? (
-                    <img 
-                      src={(user as any).profilePic} 
-                      alt="" 
+                    <img
+                      src={(user as any).profilePic}
+                      alt=""
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -142,7 +141,7 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
       <nav className="fixed bottom-0 inset-x-0 h-16 bg-neutral-950/80 backdrop-blur-2xl border-t border-white/5 flex items-center justify-around px-2 pb-safe z-50 lg:hidden">
         {navItems.map((item, idx) => {
           const isActive = pathname === item.href;
-          
+
           // Render the "New Page" button in the middle if provided
           const renderCreateButton = idx === 2 && onCreatePage;
 

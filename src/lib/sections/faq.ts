@@ -32,7 +32,7 @@ export const faqSections: SectionTemplate[] = [
             makeBlock("container", {
                 padding: "64px 24px",
                 bgColor: "#ffffff",
-                maxWidth: "800px",
+                maxWidth: "100dvw",
                 childBlocks: [
                     makeBlock("text", {
                         content: "FAQ",

@@ -20,6 +20,7 @@ export function FeaturesPanel({ block }: { block: Block }) {
                 <Field label="Subtitle"><TextInput value={(p.subtitle as string) || ""} onChange={(v) => up("subtitle", v)} placeholder="What makes us different" /></Field>
             </Section>
             <Section title="Layout & Style">
+                <Field label="Section Layout"><SelectInput value={(p.layout as string) || "grid"} onChange={(v) => up("layout", v)} options={[{ label: "Card Grid", value: "grid" }, { label: "Alternating Row (Icon + Text)", value: "alternating" }, { label: "Horizontal List", value: "horizontal" }, { label: "Icon-Only Grid", value: "icon-grid" }, { label: "Bento / Asymmetric", value: "bento" }]} /></Field>
                 <Field label="Columns"><SelectInput value={String(p.columns || "3")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>
                 <Field label="Gap"><TextInput value={(p.gap as string) || "2rem"} onChange={(v) => up("gap", v)} placeholder="2rem" /></Field>
                 <Field label="Text Alignment"><SelectInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>
@@ -106,8 +107,8 @@ export function TeamPanel({ block }: { block: Block }) {
                 <Field label="Subtitle"><TextInput value={(p.subtitle as string) || ""} onChange={(v) => up("subtitle", v)} placeholder="The people behind the magic" /></Field>
             </Section>
             <Section title="Layout & Grid">
-                <Field label="Layout Type"><SelectInput value={(p.layout as string) || "grid"} onChange={(v) => up("layout", v)} options={[{ label: "Grid", value: "grid" }, { label: "List (Horizontal)", value: "list" }]} /></Field>
-                {(p.layout as string) !== "list" && (
+                <Field label="Section Layout"><SelectInput value={(p.layout as string) || "grid"} onChange={(v) => up("layout", v)} options={[{ label: "Card Grid", value: "grid" }, { label: "Horizontal List (Photo Left)", value: "list" }, { label: "Large Cards (1 per row)", value: "large" }, { label: "Compact Row (Mini Cards)", value: "compact" }, { label: "Circular Spotlight", value: "spotlight" }]} /></Field>
+                {((p.layout as string) || "grid") !== "list" && (
                     <Field label="Columns"><SelectInput value={String(p.columns || "3")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>
                 )}
                 <Field label="Card Spacing"><TextInput value={(p.gap as string) || "2rem"} onChange={(v) => up("gap", v)} placeholder="e.g. 1rem or 24px" /></Field>
@@ -173,16 +174,71 @@ export function TeamPanel({ block }: { block: Block }) {
                                     </div>
                                 </div>
                                 <div style={{ padding: "8px 10px" }}>
-                                    <div style={{ fontSize: 10, color: "#555", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Social Links</div>
-                                    <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                                        {[{ key: "twitter", label: "Twitter / X" }, { key: "linkedin", label: "LinkedIn" }, { key: "github", label: "GitHub" }, { key: "instagram", label: "Instagram" }, { key: "facebook", label: "Facebook" }, { key: "dribbble", label: "Dribbble" }].map(({ key, label }) => (
-                                            <div key={key} style={{ display: "grid", gridTemplateColumns: "72px 1fr", alignItems: "center", borderTop: "1px solid #282828" }}>
-                                                <span style={{ fontSize: 10, color: "#555", padding: "6px 0" }}>{label}</span>
-                                                <input value={member.socials?.[key] || ""} onChange={(e) => { const val = e.target.value; up("members", ((p.members as any[]) || []).map((m, i) => { if (i !== idx) return m; const socials = { ...(m.socials || {}) }; if (val) socials[key] = val; else delete socials[key]; return { ...m, socials }; })); }} placeholder="https://…" style={{ fontSize: 10, padding: "6px 0", background: "transparent", border: "none", outline: "none", color: "#94a3b8", width: "100%" }} />
-                                            </div>
-                                        ))}
+                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                                        <div style={{ fontSize: 10, color: "#555", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Social Links</div>
+                                        <select
+                                            defaultValue=""
+                                            onChange={(e) => {
+                                                const plat = e.target.value;
+                                                if (!plat) return;
+                                                e.target.value = "";
+                                                up("members", ((p.members as any[]) || []).map((m, i) => {
+                                                    if (i !== idx) return m;
+                                                    const socials = { ...(m.socials || {}) };
+                                                    if (!socials[plat]) socials[plat] = { url: "", icon: "" };
+                                                    return { ...m, socials };
+                                                }));
+                                            }}
+                                            style={{ fontSize: 10, background: "#2a2a2a", color: "#94a3b8", border: "1px solid #333", borderRadius: 4, padding: "3px 5px", cursor: "pointer" }}
+                                        >
+                                            <option value="">+ Add</option>
+                                            {[{ v: "twitter", l: "Twitter / X" }, { v: "linkedin", l: "LinkedIn" }, { v: "github", l: "GitHub" }, { v: "instagram", l: "Instagram" }, { v: "facebook", l: "Facebook" }, { v: "dribbble", l: "Dribbble" }, { v: "youtube", l: "YouTube" }, { v: "tiktok", l: "TikTok" }, { v: "email", l: "Email" }, { v: "website", l: "Website" }]
+                                                .filter(o => !member.socials?.[o.v])
+                                                .map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
+                                        </select>
+                                    </div>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                        {Object.entries(member.socials || {}).map(([key, val]: [string, any]) => {
+                                            const url = typeof val === "string" ? val : val?.url || "";
+                                            const icon = typeof val === "object" ? val?.icon || "" : "";
+                                            const LABELS: Record<string, string> = { twitter: "Twitter/X", linkedin: "LinkedIn", github: "GitHub", instagram: "Instagram", facebook: "Facebook", dribbble: "Dribbble", youtube: "YouTube", tiktok: "TikTok", email: "Email", website: "Website" };
+                                            const setSocial = (field: "url" | "icon", v: string) => up("members", ((p.members as any[]) || []).map((m, i) => {
+                                                if (i !== idx) return m;
+                                                const updated = { ...(m.socials || {}) };
+                                                updated[key] = { url: field === "url" ? v : url, icon: field === "icon" ? v : icon };
+                                                return { ...m, socials: updated };
+                                            }));
+                                            const removeSocial = () => up("members", ((p.members as any[]) || []).map((m, i) => {
+                                                if (i !== idx) return m;
+                                                const s = { ...(m.socials || {}) };
+                                                delete s[key];
+                                                return { ...m, socials: s };
+                                            }));
+                                            return (
+                                                <div key={key} style={{ background: "#1c1c1c", border: "1px solid #2a2a2a", borderRadius: 6, overflow: "hidden" }}>
+                                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 8px", background: "#222", borderBottom: "1px solid #2a2a2a" }}>
+                                                        <span style={{ fontSize: 10, fontWeight: 600, color: "#aaa", textTransform: "uppercase", letterSpacing: "0.06em" }}>{LABELS[key] || key}</span>
+                                                        <button onClick={removeSocial} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 14, lineHeight: 1, padding: "0 2px" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ef4444")} onMouseLeave={(e) => (e.currentTarget.style.color = "#555")} title="Remove">×</button>
+                                                    </div>
+                                                    <div style={{ padding: "5px 8px", display: "flex", flexDirection: "column", gap: 4 }}>
+                                                        <div style={{ display: "grid", gridTemplateColumns: "28px 1fr", alignItems: "center", gap: 4 }}>
+                                                            <span style={{ fontSize: 9, color: "#555", fontWeight: 600 }}>URL</span>
+                                                            <input value={url} onChange={(e) => setSocial("url", e.target.value)} placeholder="https://…" style={{ fontSize: 10, padding: "4px 0", background: "transparent", border: "none", borderBottom: "1px solid #2a2a2a", outline: "none", color: "#94a3b8", width: "100%" }} />
+                                                        </div>
+                                                        <div style={{ display: "grid", gridTemplateColumns: "28px 1fr", alignItems: "center", gap: 4 }}>
+                                                            <span style={{ fontSize: 9, color: "#555", fontWeight: 600 }}>Icon</span>
+                                                            <MediaInput value={icon} onChange={(v) => setSocial("icon", v)} placeholder="Upload or paste icon URL (optional)" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                        {Object.keys(member.socials || {}).length === 0 && (
+                                            <div style={{ fontSize: 10, color: "#444", textAlign: "center", padding: "6px 0" }}>No social links yet. Use "+ Add" above.</div>
+                                        )}
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     ))}
@@ -314,6 +370,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Form Setup">
+                <Field label="Section Layout"><SelectInput value={(p.layout as string) || "centered"} onChange={(v) => up("layout", v)} options={[{ label: "Centered (Narrow)", value: "centered" }, { label: "Split — Form + Info Panel", value: "split" }, { label: "Full Width", value: "full" }, { label: "Card / Floating", value: "card" }]} /></Field>
                 <ToggleInput value={p.showLastName !== false} onChange={(v) => up("showLastName", v)} label="Show Last Name Field" />
             </Section>
 

@@ -54,9 +54,11 @@ export function ContactFormBlock({ block }: BlockProps) {
     const isPreview = React.useContext(PreviewContext);
     const { updateBlock } = useEditorStore();
     const p = block.props;
+    const layout = (p.layout as string) || "centered";
+    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
 
     // Form values
-    const [values, setValues] = useState({ firstName: "", lastName: "", email: "", message: "" });
+    const [values, setValues] = useState({ firstName: "", lastName: "", email: "", message: "", gender: "" });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [submitting, setSubmitting] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: "success" | "error"; visible: boolean }>({
@@ -66,8 +68,11 @@ export function ContactFormBlock({ block }: BlockProps) {
     // ── Props (all customisable) ────────────────────────────────────────────────
     const receiverEmail = (p.receiverEmail as string) || "ansh.official03@gmail.com";
     const showLastName = p.showLastName !== false; // default true
+    const showGender = p.showGender === true; // default false
+    const showLabels = p.showLabels !== false; // default true
     const firstNameLabel = (p.firstNameLabel as string) || "First Name";
     const lastNameLabel = (p.lastNameLabel as string) || "Last Name";
+    const genderLabel = (p.genderLabel as string) || "Gender";
     const emailLabel = (p.emailLabel as string) || "Email";
     const messageLabel = (p.messageLabel as string) || "Message";
     const submitLabel = (p.submitLabel as string) || "Send Message →";
@@ -100,6 +105,10 @@ export function ContactFormBlock({ block }: BlockProps) {
     const lastNameRequired = p.lastNameRequired === true; // default false
     const emailRequired = p.emailRequired !== false; // default true
     const messageRequired = p.messageRequired !== false; // default true
+    const genderRequired = p.genderRequired !== false; // default true
+
+    const genderOptions = (p.genderOptions as string[]) || ["woman", "man", "other", "i don't want to answer"];
+
 
     // ── Validation ─────────────────────────────────────────────────────────────
     const validate = useCallback(() => {
@@ -108,9 +117,10 @@ export function ContactFormBlock({ block }: BlockProps) {
         if (showLastName && lastNameRequired && !values.lastName.trim()) errs.lastName = `${lastNameLabel} is required`;
         if (emailRequired && !values.email.trim()) errs.email = `${emailLabel} is required`;
         else if (values.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) errs.email = "Invalid email address";
+        if (showGender && genderRequired && !values.gender) errs.gender = `${genderLabel} is required`;
         if (messageRequired && !values.message.trim()) errs.message = `${messageLabel} is required`;
         return errs;
-    }, [values, showLastName, firstNameLabel, lastNameLabel, emailLabel, messageLabel, firstNameRequired, lastNameRequired, emailRequired, messageRequired]);
+    }, [values, showLastName, showGender, firstNameLabel, lastNameLabel, genderLabel, emailLabel, messageLabel, firstNameRequired, lastNameRequired, emailRequired, messageRequired, genderRequired]);
 
     // ── Toast helper ───────────────────────────────────────────────────────────
     const showToast = (message: string, type: "success" | "error") => {
@@ -131,23 +141,24 @@ export function ContactFormBlock({ block }: BlockProps) {
                 subject: "New Contact Form Submission",
                 fields: {
                     [firstNameLabel]: values.firstName,
-                    [emailLabel]: values.email,
-                    [messageLabel]: values.message,
                 } as Record<string, string>
             };
             if (showLastName) payload.fields[lastNameLabel] = values.lastName;
+            if (showGender) payload.fields[genderLabel] = values.gender;
+            payload.fields[emailLabel] = values.email;
+            payload.fields[messageLabel] = values.message;
 
             const endpoint = "/api/forms/submit";
             await axios.post(endpoint, payload);
             showToast(successMessage, "success");
-            setValues({ firstName: "", lastName: "", email: "", message: "" });
+            setValues({ firstName: "", lastName: "", email: "", message: "", gender: "" });
         } catch (error: any) {
             const serverMsg = error?.response?.data?.message || errorMessage;
             showToast(serverMsg, "error");
         } finally {
             setSubmitting(false);
         }
-    }, [values, validate, receiverEmail, firstNameLabel, lastNameLabel, emailLabel, messageLabel, showLastName, successMessage, errorMessage]);
+    }, [values, validate, receiverEmail, firstNameLabel, lastNameLabel, genderLabel, emailLabel, messageLabel, showLastName, showGender, successMessage, errorMessage]);
 
     // ─── Input style ───────────────────────────────────────────────────────────
     const inputStyle: React.CSSProperties = {
@@ -171,6 +182,7 @@ export function ContactFormBlock({ block }: BlockProps) {
         color: labelColor,
         marginBottom: "0.4rem",
         letterSpacing: "0.01em",
+        textAlign: "left",
     };
 
     const errorStyle: React.CSSProperties = {
@@ -178,6 +190,7 @@ export function ContactFormBlock({ block }: BlockProps) {
         fontSize: "0.75rem",
         marginTop: "0.25rem",
         fontWeight: 500,
+        textAlign: "left",
     };
 
     const fieldWrapStyle: React.CSSProperties = {
@@ -197,35 +210,32 @@ export function ContactFormBlock({ block }: BlockProps) {
         }
     };
 
-    return (
-        <>
-            {/* Toast */}
-            <Toast message={toast.message} type={toast.type} visible={toast.visible} />
+    // ── Layout wrapper logic ──────────────────────────────────────────────────
+    const outerBg = (p.outerBg as string) || "transparent";
+    const outerPadding = (p.outerPadding as string) || "5rem 2rem";
 
-            {/* Form wrapper */}
-            <div
+    const formNode = (
+        <div
+            onClick={handleWrapperClick}
+            style={{
+                background: bgColor,
+                padding,
+                borderRadius,
+                boxSizing: "border-box",
+                width: "100%",
+            }}
+        >
+            {titleText && (
+                <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.8rem", fontWeight: 800, color: titleColor }}>{titleText}</h2>
+            )}
+            {subtitleText && (
+                <p style={{ margin: "0 0 1.75rem", fontSize: "0.95rem", color: subtitleColor, lineHeight: 1.6 }}>{subtitleText}</p>
+            )}
+            <form
+                onSubmit={isPreview ? handleSubmit : e => { e.preventDefault(); e.stopPropagation(); }}
                 onClick={handleWrapperClick}
-                style={{
-                    background: bgColor,
-                    padding,
-                    borderRadius,
-                    boxSizing: "border-box",
-                    width: "100%",
-                }}
+                noValidate
             >
-                {/* Optional title/subtitle */}
-                {titleText && (
-                    <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.8rem", fontWeight: 800, color: titleColor }}>{titleText}</h2>
-                )}
-                {subtitleText && (
-                    <p style={{ margin: "0 0 1.75rem", fontSize: "0.95rem", color: subtitleColor, lineHeight: 1.6 }}>{subtitleText}</p>
-                )}
-
-                <form
-                    onSubmit={isPreview ? handleSubmit : e => { e.preventDefault(); e.stopPropagation(); }}
-                    onClick={handleWrapperClick}
-                    noValidate
-                >
                     {/* Name row */}
                     <div style={{
                         display: "grid",
@@ -235,7 +245,7 @@ export function ContactFormBlock({ block }: BlockProps) {
                     }}>
                         {/* First Name */}
                         <div style={fieldWrapStyle}>
-                            <label style={labelStyle}>{firstNameLabel}{firstNameRequired && <span style={{ color: "#ef4444" }}> *</span>}</label>
+                            {showLabels && <label style={labelStyle}>{firstNameLabel}{firstNameRequired && <span style={{ color: "#ef4444" }}> *</span>}</label>}
                             <input
                                 type="text"
                                 value={values.firstName}
@@ -251,7 +261,7 @@ export function ContactFormBlock({ block }: BlockProps) {
                         {/* Last Name (optional) */}
                         {showLastName && (
                             <div style={fieldWrapStyle}>
-                                <label style={labelStyle}>{lastNameLabel}{lastNameRequired && <span style={{ color: "#ef4444" }}> *</span>}</label>
+                                {showLabels && <label style={labelStyle}>{lastNameLabel}{lastNameRequired && <span style={{ color: "#ef4444" }}> *</span>}</label>}
                                 <input
                                     type="text"
                                     value={values.lastName}
@@ -268,7 +278,7 @@ export function ContactFormBlock({ block }: BlockProps) {
 
                     {/* Email */}
                     <div style={{ ...fieldWrapStyle, marginBottom: "1rem" }}>
-                        <label style={labelStyle}>{emailLabel}{emailRequired && <span style={{ color: "#ef4444" }}> *</span>}</label>
+                        {showLabels && <label style={labelStyle}>{emailLabel}{emailRequired && <span style={{ color: "#ef4444" }}> *</span>}</label>}
                         <input
                             type="email"
                             value={values.email}
@@ -281,9 +291,32 @@ export function ContactFormBlock({ block }: BlockProps) {
                         {errors.email && <span style={errorStyle}>{errors.email}</span>}
                     </div>
 
+                    {/* Gender (optional but can be required) */}
+                    {showGender && (
+                        <div style={{ ...fieldWrapStyle, marginBottom: "1.5rem" }}>
+                            {showLabels && <label style={labelStyle}>{genderLabel}{genderRequired && <span style={{ color: "#ef4444" }}> *</span>}</label>}
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginTop: "0.25rem" }}>
+                                {genderOptions.map(option => (
+                                    <label key={option} style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontSize: "0.85rem", color: inputTextColor }}>
+                                        <input
+                                            type="radio"
+                                            name="gender"
+                                            value={option}
+                                            checked={values.gender === option}
+                                            onChange={() => { setValues(v => ({ ...v, gender: option })); setErrors(er => ({ ...er, gender: "" })); }}
+                                            style={{ cursor: "pointer", accentColor: inputFocusBorderColor }}
+                                        />
+                                        {option}
+                                    </label>
+                                ))}
+                            </div>
+                            {errors.gender && <span style={errorStyle}>{errors.gender}</span>}
+                        </div>
+                    )}
+
                     {/* Message textarea */}
                     <div style={{ ...fieldWrapStyle, marginBottom: "1.5rem" }}>
-                        <label style={labelStyle}>{messageLabel}{messageRequired && <span style={{ color: "#ef4444" }}> *</span>}</label>
+                        {showLabels && <label style={labelStyle}>{messageLabel}{messageRequired && <span style={{ color: "#ef4444" }}> *</span>}</label>}
                         <textarea
                             value={values.message}
                             onChange={e => { setValues(v => ({ ...v, message: e.target.value })); setErrors(er => ({ ...er, message: "" })); }}
@@ -353,8 +386,65 @@ export function ContactFormBlock({ block }: BlockProps) {
                     </div>
                 </form>
             </div>
+    );
 
-            {/* Spinner keyframe */}
+    // ── Contact info panel for split layout ──────────────────────────────────
+    const infoPanel = (
+        <div style={{ flex: "0 0 300px", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "2rem", background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)", borderRadius, border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}` }}>
+            <h3 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 800, color: (p.titleColor as string) || "#0f172a" }}>Get in Touch</h3>
+            <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.65, lineHeight: 1.7 }}>We'd love to hear from you. Fill out the form and we'll respond as soon as possible.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {[{ icon: "📧", text: (p.receiverEmail as string) || "hello@company.com" }, { icon: "📍", text: (p.infoAddress as string) || "123 Main Street, City" }, { icon: "📞", text: (p.infoPhone as string) || "+1 (555) 000-0000" }].map(({ icon, text }, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.75rem", fontSize: "0.88rem" }}>
+                        <span style={{ fontSize: "1.1rem" }}>{icon}</span>
+                        <span style={{ opacity: 0.7 }}>{text}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
+
+    const wrapLayout = () => {
+        switch (layout) {
+            case "split":
+                return (
+                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: outerBg, padding: outerPadding, width: "100%", boxSizing: "border-box" }}>
+                        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", gap: "3rem", alignItems: "flex-start", flexWrap: "wrap" }}>
+                            {infoPanel}
+                            <div style={{ flex: 1, minWidth: 300 }}>{formNode}</div>
+                        </div>
+                    </section>
+                );
+            case "full":
+                return (
+                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: outerBg, padding: outerPadding, width: "100%", boxSizing: "border-box" }}>
+                        {formNode}
+                    </section>
+                );
+            case "card":
+                return (
+                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: outerBg, padding: outerPadding, display: "flex", justifyContent: "center", width: "100%", boxSizing: "border-box" }}>
+                        <div style={{ width: "100%", maxWidth: 580, boxShadow: "0 20px 60px rgba(0,0,0,0.15)", borderRadius }}>
+                            {formNode}
+                        </div>
+                    </section>
+                );
+            default: // centered
+                return (
+                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: outerBg, padding: outerPadding, display: "flex", justifyContent: "center", width: "100%", boxSizing: "border-box" }}>
+                        <div style={{ width: "100%", maxWidth: 680 }}>
+                            {formNode}
+                        </div>
+                    </section>
+                );
+        }
+    };
+
+    return (
+        <>
+            <Toast message={toast.message} type={toast.type} visible={toast.visible} />
+            {wrapLayout()}
             <style>{`@keyframes cfb-spin { to { transform: rotate(360deg); } }`}</style>
         </>
     );

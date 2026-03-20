@@ -9,7 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
-import { BLOCK_TYPES, createBlock } from "@/lib/config/blocks";
+import { BLOCK_TYPES, createBlock, injectProjectName } from "@/lib/config/blocks";
 import { SECTION_TEMPLATES } from "@/lib/config/sections";
 import { useEditorStore } from "@/stores/editorStore";
 import { Popover } from "antd";
@@ -256,14 +256,16 @@ export default function BlockPalette() {
 
 // ─── Drawer section card ──────────────────────────────────────────────────────
 function DrawerSectionCard({ template, onAdd }: { template: SectionTemplate; onAdd: () => void }) {
-  const { addBlock, selectBlock } = useEditorStore();
+  const { addBlock, selectBlock, page } = useEditorStore();
+  const projectName = page?.title || "PageCraft";
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `template:${template.id}`,
     data: { type: "section", templateId: template.id },
   });
 
   function handleClick() {
-    const newBlock = template.create();
+    const rawBlock = template.create();
+    const newBlock = injectProjectName(rawBlock, projectName);
     addBlock(newBlock);
     selectBlock(newBlock.id);
     onAdd();
@@ -302,7 +304,8 @@ function DrawerSectionCard({ template, onAdd }: { template: SectionTemplate; onA
 
 // ─── Element palette card ─────────────────────────────────────────────────────
 function PaletteCard({ config, onAdd }: { config: BlockConfig; onAdd: () => void }) {
-  const { addBlock, selectBlock } = useEditorStore();
+  const { addBlock, selectBlock, page } = useEditorStore();
+  const projectName = page?.title || "PageCraft";
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `palette:${config.type}`,
     data: { type: "palette", blockType: config.type },
@@ -310,7 +313,8 @@ function PaletteCard({ config, onAdd }: { config: BlockConfig; onAdd: () => void
   const Icon = getIcon(config.icon) ?? Square2StackIcon;
 
   function handleClick() {
-    const newBlock = createBlock(config.type);
+    const rawBlock = createBlock(config.type);
+    const newBlock = injectProjectName(rawBlock, projectName);
     addBlock(newBlock);
     selectBlock(newBlock.id);
     onAdd();

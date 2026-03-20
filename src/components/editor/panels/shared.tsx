@@ -278,7 +278,7 @@ export function BorderRadiusInput({ value, onChange }: { value: string; onChange
     ];
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 5, width: "100%", maxWidth: 170 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 5, width: "100%" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
                 {corners.map(({ key, val }) => (
                     <div key={key} style={{ display: "flex", alignItems: "center", gap: 3, background: "#181818", border: "1px solid #2a2a2a", borderRadius: 4, padding: "2px 5px" }}>

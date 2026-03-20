@@ -375,7 +375,7 @@ const CanvasBlock = memo(function CanvasBlock({
             : showDropHighlight
               ? "inset 0 0 0 2px rgba(99,102,241,0.25)"
               : undefined,
-          borderRadius: isInside ? 8 : 4,
+          borderRadius: isInside ? 8 : 0,
         }}
         onClick={(e) => { e.stopPropagation(); selectBlock(block.id); }}
         onMouseEnter={() => hoverBlock(block.id)}
@@ -419,18 +419,29 @@ const CanvasBlock = memo(function CanvasBlock({
           </div>
         )}
 
-        {/* Outline overlay — use inset box-shadow so it's not clipped by overflow:hidden */}
-        {(isSelected || isHovered) && (
+        {/* Visible selection / hover ring — absolutely positioned ABOVE block content */}
+        {(isSelected || isHovered) && !isDragging && (
+          <div
+            style={{
+              position: "absolute", inset: 0,
+              border: isSelected ? "2.5px solid #6366f1" : "1.5px solid #94a3b8",
+              boxShadow: isSelected ? "inset 0 0 0 1px rgba(99,102,241,0.15), 0 0 0 3px rgba(99,102,241,0.12)" : undefined,
+              zIndex: 9998, pointerEvents: "none",
+            }}
+          />
+        )}
+        {/* Selected block type badge */}
+        {isSelected && (
           <div style={{
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            zIndex: 60,
-            boxShadow: isSelected
-              ? "inset 0 0 0 2px #0ea5e9"
-              : "inset 0 0 0 1px #94a3b8",
-            borderRadius: "2px",
-          }} />
+            position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
+            background: "#6366f1", color: "#fff",
+            fontSize: 9, fontWeight: 700, letterSpacing: "0.08em",
+            padding: "2px 10px", borderRadius: "0 0 6px 6px",
+            zIndex: 9999, pointerEvents: "none", textTransform: "uppercase",
+            whiteSpace: "nowrap", boxShadow: "0 2px 6px rgba(99,102,241,0.4)",
+          }}>
+            {block.type}
+          </div>
         )}
 
         {/* Floating action bar — WHITE background for visibility on any block */}
@@ -452,11 +463,16 @@ const CanvasBlock = memo(function CanvasBlock({
                 display: "flex", alignItems: "center", justifyContent: "center",
                 background: "none", border: "none", cursor: "grab",
                 color: "#475569", borderRadius: 6,
+                fontSize: 16, lineHeight: 1,
               }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#f1f5f9"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
             >
-              <EllipsisHorizontalIcon style={{ width: 15, height: 15 }} />
+              <svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor" style={{ color: "#64748b" }}>
+                <circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/>
+                <circle cx="3" cy="8" r="1.5"/><circle cx="9" cy="8" r="1.5"/>
+                <circle cx="3" cy="13" r="1.5"/><circle cx="9" cy="13" r="1.5"/>
+              </svg>
             </button>
             {/* Delete */}
             <button

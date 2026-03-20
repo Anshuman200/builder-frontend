@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useAuth } from "@/hooks/useAuth";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { DeleteToastProvider } from "@/context/DeleteToastContext";
 
 const NAV = [
     { key: "/admin/users", label: "Users", icon: UsersIcon },
@@ -190,9 +191,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </div>
 
                     <main className="flex-1 overflow-auto scrollbar-hide bg-neutral-950 relative">
-                        <PageTransition pathname={pathname} className="min-h-full p-4 sm:p-8 lg:p-12">
-                            {children}
-                        </PageTransition>
+                        <DeleteToastProvider>
+                            <PageTransition pathname={pathname} className="min-h-full p-4 sm:p-8 lg:p-12">
+                                {children}
+                            </PageTransition>
+                        </DeleteToastProvider>
                     </main>
                 </div>
             </div>

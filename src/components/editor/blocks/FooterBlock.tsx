@@ -28,7 +28,100 @@ export function FooterBlock({ block }: BlockProps) {
     const description = (p.description as string) || "Build beautiful pages in minutes.";
     const copyright = (p.copyright as string) || `© ${new Date().getFullYear()} PageCraft. All rights reserved.`;
     const links = (p.links as { id: string; label: string; url: string }[]) || [];
+    const footerLayout = (p.layout as string) || "standard";
     const isMobile = isPreview ? false : (viewMode === "mobile");
+
+    // Column link groups (for 'columns' layout)
+    const linkGroups = (p.linkGroups as { id: string; heading: string; links: { id: string; label: string; url: string }[] }[]) || [];
+
+    const NavLink = ({ link }: { link: { id: string; label: string; url: string } }) => {
+        const isAnchor = link.url.startsWith("#") && link.url.length > 1;
+        const handleNavClick = (e: React.MouseEvent) => { if (!isPreview) { e.preventDefault(); return; } if (isAnchor) { e.preventDefault(); const el = document.getElementById(link.url.substring(1)); if (el) el.scrollIntoView({ behavior: "smooth" }); } };
+        return (<a href={link.url} onClick={handleNavClick} style={{ color: "inherit", textDecoration: "none", fontWeight: 500, fontSize: "0.9rem", opacity: 0.75, transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.75"}>{link.label}</a>);
+    };
+
+    const Logo = () => (
+        <div style={{ fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em" }}>
+            {logoType === "image" && logoImage ? (<img src={logoImage} alt={logoText} style={{ width: logoWidth, maxHeight: "40px", objectFit: "contain" }} />) : (<span>{logoText}</span>)}
+        </div>
+    );
+
+    const innerPad = isPreview && !p.fullWidth ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX);
+
+    const renderFooterContent = () => {
+        // ── Minimal ──────────────────────────────────────────────────────
+        if (footerLayout === "minimal") {
+            return (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", paddingLeft: innerPad, paddingRight: innerPad }}>
+                    <Logo />
+                    <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>{links.map(link => <NavLink key={link.id} link={link} />)}</div>
+                    {copyright && <p style={{ margin: 0, fontSize: "0.82rem", opacity: 0.5 }}>{copyright}</p>}
+                </div>
+            );
+        }
+
+        // ── Centered ─────────────────────────────────────────────────────
+        if (footerLayout === "centered") {
+            return (
+                <div style={{ maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", paddingLeft: innerPad, paddingRight: innerPad, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "1.5rem" }}>
+                    <Logo />
+                    {description && <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.7, maxWidth: 440 }}>{description}</p>}
+                    {links.length > 0 && (
+                        <nav style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem", justifyContent: "center" }}>
+                            {links.map(link => <NavLink key={link.id} link={link} />)}
+                        </nav>
+                    )}
+                    {copyright && <p style={{ margin: "1rem 0 0", fontSize: "0.82rem", opacity: 0.5, borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1.5rem", width: "100%" }}>{copyright}</p>}
+                </div>
+            );
+        }
+
+        // ── Columns ───────────────────────────────────────────────────────
+        if (footerLayout === "columns") {
+            return (
+                <div style={{ maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", paddingLeft: innerPad, paddingRight: innerPad }}>
+                    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : `auto repeat(${Math.max(1, linkGroups.length)}, 1fr)`, gap: "2rem 3rem", marginBottom: "2rem" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                            <Logo />
+                            {description && <p style={{ margin: 0, fontSize: "0.88rem", opacity: 0.65, maxWidth: 240, lineHeight: 1.6 }}>{description}</p>}
+                        </div>
+                        {linkGroups.length > 0 ? linkGroups.map(group => (
+                            <div key={group.id} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                                <p style={{ margin: 0, fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.08em", opacity: 0.5 }}>{group.heading}</p>
+                                {group.links.map(link => <NavLink key={link.id} link={link} />)}
+                            </div>
+                        )) : (
+                            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                                <p style={{ margin: 0, fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.08em", opacity: 0.5 }}>Links</p>
+                                {links.map(link => <NavLink key={link.id} link={link} />)}
+                            </div>
+                        )}
+                    </div>
+                    {copyright && <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1.5rem", textAlign: "center", fontSize: "0.82rem", opacity: 0.5 }}>{copyright}</div>}
+                </div>
+            );
+        }
+
+        // ── Standard (default) ────────────────────────────────────────────
+        return (
+            <>
+                <div className={isPreview && !p.fullWidth ? `footer-${block.id}-inner` : undefined} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: "center", justifyContent: "space-between", gap: isMobile ? "2rem" : "1rem", width: "100%", maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", boxSizing: "border-box", textAlign: isMobile ? "center" : "left", paddingLeft: innerPad, paddingRight: innerPad }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: isMobile ? "center" : "flex-start" }}>
+                        <Logo />
+                        {description && (<p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.8, maxWidth: "250px" }}>{description}</p>)}
+                    </div>
+                    <nav className={isPreview ? `footer-${block.id}-links` : undefined} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: "1.5rem", alignItems: "center" }}>
+                        {links.map(link => <NavLink key={link.id} link={link} />)}
+                    </nav>
+                </div>
+                {copyright && (
+                    <div style={{ maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "2rem auto 0", paddingLeft: innerPad, paddingRight: innerPad }}>
+                        <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1.5rem", textAlign: "center", fontSize: "0.85rem", opacity: 0.6 }}>{copyright}</div>
+                    </div>
+                )}
+            </>
+        );
+    };
 
     return (
         <>
@@ -39,27 +132,8 @@ export function FooterBlock({ block }: BlockProps) {
           @media (max-width: 768px) { .footer-${block.id} { padding: ${mobilePadding}; } .footer-${block.id}-links { flex-direction: column; gap: 1rem; align-items: center; } }
         `}</style>
             )}
-            <footer id={(p.sectionId as string) || `block-${block.id}`} className={isPreview ? `footer-${block.id}` : undefined} style={{ background: bgColor, color: textColor, width: "100%", padding: isPreview ? undefined : editorPadding, paddingLeft: isPreview ? undefined : 0, paddingRight: isPreview ? undefined : 0 }}>
-                <div className={isPreview && !p.fullWidth ? `footer-${block.id}-inner` : undefined} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: "center", justifyContent: "space-between", gap: isMobile ? "2rem" : "1rem", width: "100%", maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", boxSizing: "border-box", textAlign: isMobile ? "center" : "left", paddingLeft: isPreview && !p.fullWidth ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), paddingRight: isPreview && !p.fullWidth ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX) }}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: isMobile ? "center" : "flex-start" }}>
-                        <div style={{ fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em" }}>
-                            {logoType === "image" && logoImage ? (<img src={logoImage} alt={logoText} style={{ width: logoWidth, maxHeight: "40px", objectFit: "contain" }} />) : (<span>{logoText}</span>)}
-                        </div>
-                        {description && (<p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.8, maxWidth: "250px" }}>{description}</p>)}
-                    </div>
-                    <nav className={isPreview ? `footer-${block.id}-links` : undefined} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: "1.5rem", alignItems: "center" }}>
-                        {links.map((link) => {
-                            const isAnchor = link.url.startsWith("#") && link.url.length > 1;
-                            const handleNavClick = (e: React.MouseEvent) => { if (!isPreview) { e.preventDefault(); return; } if (isAnchor) { e.preventDefault(); const el = document.getElementById(link.url.substring(1)); if (el) el.scrollIntoView({ behavior: "smooth" }); } };
-                            return (<a key={link.id} href={link.url} onClick={handleNavClick} style={{ color: "inherit", textDecoration: "none", fontWeight: 500, fontSize: "0.95rem", opacity: 0.8, transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.8"}>{link.label}</a>);
-                        })}
-                    </nav>
-                </div>
-                {copyright && (
-                    <div style={{ maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "2rem auto 0", paddingLeft: isPreview && !p.fullWidth ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), paddingRight: isPreview && !p.fullWidth ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX) }}>
-                        <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1.5rem", textAlign: "center", fontSize: "0.85rem", opacity: 0.6 }}>{copyright}</div>
-                    </div>
-                )}
+            <footer id={(p.sectionId as string) || `block-${block.id}`} className={isPreview ? `footer-${block.id}` : undefined} style={{ background: bgColor, color: textColor, width: "100%", padding: isPreview ? undefined : editorPadding }}>
+                {renderFooterContent()}
             </footer>
         </>
     );

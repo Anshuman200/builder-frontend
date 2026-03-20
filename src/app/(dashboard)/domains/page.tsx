@@ -21,13 +21,12 @@ import {
     DeleteOutlined,
     ReloadOutlined,
     CopyOutlined,
-    LinkOutlined
+    LinkOutlined,
 } from '@ant-design/icons';
 import { domainApi } from "@/lib/api/domain";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import DeleteConfirmModal from "@/components/domains/DeleteConfirmModal";
-// Removed plain CSS import in favor of Tailwind
+import { useDeleteToast } from "@/context/DeleteToastContext";
 
 const { Title, Text } = Typography;
 
@@ -36,12 +35,8 @@ export default function DomainPage() {
     const { user } = useAuth();
     const [domains, setDomains] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-
-    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [domainToDelete, setDomainToDelete] = useState<any>(null);
-    const [deleting, setDeleting] = useState(false);
-    const [deleteError, setDeleteError] = useState("");
     const [verifyingId, setVerifyingId] = useState<string | null>(null);
+    const { startDelete } = useDeleteToast();
 
     const loadDomains = useCallback(async () => {
         if (!user?._id) return;
@@ -75,27 +70,22 @@ export default function DomainPage() {
     };
 
     const handleDeleteClick = (domain: any) => {
-        setDomainToDelete(domain);
-        setDeleteModalOpen(true);
-        setDeleteError("");
-    };
-
-    const handleConfirmDelete = async () => {
-        if (!domainToDelete || !user?._id) return;
-        setDeleting(true);
-        setDeleteError("");
-
-        try {
-            await domainApi.delete(domainToDelete._id, user._id);
-            await loadDomains();
-            setDeleteModalOpen(false);
-            setDomainToDelete(null);
-            message.success("Domain deleted");
-        } catch (err: any) {
-            setDeleteError(err.message || "Failed to delete domain");
-        } finally {
-            setDeleting(false);
-        }
+        if (!user?._id) return;
+        // Optimistically remove from list immediately
+        setDomains(prev => prev.filter((d: any) => d._id !== domain._id));
+        startDelete(
+            [{ id: domain._id, label: domain.domain }],
+            async (item) => {
+                await domainApi.delete(item.id, user._id);
+            },
+            {
+                onComplete: async (batch) => {
+                    if (batch.failed > 0) {
+                        await loadDomains(); // Restore on failure
+                    }
+                }
+            }
+        );
     };
 
     const getStatusBadge = (domain: any) => {
@@ -143,7 +133,7 @@ export default function DomainPage() {
     };
 
     return (
-        <div className="p-4 w-full min-h-screen bg-[#0a0a0a]">
+        <div className="p-2 lg:p-8 w-full min-h-[80vh] bg-[#0a0a0a]">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                     <Title level={2} className="text-white! m-0! flex items-center gap-3">
@@ -333,14 +323,6 @@ export default function DomainPage() {
                 </div>
             )}
 
-            <DeleteConfirmModal
-                open={deleteModalOpen}
-                onClose={() => setDeleteModalOpen(false)}
-                onConfirm={handleConfirmDelete}
-                domainName={domainToDelete?.domain || ""}
-                isDeleting={deleting}
-                error={deleteError}
-            />
         </div>
     );
 }

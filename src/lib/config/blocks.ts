@@ -121,6 +121,8 @@ export const BLOCK_TYPES: BlockConfig[] = [
       bgImage: "",
       maxWidth: "100%",
       borderRadius: "0px",
+      contentAlign: "center",
+      contentJustify: "center",
       childBlocks: [],
 
       // Animation
@@ -245,7 +247,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
         { id: "3", title: "How can I contact support?", content: "You can reach our support team 24/7 via the contact form." },
       ],
       width: "100%",
-      maxWidth: "800px",
+      maxWidth: "100%",
       padding: "24px",
       bgColor: "transparent",
       itemBgColor: "var(--surface)",
@@ -600,6 +602,37 @@ export const BLOCK_TYPES: BlockConfig[] = [
 // ─── Helper to make a bare block with fresh ID ────────────────────────────────
 export function makeBlock(type: string, props: Record<string, unknown>): Block {
   return { id: crypto.randomUUID(), type, props };
+}
+
+// ─── Replace "PageCraft" placeholder with the real project name everywhere ────
+export function injectProjectName(block: Block, projectName: string): Block {
+  if (!projectName || projectName === "PageCraft") return block;
+  // Safety: some legacy saved blocks may have no props
+  if (!block || !block.props) return block;
+  const replace = (v: unknown): unknown => {
+    if (typeof v === "string") return v.replace(/PageCraft/g, projectName);
+    if (Array.isArray(v)) return (v as unknown[]).map(replace);
+    return v;
+  };
+  const newProps: Record<string, unknown> = {};
+  for (const key of Object.keys(block.props)) {
+    const val = block.props[key];
+    if (typeof val === "string") {
+      newProps[key] = val.replace(/PageCraft/g, projectName);
+    } else if (Array.isArray(val) && val.length > 0 && typeof (val[0] as any)?.id === "string") {
+      // Array of child blocks — recurse
+      newProps[key] = (val as Block[]).map(b => injectProjectName(b, projectName));
+    } else {
+      newProps[key] = replace(val);
+    }
+  }
+  return { ...block, props: newProps };
+}
+
+// ─── Migrate an entire page's blocks to replace PageCraft with project name ───
+export function migrateProjectName(blocks: Block[], projectName: string): Block[] {
+  if (!projectName || projectName === "PageCraft") return blocks;
+  return blocks.map(b => injectProjectName(b, projectName));
 }
 
 // ✅ Create a block with default props + pre-built templates

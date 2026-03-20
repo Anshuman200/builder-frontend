@@ -132,17 +132,20 @@ export function ChildBlockWrapper({
                 width: "100%",
                 transform: CSS.Translate.toString(transform),
                 opacity: isDragging ? 0.3 : 1,
-                outline: isSelected
-                    ? `2px solid ${outlineColor}`
-                    : isHovered
-                        ? `1px solid ${outlineColorHover}`
-                        : "1px solid transparent",
-                outlineOffset: -1,
             }}
             onClick={(e) => { e.stopPropagation(); selectBlock(block.id); }}
             onMouseEnter={() => hoverBlock(block.id)}
             onMouseLeave={() => hoverBlock(null)}
         >
+            {/* Selection / hover ring — above all block content */}
+            {(isSelected || isHovered) && !isDragging && (
+                <div style={{
+                    position: "absolute", inset: 0,
+                    border: isSelected ? `2px solid ${outlineColor}` : `1px solid ${outlineColorHover}`,
+                    boxShadow: isSelected ? `inset 0 0 0 1px ${outlineColor}22` : undefined,
+                    zIndex: 9998, pointerEvents: "none",
+                }} />
+            )}
             {showControls && (
                 <div style={{
                     position: "absolute", top: 4, right: 4,
@@ -159,7 +162,11 @@ export function ChildBlockWrapper({
                         onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#f1f5f9"; }}
                         onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
                     >
-                        <EllipsisHorizontalIcon style={{ width: 13, height: 13 }} />
+                        <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor" style={{ color: "#64748b" }}>
+                            <circle cx="2.5" cy="2.5" r="1.4"/><circle cx="7.5" cy="2.5" r="1.4"/>
+                            <circle cx="2.5" cy="7" r="1.4"/><circle cx="7.5" cy="7" r="1.4"/>
+                            <circle cx="2.5" cy="11.5" r="1.4"/><circle cx="7.5" cy="11.5" r="1.4"/>
+                        </svg>
                     </button>
                     <button
                         title="Delete block"

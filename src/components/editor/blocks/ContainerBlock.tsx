@@ -46,9 +46,34 @@ export function ContainerBlock({ block }: BlockProps) {
             <div
                 id={(p.sectionId as string) || `block-${block.id}`}
                 className={isPreview ? `container-${block.id}` : undefined}
-                style={{ padding: isPreview ? undefined : editorPadding, background: background || "transparent", maxWidth: (p.maxWidth as string) || "100%", width: "100%", margin: "0 auto", borderRadius: (p.borderRadius as string) || "0px", boxSizing: "border-box", border: childBlocks.length === 0 ? "1px dashed #cbd5e1" : "none" }}
+                style={{
+                    padding: isPreview ? undefined : editorPadding,
+                    background: background || "transparent",
+                    maxWidth: (p.maxWidth as string) || "100%",
+                    width: "100%",
+                    margin: "0 auto",
+                    marginTop: (p.marginTop as string) || "0",
+                    marginLeft: (p.marginLeft as string) || "0",
+                    marginRight: (p.marginRight as string) || "0",
+                    marginBottom: (p.marginBottom as string) || "0",
+                    position: (p.position as any) || "relative",
+                    top: (p.top as string) || "auto",
+                    left: (p.left as string) || "auto",
+                    right: (p.right as string) || "auto",
+                    bottom: (p.bottom as string) || "auto",
+                    zIndex: (p.zIndex as number) || "auto",
+                    borderRadius: (p.borderRadius as string) || "0px",
+                    boxSizing: "border-box",
+                    border: childBlocks.length === 0 ? "1px dashed #cbd5e1" : "none",
+                    // Content alignment
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: (p.contentAlign as string) || "center",
+                    justifyContent: (p.contentJustify as string) || "center",
+                    minHeight: (p.minHeight as string) || undefined,
+                }}
             >
-                {childBlocks.length === 0 && (
+                {!isPreview && childBlocks.length === 0 && (
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, paddingBottom: 8, color: "#94a3b8" }}>
                         <Square2StackIcon style={{ width: 22, height: 22 }} />
                         <span style={{ fontSize: 11, fontWeight: 500 }}>Container</span>

@@ -48,7 +48,7 @@ export function ColumnsBlock({ block }: BlockProps) {
         <>
             {isPreview && (
                 <style>{`
-          .builder-columns-${block.id} { display: flex; flex-direction: row; gap: ${gap}; padding: ${desktopPadding}; width: 100%; }
+          .builder-columns-${block.id} { display: flex; flex-direction: row; align-items: ${p.alignItems || "stretch"}; gap: ${gap}; padding: ${desktopPadding}; width: 100%; }
           @media (max-width: 1024px) { .builder-columns-${block.id} { padding: ${tabletPadding}; } }
           @media (max-width: 768px) { .builder-columns-${block.id} { flex-direction: column !important; padding: ${mobilePadding}; } }
         `}</style>
@@ -56,7 +56,7 @@ export function ColumnsBlock({ block }: BlockProps) {
             <div
                 id={(p.sectionId as string) || `block-${block.id}`}
                 className={isPreview ? `builder-columns-${block.id}` : undefined}
-                style={isPreview ? {} : { display: "flex", flexDirection: isStackedEditor ? "column" : "row", gap, padding: editorPadding, width: "100%" }}
+                style={isPreview ? {} : { display: "flex", flexDirection: isStackedEditor ? "column" : "row", alignItems: (p.alignItems as any) || "stretch", gap, padding: editorPadding, width: "100%" }}
             >
                 <ColumnDropZone zoneId={`col-0-${block.id}`} blocks={col0} label="Drag blocks here (Column 1)" flexBasis={`${leftWidth}%`} />
                 <ColumnDropZone zoneId={`col-1-${block.id}`} blocks={col1} label="Drag blocks here (Column 2)" flexBasis={`${rightWidth}%`} />

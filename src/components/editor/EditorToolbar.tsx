@@ -197,48 +197,6 @@ export default function EditorToolbar() {
     }
   }
 
-  async function handlePublish() {
-    if (!user) {
-      setShowAuthModal(true);
-      return;
-    }
-    if (!pageId || !page) return;
-
-    setIsPublishing(true);
-    try {
-      let finalPageId = pageId;
-      // First save draft
-      if (isDirty || pageId.length < 24) {
-        const payload = getPlainPayload();
-        if (!payload) return;
-
-        if (pageId.length < 24) {
-          const res = await createMutation.mutateAsync(payload);
-          finalPageId = (res as any).data.page._id;
-          markClean();
-          clearLocalDraft(pageId);
-          clearLocalDraft(finalPageId);
-        } else {
-          await updateMutation.mutateAsync({ id: pageId, ...payload });
-          markClean();
-          clearLocalDraft(pageId);
-        }
-      }
-
-      // Then publish
-      await publishMutation.mutateAsync(finalPageId);
-      alert("Page published successfully!");
-
-      if (finalPageId !== pageId) {
-        router.replace(`/editor/${finalPageId}`);
-      }
-    } catch (e: any) {
-      console.error("Publish failed", e);
-      toastError(e.message || "Error publishing page.");
-    } finally {
-      setIsPublishing(false);
-    }
-  }
 
   function openPreview() {
     if (!pageId) return;
@@ -432,7 +390,7 @@ export default function EditorToolbar() {
         <button
           onClick={handleSave}
           disabled={isSaving || (!isDirty && !!user)}
-          title="Save Draft"
+          title="Save Changes"
           style={{
             display: "flex", alignItems: "center", gap: 6,
             padding: "5px 12px",
@@ -446,29 +404,7 @@ export default function EditorToolbar() {
             transition: "all 0.15s",
           }}
         >
-          {isSaving ? "Saving..." : "Save Draft"}
-        </button>
-
-        {/* Publish button */}
-        <button
-          onClick={handlePublish}
-          disabled={isPublishing}
-          title="Publish Live"
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "5px 12px",
-            background: "linear-gradient(135deg, #10b981, #059669)",
-            color: "#fff",
-            border: "none",
-            borderRadius: 7,
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: isPublishing ? "not-allowed" : "pointer",
-            letterSpacing: "0.01em",
-            boxShadow: "0 2px 8px rgba(16,185,129,0.3)",
-          }}
-        >
-          {isPublishing ? "Publishing..." : "Publish"}
+          {isSaving ? "Saving..." : "Save"}
         </button>
 
         {/* Thumbnail capture button */}

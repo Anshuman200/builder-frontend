@@ -16,7 +16,7 @@ import {
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
 import { useEditorStore } from "@/stores/editorStore";
-import { createBlock } from "@/lib/config/blocks";
+import { createBlock, injectProjectName } from "@/lib/config/blocks";
 import { SECTION_TEMPLATES } from "@/lib/config/sections";
 import EditorToolbar from "./EditorToolbar";
 import BlockPalette from "./BlockPalette";
@@ -134,7 +134,9 @@ export default function EditorShell() {
     }
 
     if (data?.type === "palette" && data.blockType) {
-      const newBlock = createBlock(data.blockType);
+      const projectName = useEditorStore.getState().page?.title || "PageCraft";
+      const rawBlock = createBlock(data.blockType);
+      const newBlock = injectProjectName(rawBlock, projectName);
       addBlock(newBlock); // Adds to root
 
       // If it's not being dropped at the very end of the root canvas, move it to the precise target
@@ -145,7 +147,9 @@ export default function EditorShell() {
     } else if (data?.type === "section" && data.templateId) {
       const template = SECTION_TEMPLATES.find((t) => t.id === data.templateId);
       if (template) {
-        const newSectionRoot = template.create();
+        const projectName = useEditorStore.getState().page?.title || "PageCraft";
+        const rawSection = template.create();
+        const newSectionRoot = injectProjectName(rawSection, projectName);
         addBlock(newSectionRoot);
 
         if (overId !== "canvas-root") {

@@ -27,7 +27,7 @@ import {
 } from "@/lib/api/queries";
 import { TemplatePreviewModal } from "@/components/admin/TemplatePreviewModal";
 import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
-import { Button, Input, Select, Skeleton, Dropdown, Modal } from "antd";
+import { Button, Input, Select, Skeleton, Dropdown } from "antd";
 import { cn } from "@/lib/utils";
 import { useToasts } from "@/hooks/useToasts";
 import { CommonContainer } from "@/components/layout/CommonContainer";
@@ -36,6 +36,7 @@ import PillSegmented from "@/components/ui/PillSegmented";
 import NewPageWizard from "@/components/editor/NewPageWizard";
 import { SECTION_TEMPLATES } from "@/lib/config/sections";
 import { useCallback } from "react";
+import { useDeleteToast } from "@/context/DeleteToastContext";
 
 const SECTION_ID_MAP: Record<string, string> = {
     header: "nav-", hero: "hero-", features: "features-",
@@ -101,12 +102,13 @@ export default function AdminTemplatesPage() {
     const duplicateMutation = useDuplicatePage();
     const updateMutation = useUpdatePage();
 
-    const [deleteTarget, setDeleteTarget] = useState<{ id: string, title: string } | null>(null);
     const [renamingId, setRenamingId] = useState<string | null>(null);
     const [renameValue, setRenameValue] = useState("");
 
     const [showCapturePicker, setShowCapturePicker] = useState(false);
     const [captureTarget, setCaptureTarget] = useState<any | null>(null);
+
+    const { startDelete } = useDeleteToast();
 
     const [wizardOpen, setWizardOpen] = useState(false);
     const deferredSearch = useDeferredValue(search);
@@ -187,15 +189,14 @@ export default function AdminTemplatesPage() {
         }
     };
 
-    const handleDelete = useCallback(async (id: string) => {
-        try {
-            await deleteMutation.mutateAsync(id);
-            success("Template deleted");
-        } catch {
-            toastError("Failed to delete template");
-        }
-        setDeleteTarget(null);
-    }, [deleteMutation, success, toastError]);
+    const handleDelete = useCallback((tpl: any) => {
+        startDelete(
+            [{ id: tpl._id, label: tpl.title }],
+            async (item) => {
+                await deleteMutation.mutateAsync(item.id);
+            }
+        );
+    }, [deleteMutation, startDelete]);
 
     return (
         <CommonContainer className="py-8">
@@ -300,7 +301,7 @@ export default function AdminTemplatesPage() {
                                             { key: "preview", label: "Preview", icon: <EyeIcon className="w-4 h-4" />, onClick: () => setPreview({ id: tpl._id, title: tpl.title }) },
                                             { key: "duplicate", label: "Duplicate", icon: <Squares2X2Icon className="w-4 h-4" />, onClick: () => duplicateMutation.mutate(tpl._id) },
                                             { key: "publish", label: tpl.status === 'PUBLISHED' ? "Unpublish" : "Go live", icon: <GlobeAltIcon className="w-4 h-4" />, onClick: () => handleTogglePublish(tpl) },
-                                            { key: "delete", label: <span className="text-red-500">Delete</span>, icon: <TrashIcon className="text-red-500 w-4 h-4" />, onClick: () => setDeleteTarget({ id: tpl._id, title: tpl.title }) },
+                                            { key: "delete", label: <span className="text-red-500">Delete</span>, icon: <TrashIcon className="text-red-500 w-4 h-4" />, onClick: () => handleDelete(tpl) },
                                         ]
                                     }}
                                     trigger={['click']}
@@ -353,17 +354,6 @@ export default function AdminTemplatesPage() {
                 />
             )}
 
-            {/* Delete Modal */}
-            <Modal
-                title="Delete Template"
-                open={!!deleteTarget}
-                onOk={() => deleteTarget && handleDelete(deleteTarget.id)}
-                onCancel={() => setDeleteTarget(null)}
-                okText="Delete"
-                okButtonProps={{ danger: true, loading: deleteMutation.isPending }}
-            >
-                <p>Are you sure you want to delete <b>{deleteTarget?.title}</b>? This action cannot be undone.</p>
-            </Modal>
 
             {captureTarget && (
                 <CapturePreviewModal
