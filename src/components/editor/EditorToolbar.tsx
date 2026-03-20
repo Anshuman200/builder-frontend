@@ -580,7 +580,8 @@ export default function EditorToolbar() {
         open={!!mediaPickerType}
         onClose={() => setMediaPickerType(null)}
         title={mediaPickerType === 'favicon' ? 'Select Favicon' : 'Select OG Image'}
-        onSelect={(url) => {
+        onSelect={(urls) => {
+          const url = urls[0];
           if (mediaPickerType === 'favicon') updateMeta({ favicon: url });
           else if (mediaPickerType === 'ogImage') updateMeta({ ogImage: url });
         }}
