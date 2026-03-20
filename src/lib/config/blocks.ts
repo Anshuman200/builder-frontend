@@ -597,6 +597,30 @@ export const BLOCK_TYPES: BlockConfig[] = [
       animationPlayback: DEFAULT_CONFIG.animation.playback,
     },
   },
+  {
+    type: "masonry",
+    label: "Masonry Gallery",
+    icon: "Squares2X2",
+    defaultProps: {
+      columns: { xs: 2, sm: 2, md: 3, lg: 4 },
+      gap: 16,
+      padding: "24px",
+      bgColor: "transparent",
+      childBlocks: [],
+
+      // Animation
+      animationPlayback: DEFAULT_CONFIG.animation.playback,
+    },
+  },
+  {
+    type: "media-picker",
+    label: "Add Media",
+    icon: "PlusCircle",
+    defaultProps: {
+      padding: "0px",
+      borderRadius: "12px",
+    },
+  },
 ];
 
 // ─── Helper to make a bare block with fresh ID ────────────────────────────────

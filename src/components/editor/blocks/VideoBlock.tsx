@@ -2,6 +2,7 @@
 import React from "react";
 import { VideoCameraIcon } from "@heroicons/react/24/outline";
 import { BlockProps } from "./shared";
+import { MasonryContext } from "./MasonryBlock";
 
 export function VideoBlock({ block }: BlockProps) {
     const p = block.props;
@@ -12,6 +13,7 @@ export function VideoBlock({ block }: BlockProps) {
     const controls = p.controls !== false;
     const align = (p.align as string) || "center";
     const aspectRatio = (p.aspectRatio as string) || "16/9";
+    const isInMasonry = React.useContext(MasonryContext);
 
     const isYouTube = url?.includes("youtube.com") || url?.includes("youtu.be");
     const isVimeo = url?.includes("vimeo.com");
@@ -22,7 +24,7 @@ export function VideoBlock({ block }: BlockProps) {
         return (match && match[2].length === 11) ? match[2] : null;
     };
 
-    const wrapperStyle: React.CSSProperties = { padding: (p.padding as string) || "16px", width: "100%", display: "flex", flexDirection: "column", alignItems: align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center" };
+    const wrapperStyle: React.CSSProperties = { padding: isInMasonry ? "0" : (p.padding as string) || "16px", width: "100%", display: "flex", flexDirection: "column", alignItems: align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center" };
     const videoContainerStyle: React.CSSProperties = { width: (p.width as string) || "100%", maxWidth: "100%", aspectRatio, borderRadius: (p.borderRadius as string) || "8px", overflow: "hidden", background: "#000", position: "relative" };
 
     if (!url) {

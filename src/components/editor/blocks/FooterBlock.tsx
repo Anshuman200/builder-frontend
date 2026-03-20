@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import { useEditorStore } from "@/stores/editorStore";
 import { PreviewContext, BlockProps } from "./shared";
 
@@ -42,7 +43,17 @@ export function FooterBlock({ block }: BlockProps) {
 
     const Logo = () => (
         <div style={{ fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em" }}>
-            {logoType === "image" && logoImage ? (<img src={logoImage} alt={logoText} style={{ width: logoWidth, maxHeight: "40px", objectFit: "contain" }} />) : (<span>{logoText}</span>)}
+            {logoType === "image" && logoImage ? (
+                <div style={{ width: logoWidth, height: "40px", position: "relative" }}>
+                    <Image 
+                        src={logoImage} 
+                        alt={logoText} 
+                        fill 
+                        style={{ objectFit: "contain", objectPosition: isMobile ? "center" : "left" }}
+                        unoptimized={!logoImage.includes('unsplash.com') && !logoImage.includes('pexels.com') && !logoImage.includes('amazonaws.com') && !logoImage.includes('cloudfront.net')}
+                    />
+                </div>
+            ) : (<span>{logoText}</span>)}
         </div>
     );
 

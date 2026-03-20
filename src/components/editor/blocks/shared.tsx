@@ -58,11 +58,13 @@ export function ChildBlockWrapper({
     const selectBlock = useEditorStore((s) => s.selectBlock);
     const hoverBlock = useEditorStore((s) => s.hoverBlock);
     const deleteBlock = useEditorStore((s) => s.deleteBlock);
-    const showControls = isSelected || isHovered;
+    const isPicker = block.type === "media-picker";
+    const showControls = (isSelected || isHovered) && !isPicker;
 
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: block.id,
         data: { type: "canvas" },
+        disabled: isPicker,
     });
 
     const animType = (block.props.animationType as string) || "none";

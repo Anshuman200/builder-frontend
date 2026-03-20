@@ -1,7 +1,9 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { BlockProps } from "./shared";
+import { MasonryContext } from "./MasonryBlock";
 
 export function ImageBlock({ block }: BlockProps) {
     const p = block.props;
@@ -11,24 +13,20 @@ export function ImageBlock({ block }: BlockProps) {
     const align = (p.align as string) || "center";
     const aspectRatio = p.aspectRatio as string;
     const height = p.height as string;
+    const width = (p.width as string) || "100%";
+    const objectFit = (p.objectFit as any) || "cover";
+    const borderRadius = (p.borderRadius as string) || "0px";
+    const boxShadow = (p.boxShadow as string) || "none";
+    const priority = p.priority === true;
+    const isInMasonry = React.useContext(MasonryContext);
 
     const alignStyle: React.CSSProperties = {
         display: "flex", flexDirection: "column", width: "100%",
         alignItems: align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center",
     };
 
-    const imgStyle: React.CSSProperties = {
-        display: "block",
-        width: (p.width as string) || "100%",
-        objectFit: (p.objectFit as React.CSSProperties["objectFit"]) || "cover",
-        borderRadius: (p.borderRadius as string) || "0px",
-        boxShadow: (p.boxShadow as string) || "none",
-        ...(aspectRatio && aspectRatio !== "auto" ? { aspectRatio } : {}),
-        ...(height && height !== "auto" ? { height } : {}),
-    };
-
     const wrapperStyle: React.CSSProperties = {
-        padding: "8px 16px",
+        padding: isInMasonry ? "0" : "8px 16px",
         width: "100%",
         marginTop: (p.marginTop as string) || "0",
         marginLeft: (p.marginLeft as string) || "0",
@@ -51,8 +49,42 @@ export function ImageBlock({ block }: BlockProps) {
         );
     }
 
-    // eslint-disable-next-line @next/next/no-img-element
-    const imgEl = <img src={src} alt={(p.alt as string) || ""} style={imgStyle} />;
+    const hasAspect = aspectRatio && aspectRatio !== "auto";
+    const hasHeight = height && height !== "auto";
+    const isNatural = !hasAspect && !hasHeight;
+
+    // Detect if we can use Next Image optimization (whitelisted domains)
+    const isOptimizable = src.includes('unsplash.com') || src.includes('pexels.com') || src.includes('amazonaws.com') || src.includes('cloudfront.net');
+
+    const imgEl = (
+        <div style={{ 
+            position: "relative", 
+            width: width, 
+            overflow: "hidden", 
+            borderRadius, 
+            boxShadow,
+            maxWidth: "100%",
+            maxHeight: "min(85vh, 1200px)", // Fix for "images too big" issue
+            ...(hasAspect ? { aspectRatio } : {}),
+            ...(hasHeight ? { height } : { height: "auto" })
+        }}>
+            <Image 
+                src={src} 
+                alt={(p.alt as string) || ""} 
+                fill={!isNatural}
+                width={isNatural ? 800 : undefined}
+                height={isNatural ? 600 : undefined}
+                style={{ 
+                    objectFit: objectFit,
+                    position: isNatural ? "relative" : "absolute",
+                    width: isNatural ? "100%" : undefined,
+                    height: isNatural ? "auto" : undefined,
+                }}
+                unoptimized={!isOptimizable}
+                priority={priority}
+            />
+        </div>
+    );
 
     return (
         <div id={(p.sectionId as string) || `block-${block.id}`} style={wrapperStyle}>

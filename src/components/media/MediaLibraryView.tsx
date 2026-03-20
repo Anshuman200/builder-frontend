@@ -40,11 +40,13 @@ import { useInView } from "react-intersection-observer";
 export default function MediaLibraryView({ 
     onSelect, 
     hideBatchActions = false,
-    initialType = 'all'
+    initialType = 'all',
+    multiple = false
 }: { 
-    onSelect?: (url: string) => void, 
+    onSelect?: (urlOrUrls: string | string[]) => void, 
     hideBatchActions?: boolean,
-    initialType?: 'all' | 'image' | 'video'
+    initialType?: 'all' | 'image' | 'video',
+    multiple?: boolean
 }) {
     // Default to 'public' for guests initially, otherwise 'my'
     const [tab, setTab] = useState<'my' | 'public' | 'upload' | 'shared'>(() => {
@@ -519,9 +521,10 @@ export default function MediaLibraryView({
                                                     key={index || m._id}
                                                     className={`group relative aspect-square rounded-4xl overflow-hidden bg-white/5 border transition-all duration-300 shadow-2xl flex items-center justify-center ${selectionMode && isSelected ? 'border-indigo-500 scale-95 ring-4 ring-indigo-500/20' : 'border-white/5 hover:border-white/20 hover:scale-[1.02]'}`}
                                                     onClick={(e) => {
-                                                        if (selectionMode) {
+                                                        if (selectionMode || multiple) {
                                                             e.stopPropagation();
                                                             toggleMediaSelection(m._id);
+                                                            if (multiple && !selectionMode) setSelectionMode(true);
                                                         } else if (onSelect) {
                                                             if (tab === 'public') {
                                                                 // Fork-on-select: create the user's own copy
@@ -790,15 +793,32 @@ export default function MediaLibraryView({
                             >
                                 Cancel
                             </Button>
-                            <Button
-                                type="primary"
-                                onClick={() => setBatchDeleteModalVisible(true)}
-                                disabled={selectedMediaIds.length === 0}
-                                icon={<TrashIcon className="w-4 h-4" />}
-                                className="bg-red-500 hover:bg-red-400 border-none font-black h-12! px-6! rounded-full! shadow-xl shadow-red-500/20 flex items-center gap-2"
-                            >
-                                Delete
-                            </Button>
+                            {multiple ? (
+                                <Button
+                                    type="primary"
+                                    onClick={async () => {
+                                        const urls = selectedMediaIds.map(id => {
+                                            const m = allMedia.find(item => item._id === id);
+                                            return m ? (s3Service.getPublicUrl(m.key) || m.url || '') : '';
+                                        }).filter(u => u !== '');
+                                        onSelect?.(urls);
+                                    }}
+                                    disabled={selectedMediaIds.length === 0}
+                                    className="bg-indigo-500 hover:bg-indigo-400 border-none font-black h-12! px-8! rounded-full! shadow-xl shadow-indigo-500/20 flex items-center gap-2"
+                                >
+                                    Add {selectedMediaIds.length} to Gallery
+                                </Button>
+                            ) : (
+                                <Button
+                                    type="primary"
+                                    onClick={() => setBatchDeleteModalVisible(true)}
+                                    disabled={selectedMediaIds.length === 0}
+                                    icon={<TrashIcon className="w-4 h-4" />}
+                                    className="bg-red-500 hover:bg-red-400 border-none font-black h-12! px-6! rounded-full! shadow-xl shadow-red-500/20 flex items-center gap-2"
+                                >
+                                    Delete
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,7 @@
 "use client";
 import React from "react";
+import Image from "next/image";
+import { PhotoIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { PreviewContext, BlockProps } from "./shared";
 
@@ -203,7 +205,17 @@ export function TeamBlock({ block }: BlockProps) {
 
                                 return (
                                     <div key={`mc-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle }}>
-                                        {member.image && <img src={member.image} alt={member.name} style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />}
+                                        {member.image && (
+                                            <div style={{ width: 56, height: 56, borderRadius: "50%", overflow: "hidden", position: "relative", flexShrink: 0 }}>
+                                                <Image 
+                                                    src={member.image} 
+                                                    alt={member.name} 
+                                                    fill 
+                                                    style={{ objectFit: "cover" }}
+                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
+                                                />
+                                            </div>
+                                        )}
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <p style={{ margin: "0 0 0.15rem", fontWeight: 700, fontSize: "0.95rem", color: nameColor, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{member.name}</p>
                                             <p style={{ margin: "0 0 0.4rem", fontSize: "0.75rem", color: roleColor, opacity: 0.8, textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600 }}>{member.role}</p>
@@ -222,7 +234,17 @@ export function TeamBlock({ block }: BlockProps) {
                         <div style={{ display: "flex", flexDirection: "column", gap, marginTop: title || subtitle ? "3rem" : 0 }}>
                             {members.map((member: any, idx: number) => (
                                 <div key={`ml-${idx}`} className={idx % 2 !== 0 ? `team-large-card-reverse-${block.id}` : `team-large-card-${block.id}`}>
-                                    {member.image && <img src={member.image} alt={member.name} style={{ width: 160, height: 160, borderRadius: imageRadius, objectFit: "cover", flexShrink: 0 }} />}
+                                    {member.image && (
+                                        <div style={{ width: 160, height: 160, borderRadius: imageRadius, overflow: "hidden", position: "relative", flexShrink: 0 }}>
+                                            <Image 
+                                                src={member.image} 
+                                                alt={member.name} 
+                                                fill 
+                                                style={{ objectFit: "cover" }}
+                                                unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
+                                            />
+                                        </div>
+                                    )}
                                     <div style={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", alignItems: "inherit" }}>
                                         <h3 style={{ fontSize: "1.5rem", fontWeight: 800, margin: "0 0 0.25rem", color: nameColor }}>{member.name}</h3>
                                         <p style={{ margin: "0 0 1rem", fontWeight: 600, fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "0.05em", color: roleColor }}>{member.role}</p>
@@ -254,8 +276,18 @@ export function TeamBlock({ block }: BlockProps) {
 
                                 return (
                                     <div key={`ms-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle }}>
-                                        <div style={{ width: 140, height: 140, borderRadius: "50%", overflow: "hidden", border: `4px solid ${isDark ? "rgba(255,255,255,0.12)" : "#e2e8f0"}`, marginBottom: "1rem" }}>
-                                            {member.image ? <img src={member.image} alt={member.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ width: "100%", height: "100%", background: isDark ? "#333" : "#e2e8f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem" }}>👤</div>}
+                                        <div style={{ width: 140, height: 140, borderRadius: "50%", overflow: "hidden", border: `4px solid ${isDark ? "rgba(255,255,255,0.12)" : "#e2e8f0"}`, marginBottom: "1rem", position: "relative" }}>
+                                            {member.image ? (
+                                                <Image 
+                                                    src={member.image} 
+                                                    alt={member.name} 
+                                                    fill 
+                                                    style={{ objectFit: "cover" }}
+                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
+                                                />
+                                            ) : (
+                                                <div style={{ width: "100%", height: "100%", background: isDark ? "#333" : "#e2e8f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem" }}>👤</div>
+                                            )}
                                         </div>
                                         <h3 style={{ margin: "0 0 0.25rem", fontSize: "1.1rem", fontWeight: 700, color: nameColor }}>{member.name}</h3>
                                         <p style={{ margin: "0 0 0.75rem", fontSize: "0.82rem", color: roleColor, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>{member.role}</p>
@@ -283,24 +315,39 @@ export function TeamBlock({ block }: BlockProps) {
                                     if (isFloat) {
                                         return (
                                             <div style={{ width: imageSize, height: imageSize, borderRadius: imageRadius, overflow: "hidden", position: "absolute", top: `calc(-${imageSize} / 2)`, left: align === "center" ? "50%" : align === "right" ? "auto" : "1.75rem", right: align === "right" ? "1.75rem" : "auto", transform: align === "center" ? "translateX(-50%)" : "none", zIndex: 2, boxShadow: "0 8px 32px #0000002a, 0 2px 8px #0000001a" }}>
-                                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                <img src={member.image} alt={member.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: iPosition }} />
+                                                <Image 
+                                                    src={member.image} 
+                                                    alt={member.name} 
+                                                    fill 
+                                                    style={{ objectFit: "cover", objectPosition: iPosition }}
+                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
+                                                />
                                             </div>
                                         );
                                     }
                                     if (isCover) {
                                         return (
                                             <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "hidden", zIndex: 0 }}>
-                                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                <img src={member.image} alt={member.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: iPosition }} />
+                                                <Image 
+                                                    src={member.image} 
+                                                    alt={member.name} 
+                                                    fill 
+                                                    style={{ objectFit: "cover", objectPosition: iPosition }}
+                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
+                                                />
                                                 <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, ${(p.coverGradientBottom as string) || "#000000e6"} 0%, transparent 60%)` }} />
                                             </div>
                                         );
                                     }
                                     return (
-                                        <div style={{ width: imageStyle === "square" ? "100%" : imageSize, height: imageStyle === "square" ? iHeight : imageSize, borderRadius: imageRadius, flexShrink: 0, marginBottom: layout === "list" ? 0 : "1.25rem", overflow: "hidden" }}>
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={member.image} alt={member.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: iPosition }} />
+                                        <div style={{ width: imageStyle === "square" ? "100%" : imageSize, height: imageStyle === "square" ? iHeight : imageSize, borderRadius: imageRadius, flexShrink: 0, marginBottom: layout === "list" ? 0 : "1.25rem", overflow: "hidden", position: "relative" }}>
+                                            <Image 
+                                                src={member.image} 
+                                                alt={member.name} 
+                                                fill 
+                                                style={{ objectFit: "cover", objectPosition: iPosition }}
+                                                unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
+                                            />
                                         </div>
                                     );
                                 })() : null;

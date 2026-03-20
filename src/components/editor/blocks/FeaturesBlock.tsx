@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
@@ -65,9 +66,15 @@ export function FeaturesBlock({ block }: BlockProps) {
     const IconWrapper = ({ feature }: { feature: any }) => {
         const IconCmp = getIcon(feature.icon);
         return (
-            <div style={{ width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, color: iconColor, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
+            <div style={{ width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, color: iconColor, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden", position: "relative" }}>
                 {feature.iconType === "image" && feature.image ? (
-                    <img src={feature.image} alt={feature.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <Image 
+                        src={feature.image} 
+                        alt={feature.title} 
+                        fill 
+                        style={{ objectFit: "cover" }} 
+                        unoptimized={!feature.image.includes('unsplash.com') && !feature.image.includes('pexels.com') && !feature.image.includes('amazonaws.com') && !feature.image.includes('cloudfront.net')}
+                    />
                 ) : (
                     IconCmp ? <IconCmp style={{ width: iconSize, height: iconSize, color: iconColor }} /> : <Square2StackIcon style={{ width: iconSize, height: iconSize }} />
                 )}

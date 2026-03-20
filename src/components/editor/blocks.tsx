@@ -50,9 +50,11 @@ import { ContactInfoBlock } from "./blocks/ContactInfoBlock";
 import AccordionBlock from "./blocks/AccordionBlock";
 import { CarouselBlock } from "./blocks/CarouselBlock";
 import { WaveBlock } from "./blocks/WaveBlock";
-
+import { MasonryBlock } from "./blocks/MasonryBlock";
+import { MediaPickerBlock } from "./blocks/MediaPickerBlock";
+ 
 // ─── Block Renderer dispatch ──────────────────────────────────────────────────
-
+ 
 export function BlockRenderer({ block }: { block: Block }) {
   switch (block.type) {
     case "header":
@@ -73,6 +75,8 @@ export function BlockRenderer({ block }: { block: Block }) {
     case "accordion": return <AccordionBlock block={block} />;
     case "carousel": return <CarouselBlock block={block} />;
     case "wave": return <WaveBlock block={block} />;
+    case "masonry": return <MasonryBlock block={block} />;
+    case "media-picker": return <MediaPickerBlock block={block} />;
     case "footer":
     case "footer-2": return <FooterBlock block={block} />;
     default: return (
