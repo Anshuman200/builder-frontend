@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "./client";
 
+// ******************************************** Site Pages ********************************************
 export const useAdminSitePages = () => {
     return useQuery({
         queryKey: ["admin", "site-pages"],
@@ -37,7 +38,7 @@ export const useDeleteSitePage = () => {
     });
 };
 
-// Inquiries
+// ******************************************** Inquiries ********************************************
 export const useAdminInquiries = () => {
     return useQuery({
         queryKey: ["admin", "inquiries"],

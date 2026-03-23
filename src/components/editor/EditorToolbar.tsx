@@ -242,14 +242,14 @@ export default function EditorToolbar() {
   async function handleLogoClick(e: React.MouseEvent) {
     e.preventDefault();
     const target = !user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home";
-    
+
     // Force commit title if currently editing
     if (editingTitle) {
       const t = titleDraft.trim() || "Untitled Page";
       updateTitle(t);
       setEditingTitle(false);
     }
-    
+
     if (isDirty && user && pageId && pageId.length >= 24) {
       setIsSaving(true);
       try {
@@ -284,8 +284,8 @@ export default function EditorToolbar() {
 
       {/* Left — logo + title */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
-        <a 
-          href={!user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home"} 
+        <a
+          href={!user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home"}
           onClick={handleLogoClick}
           style={{ display: "flex", alignItems: "center", textDecoration: "none", flexShrink: 0 }}
         >
@@ -554,11 +554,11 @@ export default function EditorToolbar() {
         )}
       </div>
 
-      <AuthModal 
-        open={showAuthModal} 
-        onClose={() => setShowAuthModal(false)} 
-        defaultTab="login" 
-        redirectOnSuccess={false} 
+      <AuthModal
+        open={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        defaultTab="login"
+        redirectOnSuccess={false}
       />
 
       {/* Capture Preview Modal */}
@@ -587,18 +587,19 @@ export default function EditorToolbar() {
         }}
         type={mediaPickerType ? "image" : "all"}
       />
+
       {/* Bottom Drawer for Page Settings */}
       <Drawer
         placement="bottom"
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
-        height="auto"
+        zIndex={100}
         styles={{
           body: { padding: 0, backgroundColor: 'var(--bg-secondary)' },
-          header: { 
-            borderBottom: '1px solid var(--border)', 
+          header: {
+            borderBottom: '1px solid var(--border)',
             padding: '12px 24px',
-            backgroundColor: 'var(--bg-secondary)' 
+            backgroundColor: 'var(--bg-secondary)'
           },
           content: {
             backgroundColor: 'var(--bg-secondary)',
@@ -630,7 +631,7 @@ export default function EditorToolbar() {
                 placeholder="page-slug"
               />
             </SettingField>
-            
+
             {user && (
               <SettingField label="Page Thumbnail">
                 <div className="space-y-3">
@@ -638,13 +639,13 @@ export default function EditorToolbar() {
                     <div className="relative rounded-xl overflow-hidden border border-(--border) bg-(--surface) group">
                       <img src={currentThumbnail} alt="Thumbnail" className="w-full h-32 object-cover object-top" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                         <button onClick={() => setShowCapturePicker(true)} className="p-2 bg-white/20 blur-sm rounded-lg hover:bg-white/40 transition-colors"><ArrowsRightLeftIcon className="w-5 h-5 text-white" /></button>
+                        <button onClick={() => setShowCapturePicker(true)} className="p-2 bg-white/20 blur-sm rounded-lg hover:bg-white/40 transition-colors"><ArrowsRightLeftIcon className="w-5 h-5 text-white" /></button>
                       </div>
                     </div>
                   ) : (
                     <div className="h-32 rounded-xl border-2 border-dashed border-(--border) flex flex-col items-center justify-center text-(--text-subtle) space-y-2">
-                       <CameraIcon className="w-6 h-6 opacity-40" />
-                       <span className="text-[10px] font-medium">No thumbnail set</span>
+                      <CameraIcon className="w-6 h-6 opacity-40" />
+                      <span className="text-[10px] font-medium">No thumbnail set</span>
                     </div>
                   )}
                   <button
@@ -670,7 +671,7 @@ export default function EditorToolbar() {
                 placeholder="Brief description for search engines..."
               />
             </SettingField>
-            
+
             <SettingField label="Keywords">
               <input
                 className="w-full bg-(--surface) border border-(--border) rounded-lg px-3 py-2 text-sm text-(--text) focus:ring-1 focus:ring-(--primary) outline-none"
@@ -682,18 +683,18 @@ export default function EditorToolbar() {
 
             <div className="grid grid-cols-2 gap-4">
               <SettingField label="Favicon">
-                <MediaPreview 
-                  url={page?.meta?.favicon} 
-                  onChoose={() => setMediaPickerType("favicon")} 
+                <MediaPreview
+                  url={page?.meta?.favicon}
+                  onChoose={() => setMediaPickerType("favicon")}
                   onClear={() => updateMeta({ favicon: "" })}
                   label="Favicon"
                   allowRemove={false}
                 />
               </SettingField>
               <SettingField label="Social Preview (OG)">
-                <MediaPreview 
-                  url={page?.meta?.ogImage} 
-                  onChoose={() => setMediaPickerType("ogImage")} 
+                <MediaPreview
+                  url={page?.meta?.ogImage}
+                  onChoose={() => setMediaPickerType("ogImage")}
                   onClear={() => updateMeta({ ogImage: "" })}
                   label="OG Image"
                   allowRemove={false}
@@ -705,7 +706,7 @@ export default function EditorToolbar() {
           {/* Section 3: Global Configuration */}
           <div className="space-y-6">
             <h3 className="text-(--text-muted) text-xs font-bold uppercase tracking-widest border-b border-(--border) pb-2 mb-4">Global Configuration</h3>
-            
+
             <div className="bg-(--surface) border border-(--border) rounded-xl p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -717,9 +718,9 @@ export default function EditorToolbar() {
                     <p className="text-[10px] text-(--text-muted)">Toggle Dark/Light</p>
                   </div>
                 </div>
-                <Switch 
-                  checked={theme.mode === 'dark'} 
-                  onChange={(v) => updateTheme({ mode: v ? 'dark' : 'light' }, true)} 
+                <Switch
+                  checked={theme.mode === 'dark'}
+                  onChange={(v) => updateTheme({ mode: v ? 'dark' : 'light' }, true)}
                   size="small"
                 />
               </div>
@@ -729,9 +730,9 @@ export default function EditorToolbar() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-(--bg-primary) rounded-lg border border-(--border)">
-                    <div 
-                      className="w-4 h-4 rounded-full shadow-inner" 
-                      style={{ backgroundColor: colors.primary }} 
+                    <div
+                      className="w-4 h-4 rounded-full shadow-inner"
+                      style={{ backgroundColor: colors.primary }}
                     />
                   </div>
                   <div>
@@ -760,7 +761,7 @@ export default function EditorToolbar() {
               <div className="space-y-1">
                 <p className="text-xs font-bold text-(--text)">One-Click Sync</p>
                 <p className="text-[10px] text-(--text-muted) leading-relaxed">Instantly propagate theme changes across all page components.</p>
-                <button 
+                <button
                   onClick={() => useEditorStore.getState().migrateThemeColors()}
                   className="mt-2 text-(--primary) text-[10px] font-bold hover:underline"
                 >
@@ -820,15 +821,15 @@ function SettingField({ label, children }: { label: string; children: React.Reac
   );
 }
 
-function MediaPreview({ 
-  url, 
-  onChoose, 
-  onClear, 
+function MediaPreview({
+  url,
+  onChoose,
+  onClear,
   label,
-  allowRemove=true
-}: { 
-  url?: string; 
-  onChoose: () => void; 
+  allowRemove = true
+}: {
+  url?: string;
+  onChoose: () => void;
   onClear: () => void;
   label: string;
   allowRemove?: boolean;
@@ -839,14 +840,14 @@ function MediaPreview({
         <div className="relative group rounded-lg overflow-hidden border border-(--border) bg-(--surface) aspect-square flex items-center justify-center">
           <img src={url} alt={label} className="w-full h-full object-contain p-2" />
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-            <button 
+            <button
               onClick={onChoose}
               className="p-1.5 bg-white/20 rounded-md hover:bg-white/30 transition-colors"
               title="Change"
             >
               <ArrowsRightLeftIcon className="w-4 h-4 text-white" />
             </button>
-            {allowRemove && <button 
+            {allowRemove && <button
               onClick={onClear}
               className="p-1.5 bg-red-500/40 rounded-md hover:bg-red-500/60 transition-colors"
               title="Remove"

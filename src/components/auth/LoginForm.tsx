@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { Form, Input, Button } from "antd";
-import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+import { EnvelopeIcon, LockClosedIcon, ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline";
 import { FormHeading, GlassLink } from "./AuthShared";
+import { useAuth } from "@/hooks/useAuth";
 
 export function LoginForm(props: any) {
-    const { handleLogin, error, setTab, isLoading } = props;
+    const { handleLogin, error, setTab, isLoading, forced } = props;
+    const { logout } = useAuth();
     const [globalError, setGlobalError] = useState(error);
     const [form] = Form.useForm();
 
@@ -49,9 +51,11 @@ export function LoginForm(props: any) {
                 rules={[{ required: true, message: 'Password is required' }]}
                 className="mb-0"
                 extra={
-                    <div className="flex justify-end mt-1">
-                        <GlassLink onClick={() => setTab("forgot-password")}>Forgot password?</GlassLink>
-                    </div>
+                    !forced && (
+                        <div className="flex justify-end mt-1">
+                            <GlassLink onClick={() => setTab("forgot-password")}>Forgot password?</GlassLink>
+                        </div>
+                    )
                 }
             >
                 <Input.Password
@@ -81,10 +85,22 @@ export function LoginForm(props: any) {
                 </Button>
             </Form.Item>
 
-            <p className="text-center text-sm text-white/30">
-                No account?{" "}
-                <GlassLink onClick={() => setTab("register")}>Create one free</GlassLink>
-            </p>
+            {forced ? (
+                <Button
+                    onClick={async () => { await logout(); window.location.href = "/"; }}
+                    icon={<ArrowLeftOnRectangleIcon className="w-4 h-4" />}
+                    size="large"
+                    block
+                    className="bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10 rounded-xl mt-2"
+                >
+                    Logout & Exit
+                </Button>
+            ) : (
+                <p className="text-center text-sm text-white/30">
+                    No account?{" "}
+                    <GlassLink onClick={() => setTab("register")}>Create one free</GlassLink>
+                </p>
+            )}
         </Form>
     );
 }

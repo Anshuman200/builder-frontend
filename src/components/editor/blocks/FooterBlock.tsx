@@ -14,8 +14,19 @@ export function FooterBlock({ block }: BlockProps) {
 
     const rawBg = (p.bgColor as string) || "#0f172a";
     const rawText = (p.textColor as string) || "#f8fafc";
-    const bgColor = isDark && rawBg.toLowerCase() === "#0f172a" ? "#18181b" : rawBg;
-    const textColor = isDark && rawText.toLowerCase() === "#f8fafc" ? "#e4e4e7" : rawText;
+
+    // Helper to check if a color is effectively our default dark/light values (handles both hex and rgb from color picker)
+    const isDefaultBg = (c: string) => {
+        const normalized = c.toLowerCase().replace(/\s+/g, "");
+        return normalized === "#0f172a" || normalized === "rgb(15,23,42)";
+    };
+    const isDefaultText = (c: string) => {
+        const normalized = c.toLowerCase().replace(/\s+/g, "");
+        return normalized === "#f8fafc" || normalized === "rgb(248,250,252)";
+    };
+
+    const bgColor = isDark && isDefaultBg(rawBg) ? "#18181b" : rawBg;
+    const textColor = isDark && isDefaultText(rawText) ? "#e4e4e7" : rawText;
 
     const desktopPadding = p.padding ? (p.padding as string) : "48px 32px";
     const tabletPadding = p.tabletPadding ? (p.tabletPadding as string) : "32px 24px";

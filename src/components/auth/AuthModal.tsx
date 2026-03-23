@@ -2,9 +2,10 @@
 
 import type { Tab } from "@/@Types";
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BoltIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/hooks/useAuth";
+import { useToasts } from "@/hooks/useToasts";
 
 import { GlassOrb, TabSwitcher } from "./AuthShared";
 import { LoginForm } from "./LoginForm";
@@ -18,9 +19,16 @@ interface AuthModalProps {
   onClose: () => void;
   defaultTab?: Tab;
   redirectOnSuccess?: boolean;
+  forced?: boolean;
 }
 
-export function AuthModal({ open, onClose, defaultTab = "login", redirectOnSuccess = true }: AuthModalProps) {
+export function AuthModal({
+  open,
+  onClose,
+  defaultTab = "login",
+  redirectOnSuccess = true,
+  forced = false
+}: AuthModalProps) {
   const [tab, setTab] = useState<Tab>(defaultTab);
 
   // Keep these two states to pass the email between steps
@@ -28,8 +36,30 @@ export function AuthModal({ open, onClose, defaultTab = "login", redirectOnSucce
   const [regEmail, setRegEmail] = useState("");
 
   const { login, register, verifyOtp, forgotPassword, resetPassword, isLoading } = useAuth();
+  const { error: toastError } = useToasts();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleReason = (e: any) => {
+      if (e.detail?.reason === "session_expired") {
+        toastError("Session expired. Please login again.");
+      }
+    };
+    window.addEventListener('show-auth-modal', handleReason);
+
+    if (open && searchParams?.get("reason") === "session_expired") {
+      toastError("Session expired. Please login again.");
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("reason")) {
+        url.searchParams.delete("reason");
+        window.history.replaceState({}, "", url.toString());
+      }
+    }
+
+    return () => window.removeEventListener('show-auth-modal', handleReason);
+  }, [open, searchParams, toastError]);
 
   useEffect(() => {
     if (open) { setTab(defaultTab); }
@@ -40,14 +70,20 @@ export function AuthModal({ open, onClose, defaultTab = "login", redirectOnSucce
     setTab(defaultTab);
   };
 
-  const handleClose = () => { reset(); onClose(); };
+  const handleClose = () => {
+    if (forced) {
+      window.location.href = "/";
+      return;
+    }
+    reset(); onClose();
+  };
 
   const handleLogin = async (email: string, password: string) => {
     const result = await login(email, password);
     handleClose();
     // Only redirect if requested
     if (redirectOnSuccess) {
-        router.push(result?.redirectTo ?? "/home");
+      router.push(result?.redirectTo ?? "/home");
     }
   };
 
@@ -62,7 +98,7 @@ export function AuthModal({ open, onClose, defaultTab = "login", redirectOnSucce
     handleClose();
     // Only redirect if requested
     if (redirectOnSuccess) {
-        router.push("/home");
+      router.push("/home");
     }
   };
 
@@ -93,7 +129,10 @@ export function AuthModal({ open, onClose, defaultTab = "login", redirectOnSucce
       {/* Backdrop */}
       <div
         ref={overlayRef}
-        onClick={(e) => { if (e.target === overlayRef.current) handleClose(); }}
+        onClick={(e) => {
+          if (forced) return; // Prevent closing on background click if forced
+          if (e.target === overlayRef.current) handleClose();
+        }}
         style={{
           position: "fixed", inset: 0, zIndex: 9999,
           display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem",
@@ -149,28 +188,30 @@ export function AuthModal({ open, onClose, defaultTab = "login", redirectOnSucce
                   PageCraft
                 </span>
               </div>
-              <button onClick={handleClose} style={{
-                width: 30, height: 30, borderRadius: 8,
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                color: "rgba(255,255,255,0.45)", transition: "all 0.15s",
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.12)"; (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.85)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)"; }}
-              >
-                <XMarkIcon style={{ width: 15, height: 15 }} />
-              </button>
+              {!forced && (
+                <button onClick={handleClose} style={{
+                  width: 30, height: 30, borderRadius: 8,
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "rgba(255,255,255,0.45)", transition: "all 0.15s",
+                }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.12)"; (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.85)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)"; }}
+                >
+                  <XMarkIcon style={{ width: 15, height: 15 }} />
+                </button>
+              )}
             </div>
 
             {/* Login / Register */}
             {(tab === "login" || tab === "register") && (
               <>
-                <TabSwitcher tab={tab} onChange={(t) => { setTab(t); }} />
+                {!forced && <TabSwitcher tab={tab} onChange={(t) => { setTab(t); }} />}
                 <div key={tab} style={{ animation: "tab-slide 0.2s ease" }}>
                   {tab === "login" && (
                     <LoginForm
-                      handleLogin={handleLogin} setTab={setTab} isLoading={isLoading}
+                      handleLogin={handleLogin} setTab={setTab} isLoading={isLoading} forced={forced}
                     />
                   )}
                   {tab === "register" && (

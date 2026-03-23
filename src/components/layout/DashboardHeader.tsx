@@ -42,7 +42,7 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
             href={!user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home"}
             className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity"
           >
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+            <div className="w-10 h-10 rounded-md bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
               <BoltIcon className="w-6 h-6 text-indigo-400" />
             </div>
             <h1 className="text-lg font-black tracking-tighter text-white hidden sm:block">PageCraft</h1>
@@ -57,7 +57,7 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
               <Link
                 key={item.id}
                 href={item.href}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${isActive
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-md font-bold text-xs uppercase tracking-widest transition-all ${isActive
                   ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
                   : 'text-white/40 hover:text-white hover:bg-white/5'
                   }`}
@@ -73,7 +73,7 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
           {onCreatePage && (
             <button
               onClick={onCreatePage}
-              className="hidden lg:flex items-center gap-2 bg-white text-black px-6 py-2.5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-xl shadow-white/10"
+              className="hidden lg:flex items-center gap-2 bg-white text-black px-6 py-2.5 rounded-md font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-xl shadow-white/10"
             >
               <PlusIcon className="w-4 h-4" />
               New Page
@@ -90,7 +90,7 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
                   {
                     key: "user-info",
                     label: (
-                      <div className="p-3 bg-white/5 rounded-xl mb-1">
+                      <div className="p-3 bg-white/5 rounded-md mb-1">
                         <div className="font-black text-sm text-white uppercase tracking-tight">{user?.name}</div>
                         <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{user?.email}</div>
                       </div>
@@ -112,15 +112,15 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
                     onClick: async () => { await logout(); router.push("/"); },
                   },
                 ].filter(Boolean) as any,
-                className: "[&_.ant-dropdown-menu]:bg-neutral-900 [&_.ant-dropdown-menu]:border [&_.ant-dropdown-menu]:border-white/10 [&_.ant-dropdown-menu]:rounded-2xl p-2",
+                className: "[&_.ant-dropdown-menu]:bg-neutral-900 [&_.ant-dropdown-menu]:border [&_.ant-dropdown-menu]:border-white/10 [&_.ant-dropdown-menu]:rounded-md p-2",
               }}
               placement="bottomRight"
               trigger={["click"]}
             >
               <button
-                className="w-10 h-10 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 p-px cursor-pointer hover:scale-105 transition-transform overflow-hidden relative"
+                className="w-10 h-10 rounded-md bg-linear-to-br from-indigo-500 to-purple-600 p-px cursor-pointer hover:scale-105 transition-transform overflow-hidden relative"
               >
-                <div className="w-full h-full rounded-2xl bg-neutral-900 flex items-center justify-center overflow-hidden">
+                <div className="w-full h-full rounded-md bg-neutral-900 flex items-center justify-center overflow-hidden">
                   {(user as any)?.profilePic ? (
                     <img
                       src={(user as any).profilePic}
@@ -150,7 +150,7 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
               {renderCreateButton && (
                 <button
                   onClick={onCreatePage}
-                  className="w-12 h-12 rounded-2xl bg-white text-black flex items-center justify-center shadow-lg shadow-white/10 -mt-8 border-4 border-neutral-950 active:scale-90 transition-transform shrink-0"
+                  className="w-12 h-12 rounded-md bg-white text-black flex items-center justify-center shadow-lg shadow-white/10 -mt-8 border-4 border-neutral-950 active:scale-90 transition-transform shrink-0"
                 >
                   <PlusIcon className="w-6 h-6" />
                 </button>

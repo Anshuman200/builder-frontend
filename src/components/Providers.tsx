@@ -2,13 +2,30 @@
 
 import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ToastProvider } from "@/hooks/useToasts";
 import { ToastContainer } from "@/components/ui/ToastContainer";
 import { ConfigProvider, theme, App } from "antd";
+import { AuthModal } from "@/components/auth/AuthModal";
+import { usePathname } from "next/navigation";
 
 export function Providers({ children }: { children: React.ReactNode }) {
+    const [authOpen, setAuthOpen] = useState(false);
+    const [authForced, setAuthForced] = useState(false);
+    const pathname = usePathname();
+
+    const isLandingPage = pathname === "/";
+
+    useEffect(() => {
+        const handleShowAuth = (e: any) => {
+            setAuthForced(e.detail?.reason === "session_expired");
+            setAuthOpen(true);
+        };
+        window.addEventListener('show-auth-modal', (handleShowAuth as EventListener));
+        return () => window.removeEventListener('show-auth-modal', (handleShowAuth as EventListener));
+    }, []);
+
     const [queryClient] = useState(
         () =>
             new QueryClient({
@@ -42,6 +59,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                             colorBorder: '#262626',
                             borderRadius: 8,
                             fontFamily: 'inherit',
+                            zIndexPopupBase: 10000, // Ensure AntD popups (toasts) are above everything
                         },
                         components: {
                             Card: {
@@ -55,6 +73,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
                             <AuthProvider>
                                 {children}
                                 <ToastContainer />
+                                <AuthModal 
+                                    open={authOpen} 
+                                    onClose={() => { setAuthOpen(false); setAuthForced(false); }} 
+                                    redirectOnSuccess={isLandingPage} 
+                                    forced={authForced}
+                                />
                             </AuthProvider>
                         </ToastProvider>
                     </App>

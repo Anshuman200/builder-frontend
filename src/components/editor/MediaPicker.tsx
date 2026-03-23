@@ -16,11 +16,11 @@ interface MediaPickerProps {
 /**
  * MediaPicker — A modal wrapper for MediaLibraryView to be used within the editor.
  */
-export default function MediaPicker({ 
-    open, 
-    onClose, 
-    onSelect, 
-    title = "Select Media", 
+export default function MediaPicker({
+    open,
+    onClose,
+    onSelect,
+    title = "Select Media",
     type = "all",
     multiple = false
 }: MediaPickerProps) {
@@ -33,6 +33,7 @@ export default function MediaPicker({
             footer={null}
             width={1000}
             centered
+            zIndex={2000}
             styles={{
                 header: {
                     background: "transparent",
@@ -45,23 +46,17 @@ export default function MediaPicker({
                     overflowY: "auto",
                     padding: 0,
                 },
-                mask: {
-                    backdropFilter: "blur(4px)",
-                    background: "rgba(0, 0, 0, 0.4)",
-                    zIndex: 1000,
-                }
             }}
             style={{
                 background: "var(--bg-secondary)",
                 borderRadius: 16,
                 overflow: "hidden",
                 border: "1px solid var(--border)",
-                zIndex: 1001,
             }}
             closeIcon={<span style={{ color: "var(--text-muted)", fontSize: 24 }}>×</span>}
         >
             <div className="media-picker-content">
-                <MediaLibraryView 
+                <MediaLibraryView
                     hideBatchActions={!multiple}
                     initialType={type}
                     multiple={multiple}
@@ -74,7 +69,7 @@ export default function MediaPicker({
                         }
                         // Using a micro-task delay to ensure state updates in the parent flow through before modal closes
                         setTimeout(() => onClose(), 10);
-                    }} 
+                    }}
                 />
             </div>
         </Modal>

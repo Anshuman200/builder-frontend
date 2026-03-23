@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRightIcon, ClockIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon, ClockIcon, ArrowTopRightOnSquareIcon, GlobeAltIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { Template } from "@/types/templates";
 import { getGradient } from "@/lib/utils/gradients";
@@ -110,9 +110,24 @@ export function TemplateCard({
                             )}
                         </span>
                     )}
-                    {variant !== "public" && template.isPublic && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/90 text-indigo-600 border border-black/10 shadow-lg">
-                            PUBLIC
+                    {variant !== "public" && template.isPublic !== undefined && (
+                        <span className={cn(
+                          "text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg border backdrop-blur-md transition-all",
+                          template.isPublic 
+                            ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20" 
+                            : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                        )}>
+                            {template.isPublic ? (
+                                <>
+                                    <GlobeAltIcon className="w-3 h-3" />
+                                    PUBLIC
+                                </>
+                            ) : (
+                                <>
+                                    <LockClosedIcon className="w-3 h-3 text-zinc-500" />
+                                    PRIVATE
+                                </>
+                            )}
                         </span>
                     )}
                     {variant === "public" && template.category && (

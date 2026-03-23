@@ -3,10 +3,9 @@
 import { Layout } from "antd";
 import { Header as CustomHeader } from "@/components/landing/Header";
 import { Footer as CustomFooter } from "@/components/landing/Footer";
-import { useState } from "react";
-import { AuthModal } from "@/components/auth/AuthModal";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { useEffect } from "react";
 
 const { Content } = Layout;
 
@@ -15,8 +14,15 @@ export default function PublicLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const [authOpen, setAuthOpen] = useState(false);
     const pathname = usePathname();
+    const searchParams = useSearchParams();
+ 
+    useEffect(() => {
+        const authParam = searchParams?.get("auth");
+        if (authParam === "login" || authParam === "register") {
+            window.dispatchEvent(new CustomEvent('show-auth-modal', { detail: { reason: authParam } }));
+        }
+    }, [searchParams]);
 
     return (
         <Layout className="min-h-screen bg-[#080808] relative overflow-x-hidden font-sans">
@@ -28,7 +34,7 @@ export default function PublicLayout({
             <div className="fixed bottom-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-radial-gradient from-blue-600/10 to-transparent blur-[120px] rounded-full pointer-events-none z-0 transition-opacity duration-1000 will-change-transform" />
 
             {/* Shared Header Component */}
-            <CustomHeader onLoginClick={() => setAuthOpen(true)} />
+            <CustomHeader onLoginClick={() => window.dispatchEvent(new CustomEvent('show-auth-modal', { detail: { reason: 'login' } }))} />
 
             {/* Main Content Area */}
             <Content className="relative z-10 flex flex-col min-h-screen">
@@ -40,8 +46,7 @@ export default function PublicLayout({
             {/* Shared Footer Component */}
             <CustomFooter />
 
-            {/* Shared Auth Modal */}
-            <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+
 
             <style jsx global>{`
                 .bg-radial-gradient {

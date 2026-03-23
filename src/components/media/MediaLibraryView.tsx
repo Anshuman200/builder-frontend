@@ -37,13 +37,13 @@ import { useInView } from "react-intersection-observer";
 
 // --- Helpers -----------------------------------------------------------------
 
-export default function MediaLibraryView({ 
-    onSelect, 
+export default function MediaLibraryView({
+    onSelect,
     hideBatchActions = false,
     initialType = 'all',
     multiple = false
-}: { 
-    onSelect?: (urlOrUrls: string | string[]) => void, 
+}: {
+    onSelect?: (urlOrUrls: string | string[]) => void,
     hideBatchActions?: boolean,
     initialType?: 'all' | 'image' | 'video',
     multiple?: boolean

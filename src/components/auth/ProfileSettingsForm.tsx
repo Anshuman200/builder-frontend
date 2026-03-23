@@ -51,7 +51,17 @@ export function ProfileSettingsForm({ onSuccess, backUrl }: Props) {
       
       if (url) {
         setTempAvatar(url);
-        success("Avatar uploaded successfully");
+        
+        // Auto-save the profile picture to the database immediately
+        const res = await updateProfileMut.mutateAsync({
+          profilePic: url
+        });
+        
+        if ((res as any)?.user) {
+          setUser((res as any).user);
+        }
+        
+        success("Profile picture updated");
       }
     } catch (err) {
       toastError("Failed to upload avatar");

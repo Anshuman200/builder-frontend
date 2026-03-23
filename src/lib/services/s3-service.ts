@@ -1,5 +1,6 @@
 import { convertHeicToWebp } from "../utils/media-utils";
 import { configApi } from "../api/config";
+import { request, authApi } from "../api/client";
 
 class S3Service {
     private bucketName: string | null = null;
@@ -60,20 +61,9 @@ class S3Service {
         return new Promise(async (resolve, reject) => {
             try {
                 // 1. Get Presigned URL from Backend
-                const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3019/api";
-                const cookies = document.cookie.split(';').map(c => c.trim());
-                const tokenCookie = cookies.find(c => c.startsWith('accessToken='));
-                const token = tokenCookie ? tokenCookie.split('=')[1] : null;
-
-                const presignedUrlRes = await fetch(`${API_URL}/media/presigned-url?key=${encodeURIComponent(finalKey)}&mimeType=${encodeURIComponent(finalFile.type)}`, {
-                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-                });
-
-                if (!presignedUrlRes.ok) {
-                    throw new Error(`Failed to get presigned URL: ${presignedUrlRes.statusText}`);
-                }
-
-                const { url: presignedUrl } = await presignedUrlRes.json();
+                const { data: { url: presignedUrl } } = await request<{ url: string }>(
+                    `/media/presigned-url?key=${encodeURIComponent(finalKey)}&mimeType=${encodeURIComponent(finalFile.type)}`
+                );
 
                 // 2. Upload Direct to S3
                 const xhr = new XMLHttpRequest();

@@ -18,54 +18,54 @@ export async function request<T = any>(
     path: string,
     opts: RequestInit = {}
 ): Promise<{ data: T }> {
-    let token = getCookie("accessToken");
-
-    const getHeaders = (t: string | null) => ({
-        "Content-Type": "application/json",
-        ...(t ? { Authorization: `Bearer ${t}` } : {}),
+    const headers: any = {
         ...(opts.headers ?? {}),
-    });
-
+    };
+ 
+    if (opts.body && !headers["Content-Type"]) {
+        headers["Content-Type"] = "application/json";
+    }
+ 
     let res = await fetch(`${API}${path}`, {
         ...opts,
-        headers: getHeaders(token),
+        credentials: "include", // CRITICAL: Send and receive cookies
+        headers,
     });
 
     if (res.status === 401 && !path.startsWith("/auth/")) {
-        // Create the promise to wait for the refreshed token before we might trigger the refresh itself
-        const tokenPromise = new Promise<string>((resolve) => {
-            subscribeTokenRefresh(t => resolve(t));
-        });
-
-        // Attempt refresh
         if (!isRefreshing) {
             isRefreshing = true;
             try {
-                const refreshRes = await fetch("/api/auth/refresh", { method: "POST" });
-                if (refreshRes.ok) {
-                    const data = await refreshRes.json();
-                    const newToken = data.accessToken || getCookie("accessToken");
-                    onRefreshed(newToken || "");
-                } else {
-                    onRefreshed("");
-                    // Let the React auth context handle the UI update based on the ensuing 401 error.
+                // Call backend refresh directly
+                const refreshRes = await fetch(`${API}/auth/refresh`, { 
+                    method: "POST",
+                    credentials: "include" 
+                });
+                if (!refreshRes.ok) {
+                    throw new Error("Session expired");
                 }
+                onRefreshed("done");
             } catch (err) {
                 onRefreshed("");
+                // Trigger global login modal on terminal refresh failure
+                window.dispatchEvent(new CustomEvent('show-auth-modal', { 
+                    detail: { reason: 'session_expired' } 
+                }));
+                throw err;
             } finally {
                 isRefreshing = false;
             }
+        } else {
+            // Wait for the refreshed token
+            await new Promise<void>((resolve) => subscribeTokenRefresh(() => resolve()));
         }
-
-        // Wait for the refreshed token
-        const newToken = await tokenPromise;
-
-        if (newToken) {
-            res = await fetch(`${API}${path}`, {
-                ...opts,
-                headers: getHeaders(newToken),
-            });
-        }
+ 
+        // Retry with same options and pre-calculated headers
+        res = await fetch(`${API}${path}`, {
+            ...opts,
+            credentials: "include",
+            headers,
+        });
     }
 
     if (!res.ok) {
@@ -121,10 +121,11 @@ export const pagesApi = {
 
 export const authApi = {
     login: (body: Record<string, string>) =>
-        // Call our Next.js proxy so tokens are set as cookies
-        fetch("/api/auth/login", {
+        // Call backend directly with credentials
+        fetch(`${API}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({
                 ...body,
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -134,7 +135,7 @@ export const authApi = {
             if (!res.ok) throw new Error(data.message ?? "Login failed");
             return { data };
         }),
-
+ 
     register: (body: Record<string, string>) =>
         request("/auth/register", {
             method: "POST",
@@ -143,11 +144,12 @@ export const authApi = {
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
             })
         }),
-
+ 
     verifyOtp: (body: Record<string, string>) =>
-        fetch("/api/auth/verify-otp", {
+        fetch(`${API}/auth/verify-otp`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({
                 ...body,
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -157,9 +159,12 @@ export const authApi = {
             if (!res.ok) throw new Error(data.message ?? "Verification failed");
             return { data };
         }),
-
+ 
     logout: () =>
-        fetch("/api/auth/logout", { method: "POST" }),
+        fetch(`${API}/auth/logout`, { 
+            method: "POST",
+            credentials: "include"
+        }),
 
     getProfile: () => request("/users/profile"),
 

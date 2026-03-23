@@ -3,9 +3,10 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { usePages, useCreatePage, useDeletePage, usePublishPage, useUnpublishPage, useDuplicatePage, useUpdatePage, useGoLivePage, useStopLivePage } from "@/lib/api/queries";
+import { usePages, useDeletePage, usePublishPage, useUnpublishPage, useDuplicatePage, useUpdatePage } from "@/lib/api/queries";
 import { useToasts } from "@/hooks/useToasts";
 import { useDeleteToast } from "@/context/DeleteToastContext";
+import { cn } from "@/lib/utils";
 import {
   Squares2X2Icon,
   PencilSquareIcon,
@@ -57,13 +58,12 @@ export default function HomePage() {
   const unpublishMutation = useUnpublishPage();
   const duplicateMutation = useDuplicatePage();
   const updateMutation = useUpdatePage();
-  const goLiveMutation = useGoLivePage();
-  const stopLiveMutation = useStopLivePage();
 
   const [search, setSearch] = useState("");
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
 
+  const [activeTab, setActiveTab] = useState<"all" | "live" | "public" | "private">("all");
   const [showCapturePicker, setShowCapturePicker] = useState(false);
   const [captureTarget, setCaptureTarget] = useState<any | null>(null);
 
@@ -106,7 +106,7 @@ export default function HomePage() {
     }
   }, [publishMutation, unpublishMutation, success, toastError]);
 
-  // Removing handleToggleLive as requested to merge it into Connect Domain
+
 
   const handleUpdateThumbnails = async (newThumbnails: string[], active: string | null) => {
     if (!captureTarget) return;
@@ -131,7 +131,14 @@ export default function HomePage() {
     );
   }
 
-  const filtered = pages.filter((p: Page) => !search || p.title?.toLowerCase().includes(search.toLowerCase()));
+  const filtered = pages.filter((p: Page) => {
+    const matchesSearch = !search || p.title?.toLowerCase().includes(search.toLowerCase());
+    const matchesTab = activeTab === "all" 
+      || (activeTab === "live" && p.isLive)
+      || (activeTab === "public" && p.isPublic)
+      || (activeTab === "private" && !p.isPublic);
+    return matchesSearch && matchesTab;
+  });
 
   return (
     <>
@@ -151,6 +158,29 @@ export default function HomePage() {
               className="flex-1 bg-transparent border-none outline-none py-3 text-sm text-white placeholder:text-white/20"
             />
           </div>
+        </div>
+
+        {/* Categories / Tabs */}
+        <div className="flex items-center gap-2 mb-8 px-2 overflow-x-auto no-scrollbar">
+          {[
+            { id: "all", label: "All Projects" },
+            { id: "live", label: "Live" },
+            { id: "public", label: "Public" },
+            { id: "private", label: "Private" },
+          ].map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id as any)}
+              className={cn(
+                "px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 border backdrop-blur-md shrink-0",
+                activeTab === t.id
+                  ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                  : "bg-white/5 text-white/40 border-white/5 hover:bg-white/10 hover:text-white"
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
         {pages.length === 0 ? (

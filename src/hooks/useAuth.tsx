@@ -67,6 +67,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         fetchProfile();
     }, [fetchProfile]);
+ 
+    // // Heartbeat: Regularly ensure user is valid and refresh token if needed
+    // // No Need while using Tanstack Query
+    // useEffect(() => {
+    //     if (!user || isLoading) return;
+ 
+    //     const interval = setInterval(() => {
+    //         fetchProfile();
+    //     }, 20000); // Poll every 20s (since expiry is 30s)
+ 
+    //     return () => clearInterval(interval);
+    // }, [user, isLoading, fetchProfile]);
 
     const login = useCallback(async (email: string, password: string) => {
         setIsLoading(true);
