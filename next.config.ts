@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'solario-web-builder.s3.ap-south-1.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'solidappmaker-pagecraft.s3.ap-south-1.amazonaws.com',
         port: '',
         pathname: '/**',

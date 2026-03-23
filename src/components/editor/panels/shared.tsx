@@ -119,7 +119,7 @@ export function MediaInput({ value, onChange, placeholder, type = "image" }: { v
                 <MediaPicker
                     open={pickerOpen}
                     onClose={() => setPickerOpen(false)}
-                    onSelect={(urls) => onChange(urls[0])}
+                    onSelect={(urls) => onChange(Array.isArray(urls) ? urls[0] : urls)}
                     title={type === "image" ? "Select Image" : "Select Video"}
                 />
             )}

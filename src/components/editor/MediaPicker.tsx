@@ -70,8 +70,7 @@ export default function MediaPicker({
                             onSelect(Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls]);
                         } else {
                             const singleUrl = Array.isArray(urlOrUrls) ? urlOrUrls[0] : urlOrUrls;
-                            // @ts-ignore - parent might expect string[] or string
-                            onSelect(singleUrl);
+                            onSelect([singleUrl]);
                         }
                         // Using a micro-task delay to ensure state updates in the parent flow through before modal closes
                         setTimeout(() => onClose(), 10);
