@@ -16,11 +16,8 @@ export default function middleware(request: NextRequest) {
     const isAuthed = !!accessToken || !!refreshToken;
     const isAdmin = userRole === 'admin';
 
-    // DEBUG: Server-side check if DEBUG=true is in query or if we want to log always in development
-    const isDev = process.env.NODE_ENV === 'development';
-    if (isDev) {
-        console.log(`[Middleware] ${pathname} - isAuthed: ${isAuthed}, hasToken: ${!!accessToken}`);
-    }
+    // Log authentication status for debugging in production
+    console.log(`[Middleware] ${pathname} - isAuthed: ${isAuthed}, hasAccessToken: ${!!accessToken}`);
 
     // 1. Redirect logged-in users away from the landing page
     if (pathname === '/' && isAuthed) {
