@@ -20,6 +20,9 @@ export default function middleware(request: NextRequest) {
     const isAuthed = !!(accessToken || refreshToken || hasSession || userRole);
     const isAdmin = userRole === 'admin';
 
+    // DEBUG: Server-side cookie check
+    console.log(`[Middleware] Path: ${pathname}, isAuthed: ${isAuthed}, hasSession: ${hasSession}`);
+
     // Redirect logged-in users away from the landing page
     if (pathname === '/' && isAuthed) {
         const url = request.nextUrl.clone();
