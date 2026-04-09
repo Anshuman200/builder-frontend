@@ -203,6 +203,7 @@ export const useProfile = () => {
             // Handle both { user: ... } and direct user object
             return data?.user || (data?._id ? data : null);
         },
+        enabled: !!getCookie("hasSession"),
         retry: false,
         staleTime: 5 * 60 * 1000, // 5 min
     });
