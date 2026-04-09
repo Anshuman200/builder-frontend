@@ -1,4 +1,4 @@
-import type { SectionTemplate } from "@/@Types";
+import type { SectionTemplate } from "@/types";
 import { makeBlock } from "../config/blocks";
 
 const dummyFaqsFull = [

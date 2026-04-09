@@ -1,24 +1,33 @@
-import axios from 'axios';
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3019/api';
-
-const handleResponse = (res: any) => {
-    if (res.status >= 400) {
-        throw new Error(res.data?.error || res.data?.message || 'Request failed');
-    }
-    return res.data;
-};
+import { request } from "./client";
 
 export const domainApi = {
-    list: (userId?: string) => axios.get(`${BASE_URL}/domains/list`, { params: { userId } }).then(handleResponse),
+    list: (userId?: string) => {
+        const params = userId ? `?userId=${userId}` : "";
+        return request(`/domains/list${params}`);
+    },
     create: (domain: string, targetUrl: string, userId?: string, pageId?: string) => 
-        axios.post(`${BASE_URL}/domains/create`, { domain, targetUrl, userId, pageId }).then(handleResponse),
-    verify: (id: string) => axios.post(`${BASE_URL}/domains/${id}/verify`).then(handleResponse),
-    delete: (id: string, userId?: string) => axios.delete(`${BASE_URL}/domains/${id}`, { params: { userId } }).then(handleResponse),
+        request("/domains/create", {
+            method: "POST",
+            body: JSON.stringify({ domain, targetUrl, userId, pageId }),
+        }),
+    verify: (id: string) => 
+        request(`/domains/${id}/verify`, {
+            method: "POST",
+        }),
+    delete: (id: string, userId?: string) => {
+        const params = userId ? `?userId=${userId}` : "";
+        return request(`/domains/${id}${params}`, {
+            method: "DELETE",
+        });
+    },
 };
 
 export const proxyApi = {
     create: (pageId: string, originUrl: string) => 
-        axios.post(`${BASE_URL}/landing-proxy/create`, { pageId, originUrl }).then(handleResponse),
-    status: (pageId: string) => axios.get(`${BASE_URL}/landing-proxy/status/${pageId}`).then(handleResponse),
+        request("/landing-proxy/create", {
+            method: "POST",
+            body: JSON.stringify({ pageId, originUrl }),
+        }),
+    status: (pageId: string) => 
+        request(`/landing-proxy/status/${pageId}`),
 };

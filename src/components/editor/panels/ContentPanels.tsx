@@ -1,5 +1,5 @@
 "use client";
-import type { Block, EditorPage } from "@/@Types";
+import type { Block, EditorPage } from "@/types";
 import React from "react";
 import { useEditorStore, DEFAULT_THEME } from "@/stores/editorStore";
 

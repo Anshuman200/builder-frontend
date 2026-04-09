@@ -22,6 +22,10 @@ export function useInfiniteMedia(params: { view?: 'public' | 'shared'; limit?: n
         },
         initialPageParam: 1,
         getNextPageParam: (lastPage) => {
+            // Safety check for null/undefined lastPage to prevent runtime TypeErrors
+            if (!lastPage || !lastPage.pagination) {
+                return undefined;
+            }
             if (lastPage.pagination.page < lastPage.pagination.pages) {
                 return lastPage.pagination.page + 1;
             }

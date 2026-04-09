@@ -1,6 +1,6 @@
 "use client";
 
-import type { BlockConfig, SectionTemplate } from "@/@Types";
+import type { BlockConfig, SectionTemplate } from "@/types";
 import * as React from "react";
 import { useDraggable } from "@dnd-kit/core";
 import {

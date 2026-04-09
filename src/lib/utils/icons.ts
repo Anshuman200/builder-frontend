@@ -147,7 +147,7 @@ export {
 // ─── Curated icon list for the icon picker ───────────────────────────────────
 // Format: { name: string (used for storage), label: string (human readable) }
 import * as OutlineIcons from "@heroicons/react/24/outline";
-import type { HeroIcon, IconEntry } from "@/@Types";
+import type { HeroIcon, IconEntry } from "@/types";
 
 // Map Heroicons names → friendly display labels and picker name (no "Icon" suffix)
 const HEROICONS_MAP: Record<string, string> = {

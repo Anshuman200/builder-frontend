@@ -1,4 +1,4 @@
-import type { ThemeConfig } from "@/@Types";
+import type { ThemeConfig } from "@/types";
 
 export const DEFAULT_THEME: ThemeConfig = {
     mode: "light",

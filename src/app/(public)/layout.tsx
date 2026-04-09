@@ -3,9 +3,10 @@
 import { Layout } from "antd";
 import { Header as CustomHeader } from "@/components/landing/Header";
 import { Footer as CustomFooter } from "@/components/landing/Footer";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const { Content } = Layout;
 
@@ -16,13 +17,25 @@ export default function PublicLayout({
 }) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
- 
+    const { user, isLoading } = useAuth();
+    const router = useRouter();
+
     useEffect(() => {
+        // Redirection logic: Logged-in users should not access public routes
+        if (!isLoading && user) {
+            router.replace("/home");
+        }
+
         const authParam = searchParams?.get("auth");
         if (authParam === "login" || authParam === "register") {
             window.dispatchEvent(new CustomEvent('show-auth-modal', { detail: { reason: authParam } }));
         }
-    }, [searchParams]);
+    }, [searchParams, user, isLoading, router]);
+
+    // Prevent flickering: Do not render public layout if loading or if user is already authenticated
+    if (isLoading || user) {
+        return null; // Or a high-end full-screen loader
+    }
 
     return (
         <Layout className="min-h-screen bg-[#080808] relative overflow-x-hidden font-sans">
@@ -45,7 +58,6 @@ export default function PublicLayout({
 
             {/* Shared Footer Component */}
             <CustomFooter />
-
 
 
             <style jsx global>{`

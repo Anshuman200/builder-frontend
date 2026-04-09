@@ -1,86 +1,115 @@
 "use client";
 
-import { useState } from "react";
-import { Form, Input, Button } from "antd";
-import { FormHeading, GlassLink } from "./AuthShared";
+import { useState, useEffect, useRef } from "react";
+import { Form, Input, Button, message } from "antd";
+import { FormHeading, GlassLink, INPUT_STYLE, LABEL_STYLE, BTN_STYLE } from "./AuthShared";
+import { useResendOtp } from "@/lib/api/queries";
 
 export function VerifyOtpForm({ regEmail, handleVerify, error, setTab, isLoading }: any) {
-    const [globalError, setGlobalError] = useState(error);
-    const [form] = Form.useForm();
+  const [globalError, setGlobalError] = useState(error);
+  const [cooldown, setCooldown] = useState(0);
+  const resendMut = useResendOtp();
+  const [form] = Form.useForm();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-    const onFinish = async (values: any) => {
-        setGlobalError("");
-        try {
-            await handleVerify(regEmail, values.otp);
-        } catch (err: any) {
-            setGlobalError(err?.message || "Invalid or expired code.");
-        }
-    };
+  useEffect(() => {
+    if (error) setGlobalError(error);
+  }, [error]);
 
-    return (
-        <Form
-            form={form}
-            layout="vertical"
-            onFinish={onFinish}
-            style={{ display: "flex", flexDirection: "column", gap: 8, animation: "tab-slide 0.2s ease" }}
-            requiredMark={false}
+  useEffect(() => {
+    if (cooldown > 0) {
+      timerRef.current = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    } else if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [cooldown]);
+
+  const onFinish = async (values: any) => {
+    setGlobalError("");
+    try {
+      await handleVerify(regEmail, values.otp);
+    } catch (err: any) {
+      setGlobalError(err?.message || "Invalid or expired code.");
+    }
+  };
+
+  const handleResend = async () => {
+    if (cooldown > 0) return;
+    try {
+      await resendMut.mutateAsync({ email: regEmail });
+      message.success("A new code has been sent!");
+      setCooldown(60);
+    } catch (err: any) {
+      message.error(err.message || "Failed to resend code");
+    }
+  };
+
+  return (
+    <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      <FormHeading
+        title="Check your email"
+        subtitle={`We sent a 6-digit code to ${regEmail}`}
+      />
+
+      <Form.Item
+        name="otp"
+        label={<span style={LABEL_STYLE}>Verification Code</span>}
+        rules={[{ required: true, message: "OTP is required" }, { len: 6, message: "Please enter a valid 6-digit code" }]}
+        style={{ marginBottom: 10 }}
+      >
+        <Input
+          placeholder="123456"
+          size="large"
+          maxLength={6}
+          style={{
+            ...INPUT_STYLE,
+            textAlign: "center",
+            letterSpacing: "0.3em",
+            fontSize: "1.5rem",
+            fontWeight: 800,
+            height: 56,
+          }}
+        />
+      </Form.Item>
+
+      {globalError && (
+        <p style={{ color: "#ef4444", fontSize: "0.82rem", margin: "4px 0 8px" }}>{globalError}</p>
+      )}
+
+      <Form.Item style={{ marginBottom: 10, marginTop: 6 }}>
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={isLoading}
+          size="large"
+          block
+          style={BTN_STYLE}
         >
-            <FormHeading
-                title="Check your email"
-                subtitle={`We sent a 6-digit code to ${regEmail}`}
-            />
+          Verify email
+        </Button>
+      </Form.Item>
 
-            <Form.Item
-                name="otp"
-                label={<span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>Verification Code</span>}
-                rules={[
-                    { required: true, message: 'OTP is required' },
-                    { len: 6, message: 'Please enter a valid 6-digit code' }
-                ]}
-                style={{ marginBottom: 16 }}
-            >
-                <Input
-                    placeholder="123456"
-                    size="large"
-                    maxLength={6}
-                    style={{
-                        background: 'rgba(255,255,255,0.03)',
-                        borderColor: 'rgba(255,255,255,0.1)',
-                        color: 'white',
-                        textAlign: 'center',
-                        letterSpacing: '0.2em',
-                        fontSize: '1.2rem',
-                        fontWeight: 600
-                    }}
-                />
-            </Form.Item>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <GlassLink onClick={() => setTab("register")}>← Back to sign up</GlassLink>
 
-            {globalError && (
-                <div style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: 12 }}>
-                    {globalError}
-                </div>
-            )}
-
-            <Form.Item style={{ marginBottom: 16 }}>
-                <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={isLoading}
-                    size="large"
-                    block
-                    style={{
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                        border: 'none',
-                        fontWeight: 600,
-                    }}
-                >
-                    Verify email
-                </Button>
-            </Form.Item>
-
-            <p style={{ textAlign: "center", fontSize: "0.82rem", color: "rgba(255,255,255,0.35)", margin: 0 }}>
-                <GlassLink onClick={() => setTab("register")}>← Back to sign up</GlassLink>
-            </p>
-        </Form>
-    );
+        <Button
+          type="link"
+          size="small"
+          onClick={handleResend}
+          loading={resendMut.isPending}
+          disabled={cooldown > 0}
+          style={{
+            color: cooldown > 0 ? "rgba(255,255,255,0.2)" : "#a78bfa",
+            fontSize: "0.82rem",
+            padding: 0,
+            height: "auto",
+            transition: "all 0.2s"
+          }}
+        >
+          {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Code"}
+        </Button>
+      </div>
+    </Form>
+  );
 }

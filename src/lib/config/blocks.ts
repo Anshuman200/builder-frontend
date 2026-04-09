@@ -1,4 +1,4 @@
-import type { Block, IconName, BlockConfig } from "@/@Types";
+import type { Block, IconName, BlockConfig } from "@/types";
 // lib/blockConfig.ts
 
 

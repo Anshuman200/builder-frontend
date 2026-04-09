@@ -87,7 +87,7 @@ export default function CapturePreviewModal({
 
       // Target the iframe content directly - this is most reliable for "Visible Area" captures
       const sourceNode = iframeDoc.documentElement || iframeDoc.body;
-      
+
       // Explicitly set width/height to match the visible viewport
       captureOptions.width = iframe.clientWidth;
       captureOptions.height = iframe.clientHeight;
@@ -186,7 +186,7 @@ export default function CapturePreviewModal({
       footer={null}
       width="100%"
       style={{ top: 0, padding: 0, maxWidth: "100%", height: "100vh" }}
-      bodyStyle={{ height: "calc(100vh - 90px)", padding: "20px" }}
+      styles={{ body: { height: "calc(100vh - 90px)", padding: "20px" } }}
       centered
       destroyOnHidden
       title={
@@ -200,7 +200,7 @@ export default function CapturePreviewModal({
               <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 10, fontWeight: 500, marginTop: -2 }}>PREMIUM THUMBNAIL ENGINE</div>
             </div>
           </div>
-          
+
           <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", zIndex: 5 }}>
             <div className="" style={{ display: "flex", background: "rgba(255,255,255,0.03)", borderRadius: 10, padding: 3, border: "1px solid rgba(255,255,255,0.08)" }}>
               <button
@@ -265,7 +265,6 @@ export default function CapturePreviewModal({
           </div>
         </div>
       }
-      className="[&_.ant-modal-content]:bg-[#0c0c0e] [&_.ant-modal-content]:border-none [&_.ant-modal-content]:rounded-none [&_.ant-modal-header]:bg-transparent [&_.ant-modal-header]:border-b [&_.ant-modal-header]:border-white/5 [&_.ant-modal-close]:text-white/40 [&_.ant-modal-close]:top-[18px]"
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 24, height: "100%", position: 'relative' }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, position: "relative" }}>

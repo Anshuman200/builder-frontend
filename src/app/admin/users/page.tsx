@@ -352,6 +352,7 @@ export default function AdminUsersPage() {
                     onCancel={() => setDeleteTarget(null)}
                     okText="Delete"
                     okButtonProps={{ danger: true }}
+                    confirmLoading={deleteMut.isPending}
                     centered
                 >
                     <p style={{ color: "var(--text-muted)", margin: 0 }}>

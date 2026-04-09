@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
+
 
 // In development, Next.js clears module scope on reloads.
 // We use the global object to persist the preview data in memory across hot-reloads.

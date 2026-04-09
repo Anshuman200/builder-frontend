@@ -1,6 +1,6 @@
 // sections/team.ts
 import { makeBlock } from "../config/blocks";
-import type { SectionTemplate } from "@/@Types";
+import type { SectionTemplate } from "@/types";
 
 // Placeholder images for diverse team members
 const imgs = [

@@ -23,7 +23,7 @@ import {
     CopyOutlined,
     LinkOutlined,
 } from '@ant-design/icons';
-import { domainApi } from "@/lib/api/domain";
+import { useDomains, useVerifyDomain, useDeleteDomain } from "@/lib/api/domainHooks";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useDeleteToast } from "@/context/DeleteToastContext";
@@ -33,57 +33,22 @@ const { Title, Text } = Typography;
 export default function DomainPage() {
     const router = useRouter();
     const { user } = useAuth();
-    const [domains, setDomains] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [verifyingId, setVerifyingId] = useState<string | null>(null);
+    const { data: domains = [], isLoading: loading } = useDomains(user?._id);
+    const verifyMutation = useVerifyDomain();
+    const deleteMutation = useDeleteDomain();
     const { startDelete } = useDeleteToast();
 
-    const loadDomains = useCallback(async () => {
-        if (!user?._id) return;
-        try {
-            setLoading(true);
-            const data = await domainApi.list(user._id);
-            setDomains(data);
-        } catch (err) {
-            console.error(err);
-            message.error("Failed to load domains");
-        } finally {
-            setLoading(false);
-        }
-    }, [user?._id]);
-
-    useEffect(() => {
-        loadDomains();
-    }, [loadDomains]);
-
     const verifyDomain = async (id: string) => {
-        setVerifyingId(id);
-        try {
-            await domainApi.verify(id);
-            await loadDomains();
-            message.success("Status updated");
-        } catch (err: any) {
-            message.error(err.message || "Verification failed");
-        } finally {
-            setVerifyingId(null);
-        }
+        await verifyMutation.mutateAsync(id);
     };
 
     const handleDeleteClick = (domain: any) => {
         if (!user?._id) return;
-        // Optimistically remove from list immediately
-        setDomains(prev => prev.filter((d: any) => d._id !== domain._id));
+        
         startDelete(
             [{ id: domain._id, label: domain.domain }],
             async (item) => {
-                await domainApi.delete(item.id, user._id);
-            },
-            {
-                onComplete: async (batch) => {
-                    if (batch.failed > 0) {
-                        await loadDomains(); // Restore on failure
-                    }
-                }
+                await deleteMutation.mutateAsync({ id: item.id, userId: user._id });
             }
         );
     };
@@ -216,7 +181,7 @@ export default function DomainPage() {
                                         <Tooltip title="Check Status">
                                             <Button
                                                 icon={<ReloadOutlined />}
-                                                loading={verifyingId === d._id}
+                                                loading={verifyMutation.isPending && verifyMutation.variables === d._id}
                                                 onClick={() => verifyDomain(d._id)}
                                                 className="bg-white/5! border-white/10! text-white! hover:bg-white/10!"
                                             >

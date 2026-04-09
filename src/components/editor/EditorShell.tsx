@@ -1,6 +1,6 @@
 "use client";
 
-import type { Block } from "@/@Types";
+import type { Block } from "@/types";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   DndContext,

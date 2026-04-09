@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import type { Block } from "@/@Types";
+import type { Block } from "@/types";
 import { ChildBlockWrapper, PreviewContext, DropZoneStrip } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 

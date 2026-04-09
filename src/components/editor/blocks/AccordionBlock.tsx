@@ -1,4 +1,4 @@
-import type { Block } from "@/@Types";
+import type { Block } from "@/types";
 // components/editor/blocks/AccordionBlock.tsx
 import React, { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Block } from "@/@Types";
+import type { Block } from "@/types";
 import React, { useState, memo } from "react";
 import {
   useDroppable,

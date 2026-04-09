@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useCallback } from "react";
-import axios from "axios";
+import { useSubmitForm } from "@/lib/api/queries";
 import type { BlockProps } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { PreviewContext } from "./shared";
@@ -60,7 +60,7 @@ export function ContactFormBlock({ block }: BlockProps) {
     // Form values
     const [values, setValues] = useState({ firstName: "", lastName: "", email: "", message: "", gender: "" });
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [submitting, setSubmitting] = useState(false);
+    const submitMutation = useSubmitForm();
     const [toast, setToast] = useState<{ message: string; type: "success" | "error"; visible: boolean }>({
         message: "", type: "success", visible: false,
     });
@@ -134,7 +134,7 @@ export function ContactFormBlock({ block }: BlockProps) {
         const errs = validate();
         if (Object.keys(errs).length > 0) { setErrors(errs); return; }
         setErrors({});
-        setSubmitting(true);
+        
         try {
             const payload = {
                 receiverEmail,
@@ -148,17 +148,14 @@ export function ContactFormBlock({ block }: BlockProps) {
             payload.fields[emailLabel] = values.email;
             payload.fields[messageLabel] = values.message;
 
-            const endpoint = "/api/forms/submit";
-            await axios.post(endpoint, payload);
+            await submitMutation.mutateAsync(payload);
             showToast(successMessage, "success");
             setValues({ firstName: "", lastName: "", email: "", message: "", gender: "" });
         } catch (error: any) {
-            const serverMsg = error?.response?.data?.message || errorMessage;
+            const serverMsg = error?.message || errorMessage;
             showToast(serverMsg, "error");
-        } finally {
-            setSubmitting(false);
         }
-    }, [values, validate, receiverEmail, firstNameLabel, lastNameLabel, genderLabel, emailLabel, messageLabel, showLastName, showGender, successMessage, errorMessage]);
+    }, [values, validate, receiverEmail, firstNameLabel, lastNameLabel, genderLabel, emailLabel, messageLabel, showLastName, showGender, successMessage, errorMessage, submitMutation]);
 
     // ─── Input style ───────────────────────────────────────────────────────────
     const inputStyle: React.CSSProperties = {
@@ -338,17 +335,17 @@ export function ContactFormBlock({ block }: BlockProps) {
                     <div style={{ display: "flex", justifyContent: buttonAlign === "left" ? "flex-start" : buttonAlign === "center" ? "center" : "flex-end" }}>
                         <button
                             type="submit"
-                            disabled={submitting}
+                            disabled={submitMutation.isPending}
                             style={{
                                 width: buttonFullWidth ? "100%" : "auto",
                                 padding: "0.85rem 2rem",
-                                background: submitting ? `${buttonBg}99` : buttonBg,
+                                background: submitMutation.isPending ? `${buttonBg}99` : buttonBg,
                                 color: buttonTextColor,
                                 border: "none",
                                 borderRadius: buttonBorderRadius,
                                 fontSize: "0.95rem",
                                 fontWeight: 700,
-                                cursor: submitting ? "not-allowed" : "pointer",
+                                cursor: submitMutation.isPending ? "not-allowed" : "pointer",
                                 transition: "all 0.25s ease",
                                 letterSpacing: "0.02em",
                                 display: "flex",
@@ -359,7 +356,7 @@ export function ContactFormBlock({ block }: BlockProps) {
                                 boxShadow: `0 4px 20px ${buttonBg}55`,
                             }}
                             onMouseEnter={e => {
-                                if (!submitting) {
+                                if (!submitMutation.isPending) {
                                     (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)";
                                     (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 8px 28px ${buttonBg}77`;
                                 }
@@ -369,7 +366,7 @@ export function ContactFormBlock({ block }: BlockProps) {
                                 (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 4px 20px ${buttonBg}55`;
                             }}
                         >
-                            {submitting ? (
+                            {submitMutation.isPending ? (
                                 <>
                                     <span style={{
                                         width: 16, height: 16,

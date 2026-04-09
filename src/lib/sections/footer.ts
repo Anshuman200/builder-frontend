@@ -1,6 +1,6 @@
 // sections/footer.ts
 import { makeBlock } from "../config/blocks";
-import type { SectionTemplate } from "@/@Types";
+import type { SectionTemplate } from "@/types";
 
 export const footerSections: SectionTemplate[] = [
   {

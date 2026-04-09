@@ -87,7 +87,7 @@ export function HeroSection() {
 
           {/* Headline */}
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-8 animate-fade-in-up delay-100">
-            Build pages that <span className="gradient-text-shimmer italic">actually convert</span> without writing code
+            Build pages that <span className="gradient-text-shimmer italic">actually convert {" "}</span> without writing code
           </h1>
 
           {/* Subheadline */}

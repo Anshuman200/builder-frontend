@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
-import { pagesApi, authApi, adminApi } from "./client";
+import { pagesApi, authApi, adminApi, request } from "./client";
+import { getCookie } from "@/lib/utils";
 
 // ─── Pages Queries ──────────────────────────────────────────────────────────
 
@@ -59,13 +60,8 @@ export const useSitePage = (slug: string) => {
     return useQuery({
         queryKey: ["site-page", slug],
         queryFn: async () => {
-            const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3019/api';
-            const res = await fetch(`${API}/site-pages/${slug}`);
-            if (!res.ok) {
-                throw new Error("Page not found");
-            }
-            const data = await res.json();
-            return data.page;
+            const { data } = await request<{ page: any }>(`/site-pages/${slug}`);
+            return data.page || data;
         },
         enabled: !!slug,
         retry: false,
@@ -76,13 +72,8 @@ export const useSitePages = () => {
     return useQuery({
         queryKey: ["site-pages"],
         queryFn: async () => {
-            const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3019/api';
-            const res = await fetch(`${API}/site-pages`);
-            if (!res.ok) {
-                throw new Error("Pages not found");
-            }
-            const data = await res.json();
-            return data.pages;
+            const { data } = await request<{ pages: any[] }>(`/site-pages`);
+            return data.pages || (Array.isArray(data) ? data : []);
         },
     });
 };
@@ -209,9 +200,70 @@ export const useProfile = () => {
         queryKey: ["profile"],
         queryFn: async () => {
             const { data } = await authApi.getProfile();
-            return data;
+            // Handle both { user: ... } and direct user object
+            return data?.user || (data?._id ? data : null);
         },
         retry: false,
+        staleTime: 5 * 60 * 1000, // 5 min
+        enabled: !!getCookie("hasSession"),
+    });
+};
+
+export const useLogin = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (body: Record<string, string>) => authApi.login(body),
+        onSuccess: (res) => {
+            queryClient.setQueryData(["profile"], res.data.user);
+            queryClient.invalidateQueries({ queryKey: ["profile"] });
+            queryClient.invalidateQueries({ queryKey: ["pages"] });
+        },
+    });
+};
+
+export const useRegister = () => {
+    return useMutation({
+        mutationFn: (body: Record<string, string>) => authApi.register(body),
+    });
+};
+
+export const useResendOtp = () => {
+    return useMutation({
+        mutationFn: (body: Record<string, string>) => authApi.resendOtp(body),
+    });
+};
+
+export const useVerifyOtp = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (body: Record<string, string>) => authApi.verifyOtp(body),
+        onSuccess: (res) => {
+            queryClient.setQueryData(["profile"], res.data.user);
+            queryClient.invalidateQueries({ queryKey: ["profile"] });
+        },
+    });
+};
+
+export const useLogout = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: () => authApi.logout(),
+        onSettled: () => {
+            queryClient.setQueryData(["profile"], null);
+            queryClient.clear(); // Clear all cache on logout
+        },
+    });
+};
+
+export const useForgotPassword = () => {
+    return useMutation({
+        mutationFn: (body: Record<string, string>) => authApi.forgotPassword(body),
+    });
+};
+
+export const useResetPassword = () => {
+    return useMutation({
+        mutationFn: (body: Record<string, string>) => authApi.resetPassword(body),
     });
 };
 
@@ -219,18 +271,11 @@ export const useProfile = () => {
 
 export const useSubmitForm = () => {
     return useMutation({
-        mutationFn: (body: any) => {
-            // we use the backend directly so no proxy fetch here!
-            return fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3019/api'}/forms/submit`, {
+        mutationFn: (body: any) => 
+            request("/forms/submit", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
-            }).then(async (res) => {
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message || "Failed to submit form");
-                return data;
-            });
-        },
+            }),
     });
 };
 

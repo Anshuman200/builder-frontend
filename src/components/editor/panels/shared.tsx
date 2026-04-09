@@ -1,6 +1,6 @@
 "use client";
 
-import type { Block, EditorPage } from "@/@Types";
+import type { Block, EditorPage } from "@/types";
 /**
  * panels/shared.tsx — All shared UI primitives for the Properties Panel
  *

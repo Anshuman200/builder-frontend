@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import PreviewClient from './PreviewClient';
 import { request } from '@/lib/api/client';
 
-export const dynamic = "force-dynamic";
+
 
 interface Props {
   params: Promise<{ pageId: string }>;

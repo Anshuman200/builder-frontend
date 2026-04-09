@@ -13,7 +13,7 @@ import {
     SyncOutlined,
     ArrowLeftOutlined
 } from '@ant-design/icons';
-import { domainApi, proxyApi } from "@/lib/api/domain";
+import { useCreateDomain, useVerifyDomain, useCreateProxy } from "@/lib/api/domainHooks";
 import { useAuth } from "@/hooks/useAuth";
 import { useGoLivePage, usePage, usePages } from "@/lib/api/queries";
 // Removed plain CSS import in favor of Tailwind
@@ -35,10 +35,14 @@ function ConnectDomainContent() {
     const searchParams = useSearchParams();
     const { user } = useAuth();
     const goLiveMutation = useGoLivePage();
+    const createProxyMutation = useCreateProxy();
+    const createDomainMutation = useCreateDomain();
+    const verifyMutation = useVerifyDomain();
+    
     const pageIdFromUrl = searchParams.get("pageId") || "";
 
     const { data: pageData, isLoading: pageLoading } = usePage(pageIdFromUrl, !!pageIdFromUrl);
-    const { data: allPages, isLoading: allPagesLoading } = usePages();
+    const { data: allPages = [], isLoading: allPagesLoading } = usePages();
 
     // Filter for private projects that are not yet live
     const privateProjects = Array.isArray(allPages)
@@ -54,7 +58,6 @@ function ConnectDomainContent() {
     const [workerResult, setWorkerResult] = useState<any>(null);
 
     const [customDomain, setCustomDomain] = useState("");
-    const [domainCreating, setDomainCreating] = useState(false);
     const [domainError, setDomainError] = useState("");
     const [domainResult, setDomainResult] = useState<any>(null);
 
@@ -67,7 +70,7 @@ function ConnectDomainContent() {
             const baseUrl = `https://build.solidappmaker.in`
             setTargetUrl(`${baseUrl}/preview/${pageIdFromUrl}`);
         }
-    }, [pageIdFromUrl, pageData]);
+    }, [pageIdFromUrl]);
 
     const handleProjectSelect = (id: string) => {
         const baseUrl = `https://build.solidappmaker.in`
@@ -83,8 +86,6 @@ function ConnectDomainContent() {
         setWorkerDeploying(true);
         setWorkerError("");
         setDeployProgress(0);
-
-        let pageIdToUse = pageIdFromUrl;
 
         try {
             const totalSteps = DEPLOY_STEPS.length;
@@ -106,9 +107,11 @@ function ConnectDomainContent() {
                     }
 
                     if (!pageId) throw new Error("URL must contain an ?id= parameter or a valid 24-character ID in the path");
-                    pageIdToUse = pageId;
-
-                    const result = await proxyApi.create(pageIdToUse, targetUrl);
+                    
+                    const result: any = await createProxyMutation.mutateAsync({ 
+                        pageId, 
+                        originUrl: targetUrl 
+                    });
                     setWorkerResult(result);
                 }
                 await delay(DEPLOY_STEPS[i].ms);
@@ -127,7 +130,6 @@ function ConnectDomainContent() {
             return;
         }
 
-        setDomainCreating(true);
         setDomainError("");
 
         try {
@@ -141,7 +143,14 @@ function ConnectDomainContent() {
                 } catch (e) { }
             }
 
-            const data = await domainApi.create(customDomain, targetUrl, user?._id, pageIdToUse || undefined);
+            if (!user?._id) throw new Error("Authentication required");
+
+            const data: any = await createDomainMutation.mutateAsync({ 
+                domain: customDomain, 
+                targetUrl, 
+                userId: user._id, 
+                pageId: pageIdToUse || undefined 
+            });
             setDomainResult(data);
 
             // Trigger Go Live
@@ -155,8 +164,6 @@ function ConnectDomainContent() {
             setCurrentStep(2);
         } catch (err: any) {
             setDomainError(err.message || "Failed to create domain");
-        } finally {
-            setDomainCreating(false);
         }
     };
 
@@ -187,7 +194,7 @@ function ConnectDomainContent() {
                     await delay(15000);
                     if (!mounted) return;
 
-                    const updatedRecord = await domainApi.verify(domainResult._id);
+                    const updatedRecord: any = await verifyMutation.mutateAsync(domainResult._id);
                     if (!mounted) return;
 
                     if (updatedRecord && updatedRecord.status === 'active') {
@@ -268,7 +275,7 @@ function ConnectDomainContent() {
                                 <StepAddDomain
                                     customDomain={customDomain}
                                     setCustomDomain={setCustomDomain}
-                                    domainCreating={domainCreating}
+                                    domainCreating={createDomainMutation.isPending}
                                     domainError={domainError}
                                     onBack={() => setCurrentStep(0)}
                                     onCreate={handleCreateDomain}

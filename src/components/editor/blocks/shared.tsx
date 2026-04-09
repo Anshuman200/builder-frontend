@@ -1,6 +1,6 @@
 "use client";
 
-import type { Block } from "@/@Types";
+import type { Block } from "@/types";
 /**
  * blocks/shared.tsx — Shared types, context, and block wrappers
  */

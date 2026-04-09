@@ -1,5 +1,5 @@
 "use client";
-import type { Block } from "@/@Types";
+import type { Block } from "@/types";
 import React from "react";
 import { useDroppable } from "@dnd-kit/core";
 

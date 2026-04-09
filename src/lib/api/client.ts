@@ -32,7 +32,7 @@ export async function request<T = any>(
         headers,
     });
 
-    if (res.status === 401 && !path.startsWith("/auth/")) {
+    if (res.status === 401 && !path.startsWith("/auth/") && getCookie("hasSession")) {
         if (!isRefreshing) {
             isRefreshing = true;
             try {
@@ -47,10 +47,12 @@ export async function request<T = any>(
                 onRefreshed("done");
             } catch (err) {
                 onRefreshed("");
-                // Trigger global login modal on terminal refresh failure
-                window.dispatchEvent(new CustomEvent('show-auth-modal', { 
-                    detail: { reason: 'session_expired' } 
-                }));
+                if (typeof window !== 'undefined') {
+                    // Trigger global login modal on terminal refresh failure
+                    window.dispatchEvent(new CustomEvent('show-auth-modal', { 
+                        detail: { reason: 'session_expired' } 
+                    }));
+                }
                 throw err;
             } finally {
                 isRefreshing = false;
@@ -74,7 +76,23 @@ export async function request<T = any>(
     }
 
     const data = await res.json();
-    return { data };
+    
+    // Robust data unwrapping:
+    // 1. If 'success' is present, try to return 'data' field.
+    // 2. If 'success' is true but 'data' is missing, treat the rest of the object as data.
+    // 3. Otherwise return raw data.
+    let result = data;
+    if (data && typeof data === 'object' && 'success' in data) {
+        if ('data' in data) {
+            result = data.data;
+        } else {
+            const { success, message, ...rest } = data;
+            // If it's an empty success (just success: true), return the whole thing
+            result = Object.keys(rest).length > 0 ? rest : data;
+        }
+    }
+
+    return { data: result };
 }
 
 export const pagesApi = {
@@ -132,8 +150,13 @@ export const authApi = {
             }),
         }).then(async (res) => {
             const data = await res.json();
-            if (!res.ok) throw new Error(data.message ?? "Login failed");
-            return { data };
+            if (!res.ok) {
+                const error: any = new Error(data.message || "Sign in failed");
+                error.status = res.status;
+                error.data = data;
+                throw error;
+            }
+            return { data: (data && typeof data === 'object' && 'success' in data) ? data.data : data };
         }),
  
     register: (body: Record<string, string>) =>
@@ -143,6 +166,12 @@ export const authApi = {
                 ...body,
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
             })
+        }),
+
+    resendOtp: (body: Record<string, string>) =>
+        request("/auth/resend-otp", {
+            method: "POST",
+            body: JSON.stringify(body)
         }),
  
     verifyOtp: (body: Record<string, string>) =>
@@ -156,8 +185,13 @@ export const authApi = {
             }),
         }).then(async (res) => {
             const data = await res.json();
-            if (!res.ok) throw new Error(data.message ?? "Verification failed");
-            return { data };
+            if (!res.ok) {
+                const error = new Error(data.message ?? "Verification failed");
+                (error as any).status = res.status;
+                (error as any).data = data;
+                throw error;
+            }
+            return { data: (data && typeof data === 'object' && 'success' in data) ? data.data : data };
         }),
  
     logout: () =>

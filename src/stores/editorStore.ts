@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-import type { Block, BlockStyle, AnimationConfig, ThemeConfig, MetaConfig, EditorPage } from "@/@Types";
+import type { Block, BlockStyle, AnimationConfig, ThemeConfig, MetaConfig, EditorPage } from "@/types";
 
 // ─── Default Theme ───────────────────────────────────────────────────────────
 export const DEFAULT_THEME: ThemeConfig = {

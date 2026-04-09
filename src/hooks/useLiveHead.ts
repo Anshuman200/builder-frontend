@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { EditorPage } from "@/@Types";
+import type { EditorPage } from "@/types";
 
 export function useLiveHead(page: EditorPage | null | undefined) {
     useEffect(() => {

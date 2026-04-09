@@ -1,6 +1,6 @@
 "use client";
 
-import type { Block } from "@/@Types";
+import type { Block } from "@/types";
 /**
  * blocks.tsx — Thin re-export dispatcher (kept for backward compat)
  *

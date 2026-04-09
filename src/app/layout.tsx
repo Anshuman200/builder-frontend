@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import "./globals.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
@@ -29,9 +30,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
-        <AntdRegistry>
-          <Providers>{children}</Providers>
-        </AntdRegistry>
+        <Suspense fallback={null}>
+          <AntdRegistry>
+            <Providers>{children}</Providers>
+          </AntdRegistry>
+        </Suspense>
       </body>
     </html>
   );

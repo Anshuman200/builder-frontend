@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useCreatePage } from "@/lib/api/queries";
@@ -58,6 +58,11 @@ export default function DashboardLayout({
   const createMutation = useCreatePage();
 
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleCreate = useCallback(() => {
     setWizardOpen(true);
@@ -83,7 +88,7 @@ export default function DashboardLayout({
     }
   }, [createMutation, router, success, toastError]);
 
-  if (authLoading) {
+  if (!mounted || authLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-neutral-950 text-white/20">
         <ArrowPathIcon className="w-10 h-10 animate-spin" />

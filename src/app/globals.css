@@ -401,6 +401,7 @@ img {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: shimmer 4s linear infinite;
+  overflow: visible;
 }
 
 /* ─── Editor UI Shared Inputs ───────────────────────────────────────────────── */
@@ -527,15 +528,6 @@ img {
 .jodit-dialog__box,
 .jodit-popup {
   z-index: 99999 !important;
-}
-
-.ant-modal-wrap {
-  z-index: 1000 !important;
-}
-
-/* Prevent Antd from blocking pointer events to Jodit popovers */
-.ant-modal-root .ant-modal-wrap {
-  pointer-events: auto !important;
 }
 
 /* Admin Table Shimmer Effect */
@@ -690,7 +682,7 @@ label.jodit-ui-label {
 }
 
 .pc-segmented .ant-segmented-item {
-  color: #888888 !important;
+  color: #c11919 !important;
   transition: all 0.2s ease !important;
   border-radius: 999px !important;
 }
@@ -722,4 +714,49 @@ label.jodit-ui-label {
   background: #6366f1 !important;
   border-radius: 999px !important;
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
+}
+
+/* ─── Auth Modal Orbs ────────────────────────────────────────────────────────── */
+@keyframes float-orb-1 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(20px, -30px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-15px, 20px) scale(0.9);
+  }
+}
+
+@keyframes float-orb-2 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(-25px, 20px) scale(1.05);
+  }
+
+  66% {
+    transform: translate(20px, -20px) scale(0.95);
+  }
+}
+
+@keyframes float-orb-3 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1.05);
+  }
+
+  50% {
+    transform: translate(15px, -25px) scale(0.9);
+  }
 }

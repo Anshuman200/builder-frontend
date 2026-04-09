@@ -1,11 +1,12 @@
 "use client";
 
-import type { Tab } from "@/@Types";
-import { useState, useEffect, useRef } from "react";
+import type { Tab } from "@/types";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BoltIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/hooks/useAuth";
 import { useToasts } from "@/hooks/useToasts";
+import { Modal } from "antd";
 
 import { GlassOrb, TabSwitcher } from "./AuthShared";
 import { LoginForm } from "./LoginForm";
@@ -27,228 +28,189 @@ export function AuthModal({
   onClose,
   defaultTab = "login",
   redirectOnSuccess = true,
-  forced = false
+  forced = false,
 }: AuthModalProps) {
   const [tab, setTab] = useState<Tab>(defaultTab);
-
-  // Keep these two states to pass the email between steps
   const [loginEmail, setLoginEmail] = useState("");
   const [regEmail, setRegEmail] = useState("");
+  const [authError, setAuthError] = useState("");
 
   const { login, register, verifyOtp, forgotPassword, resetPassword, isLoading } = useAuth();
   const { error: toastError } = useToasts();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleReason = (e: any) => {
-      if (e.detail?.reason === "session_expired") {
-        toastError("Session expired. Please login again.");
-      }
-    };
-    window.addEventListener('show-auth-modal', handleReason);
-
-    if (open && searchParams?.get("reason") === "session_expired") {
-      toastError("Session expired. Please login again.");
-      const url = new URL(window.location.href);
-      if (url.searchParams.has("reason")) {
-        url.searchParams.delete("reason");
-        window.history.replaceState({}, "", url.toString());
-      }
-    }
-
-    return () => window.removeEventListener('show-auth-modal', handleReason);
-  }, [open, searchParams, toastError]);
-
-  useEffect(() => {
-    if (open) { setTab(defaultTab); }
+    if (open) setTab(defaultTab);
   }, [open, defaultTab]);
 
   const reset = () => {
-    setLoginEmail(""); setRegEmail("");
+    setLoginEmail("");
+    setRegEmail("");
+    setAuthError("");
     setTab(defaultTab);
   };
 
   const handleClose = () => {
-    if (forced) {
-      window.location.href = "/";
-      return;
-    }
-    reset(); onClose();
+    if (forced) { window.location.href = "/"; return; }
+    reset();
+    onClose();
   };
 
-  const handleLogin = async (email: string, password: string) => {
+  const executeLogin = async (email: string, password: string) => {
+    setLoginEmail(email);
     const result = await login(email, password);
-    handleClose();
-    // Only redirect if requested
-    if (redirectOnSuccess) {
-      router.push(result?.redirectTo ?? "/home");
-    }
+    if (result && redirectOnSuccess) router.push(result?.redirectTo ?? "/home");
   };
 
-  const handleRegister = async (name: string, email: string, password: string) => {
+  const executeRegister = async (name: string, email: string, password: string) => {
     setRegEmail(email);
     await register(name, email, password);
+    // Registration succeeded → OTP sent, move to verification
     setTab("verify");
   };
 
-  const handleVerify = async (email: string, otp: string) => {
-    await verifyOtp(email, otp);
-    handleClose();
-    // Only redirect if requested
-    if (redirectOnSuccess) {
-      router.push("/home");
-    }
-  };
-
-  const handleForgotPassword = async (email: string) => {
+  const executeForgotPassword = async (email: string) => {
     setLoginEmail(email);
     await forgotPassword(email);
     setTab("reset-password");
   };
 
-  const handleResetPassword = async (email: string, resetToken: string, newPassword: string) => {
+  const executeResetPassword = async (email: string, resetToken: string, newPassword: string) => {
     await resetPassword(email, resetToken, newPassword);
     setTab("login");
   };
 
-  if (!open) return null;
+  const executeVerify = async (email: string, otp: string) => {
+    await verifyOtp(email, otp);
+    if (redirectOnSuccess) router.replace("/home");
+    onClose();
+    reset();
+  };
+
+  // Memoised decorative orbs
+  const ModalBackground = useMemo(() => (
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: 20, zIndex: 0, pointerEvents: "none" }}>
+      <GlassOrb style={{
+        width: 280, height: 280, top: -80, left: -80,
+        background: "radial-gradient(circle, rgba(99,102,241,0.35) 0%, transparent 70%)",
+        animation: "float-orb-1 8s ease-in-out infinite",
+      }} />
+      <GlassOrb style={{
+        width: 220, height: 220, bottom: -50, right: -50,
+        background: "radial-gradient(circle, rgba(168,85,247,0.28) 0%, transparent 70%)",
+        animation: "float-orb-2 10s ease-in-out infinite",
+      }} />
+      <GlassOrb style={{
+        width: 150, height: 150, top: "40%", right: -30,
+        background: "radial-gradient(circle, rgba(236,72,153,0.15) 0%, transparent 70%)",
+        animation: "float-orb-3 12s ease-in-out infinite",
+      }} />
+    </div>
+  ), []);
 
   return (
-    <>
-      <style>{`
-                @keyframes float-orb-1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(20px,-30px) scale(1.1)} 66%{transform:translate(-15px,20px) scale(0.9)} }
-                @keyframes float-orb-2 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(-25px,20px) scale(1.05)} 66%{transform:translate(20px,-20px) scale(0.95)} }
-                @keyframes float-orb-3 { 0%,100%{transform:translate(0,0) scale(1.05)} 50%{transform:translate(15px,-25px) scale(0.9)} }
-                @keyframes modal-in { from{opacity:0;transform:scale(0.95) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
-                @keyframes overlay-in { from{opacity:0} to{opacity:1} }
-                @keyframes tab-slide { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-            `}</style>
-
-      {/* Backdrop */}
+    <Modal
+      open={open}
+      onCancel={handleClose}
+      footer={null}
+      closable={false}
+      styles={{ container: { padding: 0 } }}
+      centered
+    >
+      {/* Outer card — stops clicks bubbling to the mask */}
       <div
-        ref={overlayRef}
-        onClick={(e) => {
-          if (forced) return; // Prevent closing on background click if forced
-          if (e.target === overlayRef.current) handleClose();
-        }}
+        onClick={(e) => e.stopPropagation()}
         style={{
-          position: "fixed", inset: 0, zIndex: 9999,
-          display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem",
-          background: "rgba(0,0,0,0.65)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          animation: "overlay-in 0.2s ease",
+          position: "relative",
+          borderRadius: 20,
+          overflow: "hidden",
+          background: "linear-gradient(145deg, rgba(17,24,39,0.97) 0%, rgba(10,10,20,0.99) 100%)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.1)",
         }}
       >
-        {/* Card shell */}
-        <div style={{
-          position: "relative", width: "100%", maxWidth: 420,
-          borderRadius: 24, overflow: "hidden",
-          animation: "modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1)",
-        }}>
-          {/* Orb layer */}
-          <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: 24, zIndex: 0 }}>
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(145deg, #0f0a1e 0%, #170d2d 60%, #0a0a1a 100%)" }} />
-            <GlassOrb style={{ width: 260, height: 260, top: -60, left: -60, background: "radial-gradient(circle, rgba(99,102,241,0.5) 0%, transparent 70%)", animation: "float-orb-1 8s ease-in-out infinite" }} />
-            <GlassOrb style={{ width: 200, height: 200, bottom: -40, right: -40, background: "radial-gradient(circle, rgba(168,85,247,0.45) 0%, transparent 70%)", animation: "float-orb-2 10s ease-in-out infinite" }} />
-            <GlassOrb style={{ width: 180, height: 180, top: "50%", left: "60%", background: "radial-gradient(circle, rgba(236,72,153,0.3) 0%, transparent 70%)", animation: "float-orb-3 12s ease-in-out infinite" }} />
-            <GlassOrb style={{ width: 120, height: 120, bottom: "30%", left: "10%", background: "radial-gradient(circle, rgba(56,189,248,0.25) 0%, transparent 70%)", animation: "float-orb-1 15s ease-in-out infinite reverse" }} />
-          </div>
+        {ModalBackground}
 
-          {/* Iridescent border ring */}
-          <div style={{
-            position: "absolute", inset: 0, borderRadius: 24, padding: 1, zIndex: 1,
-            background: "linear-gradient(135deg, rgba(139,92,246,0.6) 0%, rgba(99,102,241,0.3) 25%, rgba(236,72,153,0.4) 50%, rgba(56,189,248,0.3) 75%, rgba(139,92,246,0.6) 100%)",
-            WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-            WebkitMaskComposite: "xor",
-            maskComposite: "exclude",
-          }} />
+        {/* Content */}
+        <div style={{ position: "relative", zIndex: 1, padding: "2rem 2.25rem" }}>
 
-          {/* Glass content */}
-          <div style={{
-            position: "relative", zIndex: 2,
-            backdropFilter: "blur(32px) saturate(180%)",
-            WebkitBackdropFilter: "blur(32px) saturate(180%)",
-            padding: "1.75rem",
-          }}>
-            {/* Modal header */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: 10,
-                  background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  boxShadow: "0 4px 12px rgba(99,102,241,0.4)",
-                }}>
-                  <BoltIcon style={{ width: 17, height: 17, color: "white" }} />
-                </div>
-                <span style={{ fontWeight: 800, fontSize: "1.05rem", color: "rgba(255,255,255,0.95)", letterSpacing: "-0.02em" }}>
-                  PageCraft
-                </span>
+          {/* ── Header ── */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.75rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                width: 34, height: 34, borderRadius: 10,
+                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 4px 14px rgba(99,102,241,0.5)",
+                flexShrink: 0,
+              }}>
+                <BoltIcon style={{ width: 16, height: 16, color: "#fff" }} />
               </div>
-              {!forced && (
-                <button onClick={handleClose} style={{
-                  width: 30, height: 30, borderRadius: 8,
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                  color: "rgba(255,255,255,0.45)", transition: "all 0.15s",
-                }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.12)"; (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.85)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)"; }}
-                >
-                  <XMarkIcon style={{ width: 15, height: 15 }} />
-                </button>
-              )}
+              <span style={{ fontWeight: 800, fontSize: "1.15rem", color: "#f9fafb", letterSpacing: "-0.02em" }}>
+                PageCraft
+              </span>
             </div>
 
-            {/* Login / Register */}
-            {(tab === "login" || tab === "register") && (
-              <>
-                {!forced && <TabSwitcher tab={tab} onChange={(t) => { setTab(t); }} />}
-                <div key={tab} style={{ animation: "tab-slide 0.2s ease" }}>
-                  {tab === "login" && (
-                    <LoginForm
-                      handleLogin={handleLogin} setTab={setTab} isLoading={isLoading} forced={forced}
-                    />
-                  )}
-                  {tab === "register" && (
-                    <RegisterForm
-                      handleRegister={handleRegister} setTab={setTab}
-                    />
-                  )}
-                </div>
-              </>
+            {!forced && (
+              <button
+                onClick={handleClose}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  width: 30, height: 30, borderRadius: 8, border: "none",
+                  background: "rgba(255,255,255,0.06)", cursor: "pointer",
+                  color: "rgba(255,255,255,0.4)", transition: "all 0.15s",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.12)";
+                  e.currentTarget.style.color = "rgba(255,255,255,0.8)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                  e.currentTarget.style.color = "rgba(255,255,255,0.4)";
+                }}
+              >
+                <XMarkIcon style={{ width: 15, height: 15 }} />
+              </button>
             )}
-
-            {/* Forgot Password */}
-            {tab === "forgot-password" && (
-              <ForgotPasswordForm
-                handleForgotPassword={handleForgotPassword} setTab={setTab}
-              />
-            )}
-
-            {/* Reset Password */}
-            {tab === "reset-password" && (
-              <ResetPasswordForm
-                loginEmail={loginEmail}
-                handleResetPassword={handleResetPassword} setTab={setTab}
-              />
-            )}
-
-            {/* Verify OTP */}
-            {tab === "verify" && (
-              <VerifyOtpForm
-                regEmail={regEmail}
-                handleVerify={handleVerify} setTab={setTab}
-              />
-            )}
-
           </div>
+
+          {/* ── Forms ── */}
+          {(tab === "login" || tab === "register") && (
+            <>
+              {!forced && <TabSwitcher tab={tab} onChange={setTab} />}
+              <div key={tab}>
+                {tab === "login" && (
+                  <LoginForm
+                    handleLogin={executeLogin}
+                    setTab={setTab}
+                    setRegEmail={setRegEmail}
+                    setAuthError={setAuthError}
+                    isLoading={isLoading}
+                    forced={forced}
+                  />
+                )}
+                {tab === "register" && (
+                  <RegisterForm handleRegister={executeRegister} setTab={setTab} isLoading={isLoading} />
+                )}
+              </div>
+            </>
+          )}
+
+          {tab === "forgot-password" && (
+            <ForgotPasswordForm handleForgotPassword={executeForgotPassword} setTab={setTab} isLoading={isLoading} />
+          )}
+
+          {tab === "reset-password" && (
+            <ResetPasswordForm loginEmail={loginEmail} handleResetPassword={executeResetPassword} setTab={setTab} isLoading={isLoading} />
+          )}
+
+          {tab === "verify" && (
+            <VerifyOtpForm regEmail={regEmail} handleVerify={executeVerify} setTab={setTab} isLoading={isLoading} error={authError} />
+          )}
         </div>
       </div>
-    </>
+    </Modal>
   );
 }

@@ -1,26 +1,29 @@
 import { Metadata } from 'next';
 import SitePageClient from './SitePageClient';
+import { request } from '@/lib/api/client';
 
-export const dynamic = "force-dynamic";
+/**
+ * Public Site Page (Server Component).
+ * Using granular 'cacheLife' and Next.js 15+ Cache Components.
+ */
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 async function getPageData(slug: string) {
-  const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3019/api';
   try {
-    const res = await fetch(`${API}/site-pages/${slug}`, { cache: 'no-store' });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.page;
+    const { data } = await request<{ page: any }>(`/site-pages/${slug}`, { 
+        next: { revalidate: 3600 } // Cache for 1 hour
+    });
+    return data.page || data;
   } catch (e) {
     return null;
   }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = params;
+  const { slug } = await params;
   const pageContent = await getPageData(slug);
   
   if (!pageContent) return { title: 'Page Not Found' };
@@ -39,6 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function Page({ params }: Props) {
-  const pageContent = await getPageData(params.slug);
+  const { slug } = await params;
+  const pageContent = await getPageData(slug);
   return <SitePageClient pageContent={pageContent} />;
 }

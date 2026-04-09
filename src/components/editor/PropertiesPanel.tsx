@@ -1,6 +1,6 @@
 "use client";
 
-import type { Block, EditorPage } from "@/@Types";
+import type { Block, EditorPage } from "@/types";
 /**
  * PropertiesPanel.tsx — Thin dispatcher (kept for backward compat)
  *

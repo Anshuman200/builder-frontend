@@ -1,196 +1,149 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bars3Icon, XMarkIcon, BoltIcon } from "@heroicons/react/24/outline";
+import {
+    Bars3Icon,
+    XMarkIcon,
+    BoltIcon,
+    UserIcon,
+    ArrowRightOnRectangleIcon,
+    HomeIcon,
+    UserCircleIcon
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { Avatar, Dropdown, Button, MenuProps } from "antd";
 
 interface HeaderProps {
-  onLoginClick?: () => void;
+    onLoginClick?: () => void;
 }
 
 export function Header({ onLoginClick }: HeaderProps) {
-  const { user } = useAuth();
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+    const { user, logout } = useAuth();
+    const [scrolled, setScrolled] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
-  return (
-    <>
-      {/* ── Outer wrapper to handle fixed position ── */}
-      <div className="fixed top-0 inset-x-0 z-100 flex justify-center p-4 md:p-6 transition-all duration-300">
+    const userMenuItems: MenuProps['items'] = [
+        {
+            key: 'dashboard',
+            label: <Link href={(user as any)?.role === 'admin' ? "/admin" : "/home"}>Dashboard</Link>,
+            icon: <HomeIcon className="w-4 h-4" />,
+        },
+        {
+            key: 'profile',
+            label: <Link href="/home/profile">Edit Profile</Link>,
+            icon: <UserCircleIcon className="w-4 h-4" />,
+        },
+        {
+            type: 'divider',
+        },
+        {
+            key: 'logout',
+            label: 'Log out',
+            icon: <ArrowRightOnRectangleIcon className="w-4 h-4" />,
+            danger: true,
+            onClick: () => logout(),
+        },
+    ];
 
-        {/* ── The "Pill" Header ── */}
-        <header
-          className={
-            "w-full max-w-5xl flex items-center justify-between gap-4 px-6 h-14 md:h-16 rounded-2xl md:rounded-full transition-all duration-500 ease-in-out border " +
-            (scrolled || mobileOpen
-              ? "bg-[#09090b]/80 backdrop-blur-2xl border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
-              : "bg-transparent border-transparent")
-          }
-        >
-          {/* Logo Section */}
-          <Link 
-            href={!user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home"}
-            className="group flex items-center gap-2 no-underline shrink-0"
-          >
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
-              style={{
-                background: "linear-gradient(135deg, #6366f1, #a855f7)",
-                boxShadow: "0 0 15px rgba(99,102,241,0.4)",
-              }}
+    return (
+        <div className="fixed top-0 inset-x-0 z-[100] flex justify-center p-4 md:p-6 transition-all duration-300">
+            <header
+                className={
+                    "w-full max-w-5xl flex items-center justify-between gap-4 px-6 h-14 md:h-16 rounded-2xl md:rounded-full transition-all duration-500 ease-in-out border " +
+                    (scrolled || mobileOpen
+                        ? "bg-[#09090b]/80 backdrop-blur-2xl border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+                        : "bg-transparent border-transparent")
+                }
             >
-              <BoltIcon style={{ width: 16, height: 16, color: "white" }} />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-white hidden sm:block">
-              PageCraft
-            </span>
-          </Link>
-
-          {/* Centre Nav Links */}
-          <nav className="hidden md:flex items-center gap-1">
-            <Link href="/explore" className="px-4 py-2 text-sm font-semibold text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all no-underline">
-              Templates
-            </Link>
-            <Link href="/explore/media" className="px-4 py-2 text-sm font-semibold text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all no-underline">
-              Media
-            </Link>
-          </nav>
-
-          {/* Right Section: Auth */}
-          <div className="flex items-center gap-2 md:gap-4">
-            {!user ? (
-              <>
-                <button
-                  onClick={onLoginClick}
-                  className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-white/60 hover:text-white transition-all"
-                >
-                  Log in
-                </button>
-
+                {/* Logo Section */}
                 <Link
-                  href="/editor"
-                  className="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-bold text-white! no-underline shadow-lg transition-all hover:scale-105 active:scale-95 bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500"
-                  style={{
-                    boxShadow: "0 4px 20px -5px rgba(99,102,241,0.6)",
-                  }}
+                    href={!user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home"}
+                    className="group flex items-center gap-2 no-underline shrink-0"
                 >
-                  Start Free
+                    <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                        style={{
+                            background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                            boxShadow: "0 0 15px rgba(99,102,241,0.4)",
+                        }}
+                    >
+                        <BoltIcon style={{ width: 16, height: 16, color: "white" }} />
+                    </div>
+                    <span className="text-lg font-bold tracking-tight text-white hidden sm:block">
+                        PageCraft
+                    </span>
                 </Link>
-              </>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Link
-                  href={(user as any).role === 'admin' ? "/admin" : "/home"}
-                  className="hidden sm:inline-flex px-5 py-2.5 rounded-full text-sm font-bold text-white! no-underline bg-white/10 hover:bg-white/20 transition-all"
-                >
-                  Dashboard
-                </Link>
-                
-                <Link
-                   href="/home/profile"
-                   className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 p-px cursor-pointer hover:scale-105 transition-transform overflow-hidden relative"
-                >
-                  <div className="w-full h-full rounded-full bg-neutral-950 flex items-center justify-center overflow-hidden">
-                    {(user as any)?.profilePic ? (
-                      <img 
-                        src={(user as any).profilePic} 
-                        alt="" 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-white font-black text-sm">{(user?.name || "U").charAt(0).toUpperCase()}</span>
-                    )}
-                  </div>
-                </Link>
-              </div>
-            )}
 
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setMobileOpen((o) => !o)}
-              className="flex md:hidden items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 transition-all"
-            >
-              {mobileOpen ? <XMarkIcon style={{ width: 18, height: 18 }} /> : <Bars3Icon style={{ width: 18, height: 18 }} />}
-            </button>
-          </div>
-        </header>
-      </div>
+                {/* Centre Nav Links */}
+                <nav className="hidden md:flex items-center gap-1">
+                    <Link href="/explore" className="px-4 py-2 text-sm font-semibold text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all no-underline">
+                        Templates
+                    </Link>
+                    <Link href="/explore/media" className="px-4 py-2 text-sm font-semibold text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all no-underline">
+                        Media
+                    </Link>
+                </nav>
 
-      {/* ── Mobile menu overlay ── */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-90 bg-black/60 backdrop-blur-md animate-fade-in md:hidden"
-          onClick={() => setMobileOpen(false)}
-        >
-          <div
-            className="absolute top-24 left-4 right-4 bg-[#09090b] border border-white/10 rounded-3xl p-6 flex flex-col gap-6 shadow-2xl animate-in fade-in zoom-in duration-300"
-            onClick={(e) => e.stopPropagation()}
-          >
+                {/* Right Section: Auth */}
+                <div className="flex items-center gap-2 md:gap-4">
+                    <Button type="text" onClick={onLoginClick} className="hidden sm:inline-flex text-white/60 hover:text-white">Log in</Button>
+                    <Button
+                        type="primary"
+                        shape="round"
+                        size="large"
+                        href="/editor"
+                        style={{
+                            background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                            border: 'none',
+                            fontWeight: 700,
+                            boxShadow: "0 4px 20px -5px rgba(99,102,241,0.6)",
+                        }}
+                    >
+                        Start Free
+                    </Button>
+                </div>
 
-            <div className="flex flex-col gap-3">
-              {/* Nav links — always shown regardless of auth state */}
-              <div className="flex flex-col gap-1 pb-2 border-b border-white/5">
-                <Link
-                  href="/explore"
-                  className="py-3 px-4 rounded-2xl text-left font-semibold text-white/70 hover:text-white hover:bg-white/5 transition-all no-underline"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  📐 Templates
-                </Link>
-                <Link
-                  href="/explore/media"
-                  className="py-3 px-4 rounded-2xl text-left font-semibold text-white/70 hover:text-white hover:bg-white/5 transition-all no-underline"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  🖼️ Media
-                </Link>
-              </div>
-
-              {!user ? (
-                <>
-                  <button
-                    onClick={() => { onLoginClick?.(); setMobileOpen(false); }}
-                    className="w-full py-4 rounded-2xl bg-white/5 text-white font-semibold hover:bg-white/10 transition-colors"
-                  >
-                    Log in
-                  </button>
-                  <Link
-                    href="/editor"
-                    className="w-full py-4 rounded-2xl text-center font-bold text-white! bg-linear-to-r from-indigo-600 to-violet-600"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Start Free
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href={(user as any).role === 'admin' ? "/admin" : "/home"}
-                    className="w-full py-4 rounded-2xl text-center font-bold text-white! bg-white/5 hover:bg-white/10"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Go to Dashboard
-                  </Link>
-                  <Link
-                    href="/home/profile"
-                    className="w-full py-4 rounded-2xl text-center font-bold text-white! bg-linear-to-r from-indigo-600 to-violet-600"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Edit Profile
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
+                {/* Mobile Menu Toggle */}
+                <div className="md:hidden">
+                    <Dropdown
+                        open={mobileOpen}
+                        onOpenChange={setMobileOpen}
+                        trigger={['click']}
+                        popupRender={() => (
+                            <div className="bg-[#09090b] border border-white/10 rounded-3xl p-4 flex flex-col gap-2 shadow-2xl mt-4 w-64 backdrop-blur-xl">
+                                <Link href="/explore" className="py-3 px-4 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-all no-underline">📐 Templates</Link>
+                                <Link href="/explore/media" className="py-3 px-4 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-all no-underline">🖼️ Media</Link>
+                                <div className="h-px bg-white/5 my-1" />
+                                {!user ? (
+                                    <>
+                                        <Button block onClick={() => { onLoginClick?.(); setMobileOpen(false); }} className="bg-white/5 text-white border-white/10">Log in</Button>
+                                        <Button block type="primary" href="/editor" style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none' }}>Start Free</Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Button block href={(user as any).role === 'admin' ? "/admin" : "/home"} className="bg-white/5 text-white border-white/10">Dashboard</Button>
+                                        <Button block type="primary" onClick={() => logout()} danger>Log out</Button>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                        placement="bottomRight"
+                    >
+                        <Button
+                            type="text"
+                            icon={mobileOpen ? <XMarkIcon className="w-5 h-5" /> : <Bars3Icon className="w-5 h-5" />}
+                            className="flex text-white/70 hover:text-white bg-white/5"
+                        />
+                    </Dropdown>
+                </div>
+            </header>
         </div>
-      )}
-    </>
-  );
+    );
 }

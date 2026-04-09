@@ -1,6 +1,6 @@
 // sections/contact.ts
 import { makeBlock } from "../config/blocks";
-import type { SectionTemplate } from "@/@Types";
+import type { SectionTemplate } from "@/types";
 
 // ─── Helper: build a frosted info card (container block) ────────────────────
 function infoCard(bgColor: string, iconName: string, iconColor: string, title: string, line1: string, line2: string) {

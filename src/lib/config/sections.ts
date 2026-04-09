@@ -1,4 +1,4 @@
-import type { Block, SectionTemplate } from "@/@Types";
+import type { Block, SectionTemplate } from "@/types";
 /**
  * sectionTemplates.ts
  *

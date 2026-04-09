@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { Carousel as AntCarousel } from "antd";
-import type { Block } from "@/@Types";
+import type { Block } from "@/types";
 import { PreviewContext, ChildBlockWrapper, type BlockProps } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 

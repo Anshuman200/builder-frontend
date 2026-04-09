@@ -1,4 +1,4 @@
-import type { EditorPage } from "@/@Types";
+import type { EditorPage } from "@/types";
 
 import { DEFAULT_THEME } from "@/stores/editorStore";
 import { slugify } from "@/lib/utils";
