@@ -70,9 +70,9 @@ export const contactSections: SectionTemplate[] = [
         align: "center", nameColor: "#111111", roleColor: "#00838f", descColor: "#4b5563",
         imageStyle: "circle", imageSize: "64px", imageRadius: "50%",
         members: [
-          { id: "ic1", name: "ABOUT CLUB", role: "🏃", description: "Running Guide\nWorkouts", image: "https://via.placeholder.com/64/00bcd4/ffffff?text=🏃", socials: {} },
-          { id: "ic2", name: "PHONE (LANDLINE)", role: "📞", description: "+ 912 3 567 8987\n+ 912 5 252 3336", image: "https://via.placeholder.com/64/00bcd4/ffffff?text=📞", socials: {} },
-          { id: "ic3", name: "OUR OFFICE LOCATION", role: "📍", description: "The Interior Design Studio\nThe Courtyard, Al Quoz 1, USA", image: "https://via.placeholder.com/64/00bcd4/ffffff?text=📍", socials: {} },
+          { id: "ic1", name: "ABOUT CLUB", role: "🏃", description: "Running Guide\nWorkouts", image: "", socials: {} },
+          { id: "ic2", name: "PHONE (LANDLINE)", role: "📞", description: "+ 912 3 567 8987\n+ 912 5 252 3336", image: "", socials: {} },
+          { id: "ic3", name: "OUR OFFICE LOCATION", role: "📍", description: "The Interior Design Studio\nThe Courtyard, Al Quoz 1, USA", image: "", socials: {} },
         ],
       });
       bottomSection.props.childBlocks = [infoTeam];

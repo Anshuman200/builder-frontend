@@ -64,8 +64,8 @@ export function TeamBlock({ block }: BlockProps) {
     const rawText = (p.textColor as string) || "#1e293b";
     const bgColor = isDark && LIGHT_BGS.includes(rawBg.toLowerCase()) ? "#09090b" : rawBg;
     const textColor = isDark && LIGHT_TEXTS.includes(rawText.toLowerCase()) ? "#fafafa" : rawText;
-    const title = (p.title as string) || "Meet Our Team";
-    const subtitle = (p.subtitle as string) || "The people behind the magic";
+    const title = typeof p.title === "string" ? p.title : "Meet Our Team";
+    const subtitle = typeof p.subtitle === "string" ? p.subtitle : "The people behind the magic";
     const align = (p.align as string) || "center";
     const layout = (p.layout as string) || "grid";
     const columns = Number(p.columns) || 3;
@@ -212,7 +212,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     alt={member.name} 
                                                     fill 
                                                     style={{ objectFit: "cover" }}
-                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
+                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
                                             </div>
                                         )}
@@ -283,7 +283,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     alt={member.name} 
                                                     fill 
                                                     style={{ objectFit: "cover" }}
-                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
+                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
                                             ) : (
                                                 <div style={{ width: "100%", height: "100%", background: isDark ? "#333" : "#e2e8f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem" }}>👤</div>
@@ -320,7 +320,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     alt={member.name} 
                                                     fill 
                                                     style={{ objectFit: "cover", objectPosition: iPosition }}
-                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
+                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
                                             </div>
                                         );
@@ -333,7 +333,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     alt={member.name} 
                                                     fill 
                                                     style={{ objectFit: "cover", objectPosition: iPosition }}
-                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
+                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
                                                 <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, ${(p.coverGradientBottom as string) || "#000000e6"} 0%, transparent 60%)` }} />
                                             </div>
