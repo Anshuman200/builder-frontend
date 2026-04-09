@@ -3,16 +3,20 @@ import type { NextRequest } from 'next/server';
 
 export default function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
- 
+
     const accessToken = request.cookies.get('access_token')?.value;
     const refreshToken = request.cookies.get('refresh_token')?.value;
-    
+
     // For admin check, we might want to check a 'hasAdmin' cookie if we had one,
     // but the backend uses the JWT role. For the middleware redirect, we'll
     // check a non-httpOnly 'user_role' cookie if we added one, otherwise 
     // we'll default to /home.
     const userRole = request.cookies.get('user_role')?.value;
     const hasSession = request.cookies.get('hasSession')?.value === 'true';
+
+    // DEBUG: Server-side cookie check
+    console.log(`[Middleware] ${pathname} - hasSession: ${hasSession}, userRole: ${userRole}, hasAccessToken: ${!!accessToken}`);
+
     const isAuthed = !!(accessToken || refreshToken || hasSession || userRole);
     const isAdmin = userRole === 'admin';
 
