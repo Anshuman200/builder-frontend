@@ -25,7 +25,7 @@ export default function middleware(request: NextRequest) {
     }
 
     // Redirect unauthenticated users away from protected routes
-    const protectedPaths = ['/admin', '/templates', '/media'];
+    const protectedPaths = ['/admin', '/home', '/templates', '/media', '/domains'];
     const isProtected = protectedPaths.some(p => pathname.startsWith(p));
 
     if (isProtected && !isAuthed) {
