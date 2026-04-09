@@ -24,10 +24,11 @@ export default function PublicLayout({
         // Redirection logic: Logged-in users should not access public routes
         if (!isLoading && user) {
             router.replace("/home");
+            return;
         }
 
         const authParam = searchParams?.get("auth");
-        if (authParam === "login" || authParam === "register") {
+        if ((authParam === "login" || authParam === "register") && !user) {
             window.dispatchEvent(new CustomEvent('show-auth-modal', { detail: { reason: authParam } }));
             // Clear the param from URL to prevent re-triggering
             const params = new URLSearchParams(searchParams.toString());
