@@ -60,7 +60,10 @@ export function AuthModal({
   const executeLogin = async (email: string, password: string) => {
     setLoginEmail(email);
     const result = await login(email, password);
-    if (result && redirectOnSuccess) router.push(result?.redirectTo ?? "/home");
+    if (result && redirectOnSuccess) {
+      router.push(result?.redirectTo ?? "/home");
+      onClose();
+    }
   };
 
   const executeRegister = async (name: string, email: string, password: string) => {
