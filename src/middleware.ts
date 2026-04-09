@@ -12,9 +12,8 @@ export default function middleware(request: NextRequest) {
     // check a non-httpOnly 'user_role' cookie if we added one, otherwise 
     // we'll default to /home.
     const userRole = request.cookies.get('user_role')?.value;
-    
     const hasSession = request.cookies.get('hasSession')?.value === 'true';
-    const isAuthed = !!(accessToken || refreshToken || hasSession);
+    const isAuthed = !!(accessToken || refreshToken || hasSession || userRole);
     const isAdmin = userRole === 'admin';
 
     // Redirect logged-in users away from the landing page
