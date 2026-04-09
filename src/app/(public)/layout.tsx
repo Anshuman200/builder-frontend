@@ -38,9 +38,9 @@ export default function PublicLayout({
         }
     }, [searchParams, user, isLoading, router]);
 
-    // Prevent flickering: Do not render public layout if loading or if user is already authenticated
-    if (isLoading || user) {
-        return null; // Or a high-end full-screen loader
+    // Prevent flickering while loading: Do not render public layout if isLoading
+    if (isLoading) {
+        return null; 
     }
 
     return (

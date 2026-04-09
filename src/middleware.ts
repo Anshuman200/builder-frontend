@@ -13,7 +13,8 @@ export default function middleware(request: NextRequest) {
     // we'll default to /home.
     const userRole = request.cookies.get('user_role')?.value;
     
-    const isAuthed = !!(accessToken || refreshToken);
+    const hasSession = request.cookies.get('hasSession')?.value === 'true';
+    const isAuthed = !!(accessToken || refreshToken || hasSession);
     const isAdmin = userRole === 'admin';
 
     // Redirect logged-in users away from the landing page
