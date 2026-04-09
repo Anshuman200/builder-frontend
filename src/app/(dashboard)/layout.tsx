@@ -51,7 +51,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { success, error: toastError } = useToasts();
   const router = useRouter();
   const pathname = usePathname();
@@ -62,7 +62,12 @@ export default function DashboardLayout({
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    // Client-side authentication guard
+    if (!authLoading && !user) {
+        router.push("/?auth=login");
+    }
+  }, [authLoading, user, router]);
 
   const handleCreate = useCallback(() => {
     setWizardOpen(true);
