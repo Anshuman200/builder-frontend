@@ -62,7 +62,7 @@ export function AuthModal({
     const result = await login(email, password);
     if (result && redirectOnSuccess) {
       const destination = result?.redirectTo ?? "/home";
-      window.location.href = destination;
+      router.replace(destination);
       onClose();
     }
   };

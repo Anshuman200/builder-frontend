@@ -3,6 +3,7 @@
 import { useCallback, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { getCookie } from "@/lib/utils";
 import { useCreatePage } from "@/lib/api/queries";
 import { useToasts } from "@/hooks/useToasts";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
@@ -64,7 +65,10 @@ export default function DashboardLayout({
     setMounted(true);
     
     // Client-side authentication guard
-    if (!authLoading && !user) {
+    // Only redirect if we are NOT loading, we have NO user, AND we don't even have a session cookie
+    // This prevents premature redirection during state transitions.
+    const hasSessionCookie = !!getCookie("hasSession");
+    if (!authLoading && !user && !hasSessionCookie) {
         router.push("/?auth=login");
     }
   }, [authLoading, user, router]);
