@@ -29,12 +29,14 @@ export default function middleware(request: NextRequest) {
     }
 
     // 2. Protect routes
-    const protectedPaths = ['/admin', '/home', '/templates', '/media', '/domains', '/editor'];
-    const isProtected = protectedPaths.some(
-        p => pathname === p || pathname.startsWith(`${p}/`)
+    // We check if the pathname starts with any of our dashboard base paths
+    const protectedBases = ['/admin', '/home', '/templates', '/media', '/domains', '/editor'];
+    const isProtected = protectedBases.some(base => 
+        pathname === base || pathname.startsWith(`${base}/`)
     );
 
     if (isProtected && !isAuthed) {
+        console.log(`[Middleware] Blocking access to ${pathname} - No valid session found. Redirecting to login.`);
         const url = request.nextUrl.clone();
         url.pathname = '/';
         url.searchParams.set('auth', 'login');
