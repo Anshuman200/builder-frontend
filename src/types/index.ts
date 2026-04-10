@@ -81,6 +81,8 @@ export interface EditorPage {
     isPublic?: boolean;
     isLocked?: boolean;
     category?: string;
+    visibility?: "PUBLIC" | "PRIVATE" | string;
+    password?: string;
 }
 
 // ─── BLOCKS & TEMPLATES ────────────────────────────────────────────────────────
