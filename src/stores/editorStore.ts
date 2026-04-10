@@ -4,20 +4,35 @@ import { immer } from "zustand/middleware/immer";
 import type { Block, BlockStyle, AnimationConfig, ThemeConfig, MetaConfig, EditorPage } from "@/types";
 
 // ─── Default Theme ───────────────────────────────────────────────────────────
+export const LIGHT_COLORS = {
+    primary: "#6366f1",
+    secondary: "#8b5cf6",
+    background: "#ffffff",
+    surface: "#f8fafc",
+    text: "#0f172a",
+    textMuted: "#64748b",
+    border: "#e2e8f0",
+    accent: "#f59e0b",
+    buttonText: "#ffffff",
+    overlay: "rgba(0,0,0,0.25)",
+};
+
+export const DARK_COLORS = {
+    primary: "#818cf8",
+    secondary: "#a78bfa",
+    background: "#020617",
+    surface: "#0f172a",
+    text: "#f8fafc",
+    textMuted: "#94a3b8",
+    border: "#1e293b",
+    accent: "#fbbf24",
+    buttonText: "#ffffff",
+    overlay: "rgba(0,0,0,0.45)",
+};
+
 export const DEFAULT_THEME: ThemeConfig = {
     mode: "light",
-    colors: {
-        primary: "#6366f1",
-        secondary: "#8b5cf6",
-        background: "#ffffff",
-        surface: "#f8fafc",
-        text: "#0f172a",
-        textMuted: "#64748b",
-        border: "#e2e8f0",
-        accent: "#f59e0b",
-        buttonText: "#ffffff",
-        overlay: "rgba(0,0,0,0.25)",
-    },
+    colors: LIGHT_COLORS,
     fonts: { heading: "Inter", body: "Inter" },
     borderRadius: "md",
     spacing: "normal",
@@ -280,7 +295,7 @@ function migrateBlockColors(blocks: Block[]): Block[] {
                 } else if (BG_PROPS.includes(key) && (hex === "#ffffff" || hex === "#fff" || hex === "#fafafa")) {
                     // For analytics cards specifically, white usually means surface
                     if (b.type === "stats" || b.type === "chart") p[key] = "var(--surface)";
-                    else p[key] = "var(--bg)";
+                    else p[key] = "var(--background)";
                     changed = true;
                 } else if (BG_PROPS.includes(key) && (hex === "#000000" || hex === "#09090b" || hex === "#111827" || hex === "#18181b" || hex === "#1a1a1a")) {
                     p[key] = "var(--surface)";
@@ -484,11 +499,25 @@ export const useEditorStore = create<EditorStore>()(
         updateTheme: (theme, commit) => {
             set((s) => {
                 if (!s.page) return;
+                
+                // Safety: Ensure theme object exists
+                if (!s.page.theme) {
+                  s.page.theme = JSON.parse(JSON.stringify(DEFAULT_THEME));
+                }
+                
                 const oldMode = s.page.theme.mode;
+                const newMode = theme.mode || oldMode;
+                
+                // Pivot colors if mode is changing
+                if (theme.mode && theme.mode !== oldMode) {
+                  const newColors = theme.mode === "dark" ? DARK_COLORS : LIGHT_COLORS;
+                  s.page.theme.colors = { ...s.page.theme.colors, ...newColors };
+                }
+
                 s.page.theme = { ...s.page.theme, ...theme };
                 
                 // If mode changed (e.g. Light -> Dark), automatically sync blocks
-                if (theme.mode && theme.mode !== oldMode) {
+                if (newMode !== oldMode) {
                     s.page.content = migrateBlockColors(s.page.content);
                 }
                 
@@ -575,7 +604,7 @@ export const useEditorStore = create<EditorStore>()(
             
             if (OLD_PRIMARY.includes(c.primary)) c.primary = "var(--primary)";
             if (OLD_SECONDARY.includes(c.secondary)) c.secondary = "var(--secondary)";
-            if (c.background === "#ffffff") c.background = "var(--bg)";
+            if (c.background === "#ffffff") c.background = "var(--background)";
             if (c.text === "#0f172a") c.text = "var(--text)";
 
             // Trigger history push

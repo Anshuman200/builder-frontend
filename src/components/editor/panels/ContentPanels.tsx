@@ -7,6 +7,9 @@ import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, 
 import { IconPicker } from "../IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
 import { useAuth } from "@/hooks/useAuth";
+import dynamic from "next/dynamic";
+
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 export function FeaturesPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
@@ -668,6 +671,122 @@ export function ChartPanel({ block }: { block: Block }) {
                 </div>
             </Section>
             <AnimationPanel block={block} />
+        </>
+    );
+}
+
+export function LegalPanel({ block }: { block: Block }) {
+    const { updateBlock } = useEditorStore();
+    const p = block.props;
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
+
+    const joditConfig = {
+        readonly: false,
+        theme: "dark",
+        height: 400,
+        placeholder: 'Start typing here...',
+        buttons: ['bold', 'italic', 'underline', 'strikethrough', 'ul', 'ol', 'font', 'fontsize', 'brush', 'image', 'table', 'link', 'align', 'undo', 'redo'],
+        style: { background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)' }
+    };
+
+    return (
+        <>
+            <Section title="Data Source">
+                <Field label="Content Mode">
+                    <SelectInput
+                        value={(p.mode as string) || "manual"}
+                        onChange={(v) => up("mode", v)}
+                        options={[
+                            { label: "Manual Editor", value: "manual" },
+                            { label: "API Webhook", value: "api" }
+                        ]}
+                    />
+                </Field>
+                {p.mode === "api" && (
+                    <>
+                        <Field label="API URL">
+                            <TextInput
+                                value={(p.apiUrl as string) || ""}
+                                onChange={(v) => up("apiUrl", v)}
+                                placeholder="https://api.example.com/legal/tos"
+                            />
+                        </Field>
+                        <Field label="Data Path">
+                            <TextInput
+                                value={(p.dataPath as string) || ""}
+                                onChange={(v) => up("dataPath", v)}
+                                placeholder="data.terms (leave empty for root)"
+                            />
+                        </Field>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>
+                            Enter the path to the text content in the API response. Example: <code>data.terms</code>
+                        </div>
+                    </>
+                )}
+            </Section>
+
+            {p.mode !== "api" && (
+                <Section title="Manual Content">
+                    <div style={{ marginBottom: 8, fontSize: 11, color: "var(--text-subtle)" }}>Edit your content using the rich text editor below:</div>
+                    <div className="jodit-dark-theme-override">
+                        <JoditEditor
+                            value={(p.content as string) || ""}
+                            config={joditConfig}
+                            onBlur={(newContent) => up("content", newContent, true)}
+                        />
+                    </div>
+                </Section>
+            )}
+
+            <Section title="Title Settings">
+                <ToggleInput label="Show Title" value={p.showTitle !== false} onChange={(v) => up("showTitle", v)} />
+                {p.showTitle !== false && (
+                    <>
+                        <Field label="Title Text">
+                            <TextInput value={(p.title as string) || ""} onChange={(v) => up("title", v)} placeholder="e.g. Terms of Service" />
+                        </Field>
+                        <Field label="Title Alignment">
+                            <SelectInput
+                                value={(p.titleAlign as string) || "left"}
+                                onChange={(v) => up("titleAlign", v)}
+                                options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]}
+                            />
+                        </Field>
+                        <Field label="Title Color">
+                            <ColorInput value={(p.titleColor as string) || "var(--text)"} onChange={(v) => up("titleColor", v)} onBlur={(v) => up("titleColor", v, true)} />
+                        </Field>
+                        <Field label="Title Weight">
+                            <SelectInput value={(p.titleFontWeight as string) || "700"} onChange={(v) => up("titleFontWeight", v)} options={[{ label: "Light (300)", value: "300" }, { label: "Regular (400)", value: "400" }, { label: "Medium (500)", value: "500" }, { label: "Semibold (600)", value: "600" }, { label: "Bold (700)", value: "700" }, { label: "Extrabold (800)", value: "800" }]} />
+                        </Field>
+
+                        <div style={{ marginTop: 12 }}>
+                            <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 8 }}>Font Size (Responsive)</p>
+                            <Field label="Desktop">
+                                <TextInput value={(p.titleFontSize as string) || "2rem"} onChange={(v) => up("titleFontSize", v)} placeholder="2rem" />
+                            </Field>
+                            <Field label="Tablet">
+                                <TextInput value={(p.titleTabletFontSize as string) || ""} onChange={(v) => up("titleTabletFontSize", v)} placeholder="1.75rem" />
+                            </Field>
+                            <Field label="Mobile">
+                                <TextInput value={(p.titleMobileFontSize as string) || ""} onChange={(v) => up("titleMobileFontSize", v)} placeholder="1.5rem" />
+                            </Field>
+                        </div>
+                    </>
+                )}
+            </Section>
+
+            <Section title="Section Styling">
+                <Field label="Background Color">
+                    <ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} />
+                </Field>
+                <Field label="Text Color">
+                    <ColorInput value={(p.textColor as string) || "var(--text)"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} />
+                </Field>
+                <Field label="Section Padding">
+                    <TextInput value={(p.padding as string) || "64px 24px"} onChange={(v) => up("padding", v)} placeholder="64px 24px" />
+                </Field>
+                <AnimationPanel block={block} />
+            </Section>
         </>
     );
 }

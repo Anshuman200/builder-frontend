@@ -15,11 +15,11 @@ import { useEditorStore } from "@/stores/editorStore";
 import { Popover } from "antd";
 
 // ─── Category display order ───────────────────────────────────────────────────
-const CATEGORY_ORDER = ["Navigation", "Hero", "Carousel", "Logos", "Team", "Gallery", "Features", "Stats", "Pricing", "Testimonial", "FAQ", "Contact", "CTA", "Footer"];
+const CATEGORY_ORDER = ["Navigation", "Hero", "Carousel", "Logos", "Team", "Gallery", "Features", "Stats", "Legal", "Pricing", "Testimonial", "FAQ", "Contact", "CTA", "Footer"];
 
 const CATEGORY_ICONS: Record<string, string> = {
   Navigation: "🧭", Hero: "⭐", Carousel: "🎠", Logos: "🏷️", Team: "👥",
-  Gallery: "🖼️", Features: "✨", Stats: "📊", Pricing: "💰",
+  Gallery: "🖼️", Features: "✨", Stats: "📊", Legal: "⚖️", Pricing: "💰",
   Testimonial: "💬", Contact: "📬", Footer: "📄", FAQ: "❓", CTA: "⚡",
 };
 

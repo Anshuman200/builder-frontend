@@ -35,7 +35,7 @@ export const statsSections: SectionTemplate[] = [
     category: "Stats",
     preview: `<div style="padding:16px;background:var(--bg);display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <div style="grid-column: span 2; font-size:10px; font-weight:900; margin-bottom:4px">By the numbers</div>
-      ${[1,2,3,4].map(() => `<div style="height:20px;background:var(--surface);border-radius:4px"></div>`).join("")}
+      ${[1, 2, 3, 4].map(() => `<div style="height:20px;background:var(--surface);border-radius:4px"></div>`).join("")}
     </div>`,
     create: () => {
       const parent = makeBlock("columns", {
@@ -44,7 +44,7 @@ export const statsSections: SectionTemplate[] = [
         leftWidth: "50",
       });
       parent.props.col0 = [
-        makeBlock("text", { content: "Let's build something great.", tag: "h2", fontSize: "4rem", bold: true }),
+        makeBlock("text", { content: "Let's build something great.", tag: "h2", fontSize: "4rem", bold: true, color: "#000" }),
         makeBlock("text", { content: "Enim sed faucibus turpis in eu mi bibendum neque egestas. Elit pellentesque habitant.", tag: "p", fontSize: "1.1rem", marginTop: "1.5rem", color: "var(--text-muted)" }),
       ];
       parent.props.col1 = [

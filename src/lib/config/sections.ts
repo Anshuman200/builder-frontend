@@ -27,6 +27,7 @@ export { faqSections } from "../sections/faq";
 export { statsSections } from "../sections/stats";
 export { carouselSections } from "../sections/carousel";
 export { ctaSections } from "../sections/cta";
+export { legalSections } from "../sections/legal";
 
 // ─── Combined array (ordered display) ────────────────────────────────────────
 
@@ -43,6 +44,7 @@ import { faqSections } from "../sections/faq";
 import { statsSections } from "../sections/stats";
 import { carouselSections } from "../sections/carousel";
 import { ctaSections } from "../sections/cta";
+import { legalSections } from "../sections/legal";
 
 export const SECTION_TEMPLATES: SectionTemplate[] = [
     ...navigationSections,
@@ -58,4 +60,5 @@ export const SECTION_TEMPLATES: SectionTemplate[] = [
     ...statsSections,
     ...carouselSections,
     ...ctaSections,
+    ...legalSections,
 ];
