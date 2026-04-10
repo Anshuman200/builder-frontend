@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Middleware to handle authentication and routing.
+ * Proxy to handle authentication and routing.
  * Checks for access_token and refresh_token in cookies.
  */
-export default function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Retrieve cookies
@@ -17,7 +17,7 @@ export default function middleware(request: NextRequest) {
     const isAdmin = userRole === 'admin';
 
     // Log authentication status for debugging in production
-    console.log(`[Middleware] ${pathname} - isAuthed: ${isAuthed}, hasAccessToken: ${!!accessToken}`);
+    console.log(`[Proxy] ${pathname} - isAuthed: ${isAuthed}, hasAccessToken: ${!!accessToken}`);
 
     // 1. Redirect logged-in users away from the landing page
     if (pathname === '/' && isAuthed) {
@@ -36,7 +36,7 @@ export default function middleware(request: NextRequest) {
     );
 
     if (isProtected && !isAuthed) {
-        console.log(`[Middleware] Blocking access to ${pathname} - No valid session found. Redirecting to login.`);
+        console.log(`[Proxy] Blocking access to ${pathname} - No valid session found. Redirecting to login.`);
         const url = request.nextUrl.clone();
         url.pathname = '/';
         url.searchParams.set('auth', 'login');

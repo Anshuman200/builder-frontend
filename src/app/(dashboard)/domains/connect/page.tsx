@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Steps, Input, Button, Alert, Progress, Typography, Space, message, Card, Select, Tag } from 'antd';
+import { Steps, Input, Button, Alert, Progress, Typography, Space, App, Card, Select, Tag } from 'antd';
 import {
     RocketOutlined,
     GlobalOutlined,
@@ -31,6 +31,7 @@ const DEPLOY_STEPS = [
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 function ConnectDomainContent() {
+    const { message } = App.useApp();
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user } = useAuth();

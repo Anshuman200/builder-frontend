@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { mediaApi, MediaRecord } from "./media";
-import { message } from "antd";
+import { App } from "antd";
 
 export const useMedia = (params?: Parameters<typeof mediaApi.list>[0]) => {
     return useQuery({
@@ -65,6 +65,7 @@ export const useUpdateMedia = () => {
 
 export const useDeleteMedia = () => {
     const queryClient = useQueryClient();
+    const { message } = App.useApp();
     return useMutation({
         mutationFn: (id: string) => mediaApi.delete(id),
         onSuccess: () => {
@@ -90,6 +91,7 @@ export const useMediaUsage = (id: string) => {
 
 export const useForkMedia = () => {
     const queryClient = useQueryClient();
+    const { message } = App.useApp();
     return useMutation({
         mutationFn: (id: string) => mediaApi.fork(id),
         onSuccess: () => {

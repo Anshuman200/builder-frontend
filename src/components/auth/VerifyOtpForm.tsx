@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Form, Input, Button, message } from "antd";
+import { Form, Input, Button, App } from "antd";
 import { FormHeading, GlassLink, INPUT_STYLE, LABEL_STYLE, BTN_STYLE } from "./AuthShared";
 import { useResendOtp } from "@/lib/api/queries";
 
 export function VerifyOtpForm({ regEmail, handleVerify, error, setTab, isLoading }: any) {
+  const { message } = App.useApp();
   const [globalError, setGlobalError] = useState(error);
   const [cooldown, setCooldown] = useState(0);
   const resendMut = useResendOtp();
