@@ -204,7 +204,7 @@ export default function EditorToolbar() {
 
   function openPreview() {
     if (!pageId) return;
-    const previewUrl = typeof window !== "undefined" ? `${window.location.origin}/preview/${pageId}` : `/preview/${pageId}`;
+    const previewUrl = typeof window !== "undefined" ? `${window.location.origin}/preview/${pageId}?capture=true` : `/preview/${pageId}?capture=true`;
 
     // Open immediately to avoid popup blockers
     const newWin = typeof window !== "undefined" ? window.open("about:blank", "_blank") : null;
@@ -571,7 +571,7 @@ export default function EditorToolbar() {
           open={showCapturePicker}
           onClose={() => setShowCapturePicker(false)}
           pageId={pageId}
-          previewUrl={typeof window !== 'undefined' ? `${window.location.origin}/preview/${pageId}` : `/preview/${pageId}`}
+          previewUrl={typeof window !== 'undefined' ? `${window.location.origin}/preview/${pageId}?capture=true` : `/preview/${pageId}?capture=true`}
           currentThumbnail={currentThumbnail}
           existingThumbnails={capturedThumbnails}
           onSelect={(url) => { setCurrentThumbnail(url); }}
@@ -597,7 +597,6 @@ export default function EditorToolbar() {
         placement="bottom"
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
-        height="85%"
         zIndex={100}
         styles={{
           body: { padding: 0, backgroundColor: 'var(--bg-secondary)' },
@@ -606,7 +605,8 @@ export default function EditorToolbar() {
             padding: '12px 24px',
             backgroundColor: 'var(--bg-secondary)'
           },
-          content: {
+          section: {
+            height: '85%',
             backgroundColor: 'var(--bg-secondary)',
             borderTop: '1px solid var(--border)',
             borderRadius: '24px 24px 0 0',

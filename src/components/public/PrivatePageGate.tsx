@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { LockClosedIcon, EyeIcon, EyeSlashIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { request } from "@/lib/api/client";
 
@@ -11,15 +12,18 @@ interface PrivatePageGateProps {
 }
 
 export default function PrivatePageGate({ pageId, isPrivate, children }: PrivatePageGateProps) {
-  const [verified, setVerified] = useState(false);
+  const searchParams = useSearchParams();
+  const isCaptureMode = searchParams.get("capture") === "true";
+
+  const [verified, setVerified] = useState(isCaptureMode);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!isPrivate) return;
-    
+    if (!isPrivate || isCaptureMode) return;
+
     // Check session storage for existing verification
     const sessionKey = `page-auth-${pageId}`;
     if (sessionStorage.getItem(sessionKey)) {
@@ -39,7 +43,7 @@ export default function PrivatePageGate({ pageId, isPrivate, children }: Private
         method: "POST",
         body: JSON.stringify({ password: password.trim() }),
       });
-      
+
       const sessionKey = `page-auth-${pageId}`;
       sessionStorage.setItem(sessionKey, "true");
       setVerified(true);
@@ -95,7 +99,7 @@ export default function PrivatePageGate({ pageId, isPrivate, children }: Private
                 placeholder="Enter password..."
                 className="flex-1 bg-transparent border-none outline-none py-3 px-4 text-white placeholder:text-white/20 font-bold"
               />
-              
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}

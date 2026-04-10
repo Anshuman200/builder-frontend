@@ -22,7 +22,7 @@ export { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, Bord
 // ─── Per-panel imports ────────────────────────────────────────────────────────
 import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPanel, VideoPanel, ColumnsPanel, WavePanel, CarouselPanel } from "./panels/BasicPanels";
 import { ButtonPanel, HeaderPanel, FooterPanel } from "./panels/LayoutPanels";
-import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel, AccordionPanel } from "./panels/ContentPanels";
+import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel, AccordionPanel, StatsPanel, ChartPanel } from "./panels/ContentPanels";
 
 // ─── Block finder utility ─────────────────────────────────────────────────────
 
@@ -81,6 +81,8 @@ export default function PropertiesPanel() {
             {selectedBlock.type === "accordion" && <AccordionPanel block={selectedBlock} />}
             {selectedBlock.type === "wave" && <WavePanel block={selectedBlock} />}
             {selectedBlock.type === "carousel" && <CarouselPanel block={selectedBlock} />}
+            {selectedBlock.type === "stats" && <StatsPanel block={selectedBlock} />}
+            {selectedBlock.type === "chart" && <ChartPanel block={selectedBlock} />}
 
             {/* Generic Section ID field for all blocks */}
             <Section title="Advanced">

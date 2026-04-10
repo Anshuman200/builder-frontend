@@ -95,7 +95,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
       bgColor: "var(--primary)",
       bgImage: "",
       bgOverlay: "var(--overlay)",
-      textColor: "#ffffff",
+      textColor: "var(--button-text)",
       minHeight: "480px",
       padding: "4rem 2rem",
       tabletPadding: "",
@@ -447,8 +447,8 @@ export const BLOCK_TYPES: BlockConfig[] = [
     label: "Footer",
     icon: "PanelBottom",
     defaultProps: {
-      bgColor: "#0f172a",
-      textColor: "#f8fafc",
+      bgColor: "var(--surface)",
+      textColor: "var(--text)",
       padding: "48px 32px",
       tabletPadding: "32px 24px",
       mobilePadding: "24px 16px",
@@ -503,10 +503,10 @@ export const BLOCK_TYPES: BlockConfig[] = [
       bgColor: "var(--surface)",
       padding: "3rem 2rem",
       borderRadius: "20px",
-      inputBg: "#f8fafc",
-      inputBorderColor: "#e2e8f0",
+      inputBg: "var(--bg)",
+      inputBorderColor: "var(--border)",
       inputFocusBorderColor: "var(--primary)",
-      labelColor: "#374151",
+      labelColor: "var(--text)",
       inputTextColor: "var(--text)",
       titleText: "",
       subtitleText: "",
@@ -558,16 +558,16 @@ export const BLOCK_TYPES: BlockConfig[] = [
       mobilePadding: "12px",
       bgColor: "transparent",
       childBlocks: [
-        { 
-          id: "slide-1", 
-          type: "container", 
-          props: { 
-            padding: "40px 24px", 
-            bgColor: "rgba(255,255,255,0.03)", 
-            borderRadius: "12px", 
-            maxWidth: "100%", 
-            contentAlign: "center", 
-            contentJustify: "center", 
+        {
+          id: "slide-1",
+          type: "container",
+          props: {
+            padding: "40px 24px",
+            bgColor: "rgba(255,255,255,0.03)",
+            borderRadius: "12px",
+            maxWidth: "100%",
+            contentAlign: "center",
+            contentJustify: "center",
             childBlocks: [
               {
                 id: "slide-1-cols",
@@ -584,19 +584,19 @@ export const BLOCK_TYPES: BlockConfig[] = [
                   ]
                 }
               }
-            ] 
-          } 
+            ]
+          }
         },
-        { 
-          id: "slide-2", 
-          type: "container", 
-          props: { 
-            padding: "40px 24px", 
-            bgColor: "rgba(255,255,255,0.03)", 
-            borderRadius: "12px", 
-            maxWidth: "100%", 
-            contentAlign: "center", 
-            contentJustify: "center", 
+        {
+          id: "slide-2",
+          type: "container",
+          props: {
+            padding: "40px 24px",
+            bgColor: "rgba(255,255,255,0.03)",
+            borderRadius: "12px",
+            maxWidth: "100%",
+            contentAlign: "center",
+            contentJustify: "center",
             childBlocks: [
               {
                 id: "slide-2-cols",
@@ -613,8 +613,8 @@ export const BLOCK_TYPES: BlockConfig[] = [
                   ]
                 }
               }
-            ] 
-          } 
+            ]
+          }
         },
       ],
       autoplay: true,
@@ -654,7 +654,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
       animated: false,
       padding: "24px",
       childBlocks: [],
-      
+
       // Animation
       animationType: DEFAULT_CONFIG.animation.type,
       animationDuration: DEFAULT_CONFIG.animation.duration,
@@ -676,6 +676,78 @@ export const BLOCK_TYPES: BlockConfig[] = [
 
       // Animation
       animationPlayback: DEFAULT_CONFIG.animation.playback,
+    },
+  },
+  {
+    type: "stats",
+    label: "Stats & KPIs",
+    icon: "ChartBar",
+    defaultProps: {
+      layout: "kpi", // grid | strip | kpi
+      columns: 4,
+      gap: "2rem",
+      padding: "4rem 2rem",
+      bgColor: "transparent",
+      textColor: "var(--text)",
+      accentColor: "var(--primary)",
+
+      // Card Styling
+      cardStyle: "card", // none | card | glass | flat
+      cardBg: "var(--surface)",
+      cardRadius: "1.5rem",
+      cardPadding: "1.5rem",
+
+      items: [
+        { id: "1", value: "24.5K", label: "Active Revenue", unit: "$", icon: "Banknotes", trend: "up", trendValue: "12%", description: "Total earnings from subscriptions" },
+        { id: "2", value: "8.2M", label: "Global Reach", unit: "", icon: "GlobeAlt", trend: "up", trendValue: "5.4%", description: "Monthly active users across regions" },
+        { id: "3", value: "99.9%", label: "Uptime SLA", unit: "", icon: "ShieldCheck", trend: "none", trendValue: "", description: "System reliability and performance" },
+        { id: "4", value: "1.2K", label: "New Signups", unit: "", icon: "UserPlus", trend: "up", trendValue: "18%", description: "Acquisition growth in past 30 days" },
+      ],
+
+      // Animation
+      animationType: "fade",
+      animationDuration: 0.6,
+      animationDelay: 0,
+      animationPlayback: "once",
+    },
+  },
+  {
+    type: "chart",
+    label: "Data Chart",
+    icon: "ChartPie",
+    defaultProps: {
+      chartType: "area", // area | bar | line | pie | donut
+      title: "Performance Monitor",
+      subtitle: "Last 30 days activity",
+      height: "300px",
+      padding: "2rem",
+      bgColor: "var(--surface)",
+      borderRadius: "1.5rem",
+
+      // Data
+      data: [
+        { name: "Mon", value: 400 },
+        { name: "Tue", value: 300 },
+        { name: "Wed", value: 600 },
+        { name: "Thu", value: 800 },
+        { name: "Fri", value: 500 },
+        { name: "Sat", value: 900 },
+        { name: "Sun", value: 700 },
+      ],
+
+      // Styling
+      color: "var(--primary)",
+      secondaryColor: "var(--secondary)",
+      textColor: "var(--text)",
+      showGrid: true,
+      showXAxis: true,
+      showYAxis: true,
+      showTooltip: true,
+      showLegend: false,
+      curve: "smooth", // smooth | step | linear
+
+      // Animation
+      animationDuration: 1000,
     },
   },
   {

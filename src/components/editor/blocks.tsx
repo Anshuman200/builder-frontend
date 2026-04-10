@@ -52,6 +52,8 @@ import { CarouselBlock } from "./blocks/CarouselBlock";
 import { WaveBlock } from "./blocks/WaveBlock";
 import { MasonryBlock } from "./blocks/MasonryBlock";
 import { MediaPickerBlock } from "./blocks/MediaPickerBlock";
+import { StatsBlock } from "./blocks/StatsBlock";
+import { ChartBlock } from "./blocks/ChartBlock";
  
 // ─── Block Renderer dispatch ──────────────────────────────────────────────────
  
@@ -77,6 +79,8 @@ export function BlockRenderer({ block }: { block: Block }) {
     case "wave": return <WaveBlock block={block} />;
     case "masonry": return <MasonryBlock block={block} />;
     case "media-picker": return <MediaPickerBlock block={block} />;
+    case "stats": return <StatsBlock block={block} />;
+    case "chart": return <ChartBlock block={block} />;
     case "footer":
     case "footer-2": return <FooterBlock block={block} />;
     default: return (

@@ -231,33 +231,92 @@ function insertBlockDeep(
  * Recursively migrates hardcoded old default hex colors to CSS variables.
  */
 function migrateBlockColors(blocks: Block[]): Block[] {
-    const OLD_PRIMARY = ["#6366f1", "#6366F1"];
-    const OLD_SECONDARY = ["#8b5cf6", "#8b5cf6"];
-    const OLD_BUTTON_TEXT = ["#ffffff", "#FFFFFF", "#fff", "#FFF"];
-    const OLD_OVERLAY = ["rgba(0,0,0,0.25)"];
+    const COLOR_MAP: Record<string, string> = {
+        // Pure Darks
+        "#000000": "var(--text)",
+        "#020617": "var(--bg)",
+        "#09090b": "var(--bg)",
+        "#0f172a": "var(--primary)",
+        "#11181f": "var(--surface)",
+        "#111827": "var(--surface)",
+        "#18181b": "var(--surface)",
+        "#1a1a1a": "var(--surface)",
+        "#1e293b": "var(--surface)",
+        // Pure Lights
+        "#ffffff": "var(--bg)",
+        "#fafafa": "var(--bg)",
+        "#f8fafc": "var(--surface)",
+        "#f1f5f9": "var(--surface)",
+        "#e2e8f0": "var(--border)",
+        "#cbd5e1": "var(--border-strong)",
+        // Brand Indigo/Violet
+        "#6366f1": "var(--primary)",
+        "#818cf8": "var(--primary)",
+        "#8b5cf6": "var(--secondary)",
+        "#f59e0b": "var(--accent)",
+    };
+
+    const TEXT_PROPS = ["textColor", "color", "labelColor", "titleColor", "subtitleColor", "descColor", "nameColor", "roleColor", "ctaTextColor", "buttonTextColor", "inputTextColor"];
+    const BG_PROPS = ["bgColor", "cardBg", "itemBg", "itemBgColor", "inputBg", "ctaBgColor", "buttonBg", "fillColor"];
+    const ACCENT_PROPS = ["accentColor", "secondaryColor", "iconColor", "bulletColor"];
+    const BORDER_PROPS = ["borderColor", "itemBorderColor", "inputBorderColor"];
 
     return blocks.map(b => {
         const p = { ...b.props };
         let changed = false;
 
-        // Traverse props for color fields
         Object.keys(p).forEach(key => {
             const val = p[key];
             if (typeof val === 'string') {
-                if (OLD_PRIMARY.includes(val)) { p[key] = "var(--primary)"; changed = true; }
-                else if (OLD_SECONDARY.includes(val)) { p[key] = "var(--secondary)"; changed = true; }
-                else if (OLD_OVERLAY.includes(val)) { p[key] = "var(--overlay)"; changed = true; }
-                // For button text, we only replace it if it's explicitly white, 
-                // but we should be careful not to break other white text.
-                // In our templates, ctaTextColor/buttonTextColor use these.
-                else if ((key.toLowerCase().includes('text') || key.toLowerCase().includes('button')) && OLD_BUTTON_TEXT.includes(val)) {
-                    p[key] = "var(--button-text)"; changed = true;
+                const hex = val.toLowerCase();
+                
+                // Specific mapping based on property type
+                if (TEXT_PROPS.includes(key) && (hex === "#ffffff" || hex === "#fff" || hex === "#f8fafc" || hex === "#fafafa")) {
+                    p[key] = "var(--text)";
+                    changed = true;
+                } else if (TEXT_PROPS.includes(key) && (hex === "#000000" || hex === "#000" || hex === "#09090b")) {
+                    p[key] = "var(--text)";
+                    changed = true;
+                } else if (BG_PROPS.includes(key) && (hex === "#ffffff" || hex === "#fff" || hex === "#fafafa")) {
+                    // For analytics cards specifically, white usually means surface
+                    if (b.type === "stats" || b.type === "chart") p[key] = "var(--surface)";
+                    else p[key] = "var(--bg)";
+                    changed = true;
+                } else if (BG_PROPS.includes(key) && (hex === "#000000" || hex === "#09090b" || hex === "#111827" || hex === "#18181b" || hex === "#1a1a1a")) {
+                    p[key] = "var(--surface)";
+                    changed = true;
+                } else if (ACCENT_PROPS.includes(key) && (hex === "#6366f1" || hex === "#8b5cf6" || hex === "#818cf8")) {
+                    p[key] = (hex === "#6366f1" || hex === "#818cf8") ? "var(--primary)" : "var(--secondary)";
+                    changed = true;
+                } else if (BORDER_PROPS.includes(key) && (hex === "#e2e8f0" || hex === "#cbd5e1" || hex === "#e5e7eb" || hex === "#27272a")) {
+                    p[key] = "var(--border)";
+                    changed = true;
+                } else if (COLOR_MAP[hex]) {
+                    p[key] = COLOR_MAP[hex];
+                    changed = true;
                 }
             }
-            // Recurse into array props (cols)
-            if (Array.isArray(val) && val.length > 0 && (val[0] as any)?.id) {
-                const migratedArr = migrateBlockColors(val as Block[]);
-                if (migratedArr !== val) { p[key] = migratedArr; changed = true; }
+            // Recurse into array props (cols, items, features, members)
+            if (Array.isArray(val) && val.length > 0) {
+                if ((val[0] as any)?.id && typeof (val[0] as any)?.type === "string") {
+                    // Array of blocks
+                    const migratedArr = migrateBlockColors(val as Block[]);
+                    if (migratedArr !== val) { p[key] = migratedArr; changed = true; }
+                } else if (typeof val[0] === 'object') {
+                    // Array of items (like stats items or features)
+                    let itemsChanged = false;
+                    const migratedItems = val.map(item => {
+                        const newItem = { ...item };
+                        Object.keys(newItem).forEach(k => {
+                            if (typeof newItem[k] === 'string' && COLOR_MAP[newItem[k].toLowerCase()]) {
+                                newItem[k] = COLOR_MAP[newItem[k].toLowerCase()];
+                                itemsChanged = true;
+                            }
+                        });
+                        return newItem;
+                    });
+                    if (itemsChanged) { p[key] = migratedItems; changed = true; }
+                }
             }
         });
 
@@ -331,7 +390,19 @@ export const useEditorStore = create<EditorStore>()(
                         children: [...(b.children ?? []), block],
                     }));
                 } else {
-                    s.page.content.push(block);
+                    if (block.type === "header") {
+                        s.page.content.unshift(block);
+                    } else if (block.type === "footer") {
+                        s.page.content.push(block);
+                    } else {
+                        // Insert before footer if it exists, otherwise push
+                        const footerIdx = s.page.content.findIndex(b => b.type === "footer");
+                        if (footerIdx !== -1) {
+                            s.page.content.splice(footerIdx, 0, block);
+                        } else {
+                            s.page.content.push(block);
+                        }
+                    }
                 }
                 s.isDirty = true;
             });
@@ -374,21 +445,36 @@ export const useEditorStore = create<EditorStore>()(
             set((s) => {
                 if (!s.page) return;
 
-                // 1. Remove the block from wherever it is in the tree
                 const { newBlocks: afterRemove, removed } = findAndRemoveBlock(s.page.content, activeId);
-                if (!removed) return; // Block not found
+                if (!removed) return;
 
-                // 2. Insert it at the target
-                if (overId === "canvas-root") {
-                    // special case: moving back to root at the end
+                // Enforce positioning
+                if (removed.type === "header") {
+                    s.page.content = [removed, ...afterRemove];
+                } else if (removed.type === "footer") {
                     s.page.content = [...afterRemove, removed];
                 } else {
-                    const { newBlocks: afterInsert, inserted } = insertBlockDeep(afterRemove, removed, overId, position, childProp);
-                    if (inserted) {
-                        s.page.content = afterInsert;
+                    if (overId === "canvas-root") {
+                        // Insert before footer if exist
+                        const fIdx = afterRemove.findIndex(b => b.type === "footer");
+                        if (fIdx !== -1) {
+                            const updated = [...afterRemove];
+                            updated.splice(fIdx, 0, removed);
+                            s.page.content = updated;
+                        } else {
+                            s.page.content = [...afterRemove, removed];
+                        }
                     } else {
-                        // fallback if failed (e.g., targetId not found)
-                        s.page.content = [...afterRemove, removed];
+                        // Prevent moving generic blocks ABOVE header or BELOW footer at root level
+                        const targetBlock = afterRemove.find(b => b.id === overId);
+                        if (targetBlock?.type === "header" && position === "before") {
+                            s.page.content = [targetBlock, removed, ...afterRemove.filter(b => b.id !== overId)];
+                        } else if (targetBlock?.type === "footer" && position === "after") {
+                            s.page.content = [...afterRemove.filter(b => b.id !== overId), removed, targetBlock];
+                        } else {
+                            const { newBlocks: afterInsert, inserted } = insertBlockDeep(afterRemove, removed, overId, position, childProp);
+                            s.page.content = inserted ? afterInsert : [...afterRemove, removed];
+                        }
                     }
                 }
 
@@ -398,7 +484,14 @@ export const useEditorStore = create<EditorStore>()(
         updateTheme: (theme, commit) => {
             set((s) => {
                 if (!s.page) return;
+                const oldMode = s.page.theme.mode;
                 s.page.theme = { ...s.page.theme, ...theme };
+                
+                // If mode changed (e.g. Light -> Dark), automatically sync blocks
+                if (theme.mode && theme.mode !== oldMode) {
+                    s.page.content = migrateBlockColors(s.page.content);
+                }
+                
                 s.isDirty = true;
             });
             if (commit) get().pushHistory();
@@ -471,13 +564,26 @@ export const useEditorStore = create<EditorStore>()(
 
         migrateThemeColors: () => set((s) => {
             if (!s.page) return;
+            
+            // 1. Migrate Blocks
             s.page.content = migrateBlockColors(s.page.content);
-            const get = (s as any).get; // zustand type workaround if needed, but immer 's' is the state
+
+            // 2. Migrate Theme Colors (if any are hardcoded to old values)
+            const c = s.page.theme.colors;
+            const OLD_PRIMARY = ["#6366f1", "#6366F1"];
+            const OLD_SECONDARY = ["#8b5cf6", "#8B5CF6"];
+            
+            if (OLD_PRIMARY.includes(c.primary)) c.primary = "var(--primary)";
+            if (OLD_SECONDARY.includes(c.secondary)) c.secondary = "var(--secondary)";
+            if (c.background === "#ffffff") c.background = "var(--bg)";
+            if (c.text === "#0f172a") c.text = "var(--text)";
+
             // Trigger history push
             const snapshot = JSON.parse(JSON.stringify(s.page));
             s.history = s.history.slice(0, s.historyIndex + 1);
             s.history.push(snapshot);
             s.historyIndex++;
+            s.isDirty = true;
         }),
     }))
 );

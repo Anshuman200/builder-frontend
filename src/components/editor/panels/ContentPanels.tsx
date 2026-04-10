@@ -3,7 +3,7 @@ import type { Block, EditorPage } from "@/types";
 import React from "react";
 import { useEditorStore, DEFAULT_THEME } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel } from "./shared";
+import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel, PANEL_COLORS } from "./shared";
 import { IconPicker } from "../IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
 import { useAuth } from "@/hooks/useAuth";
@@ -67,14 +67,14 @@ export function FeaturesPanel({ block }: { block: Block }) {
                             <textarea value={feature.description} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], description: e.target.value }; up("features", nF); }} placeholder="Feature Description" rows={2} style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)", resize: "vertical" }} />
                             <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
                                 <div style={{ flex: 1 }}>
-                                    <SelectInput 
-                                        value={feature.iconType || "icon"} 
-                                        onChange={(v) => { 
-                                            const nF = [...((p.features as any[]) || [])]; 
-                                            nF[idx] = { ...nF[idx], iconType: v }; 
-                                            up("features", nF); 
-                                        }} 
-                                        options={[{ label: "Icon", value: "icon" }, { label: "Image", value: "image" }]} 
+                                    <SelectInput
+                                        value={feature.iconType || "icon"}
+                                        onChange={(v) => {
+                                            const nF = [...((p.features as any[]) || [])];
+                                            nF[idx] = { ...nF[idx], iconType: v };
+                                            up("features", nF);
+                                        }}
+                                        options={[{ label: "Icon", value: "icon" }, { label: "Image", value: "image" }]}
                                     />
                                 </div>
                                 <div style={{ flex: 2 }}>
@@ -275,43 +275,43 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
             <Section title="Global Theme">
                 <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Synchronize colors across all components.</div>
                 <Field label="Primary Color">
-                    <ColorInput 
-                        value={c.primary} 
-                        onChange={(v) => updateTheme({ colors: { ...c, primary: v } })} 
-                        onBlur={(v) => { updateTheme({ colors: { ...c, primary: v } }, true); useEditorStore.getState().migrateThemeColors(); }} 
+                    <ColorInput
+                        value={c.primary}
+                        onChange={(v) => updateTheme({ colors: { ...c, primary: v } })}
+                        onBlur={(v) => { updateTheme({ colors: { ...c, primary: v } }, true); useEditorStore.getState().migrateThemeColors(); }}
                     />
                 </Field>
                 <Field label="Secondary Color">
-                    <ColorInput 
-                        value={c.secondary} 
-                        onChange={(v) => updateTheme({ colors: { ...c, secondary: v } })} 
-                        onBlur={(v) => updateTheme({ colors: { ...c, secondary: v } }, true)} 
+                    <ColorInput
+                        value={c.secondary}
+                        onChange={(v) => updateTheme({ colors: { ...c, secondary: v } })}
+                        onBlur={(v) => updateTheme({ colors: { ...c, secondary: v } }, true)}
                     />
                 </Field>
                 <Field label="Button Text">
-                    <ColorInput 
-                        value={c.buttonText || "#ffffff"} 
-                        onChange={(v) => updateTheme({ colors: { ...c, buttonText: v } })} 
-                        onBlur={(v) => updateTheme({ colors: { ...c, buttonText: v } }, true)} 
+                    <ColorInput
+                        value={c.buttonText || "#ffffff"}
+                        onChange={(v) => updateTheme({ colors: { ...c, buttonText: v } })}
+                        onBlur={(v) => updateTheme({ colors: { ...c, buttonText: v } }, true)}
                     />
                 </Field>
                 <Field label="Overlay Tint">
-                    <ColorInput 
-                        value={c.overlay || "rgba(0,0,0,0.25)"} 
-                        onChange={(v) => updateTheme({ colors: { ...c, overlay: v } })} 
-                        onBlur={(v) => updateTheme({ colors: { ...c, overlay: v } }, true)} 
+                    <ColorInput
+                        value={c.overlay || "rgba(0,0,0,0.25)"}
+                        onChange={(v) => updateTheme({ colors: { ...c, overlay: v } })}
+                        onBlur={(v) => updateTheme({ colors: { ...c, overlay: v } }, true)}
                     />
                 </Field>
-                <button 
-                  onClick={() => useEditorStore.getState().migrateThemeColors()}
-                  style={{ marginTop: 8, padding: "4px 8px", fontSize: 10, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 4, cursor: "pointer", color: "var(--text)" }}
+                <button
+                    onClick={() => useEditorStore.getState().migrateThemeColors()}
+                    style={{ marginTop: 8, padding: "4px 8px", fontSize: 10, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 4, cursor: "pointer", color: "var(--text)" }}
                 >
-                  Sync all components now
+                    Sync all components now
                 </button>
             </Section>
             <Section title="Visibility & Access">
                 <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 12, lineHeight: 1.4 }}>Control who can view or use your page.</div>
-                
+
                 <Field label="Page Visibility">
                     <SelectInput
                         value={page.visibility || "PUBLIC"}
@@ -325,21 +325,21 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
 
                 {page.visibility === "PRIVATE" && (
                     <Field label="Page Password">
-                        <TextInput 
-                            value={page.password || ""} 
-                            onChange={(v) => upP("password", v)} 
-                            placeholder="Set access password" 
+                        <TextInput
+                            value={page.password || ""}
+                            onChange={(v) => upP("password", v)}
+                            placeholder="Set access password"
                             type="password"
                         />
                     </Field>
                 )}
 
                 <div style={{ margin: "16px 0", height: 1, background: "var(--border)" }} />
-                
-                <ToggleInput 
-                    value={!!page.isPublic} 
-                    onChange={(v) => { upP("isPublic", v); if (v) upP("isTemplate", true); }} 
-                    label="Public Template" 
+
+                <ToggleInput
+                    value={!!page.isPublic}
+                    onChange={(v) => { upP("isPublic", v); if (v) upP("isTemplate", true); }}
+                    label="Public Template"
                 />
                 <div style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 4, paddingLeft: 28 }}>
                     Allows others to clone this design as a template.
@@ -537,3 +537,137 @@ export function AccordionPanel({ block }: { block: Block }) {
     );
 }
 
+export function StatsPanel({ block }: { block: Block }) {
+    const { updateBlock } = useEditorStore();
+    const p = block.props;
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
+
+    return (
+        <>
+            <Section title="Layout & Style">
+                <Field label="Layout"><SelectInput value={(p.layout as string) || "grid"} onChange={(v) => up("layout", v)} options={[{ label: "Grid", value: "grid" }, { label: "Strip", value: "strip" }, { label: "KPI Cards", value: "kpi" }]} /></Field>
+                <Field label="Columns"><SelectInput value={String(p.columns || "4")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>
+                <Field label="Background"><ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} /></Field>
+                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "var(--text)"} onChange={(v) => up("textColor", v)} /></Field>
+                <Field label="Accent Color"><ColorInput value={(p.accentColor as string) || "var(--primary)"} onChange={(v) => up("accentColor", v)} /></Field>
+            </Section>
+
+            <Section title="Card Styling">
+                <Field label="Style"><SelectInput value={(p.cardStyle as string) || "none"} onChange={(v) => up("cardStyle", v)} options={[{ label: "None", value: "none" }, { label: "Solid Card", value: "card" }, { label: "Glassmorphism", value: "glass" }, { label: "Flat / Ghost", value: "flat" }]} /></Field>
+                {p.cardStyle !== "none" && (
+                    <>
+                        <Field label="Card Background"><ColorInput value={(p.cardBg as string) || "var(--surface)"} onChange={(v) => up("cardBg", v)} /></Field>
+                        <Field label="Corner Radius"><BorderRadiusInput value={(p.cardRadius as string) || "1.5rem"} onChange={(v) => up("cardRadius", v)} /></Field>
+                    </>
+                )}
+            </Section>
+
+            <Section title="Metric Items">
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {((p.items as any[]) || []).map((item, idx) => (
+                        <div key={item.id || idx} style={{ padding: 10, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                                <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)" }}>Metric {idx + 1}</span>
+                                <button onClick={() => { const nI = [...((p.items as any[]) || [])]; nI.splice(idx, 1); up("items", nI); }} style={{ background: "transparent", border: "none", color: "var(--error, red)", cursor: "pointer" }}>&times;</button>
+                            </div>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                                <TextInput value={item.value} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], value: v }; up("items", nI); }} placeholder="420%" />
+                                <TextInput value={item.unit} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], unit: v }; up("items", nI); }} placeholder="Unit (e.g. %)" />
+                            </div>
+                            <TextInput value={item.label} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], label: v }; up("items", nI); }} placeholder="Label (e.g. Growth)" style={{ marginBottom: 8 }} />
+                            <div style={{ marginBottom: 8 }}>
+                                <IconPicker value={item.icon || "Zap"} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], icon: v }; up("items", nI); }} />
+                            </div>
+                            <div style={{ display: "flex", gap: 8 }}>
+                                <SelectInput value={item.trend || "none"} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], trend: v }; up("items", nI); }} options={[{ label: "No Trend", value: "none" }, { label: "Up Trend", value: "up" }, { label: "Down Trend", value: "down" }]} />
+                                {item.trend !== "none" && <TextInput value={item.trendValue} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], trendValue: v }; up("items", nI); }} placeholder="12%" />}
+                            </div>
+                        </div>
+                    ))}
+                    <button onClick={() => { const nI = [...((p.items as any[]) || [])]; nI.push({ id: crypto.randomUUID(), value: "0", label: "New Stat", icon: "Activity" }); up("items", nI); }} style={{ padding: "8px", background: "var(--primary)", color: "white", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>+ Add Metric</button>
+                </div>
+            </Section>
+            <AnimationPanel block={block} />
+        </>
+    );
+}
+
+export function ChartPanel({ block }: { block: Block }) {
+    const { updateBlock } = useEditorStore();
+    const p = block.props;
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
+
+    return (
+        <>
+            <Section title="Chart Settings">
+                <Field label="Type"><SelectInput value={(p.chartType as string) || "area"} onChange={(v) => up("chartType", v)} options={[{ label: "Area Chart", value: "area" }, { label: "Bar Chart", value: "bar" }, { label: "Line Chart", value: "line" }, { label: "Pie Chart", value: "pie" }, { label: "Donut Chart", value: "donut" }]} /></Field>
+                <Field label="Height"><TextInput value={(p.height as string) || "300px"} onChange={(v) => up("height", v)} /></Field>
+                <Field label="Primary Color"><ColorInput value={(p.color as string) || "var(--primary)"} onChange={(v) => up("color", v)} /></Field>
+                <Field label="Secondary Color"><ColorInput value={(p.secondaryColor as string) || "var(--accent)"} onChange={(v) => up("secondaryColor", v)} /></Field>
+            </Section>
+
+            <Section title="Display Options">
+                <ToggleInput label="Show Grid" value={p.showGrid !== false} onChange={(v) => up("showGrid", v)} />
+                <ToggleInput label="X Axis" value={p.showXAxis !== false} onChange={(v) => up("showXAxis", v)} />
+                <ToggleInput label="Y Axis" value={p.showYAxis !== false} onChange={(v) => up("showYAxis", v)} />
+                <ToggleInput label="Tooltip" value={p.showTooltip !== false} onChange={(v) => up("showTooltip", v)} />
+                <ToggleInput label="Legend" value={p.showLegend === true} onChange={(v) => up("showLegend", v)} />
+                <Field label="Line Curve"><SelectInput value={(p.curve as string) || "smooth"} onChange={(v) => up("curve", v)} options={[{ label: "Smooth", value: "smooth" }, { label: "Step", value: "step" }, { label: "Linear", value: "linear" }]} /></Field>
+            </Section>
+
+            <Section title="Data Management">
+                <div style={{ padding: "0 0 12px", borderBottom: `1px solid ${PANEL_COLORS.border}`, marginBottom: 12 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: PANEL_COLORS.muted, textTransform: "uppercase" }}>Quick Bulk Edit</span>
+                        <span style={{ fontSize: 9, color: PANEL_COLORS.muted, opacity: 0.6 }}>Format: Label, Value</span>
+                    </div>
+                    <textarea
+                        style={{ width: "100%", background: PANEL_COLORS.bg, border: `1px solid ${PANEL_COLORS.border}`, borderRadius: 8, padding: 8, fontSize: 11, color: PANEL_COLORS.text, outline: "none", resize: "vertical", minHeight: 60 }}
+                        placeholder="Jan, 400&#10;Feb, 600&#10;Mar, 800"
+                        onBlur={(e) => {
+                            const val = e.target.value.trim();
+                            if (!val) return;
+                            const lines = val.split("\n");
+                            const newData = lines.map(line => {
+                                const [name, value] = line.split(",").map(s => s.trim());
+                                return { name: name || "New", value: Number(value) || 0 };
+                            }).filter(d => d.name || d.value);
+                            if (newData.length > 0) up("data", newData, true);
+                            e.target.value = "";
+                        }}
+                    />
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 24px", gap: 8, padding: "0 4px" }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: PANEL_COLORS.muted }}>LABEL</span>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: PANEL_COLORS.muted }}>VALUE</span>
+                        <span></span>
+                    </div>
+                    {((p.data as any[]) || []).map((point, idx) => (
+                        <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 24px", gap: 6, alignItems: "center" }}>
+                            <input
+                                value={point.name}
+                                onChange={(e) => { const nD = [...((p.data as any[]) || [])]; nD[idx] = { ...nD[idx], name: e.target.value }; up("data", nD); }}
+                                onBlur={() => up("data", p.data, true)}
+                                placeholder="Label"
+                                style={{ background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 6, padding: "5px 8px", fontSize: 11, color: PANEL_COLORS.text, outline: "none" }}
+                            />
+                            <input
+                                value={point.value}
+                                type="number"
+                                onChange={(e) => { const nD = [...((p.data as any[]) || [])]; nD[idx] = { ...nD[idx], value: Number(e.target.value) || 0 }; up("data", nD); }}
+                                onBlur={() => up("data", p.data, true)}
+                                placeholder="0"
+                                style={{ background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 6, padding: "5px 8px", fontSize: 11, color: PANEL_COLORS.text, outline: "none" }}
+                            />
+                            <button onClick={() => { const nD = [...((p.data as any[]) || [])]; nD.splice(idx, 1); up("data", nD, true); }} style={{ background: "transparent", border: "none", color: PANEL_COLORS.muted, cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }} onMouseEnter={e => e.currentTarget.style.color = "#ef4444"} onMouseLeave={e => e.currentTarget.style.color = PANEL_COLORS.muted}>&times;</button>
+                        </div>
+                    ))}
+                    <button onClick={() => { const nD = [...((p.data as any[]) || [])]; nD.push({ name: "New Item", value: 0 }); up("data", nD, true); }} style={{ marginTop: 4, padding: "8px", background: "rgba(0,153,255,0.1)", color: "#4db8ff", border: "1px dashed rgba(0,153,255,0.3)", borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>+ Add Data Point</button>
+                </div>
+            </Section>
+            <AnimationPanel block={block} />
+        </>
+    );
+}

@@ -144,7 +144,7 @@ export function Field({ label, children }: { label: string; children: React.Reac
 
 // ─── TextInput ────────────────────────────────────────────────────────────────
 
-export function TextInput({ value, onChange, placeholder, type = "text" }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: string }) {
+export function TextInput({ value, onChange, placeholder, type = "text", style }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: string, style?: React.CSSProperties }) {
     return (
         <input
             type={type}
@@ -152,7 +152,7 @@ export function TextInput({ value, onChange, placeholder, type = "text" }: { val
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             spellCheck={false}
-            style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", transition: "all 0.15s" }}
+            style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", transition: "all 0.15s", ...style }}
             onMouseEnter={(e) => { if (document.activeElement !== e.currentTarget) e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; }}
             onMouseLeave={(e) => { if (document.activeElement !== e.currentTarget) e.currentTarget.style.background = PANEL_COLORS.inputBg; }}
             onFocus={(e) => { e.currentTarget.style.background = PANEL_COLORS.sectionBg; e.currentTarget.style.borderColor = PANEL_COLORS.primary; }}
@@ -341,41 +341,62 @@ function toHex(color: string): string {
 
 export function ColorInput({ value, onChange, onBlur }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void }) {
     const displayValue = resolveColor(value);
+    const isVariable = value.startsWith("var(");
 
     return (
-        <ColorPicker
-            value={value}
-            onChange={(color) => {
-                // Return rgb/rgba string to preserve transparency
-                const val = color.toRgbString();
-                onChange(val);
-            }}
-            onChangeComplete={(color) => {
-                if (onBlur) onBlur(color.toRgbString());
-            }}
-            showText={(color) => (
-                <span style={{ fontSize: 10, color: PANEL_COLORS.muted }}>{color.toRgbString()}</span>
-            )}
-            presets={[
-                {
-                    label: 'Brand Colors',
-                    colors: ["#6366f1", "#0ea5e9", "#22c55e", "#eab308", "#f97316", "#ef4444", "#0099ff"],
-                },
-                {
-                    label: 'Grayscale',
-                    colors: ["#ffffff", "#f8fafc", "#f1f5f9", "#e2e8f0", "#cbd5e1", "#94a3b8", "#64748b", "#475569", "#1e293b", "#0f172a", "#000000"],
-                }
-            ]}
-        >
-            <button
-                style={{ display: "flex", gap: 8, alignItems: "center", width: "100%", height: 26, padding: "0 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", transition: "background 0.15s" }}
-                onMouseEnter={e => e.currentTarget.style.background = PANEL_COLORS.inputHoverBg}
-                onMouseLeave={e => e.currentTarget.style.background = PANEL_COLORS.inputBg}
+        <div style={{ display: "flex", gap: 4, width: "100%" }}>
+            <ColorPicker
+                value={isVariable ? displayValue : value}
+                onChange={(color) => {
+                    onChange(color.toRgbString());
+                }}
+                onChangeComplete={(color) => {
+                    if (onBlur) onBlur(color.toRgbString());
+                }}
+                showText={() => (
+                    <span style={{ fontSize: 10, color: PANEL_COLORS.muted }}>
+                        {toHex(value)}
+                    </span>
+                )}
+                presets={[
+                    {
+                        label: 'Brand Colors',
+                        colors: ["#6366f1", "#0ea5e9", "#22c55e", "#eab308", "#f97316", "#ef4444", "#0099ff"],
+                    },
+                    {
+                        label: 'Grayscale',
+                        colors: ["#ffffff", "#f8fafc", "#f1f5f9", "#e2e8f0", "#cbd5e1", "#94a3b8", "#64748b", "#475569", "#1e293b", "#0f172a", "#000000"],
+                    }
+                ]}
             >
-                <div style={{ width: 14, height: 14, borderRadius: 3, background: displayValue, border: "1px solid rgba(255,255,255,0.15)" }} />
-                <span style={{ flex: 1, textAlign: "left", fontFamily: "monospace", fontSize: 11, opacity: 0.9 }}>{displayValue}</span>
-            </button>
-        </ColorPicker>
+                <button
+                    style={{ display: "flex", gap: 8, alignItems: "center", flex: 1, height: 26, padding: "0 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${isVariable ? "var(--primary)" : PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", transition: "background 0.15s" }}
+                    onMouseEnter={e => e.currentTarget.style.background = PANEL_COLORS.inputHoverBg}
+                    onMouseLeave={e => e.currentTarget.style.background = PANEL_COLORS.inputBg}
+                >
+                    <div style={{ width: 14, height: 14, borderRadius: 3, background: displayValue, border: "1px solid rgba(255,255,255,0.15)" }} />
+                    <span style={{ flex: 1, textAlign: "left", fontFamily: "monospace", fontSize: 11, opacity: 0.9, overflow: "hidden", textOverflow: "ellipsis" }}>{isVariable ? `${toHex(value)} (Theme)` : toHex(value)}</span>
+                </button>
+            </ColorPicker>
+
+            {!isVariable && (
+                <Tooltip title="Reset to Theme Variable">
+                    <button
+                        onClick={() => {
+                            // Smart guess: if white text -> var(--text), if dark bg -> var(--surface)
+                            if (value.toLowerCase() === "#ffffff" || value.toLowerCase() === "#fff") {
+                                onChange("var(--text)");
+                            } else {
+                                onChange("var(--primary)");
+                            }
+                        }}
+                        style={{ width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center", background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, cursor: "pointer", color: PANEL_COLORS.muted }}
+                    >
+                        <ArrowPathIcon style={{ width: 14, height: 14 }} />
+                    </button>
+                </Tooltip>
+            )}
+        </div>
     );
 }
 
