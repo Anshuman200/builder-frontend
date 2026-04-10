@@ -16,13 +16,15 @@ import {
   MagnifyingGlassIcon,
   EyeIcon,
   ArrowPathIcon,
-  CameraIcon
+  CameraIcon,
+  LockClosedIcon
 } from "@heroicons/react/24/outline";
 import { Dropdown } from "antd";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 import { TemplateCard } from "@/components/templates/TemplateCard";
 import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import PasswordUpdateModal from "@/components/shared/PasswordUpdateModal";
+import { EllipsisVerticalIcon, KeyIcon } from "@heroicons/react/24/outline";
 
 interface Page {
   _id: string;
@@ -32,6 +34,7 @@ interface Page {
   updatedAt: string;
   previewUrl?: string;
   isPublic?: boolean;
+  visibility?: 'PUBLIC' | 'PRIVATE';
   isLive?: boolean;
   domain?: string;
 }
@@ -68,6 +71,8 @@ export default function HomePage() {
   const [captureTarget, setCaptureTarget] = useState<any | null>(null);
 
   const { startDelete } = useDeleteToast();
+  const [passwordModalId, setPasswordModalId] = useState<string | null>(null);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
 
   const handleDelete = useCallback((page: Page) => {
     startDelete(
@@ -135,10 +140,23 @@ export default function HomePage() {
     const matchesSearch = !search || p.title?.toLowerCase().includes(search.toLowerCase());
     const matchesTab = activeTab === "all" 
       || (activeTab === "live" && p.isLive)
-      || (activeTab === "public" && p.isPublic)
-      || (activeTab === "private" && !p.isPublic);
+      || (activeTab === "public" && p.visibility === "PUBLIC")
+      || (activeTab === "private" && p.visibility === "PRIVATE");
     return matchesSearch && matchesTab;
   });
+
+  const handlePasswordUpdate = async (password: string) => {
+    if (!passwordModalId) return;
+    setUpdatingPassword(true);
+    try {
+      await updateMutation.mutateAsync({ id: passwordModalId, password });
+      success("Password updated successfully");
+    } catch {
+      toastError("Failed to update password");
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
 
   return (
     <>
@@ -212,8 +230,35 @@ export default function HomePage() {
                         { key: "rename", label: "Rename", icon: <PencilIcon className="w-4 h-4" />, onClick: () => { setRenamingId(p._id); setRenameValue(p.title); } },
                         { key: "capture", label: "Update Thumbnail", icon: <CameraIcon className="w-4 h-4" />, onClick: () => { setCaptureTarget(p); setShowCapturePicker(true); } },
                         !p.isLive && { key: "preview", label: "Preview", icon: <EyeIcon className="w-4 h-4" />, onClick: () => window.open(`/preview/${p._id}`, "_blank") },
-                        { key: "duplicate", label: "Duplicate", icon: <Squares2X2Icon className="w-4 h-4" />, onClick: () => duplicateMutation.mutate(p._id) },
-                        !p.isLive && { key: "publish", label: p.isPublic ? "Make Private" : "Make Public", icon: <GlobeAltIcon className="w-4 h-4" />, onClick: () => handleTogglePublish(p) },
+                        !p.isLive && { key: "duplicate", label: "Duplicate", icon: <Squares2X2Icon className="w-4 h-4" />, onClick: () => duplicateMutation.mutate(p._id) },
+                        { type: 'divider' },
+                        !p.isLive && { key: "publish", label: p.isPublic ? "Make Private Template" : "Make Public Template", icon: <GlobeAltIcon className="w-4 h-4" />, onClick: () => handleTogglePublish(p) },
+                        { 
+                          key: "visibility", 
+                          label: <div className="flex items-center justify-between gap-8">
+                            <span>Visibility</span>
+                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${p.visibility === 'PRIVATE' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                              {p.visibility || 'PUBLIC'}
+                            </span>
+                          </div>,
+                          icon: p.visibility === "PRIVATE" ? <LockClosedIcon className="w-4 h-4 text-indigo-400" /> : <GlobeAltIcon className="w-4 h-4 text-emerald-400" />, 
+                          onClick: async () => {
+                            try {
+                              const newVisibility = p.visibility === "PRIVATE" ? "PUBLIC" : "PRIVATE";
+                              await updateMutation.mutateAsync({ id: p._id, visibility: newVisibility });
+                              success(`Project is now ${newVisibility.toLowerCase()}`);
+                            } catch {
+                              toastError("Failed to update visibility");
+                            }
+                          }
+                        },
+                        p.visibility === 'PRIVATE' && {
+                          key: "password",
+                          label: "Update Password",
+                          icon: <KeyIcon className="w-4 h-4 text-indigo-400" />,
+                          onClick: () => setPasswordModalId(p._id)
+                        },
+                        { type: 'divider' },
                         !p.isLive && { key: "delete", label: <span className="text-red-400 font-bold">Delete</span>, icon: <TrashIcon className="text-red-400 w-4 h-4" />, onClick: () => handleDelete(p) },
                       ].filter(Boolean) as any,
                       className: "[&_.ant-dropdown-menu]:bg-neutral-900 [&_.ant-dropdown-menu]:border [&_.ant-dropdown-menu]:border-white/10 [&_.ant-dropdown-menu]:rounded-2xl p-2",
@@ -221,7 +266,8 @@ export default function HomePage() {
                     trigger={['click']}
                   >
                     <button className="w-10 h-10 flex items-center justify-center rounded-xl text-white/30 hover:text-white hover:bg-white/5 transition-all bg-transparent border-none cursor-pointer">
-                      <EllipsisVerticalIcon className="w-5 h-5" />
+                      <span className="sr-only">Open menu</span>
+                      <EllipsisVerticalIcon className="w-5 h-5 transition-transform group-hover:scale-110" />
                     </button>
                   </Dropdown>
                 }
@@ -243,6 +289,13 @@ export default function HomePage() {
           onUpdateThumbnails={handleUpdateThumbnails}
         />
       )}
+
+      <PasswordUpdateModal
+        open={!!passwordModalId}
+        onClose={() => setPasswordModalId(null)}
+        onConfirm={handlePasswordUpdate}
+        loading={updatingPassword}
+      />
     </>
   );
 }

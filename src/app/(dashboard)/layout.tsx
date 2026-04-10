@@ -77,7 +77,7 @@ export default function DashboardLayout({
     setWizardOpen(true);
   }, []);
 
-  const handleWizardSubmit = useCallback(async (title: string, slug: string, selectedSections: string[]) => {
+  const handleWizardSubmit = useCallback(async (title: string, slug: string, selectedSections: string[], visibility: 'PUBLIC' | 'PRIVATE', password?: string) => {
     try {
       const content = buildContentFromSections(selectedSections);
       const payload = {
@@ -85,6 +85,8 @@ export default function DashboardLayout({
         slug: slug || "page-" + Date.now().toString().slice(-4),
         status: "DRAFT",
         isPublic: false,
+        visibility,
+        password,
         content,
         meta: {}
       };

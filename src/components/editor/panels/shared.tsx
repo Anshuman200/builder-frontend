@@ -144,9 +144,10 @@ export function Field({ label, children }: { label: string; children: React.Reac
 
 // ─── TextInput ────────────────────────────────────────────────────────────────
 
-export function TextInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+export function TextInput({ value, onChange, placeholder, type = "text" }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: string }) {
     return (
         <input
+            type={type}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}

@@ -11,6 +11,7 @@ import ThemeSwitcher from "@/components/shared/ThemeSwitcher";
 import { pagesApi } from "@/lib/api/client";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { useLiveHead } from "@/hooks/useLiveHead";
+import PrivatePageGate from "@/components/public/PrivatePageGate";
 import React from "react";
 
 export default function PreviewClient({ pageId }: { pageId: string }) {
@@ -67,29 +68,31 @@ export default function PreviewClient({ pageId }: { pageId: string }) {
     }
 
     return (
-        <DndContext>
-            <PreviewProvider>
-                <main 
-                    ref={mainRef}
-                    style={{ background: "var(--background)", color: "var(--text)", minHeight: "100vh" }}
-                >
-                    {page.content.map((block: any) => (
-                        <BlockRenderer key={block.id} block={block} />
-                    ))}
-                    {page.content.length === 0 && (
-                        <div style={{
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            height: "60vh", flexDirection: "column", gap: 8,
-                            color: "#94a3b8",
-                        }}>
-                            <p style={{ fontSize: 16, margin: 0, fontWeight: 500 }}>This page has no content yet.</p>
-                            <p style={{ fontSize: 13, margin: 0 }}>Go back to the editor and add some blocks.</p>
-                        </div>
-                    )}
-                    <ScrollToTop />
-                    <ThemeSwitcher />
-                </main>
-            </PreviewProvider>
-        </DndContext>
+        <PrivatePageGate pageId={pageId} isPrivate={page.visibility === 'PRIVATE'}>
+            <DndContext>
+                <PreviewProvider>
+                    <main 
+                        ref={mainRef}
+                        style={{ background: "var(--background)", color: "var(--text)", minHeight: "100vh" }}
+                    >
+                        {page.content.map((block: any) => (
+                            <BlockRenderer key={block.id} block={block} />
+                        ))}
+                        {page.content.length === 0 && (
+                            <div style={{
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                height: "60vh", flexDirection: "column", gap: 8,
+                                color: "#94a3b8",
+                            }}>
+                                <p style={{ fontSize: 16, margin: 0, fontWeight: 500 }}>This page has no content yet.</p>
+                                <p style={{ fontSize: 13, margin: 0 }}>Go back to the editor and add some blocks.</p>
+                            </div>
+                        )}
+                        <ScrollToTop />
+                        <ThemeSwitcher />
+                    </main>
+                </PreviewProvider>
+            </DndContext>
+        </PrivatePageGate>
     );
 }

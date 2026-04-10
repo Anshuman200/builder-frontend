@@ -310,10 +310,43 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                 </button>
             </Section>
             <Section title="Visibility & Access">
-                <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Make this page public for others to view and duplicate.</div>
-                <ToggleInput value={!!page.isPublic} onChange={(v) => { upP("isPublic", v); if (v) upP("isTemplate", true); }} label="Make Public" />
+                <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 12, lineHeight: 1.4 }}>Control who can view or use your page.</div>
+                
+                <Field label="Page Visibility">
+                    <SelectInput
+                        value={page.visibility || "PUBLIC"}
+                        onChange={(v) => upP("visibility", v)}
+                        options={[
+                            { label: "Public (Everyone)", value: "PUBLIC" },
+                            { label: "Private (Password)", value: "PRIVATE" }
+                        ]}
+                    />
+                </Field>
+
+                {page.visibility === "PRIVATE" && (
+                    <Field label="Page Password">
+                        <TextInput 
+                            value={page.password || ""} 
+                            onChange={(v) => upP("password", v)} 
+                            placeholder="Set access password" 
+                            type="password"
+                        />
+                    </Field>
+                )}
+
+                <div style={{ margin: "16px 0", height: 1, background: "var(--border)" }} />
+                
+                <ToggleInput 
+                    value={!!page.isPublic} 
+                    onChange={(v) => { upP("isPublic", v); if (v) upP("isTemplate", true); }} 
+                    label="Public Template" 
+                />
+                <div style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 4, paddingLeft: 28 }}>
+                    Allows others to clone this design as a template.
+                </div>
+
                 {page.isPublic && (
-                    <Field label="Category">
+                    <Field label="Template Category">
                         <SelectInput
                             value={page.category || "Other"}
                             onChange={(v) => upP("category", v)}

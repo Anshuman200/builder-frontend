@@ -18,6 +18,9 @@ import {
   MoonIcon,
   SunIcon,
   ArrowsRightLeftIcon,
+  GlobeAltIcon,
+  LockClosedIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 import { Popover, Dropdown, Drawer, Switch, ColorPicker } from "antd";
 import Link from "next/link";
@@ -57,6 +60,7 @@ export default function EditorToolbar() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showCapturePicker, setShowCapturePicker] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [mediaPickerType, setMediaPickerType] = useState<"favicon" | "ogImage" | null>(null);
 
   const theme = page?.theme || DEFAULT_THEME;
@@ -593,6 +597,7 @@ export default function EditorToolbar() {
         placement="bottom"
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
+        height="85%"
         zIndex={100}
         styles={{
           body: { padding: 0, backgroundColor: 'var(--bg-secondary)' },
@@ -611,7 +616,7 @@ export default function EditorToolbar() {
         closeIcon={<span className="text-(--text-muted)">×</span>}
         title={<span className="text-(--text) uppercase tracking-wider font-bold text-sm">Page Settings</span>}
       >
-        <div className="max-w-4xl mx-auto p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="max-w-6xl mx-auto p-6 md:p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Section 1: Page Identity */}
           <div className="space-y-6">
             <h3 className="text-(--text-muted) text-xs font-bold uppercase tracking-widest border-b border-(--border) pb-2 mb-4">Page Identity</h3>
@@ -767,6 +772,64 @@ export default function EditorToolbar() {
                 >
                   Sync Now &rarr;
                 </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: Access & Visibility */}
+          <div className="space-y-6">
+            <h3 className="text-(--text-muted) text-xs font-bold uppercase tracking-widest border-b border-(--border) pb-2 mb-4">Access Control</h3>
+            
+            <div className="p-4 bg-(--surface) border border-(--border) rounded-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-(--bg-primary) rounded-lg border border-(--border)">
+                    {page?.visibility === 'PRIVATE' ? <LockClosedIcon className="w-4 h-4 text-indigo-400" /> : <GlobeAltIcon className="w-4 h-4 text-emerald-400" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-(--text)">Visibility</p>
+                    <p className="text-[10px] text-(--text-muted)">{page?.visibility === 'PRIVATE' ? 'Private (Protected)' : 'Public (Everyone)'}</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={page?.visibility === 'PRIVATE'}
+                  onChange={(v) => updatePageData({ visibility: v ? 'PRIVATE' : 'PUBLIC' })}
+                  size="small"
+                />
+              </div>
+
+              {page?.visibility === 'PRIVATE' && (
+                <div className="pt-2 border-t border-(--border) animate-in fade-in slide-in-from-top-2 duration-300">
+                  <SettingField label="Change Password">
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        className="w-full bg-(--bg-primary) border border-(--border) rounded-lg px-3 py-2 pr-10 text-sm text-(--text) focus:ring-1 focus:ring-(--primary) outline-none font-bold"
+                        value={page?.password || ""}
+                        onChange={(e) => updatePageData({ password: e.target.value })}
+                        placeholder="Set new password"
+                      />
+                      <button
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-muted) hover:text-(--text) transition-colors"
+                      >
+                        {showPassword ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </SettingField>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl flex gap-3">
+              <div className="p-2 bg-amber-500/10 rounded-lg h-fit text-amber-500">
+                <AdjustmentsHorizontalIcon className="w-4 h-4" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-(--text)">Access Rights</p>
+                <p className="text-[10px] text-(--text-muted) leading-relaxed">
+                  Private pages are excluded from search engines and require a password to view.
+                </p>
               </div>
             </div>
           </div>
