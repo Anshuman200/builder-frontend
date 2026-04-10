@@ -25,7 +25,8 @@ export function LegalBlock({ block }: BlockProps) {
         queryKey: ["legal-data", block.id, apiUrl],
         queryFn: async () => {
             if (!apiUrl) return null;
-            const res = await axios.get(apiUrl);
+            // Use internal server proxy to bypass CORS
+            const res = await axios.get(`/api/proxy?url=${encodeURIComponent(apiUrl)}`);
             return res.data;
         },
         enabled: mode === "api" && !!apiUrl,

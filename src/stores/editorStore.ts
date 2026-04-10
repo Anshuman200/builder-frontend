@@ -249,21 +249,25 @@ function migrateBlockColors(blocks: Block[]): Block[] {
     const COLOR_MAP: Record<string, string> = {
         // Pure Darks
         "#000000": "var(--text)",
-        "#020617": "var(--bg)",
-        "#09090b": "var(--bg)",
+        // "#020617": "var(--bg)",
+        // "#09090b": "var(--bg)",
         "#0f172a": "var(--primary)",
         "#11181f": "var(--surface)",
         "#111827": "var(--surface)",
-        "#18181b": "var(--surface)",
+        // "#18181b": "var(--surface)",
         "#1a1a1a": "var(--surface)",
         "#1e293b": "var(--surface)",
         // Pure Lights
-        "#ffffff": "var(--bg)",
-        "#fafafa": "var(--bg)",
+        "#ffffff": "var(--background)",
+        "#fafafa": "var(--background)",
         "#f8fafc": "var(--surface)",
         "#f1f5f9": "var(--surface)",
         "#e2e8f0": "var(--border)",
         "#cbd5e1": "var(--border-strong)",
+        // Dark surfaces
+        "#18181b": "var(--surface)",
+        "#020617": "var(--background)",
+        "#09090b": "var(--background)",
         // Brand Indigo/Violet
         "#6366f1": "var(--primary)",
         "#818cf8": "var(--primary)",
@@ -284,22 +288,46 @@ function migrateBlockColors(blocks: Block[]): Block[] {
             const val = p[key];
             if (typeof val === 'string') {
                 const hex = val.toLowerCase();
-                
+
                 // Specific mapping based on property type
-                if (TEXT_PROPS.includes(key) && (hex === "#ffffff" || hex === "#fff" || hex === "#f8fafc" || hex === "#fafafa")) {
-                    p[key] = "var(--text)";
-                    changed = true;
-                } else if (TEXT_PROPS.includes(key) && (hex === "#000000" || hex === "#000" || hex === "#09090b")) {
-                    p[key] = "var(--text)";
-                    changed = true;
-                } else if (BG_PROPS.includes(key) && (hex === "#ffffff" || hex === "#fff" || hex === "#fafafa")) {
-                    // For analytics cards specifically, white usually means surface
-                    if (b.type === "stats" || b.type === "chart") p[key] = "var(--surface)";
-                    else p[key] = "var(--background)";
-                    changed = true;
-                } else if (BG_PROPS.includes(key) && (hex === "#000000" || hex === "#09090b" || hex === "#111827" || hex === "#18181b" || hex === "#1a1a1a")) {
-                    p[key] = "var(--surface)";
-                    changed = true;
+                if (TEXT_PROPS.includes(key)) {
+                    if (hex === "#ffffff" || hex === "#fff" || hex === "#f8fafc" || hex === "#fafafa") {
+                        // EXCLUSION: Don't migrate white text for heros/containers with images
+                        const hasBgImage = !!p.bgImage || !!p.backgroundImage;
+                        if (b.type === "hero" || (b.type === "container" && hasBgImage)) {
+                            // Keep as white
+                        } else {
+                            p[key] = "var(--text)";
+                            changed = true;
+                        }
+                    } else if (hex === "#000000" || hex === "#000" || hex === "#09090b") {
+                        p[key] = "var(--text)";
+                        changed = true;
+                    } else if (val === "var(--text)" && b.type === "hero") {
+                        // REVERT: If it's a hero and was previously migrated to var(--text), set it back to white
+                        p[key] = "#ffffff";
+                        changed = true;
+                    }
+                } else if (BG_PROPS.includes(key)) {
+                    if (hex === "#ffffff" || hex === "#fff" || hex === "#fafafa") {
+                        // EXCLUSION: Don't migrate bgColor for heros with images
+                        if (b.type === "hero" && (!!p.bgImage || !!p.backgroundImage)) {
+                            // Keep original
+                        } else if (b.type === "stats" || b.type === "chart") {
+                            p[key] = "var(--surface)";
+                            changed = true;
+                        } else {
+                            p[key] = "var(--background)";
+                            changed = true;
+                        }
+                    } else if (hex === "#000000" || hex === "#09090b" || hex === "#111827" || hex === "#18181b" || hex === "#1a1a1a") {
+                        p[key] = "var(--surface)";
+                        changed = true;
+                    } else if (val === "var(--background)" && b.type === "hero" && (!!p.bgImage || !!p.backgroundImage)) {
+                        // REVERT: If it's a hero with an image and was migrated to var(--background), set it back to original (transparent/white)
+                        p[key] = "transparent";
+                        changed = true;
+                    }
                 } else if (ACCENT_PROPS.includes(key) && (hex === "#6366f1" || hex === "#8b5cf6" || hex === "#818cf8")) {
                     p[key] = (hex === "#6366f1" || hex === "#818cf8") ? "var(--primary)" : "var(--secondary)";
                     changed = true;
@@ -499,28 +527,31 @@ export const useEditorStore = create<EditorStore>()(
         updateTheme: (theme, commit) => {
             set((s) => {
                 if (!s.page) return;
-                
+
                 // Safety: Ensure theme object exists
                 if (!s.page.theme) {
-                  s.page.theme = JSON.parse(JSON.stringify(DEFAULT_THEME));
+                    s.page.theme = JSON.parse(JSON.stringify(DEFAULT_THEME));
                 }
-                
+
                 const oldMode = s.page.theme.mode;
                 const newMode = theme.mode || oldMode;
-                
+
                 // Pivot colors if mode is changing
                 if (theme.mode && theme.mode !== oldMode) {
-                  const newColors = theme.mode === "dark" ? DARK_COLORS : LIGHT_COLORS;
-                  s.page.theme.colors = { ...s.page.theme.colors, ...newColors };
+                    const newColors = theme.mode === "dark" ? DARK_COLORS : LIGHT_COLORS;
+                    s.page.theme.colors = { ...s.page.theme.colors, ...newColors };
                 }
 
                 s.page.theme = { ...s.page.theme, ...theme };
-                
+
                 // If mode changed (e.g. Light -> Dark), automatically sync blocks
                 if (newMode !== oldMode) {
                     s.page.content = migrateBlockColors(s.page.content);
+                } else if (!oldMode && theme.mode) {
+                    // Force migration if we are initializing mode for the first time
+                    s.page.content = migrateBlockColors(s.page.content);
                 }
-                
+
                 s.isDirty = true;
             });
             if (commit) get().pushHistory();
@@ -593,7 +624,7 @@ export const useEditorStore = create<EditorStore>()(
 
         migrateThemeColors: () => set((s) => {
             if (!s.page) return;
-            
+
             // 1. Migrate Blocks
             s.page.content = migrateBlockColors(s.page.content);
 
@@ -601,7 +632,7 @@ export const useEditorStore = create<EditorStore>()(
             const c = s.page.theme.colors;
             const OLD_PRIMARY = ["#6366f1", "#6366F1"];
             const OLD_SECONDARY = ["#8b5cf6", "#8B5CF6"];
-            
+
             if (OLD_PRIMARY.includes(c.primary)) c.primary = "var(--primary)";
             if (OLD_SECONDARY.includes(c.secondary)) c.secondary = "var(--secondary)";
             if (c.background === "#ffffff") c.background = "var(--background)";
