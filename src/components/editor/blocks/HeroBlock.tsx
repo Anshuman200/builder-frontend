@@ -35,8 +35,8 @@ export function HeroBlock({ block }: BlockProps) {
         background = bgColor;
     }
 
-    const layout = (p.layout as string) || "centered";
-    const innerMaxWidth = layout === "narrow" ? "800px" : layoutObj.maxWidth;
+    const layout = (p.layout as string) || "fluid";
+    const innerMaxWidth = layout === "fluid" ? "100%" : (layout === "narrow" ? "800px" : layoutObj.maxWidth);
     const sectionMinHeight = layout === "fullscreen" ? "100dvh" : (p.minHeight as string) || "80dvh";
 
     return (

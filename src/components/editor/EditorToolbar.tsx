@@ -65,8 +65,6 @@ export default function EditorToolbar() {
 
   const theme = page?.theme || DEFAULT_THEME;
   const colors = theme.colors || DEFAULT_THEME.colors;
-  const [currentThumbnail, setCurrentThumbnail] = useState<string | null>((page as any)?.thumbnail || null);
-  const [capturedThumbnails, setCapturedThumbnails] = useState<string[]>((page as any)?.thumbnails || []);
 
   const updateMutation = useUpdatePage();
   const createMutation = useCreatePage();
@@ -97,8 +95,11 @@ export default function EditorToolbar() {
 
   // Handle thumbnail selection from capture or media library
   const handleUpdateThumbnails = async (newThumbnails: string[], active: string | null) => {
-    setCapturedThumbnails(newThumbnails);
-    setCurrentThumbnail(active);
+    updatePageData({ 
+      thumbnail: active, 
+      thumbnails: newThumbnails 
+    });
+
     if (!pageId || pageId.length < 24) return;
     try {
       await updateMutation.mutateAsync({
@@ -151,15 +152,7 @@ export default function EditorToolbar() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [canUndo, canRedo, undo, redo]);
 
-  // Sync thumbnail when page loads from API or changes
-  useEffect(() => {
-    if (page && pageId) {
-      // Always sync state with the page object to prevent mismatches
-      // when navigating between different projects
-      setCurrentThumbnail((page as any).thumbnail || null);
-      setCapturedThumbnails((page as any).thumbnails || []);
-    }
-  }, [page?.id]);
+
 
   // Sync / Auto-save on Login
   useEffect(() => {
@@ -419,9 +412,9 @@ export default function EditorToolbar() {
             style={{
               display: "flex", alignItems: "center", gap: 6,
               padding: "5px 10px",
-              background: currentThumbnail ? "rgba(99,102,241,0.15)" : "var(--surface)",
-              color: currentThumbnail ? "#818cf8" : "var(--text-muted)",
-              border: `1px solid ${currentThumbnail ? "rgba(99,102,241,0.4)" : "var(--border)"}`,
+              background: page?.thumbnail ? "rgba(99,102,241,0.15)" : "var(--surface)",
+              color: page?.thumbnail ? "#818cf8" : "var(--text-muted)",
+              border: `1px solid ${page?.thumbnail ? "rgba(99,102,241,0.4)" : "var(--border)"}`,
               borderRadius: 7,
               fontSize: 12,
               fontWeight: 600,
@@ -430,10 +423,10 @@ export default function EditorToolbar() {
               position: "relative",
             }}
           >
-            {currentThumbnail ? (
+            {page?.thumbnail ? (
               <span style={{ position: "relative", width: 14, height: 14, flexShrink: 0 }}>
                 <img
-                  src={currentThumbnail}
+                  src={page.thumbnail}
                   alt=""
                   style={{ width: 14, height: 14, borderRadius: 3, objectFit: "cover" }}
                 />
@@ -572,9 +565,9 @@ export default function EditorToolbar() {
           onClose={() => setShowCapturePicker(false)}
           pageId={pageId}
           previewUrl={typeof window !== 'undefined' ? `${window.location.origin}/preview/${pageId}?capture=true` : `/preview/${pageId}?capture=true`}
-          currentThumbnail={currentThumbnail}
-          existingThumbnails={capturedThumbnails}
-          onSelect={(url) => { setCurrentThumbnail(url); }}
+          currentThumbnail={page?.thumbnail || null}
+          existingThumbnails={page?.thumbnails || []}
+          onSelect={(url) => { updatePageData({ thumbnail: url }); }}
           onUpdateThumbnails={handleUpdateThumbnails}
         />
       )}
@@ -598,25 +591,38 @@ export default function EditorToolbar() {
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
         zIndex={100}
+        height="80%"
         styles={{
-          body: { padding: 0, backgroundColor: 'var(--bg-secondary)' },
-          header: {
-            borderBottom: '1px solid var(--border)',
-            padding: '12px 24px',
-            backgroundColor: 'var(--bg-secondary)'
+          body: { 
+            padding: 0, 
+            backgroundColor: 'var(--bg-secondary)',
+            height: '100%',
+            overflowY: 'auto'
+          },
+          mask: {
+            backdropFilter: 'blur(4px)',
+            backgroundColor: 'rgba(0,0,0,0.4)'
+          },
+          wrapper: {
+            backgroundColor: 'transparent',
           },
           section: {
-            height: '85%',
+            height: '100%',
             backgroundColor: 'var(--bg-secondary)',
             borderTop: '1px solid var(--border)',
             borderRadius: '24px 24px 0 0',
-            overflow: 'hidden'
+            boxShadow: '0 -10px 40px rgba(0,0,0,0.2)'
+          },
+          header: {
+            borderBottom: '1px solid var(--border)',
+            padding: '16px 24px',
+            backgroundColor: 'var(--bg-secondary)'
           }
         }}
-        closeIcon={<span className="text-(--text-muted)">×</span>}
-        title={<span className="text-(--text) uppercase tracking-wider font-bold text-sm">Page Settings</span>}
+        closeIcon={<span className="text-(--text-muted) text-xl">×</span>}
+        title={<span className="text-(--text) uppercase tracking-widest font-extrabold text-xs">Page Settings & Configuration</span>}
       >
-        <div className="max-w-6xl mx-auto p-6 md:p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className=" p-6 md:p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Section 1: Page Identity */}
           <div className="space-y-6">
             <h3 className="text-(--text-muted) text-xs font-bold uppercase tracking-widest border-b border-(--border) pb-2 mb-4">Page Identity</h3>
@@ -640,9 +646,9 @@ export default function EditorToolbar() {
             {user && (
               <SettingField label="Page Thumbnail">
                 <div className="space-y-3">
-                  {currentThumbnail ? (
+                  {page?.thumbnail ? (
                     <div className="relative rounded-xl overflow-hidden border border-(--border) bg-(--surface) group">
-                      <img src={currentThumbnail} alt="Thumbnail" className="w-full h-32 object-cover object-top" />
+                      <img src={page.thumbnail} alt="Thumbnail" className="w-full h-32 object-cover object-top" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <button onClick={() => setShowCapturePicker(true)} className="p-2 bg-white/20 blur-sm rounded-lg hover:bg-white/40 transition-colors"><ArrowsRightLeftIcon className="w-5 h-5 text-white" /></button>
                       </div>
@@ -657,7 +663,7 @@ export default function EditorToolbar() {
                     onClick={() => setShowCapturePicker(true)}
                     className="w-full py-2 bg-(--primary) text-white text-xs font-bold rounded-lg hover:opacity-90 transition-all shadow-lg shadow-blue-500/20"
                   >
-                    {currentThumbnail ? "Change Thumbnail" : "Choose Thumbnail"}
+                    {page?.thumbnail ? "Change Thumbnail" : "Choose Thumbnail"}
                   </button>
                 </div>
               </SettingField>
@@ -779,7 +785,7 @@ export default function EditorToolbar() {
           {/* Section 4: Access & Visibility */}
           <div className="space-y-6">
             <h3 className="text-(--text-muted) text-xs font-bold uppercase tracking-widest border-b border-(--border) pb-2 mb-4">Access Control</h3>
-            
+
             <div className="p-4 bg-(--surface) border border-(--border) rounded-xl space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">

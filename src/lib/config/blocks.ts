@@ -49,6 +49,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
     icon: "LayoutPanelTop",
     defaultProps: {
       layout: "standard",       // standard | centered | split
+      layoutWidth: "fluid",     // fluid | centered | narrow
       position: "static",       // static | sticky | fixed
       style: "solid",           // solid | glass | transparent
       bgColor: "var(--primary)",
@@ -92,6 +93,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
     icon: "Sparkles",
     defaultProps: {
       align: "center",
+      layout: "fluid",
       bgColor: "var(--primary)",
       bgImage: "",
       bgOverlay: "var(--overlay)",

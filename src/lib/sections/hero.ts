@@ -16,7 +16,7 @@ export const heroSections: SectionTemplate[] = [
       <div style="width:60px;height:50px;background:var(--surface);border-radius:6px;flex-shrink:0;border:1px solid var(--border)"></div>
     </div>`,
         create: () => {
-            const root = makeBlock("hero", { align: "left", bgColor: "#0f172a", textColor: "#ffffff", padding: "6rem 2rem" });
+            const root = makeBlock("hero", { align: "left", layout: "fluid", bgColor: "#0f172a", textColor: "#ffffff", padding: "6rem 2rem" });
             const columns = makeBlock("columns", { leftWidth: "50", gap: "2rem", align: "center" });
             columns.props.col0 = [
                 makeBlock("text", { content: "Welcome to PageCraft", tag: "h1", fontSize: "3.5rem", color: "#ffffff", bold: true, lineHeight: "1.2" }),

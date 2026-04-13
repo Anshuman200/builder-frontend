@@ -87,12 +87,15 @@ export function HeaderBlock({ block }: BlockProps) {
         </nav>
     );
 
+    const layoutWidth = (p.layoutWidth as string) || "fluid";
+    const innerMaxWidth = layoutWidth === "fluid" ? "100%" : (layoutWidth === "narrow" ? "800px" : layoutObj.maxWidth);
+
     return (
         <>
             {isPreview && (
                 <style>{`
           .header-${block.id} { padding: ${desktopPadding}; padding-left: 0; padding-right: 0; }
-          .header-${block.id}-inner { max-width: ${layoutObj.maxWidth}; padding-left: ${layoutObj.paddingX}; padding-right: ${layoutObj.paddingX}; margin: 0 auto; width: 100%; box-sizing: border-box; }
+          .header-${block.id}-inner { max-width: ${innerMaxWidth}; padding-left: ${layoutObj.paddingX}; padding-right: ${layoutObj.paddingX}; margin: 0 auto; width: 100%; box-sizing: border-box; }
           .header-${block.id}-mobile-menu { display: none !important; }
           .header-${block.id}-hamburger { display: none !important; }
           @media (max-width: 1024px) { .header-${block.id} { padding: ${tabletPadding}; padding-left: 0; padding-right: 0; } .header-${block.id}-inner { padding-left: ${layoutObj.tabletPaddingX}; padding-right: ${layoutObj.tabletPaddingX}; } }
@@ -100,7 +103,7 @@ export function HeaderBlock({ block }: BlockProps) {
         `}</style>
             )}
             <header id={(p.sectionId as string) || `block-${block.id}`} className={isPreview ? `header-${block.id}` : undefined} style={{ ...baseHeaderStyle, position: position === "static" ? "relative" : (position as any), padding: isPreview ? undefined : editorPadding, paddingLeft: isPreview ? undefined : 0, paddingRight: isPreview ? undefined : 0, zIndex: 50 }}>
-                <div className={isPreview && !p.fullWidth ? `header-${block.id}-inner` : undefined} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", boxSizing: "border-box", paddingLeft: isPreview && !p.fullWidth ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), paddingRight: isPreview && !p.fullWidth ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX) }}>
+                <div className={isPreview ? `header-${block.id}-inner` : undefined} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: innerMaxWidth, margin: "0 auto", boxSizing: "border-box", paddingLeft: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), paddingRight: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX) }}>
                     {layout === "split" ? (<NavLinksElement />) : layout === "centered" ? (<div className={isPreview ? `header-${block.id}-desktop-nav` : undefined} style={{ flex: 1, display: isMobile ? "none" : "flex" }}><NavLinksElement /></div>) : (<LogoElement />)}
                     {layout === "centered" ? (<div style={{ flex: 1, display: "flex", justifyContent: "center" }}><LogoElement /></div>) : layout === "split" ? (<LogoElement />) : (<div className={isPreview ? `header-${block.id}-desktop-nav` : undefined} style={{ display: isMobile ? "none" : "flex" }}><NavLinksElement /></div>)}
                     <div style={{ display: "flex", alignItems: "center", gap: "1rem", ...(layout === "centered" ? { flex: 1, justifyContent: "flex-end" } : {}) }}>

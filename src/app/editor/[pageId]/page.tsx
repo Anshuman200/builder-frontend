@@ -1,7 +1,5 @@
 "use client";
 
-
-
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
@@ -12,6 +10,8 @@ import EditorShell from "@/components/editor/EditorShell";
 import { useToasts } from "@/hooks/useToasts";
 import { usePage } from "@/lib/api/queries";
 import { useLiveHead } from "@/hooks/useLiveHead";
+import NewPageWizard from "@/components/editor/NewPageWizard";
+import { createBlock, injectProjectName } from "@/lib/config/blocks";
 
 /**
  * Editor Page — The main workspace for building/editing.
@@ -30,6 +30,7 @@ export default function EditorPage() {
 
   const [hasLoadedApi, setHasLoadedApi] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
 
   useEffect(() => {
     if (pageId && pageId.length < 24) setIsGuest(true);
@@ -45,6 +46,10 @@ export default function EditorPage() {
       setPage(migrated);
       savePage(pageId, migrated); // persist so reload shows correct name
       markClean();
+
+      if (migrated.content.length === 0) {
+        setShowWizard(true);
+      }
     } else if (apiPage && !hasLoadedApi) {
       if (hasLocalDraft(pageId)) {
         const local = loadPage(pageId);
@@ -52,6 +57,10 @@ export default function EditorPage() {
         setPage(migrated);
         savePage(pageId, migrated); // persist migrated version
         setHasLoadedApi(true);
+
+        if (migrated.content.length === 0) {
+          setShowWizard(true);
+        }
         // Do NOT markClean — auto-save will push to DB.
       } else {
         const pageData = apiPage.page || apiPage;
@@ -61,6 +70,11 @@ export default function EditorPage() {
         savePage(pageId, migrated); // persist migrated version to local
         markClean();
         setHasLoadedApi(true);
+
+        // TRIGGER WIZARD IF EMPTY
+        if (content.length === 0) {
+          setShowWizard(true);
+        }
       }
     }
   }, [apiPage, pageId, hasLoadedApi, setPage, isGuest, markClean]);
@@ -107,5 +121,61 @@ export default function EditorPage() {
     );
   }
 
-  return <EditorShell />;
+  const handleWizardSubmit = async (title: string, slug: string, selectedSections: string[]) => {
+    const { updateTitle, updateSlug, addBlock } = useEditorStore.getState();
+    const { SECTION_TEMPLATES } = await import("@/lib/config/sections");
+    
+    if (title) updateTitle(title);
+    if (slug) updateSlug(slug);
+
+    const projectName = title || page?.title || "PageCraft";
+
+    // Sort: header first, footer last, rest in selection order
+    const sorted = [
+      ...selectedSections.filter((id) => id === "header"),
+      ...selectedSections.filter((id) => id !== "header" && id !== "footer"),
+      ...selectedSections.filter((id) => id === "footer"),
+    ];
+
+    const SECTION_ID_MAP: Record<string, string> = {
+      header: "nav-",
+      hero: "hero-",
+      features: "features-",
+      stats: "stats-",
+      team: "team-",
+      testimonials: "testimonials-",
+      pricing: "pricing-",
+      contact: "contact-",
+      cta: "cta-",
+      gallery: "gallery-",
+      faq: "faq-",
+      footer: "footer-",
+    };
+
+    sorted.forEach(id => {
+      const prefix = SECTION_ID_MAP[id];
+      if (prefix) {
+        const template = SECTION_TEMPLATES.find((t) => t.id.startsWith(prefix));
+        if (template) {
+          const raw = template.create();
+          const migrated = injectProjectName(raw, projectName);
+          addBlock(migrated);
+        }
+      }
+    });
+
+    setShowWizard(false);
+  };
+
+  return (
+    <>
+      <EditorShell />
+      <NewPageWizard 
+        open={showWizard} 
+        onClose={() => setShowWizard(false)} 
+        onSubmit={handleWizardSubmit}
+        closable={!(isGuest && (!page?.content || page.content.length === 0))}
+      />
+    </>
+  );
 }

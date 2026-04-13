@@ -30,7 +30,7 @@ export default function proxy(request: NextRequest) {
 
     // 2. Protect routes
     // We check if the pathname starts with any of our dashboard base paths
-    const protectedBases = ['/admin', '/home', '/templates', '/media', '/domains', '/editor'];
+    const protectedBases = ['/admin', '/home', '/templates', '/media', '/domains'];
     const isProtected = protectedBases.some(base => 
         pathname === base || pathname.startsWith(`${base}/`)
     );

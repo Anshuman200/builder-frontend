@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -196,6 +196,7 @@ interface NewPageWizardProps {
   onClose: () => void;
   onSubmit: (title: string, slug: string, selectedSections: string[], visibility: 'PUBLIC' | 'PRIVATE', password?: string) => Promise<void>;
   isSubmitting?: boolean;
+  closable?: boolean;
 }
 
 // ─── Stepper Bar ─────────────────────────────────────────────────────────────
@@ -230,7 +231,7 @@ function StepBar({ step }: { step: 1 | 2 }) {
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
-export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting }: NewPageWizardProps) {
+export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = false, closable = true }: NewPageWizardProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
@@ -241,6 +242,32 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting }:
   const [selectedSections, setSelectedSections] = useState<string[]>(["header", "hero", "footer"]);
   const [titleError, setTitleError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+
+  const handleClose = useCallback(() => {
+    if (!closable) return;
+    setStep(1);
+    setTitle("");
+    setSlug("");
+    setSlugManual(false);
+    setVisibility('PUBLIC');
+    setPassword("");
+    setShowPassword(false);
+    setSelectedSections(["header", "hero", "footer"]);
+    setTitleError("");
+    setPasswordError("");
+    onClose();
+  }, [closable, onClose]);
+
+  // Handle Escape key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && open && closable) {
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [open, closable, handleClose]);
 
   const slugify = (str: string) =>
     str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -273,19 +300,7 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting }:
     await onSubmit(title.trim(), finalSlug, selectedSections, visibility, visibility === 'PRIVATE' ? password : undefined);
   };
 
-  const handleClose = () => {
-    setStep(1);
-    setTitle("");
-    setSlug("");
-    setSlugManual(false);
-    setVisibility('PUBLIC');
-    setPassword("");
-    setShowPassword(false);
-    setSelectedSections(["header", "hero", "footer"]);
-    setTitleError("");
-    setPasswordError("");
-    onClose();
-  };
+
 
   if (!open) return null;
 
@@ -299,9 +314,16 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting }:
 
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-9999 flex items-center justify-center p-4"
-        style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", animation: "wizard-bg 0.2s ease" }}
-        onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
+        className="fixed inset-0 z-9999 flex items-center justify-center p-4 transition-all"
+        style={{ 
+          background: "rgba(0,0,0,0.75)", 
+          backdropFilter: "blur(16px)", 
+          WebkitBackdropFilter: "blur(16px)", 
+          animation: "wizard-bg 0.3s ease" 
+        }}
+        onClick={(e) => { 
+          if (e.target === e.currentTarget && closable) handleClose(); 
+        }}
       >
         {/* Modal card */}
         <div
@@ -324,12 +346,14 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting }:
                 </p>
               </div>
             </div>
-            <button
-              onClick={handleClose}
-              className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all"
-            >
-              <XMarkIcon className="w-4 h-4" />
-            </button>
+            {closable && (
+              <button
+                onClick={handleClose}
+                className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all"
+              >
+                <XMarkIcon className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
           {/* Step bar */}
@@ -489,7 +513,13 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting }:
               </button>
             ) : (
               <button
-                onClick={handleClose}
+                onClick={() => {
+                  if (!closable) {
+                    window.location.href = "/";
+                  } else {
+                    handleClose();
+                  }
+                }}
                 className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest"
               >
                 Cancel

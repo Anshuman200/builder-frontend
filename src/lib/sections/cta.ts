@@ -4,85 +4,182 @@ import type { SectionTemplate } from "@/types";
 
 export const ctaSections: SectionTemplate[] = [
   {
-    id: "cta-split",
-    name: "Split CTA with Image",
+    id: "cta-wavy",
+    name: "Modern Wavy Gradient",
     category: "CTA",
-    preview: `<div style="font-family:sans-serif;padding:10px;background:var(--bg-secondary);display:flex;gap:8px;align-items:center">
-      <div style="flex:1">
-        <div style="font-size:8px;font-weight:800;color:var(--text);margin-bottom:3px">Take the next step</div>
-        <div style="font-size:6px;color:var(--text-muted);margin-bottom:6px">Start building today.</div>
-        <div style="display:inline-block;background:#6366f1;color:#fff;font-size:5px;font-weight:700;padding:3px 8px;border-radius:3px">Start Free Trial</div>
+    preview: `<div style="font-family:sans-serif;padding:16px;background:linear-gradient(135deg,#312e81 0%,#7c3aed 50%,#ea580c 100%);border-radius:12px;text-align:center">
+      <div style="font-size:11px;font-weight:800;color:#fff;margin-bottom:4px">Ready to Unlock potential?</div>
+      <div style="font-size:6px;color:rgba(255,255,255,0.7);margin-bottom:8px">Let's create a lasting impression.</div>
+      <div style="display:flex;gap:4px;justify-content:center">
+        <div style="background:#fff;color:#000;font-size:5px;padding:3px 8px;border-radius:10px">Get a quote</div>
+        <div style="border:1px solid #fff;color:#fff;font-size:5px;padding:3px 8px;border-radius:10px">Learn more</div>
       </div>
-      <div style="width:50px;height:40px;background:var(--surface);border-radius:5px;border:1px solid var(--border)"></div>
     </div>`,
     create: () => {
-      const root = makeBlock("container", { bgColor: "#0f172a", padding: "5rem 2rem" });
-      const cols = makeBlock("columns", { leftWidth: "55", gap: "4rem", align: "center" });
+      const root = makeBlock("container", {
+        bgColor: "linear-gradient(135deg, #1e1b4b 0%, #4c1d95 30%, #7c3aed 50%, #ea580c 80%, #fbbf24 100%)",
+        padding: "6rem 2rem",
+        borderRadius: "24px",
+        maxWidth: "100%",
+        contentAlign: "center",
+      });
+      root.props.childBlocks = [
+        makeBlock("text", { content: "Ready to Unlock your Brand’s Potential?", tag: "h2", fontSize: "3.5rem", bold: true, align: "center", color: "#ffffff", lineHeight: "1.1" }),
+        makeBlock("text", { content: "Our design expertise can take your brand from ordinary to extraordinary. Let's create a lasting impression.", tag: "p", fontSize: "1.25rem", align: "center", color: "rgba(255,255,255,0.8)", marginTop: "1.5rem", maxWidth: "600px" }),
+        {
+          id: crypto.randomUUID(),
+          type: "columns",
+          props: {
+            padding: "2rem 0 0 0",
+            gap: "1rem",
+            leftWidth: 50,
+            alignItems: "center",
+            col0: [
+              makeBlock("button", { label: "Get a quote →", variant: "solid", bgColor: "#ffffff", textColor: "#000000", size: "lg", align: "right", fullWidth: false })
+            ],
+            col1: [
+              makeBlock("button", { label: "Learn more", variant: "outline", borderColor: "rgba(255,255,255,0.3)", textColor: "#ffffff", size: "lg", align: "left", fullWidth: false })
+            ]
+          }
+        }
+      ];
+      return root;
+    },
+  },
+  {
+    id: "cta-mobile-ai",
+    name: "AI Elevate (Concentric)",
+    category: "CTA",
+    preview: `<div style="font-family:sans-serif;padding:16px;background:#dcfce7;display:flex;gap:8px;align-items:center;border-radius:12px">
+      <div style="flex:1">
+        <div style="font-size:10px;font-weight:800;color:#166534">Ready to Elevate?</div>
+        <div style="font-size:5px;color:#15803d;margin-top:2px">Experience the efficiency.</div>
+      </div>
+      <div style="width:40px;height:50px;background:#fff;border:1px solid #166534;border-radius:4px"></div>
+    </div>`,
+    create: () => {
+      const root = makeBlock("container", {
+        bgColor: "#e0f2fe",
+        padding: "4rem 2rem",
+        borderRadius: "24px",
+        maxWidth: "100%",
+      });
+      const cols = makeBlock("columns", { leftWidth: "60", gap: "4rem", align: "center" });
       cols.props.col0 = [
-        makeBlock("text", { content: "Take the Next Step", tag: "h2", fontSize: "2.75rem", bold: true, color: "#ffffff" }),
-        makeBlock("text", { content: "Start your free trial today. No credit card required. Cancel anytime.", tag: "p", fontSize: "1.125rem", color: "#94a3b8", marginTop: "1rem" }),
-        makeBlock("button", {
-          text: "Start Free Trial",
-          url: "#",
-          variant: "solid",
-          bgColor: "#6366f1",
-          textColor: "#ffffff",
-          align: "left",
-          size: "large",
-          borderRadius: "12px",
-          marginTop: "2rem",
-        }),
+        makeBlock("text", { content: "Experience the Efficiency of Joy Today", tag: "p", fontSize: "0.9rem", bold: true, color: "#3b82f6", bgColor: "#ffffff", padding: "4px 12px", borderRadius: "999px", display: "inline-block" } as any),
+        makeBlock("text", { content: "Ready to Elevate Your Customer Service?", tag: "h2", fontSize: "3rem", bold: true, color: "#0f172a", marginTop: "1.5rem" }),
+        makeBlock("text", { content: "Take the next step toward transforming your customer service. With Joy's AI-powered assistance, provide exceptional support that sets you apart.", tag: "p", fontSize: "1.1rem", color: "#475569", marginTop: "1.5rem" }),
+        {
+          id: crypto.randomUUID(),
+          type: "columns",
+          props: {
+            padding: "2rem 0 0 0",
+            gap: "1rem",
+            leftWidth: 50,
+            col0: [makeBlock("button", { label: "Get started now →", variant: "solid", bgColor: "#0284c7", textColor: "#ffffff", size: "lg", align: "left" })],
+            col1: [makeBlock("button", { label: "Try demo for free", variant: "soft", bgColor: "#0284c7", textColor: "#0284c7", size: "lg", align: "left" })]
+          }
+        }
       ];
       cols.props.col1 = [
         makeBlock("image", {
-          src: "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=800&q=80",
-          borderRadius: "16px",
-          aspectRatio: "4/3",
-        }),
+          src: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=80",
+          alt: "Mobile App",
+          borderRadius: "24px",
+          aspectRatio: "9/16",
+          width: "300px",
+          align: "center",
+          shadow: "0 25px 50px -12px rgba(0,0,0,0.25)"
+        } as any)
       ];
       root.props.childBlocks = [cols];
       return root;
     },
   },
   {
-    id: "cta-card",
-    name: "CTA Card on Gradient",
+    id: "cta-laptop-luxury",
+    name: "Laptop Catchy Headline",
     category: "CTA",
-    preview: `<div style="font-family:sans-serif;padding:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6)">
-      <div style="background:rgba(255,255,255,0.12);border-radius:8px;padding:10px;text-align:center">
-        <div style="font-size:8px;font-weight:800;color:#fff;margin-bottom:3px">Start building today</div>
-        <div style="font-size:5px;color:rgba(255,255,255,0.7);margin-bottom:6px">Free forever for personal use.</div>
-        <div style="display:inline-block;background:#fff;color:#6366f1;font-size:5px;font-weight:700;padding:3px 10px;border-radius:20px">Sign Up Free</div>
+    preview: `<div style="font-family:sans-serif;padding:16px;background:#f8fafc;display:flex;gap:8px;align-items:center;border-radius:12px">
+      <div style="flex:1">
+        <div style="font-size:9px;font-weight:700;color:#0f172a">A catchy headline</div>
+        <div style="font-size:5px;color:#64748b;margin-top:2px">Lorem ipsum dolor sit.</div>
+      </div>
+      <div style="width:60px;height:40px;background:#e2e8f0;border-radius:4px"></div>
+    </div>`,
+    create: () => {
+      const root = makeBlock("container", {
+        bgColor: "#f9fafb",
+        padding: "6rem 2rem",
+        borderRadius: "24px",
+        maxWidth: "100%",
+      });
+      const cols = makeBlock("columns", { leftWidth: "50", gap: "3rem", align: "center" });
+      cols.props.col0 = [
+        makeBlock("text", { content: "LOREM IPSUM DOLOR", tag: "p", fontSize: "0.75rem", bold: true, color: "#3b82f6", letterSpacing: "0.1em" }),
+        makeBlock("text", { content: "A catchy headline that grab user attention", tag: "h2", fontSize: "2.5rem", bold: true, color: "#111827", marginTop: "0.5rem" }),
+        makeBlock("text", { content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin interdum enim turpis, vitae sollicitudin eros dignissim sed. Maecenas vitae facilisis metus.", tag: "p", fontSize: "1rem", color: "#6b7280", marginTop: "1.5rem" }),
+        {
+          id: crypto.randomUUID(),
+          type: "columns",
+          props: {
+            padding: "2rem 0 0 0",
+            gap: "1rem",
+            leftWidth: 50,
+            col0: [makeBlock("button", { label: "Primary action", variant: "solid", bgColor: "#2563eb", textColor: "#ffffff", size: "md", align: "left" })],
+            col1: [makeBlock("button", { label: "Secondary action", variant: "soft", bgColor: "#2563eb", textColor: "#2563eb", size: "md", align: "left" })]
+          }
+        }
+      ];
+      cols.props.col1 = [
+        makeBlock("image", {
+          src: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&q=80",
+          alt: "Laptop Showcase",
+          borderRadius: "12px",
+          aspectRatio: "16/10",
+          shadow: "0 20px 25px -5px rgba(0,0,0,0.1)"
+        } as any)
+      ];
+      root.props.childBlocks = [cols];
+      return root;
+    },
+  },
+  {
+    id: "cta-minimalist",
+    name: "Minimalist Pill Contrast",
+    category: "CTA",
+    preview: `<div style="font-family:sans-serif;padding:16px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;text-align:center">
+      <div style="font-size:11px;font-weight:900;color:#000;margin-bottom:8px">Ready to make everyday life clearer?</div>
+      <div style="display:flex;gap:4px;justify-content:center">
+        <div style="border:1px solid #000;color:#000;font-size:5px;padding:3px 10px;border-radius:20px">Buy now</div>
+        <div style="background:#000;color:#fff;font-size:5px;padding:3px 10px;border-radius:20px">Learn more</div>
       </div>
     </div>`,
     create: () => {
-      const outer = makeBlock("container", {
-        bgColor: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-        padding: "5rem 2rem",
-      });
-      const card = makeBlock("container", {
-        bgColor: "rgba(255,255,255,0.1)",
-        padding: "4rem 3rem",
+      const root = makeBlock("container", {
+        bgColor: "#ffffff",
+        padding: "8rem 2rem",
         borderRadius: "24px",
-        maxWidth: "700px",
+        contentAlign: "center",
+        maxWidth: "100%",
       });
-      card.props.childBlocks = [
-        makeBlock("text", { content: "Start Building Today", tag: "h2", fontSize: "2.75rem", bold: true, align: "center", color: "#ffffff" }),
-        makeBlock("text", { content: "Free forever for personal use. Upgrade when you grow.", tag: "p", fontSize: "1.125rem", align: "center", color: "rgba(255,255,255,0.80)", marginTop: "0.75rem" }),
-        makeBlock("button", {
-          text: "Sign Up Free",
-          url: "#",
-          variant: "solid",
-          bgColor: "#ffffff",
-          textColor: "#6366f1",
-          align: "center",
-          size: "large",
-          borderRadius: "9999px",
-          marginTop: "2rem",
-        }),
+      root.props.childBlocks = [
+        makeBlock("text", { content: "Ready to make everyday life clearer and easier?", tag: "h2", fontSize: "4rem", bold: true, align: "center", color: "#000000", maxWidth: "800px", lineHeight: "1.1" }),
+        makeBlock("text", { content: "EyeSight brings together comfort, connection, and smart support in one simple pair of glasses designed for real life.", tag: "p", fontSize: "1.2rem", align: "center", color: "#666666", marginTop: "1.5rem", maxWidth: "500px" }),
+        {
+          id: crypto.randomUUID(),
+          type: "columns",
+          props: {
+            padding: "3rem 0 0 0",
+            gap: "1rem",
+            leftWidth: 50,
+            alignItems: "center",
+            col0: [makeBlock("button", { label: "Buy now", variant: "outline", borderColor: "#000000", textColor: "#000000", size: "lg", align: "right", borderRadius: "9999px", fullWidth: false })],
+            col1: [makeBlock("button", { label: "Learn more", variant: "solid", bgColor: "#000000", textColor: "#ffffff", size: "lg", align: "left", borderRadius: "9999px", fullWidth: false })]
+          }
+        }
       ];
-      outer.props.childBlocks = [card];
-      return outer;
+      return root;
     },
   },
 ];

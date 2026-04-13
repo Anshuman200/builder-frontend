@@ -20,7 +20,7 @@ export function HeroPanel({ block }: { block: Block }) {
                 <Field label="Image Overlay Color"><ColorInput value={(p.bgOverlay as string) || "var(--overlay)"} onChange={(v) => up("bgOverlay", v)} onBlur={(v) => up("bgOverlay", v, true)} /></Field>
             </Section>
             <Section title="Style">
-                <Field label="Section Layout"><SelectInput value={(p.layout as string) || "centered"} onChange={(v) => up("layout", v)} options={[{ label: "Centered (Full Width)", value: "centered" }, { label: "Narrow Content (800px)", value: "narrow" }, { label: "Full Screen (100vh)", value: "fullscreen" }]} /></Field>
+                <Field label="Section Layout"><SelectInput value={(p.layout as string) || "centered"} onChange={(v) => up("layout", v)} options={[{ label: "Fluid / Edge-to-Edge", value: "fluid" }, { label: "Centered (Container)", value: "centered" }, { label: "Narrow Content (800px)", value: "narrow" }, { label: "Full Screen (100vh)", value: "fullscreen" }]} /></Field>
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#ffffff"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
                 <Field label="Min Height"><TextInput value={(p.minHeight as string) || "480px"} onChange={(v) => up("minHeight", v)} placeholder="480px" /></Field>
                 <Field label="Content Alignment"><SelectInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>

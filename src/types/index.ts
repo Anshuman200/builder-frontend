@@ -83,6 +83,8 @@ export interface EditorPage {
     category?: string;
     visibility?: "PUBLIC" | "PRIVATE" | string;
     password?: string;
+    thumbnail?: string | null;
+    thumbnails?: string[];
 }
 
 // ─── BLOCKS & TEMPLATES ────────────────────────────────────────────────────────

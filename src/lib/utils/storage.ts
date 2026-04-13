@@ -44,5 +44,7 @@ function createBlankPage(id: string): EditorPage {
     theme: DEFAULT_THEME,
     meta: {},
     status: "DRAFT",
+    thumbnail: null,
+    thumbnails: [],
   };
 }
