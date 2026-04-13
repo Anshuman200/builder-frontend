@@ -26,8 +26,9 @@ export function ImageBlock({ block }: BlockProps) {
     };
 
     const wrapperStyle: React.CSSProperties = {
-        padding: isInMasonry ? "0" : "8px 16px",
+        padding: (isInMasonry || p.padding === "0") ? "0" : (p.padding as string) || "8px 16px",
         width: "100%",
+        height: height === "100%" ? "100%" : "auto",
         marginTop: (p.marginTop as string) || "0",
         marginLeft: (p.marginLeft as string) || "0",
         marginRight: (p.marginRight as string) || "0",
@@ -71,9 +72,8 @@ export function ImageBlock({ block }: BlockProps) {
             borderRadius, 
             boxShadow,
             maxWidth: "100%",
-            maxHeight: "min(85vh, 1200px)", // Fix for "images too big" issue
-            ...(hasAspect ? { aspectRatio } : {}),
-            ...(hasHeight ? { height } : { height: "auto" }),
+            height: height === "100%" ? "100%" : (hasHeight ? height : (hasAspect ? "auto" : "auto")),
+            ...(hasAspect && height !== "100%" ? { aspectRatio } : {}),
             backgroundColor: "rgba(100, 116, 139, 0.05)",
         }}>
             {isLoading && (

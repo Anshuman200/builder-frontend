@@ -392,36 +392,64 @@ export function ContactFormPanel({ block }: { block: Block }) {
 
     return (
         <>
-            <Section title="Destination Email">
-                <Field label="Receiver Email"><TextInput value={(p.receiverEmail as string) || "ansh.official03@gmail.com"} onChange={(v) => up("receiverEmail", v)} placeholder="hello@yourdomain.com" /></Field>
+            <Section title="Destination">
+                <Field label="Submit Mode">
+                    <SelectInput
+                        value={(p.mode as string) || "email"}
+                        onChange={(v) => up("mode", v)}
+                        options={[
+                            { label: "Send Email", value: "email" },
+                            { label: "API Webhook", value: "api" }
+                        ]}
+                    />
+                </Field>
+                {p.mode === "api" ? (
+                    <Field label="API URL">
+                        <TextInput value={(p.apiUrl as string) || ""} onChange={(v) => up("apiUrl", v)} placeholder="https://api.example.com/webhook" />
+                    </Field>
+                ) : (
+                    <Field label="Receiver Email">
+                        <TextInput value={(p.receiverEmail as string) || "ansh.official03@gmail.com"} onChange={(v) => up("receiverEmail", v)} placeholder="hello@yourdomain.com" />
+                    </Field>
+                )}
             </Section>
 
             <Section title="Form Setup">
                 <Field label="Section Layout"><SelectInput value={(p.layout as string) || "centered"} onChange={(v) => up("layout", v)} options={[{ label: "Centered (Narrow)", value: "centered" }, { label: "Split — Form + Info Panel", value: "split" }, { label: "Full Width", value: "full" }, { label: "Card / Floating", value: "card" }]} /></Field>
                 <ToggleInput value={p.showLastName !== false} onChange={(v) => up("showLastName", v)} label="Show Last Name Field" />
+                <ToggleInput value={p.showGender === true} onChange={(v) => up("showGender", v)} label="Show Gender Field" />
             </Section>
 
             <Section title="Field Labels & Validation">
                 <div style={{ paddingBottom: 12, borderBottom: "1px solid var(--border)", marginBottom: 12 }}>
                     <Field label="First Name"><TextInput value={(p.firstNameLabel as string) || "First Name"} onChange={(v) => up("firstNameLabel", v)} /></Field>
-                    <ToggleInput value={p.firstNameRequired !== false} onChange={(v) => up("firstNameRequired", v)} label="Required Field" />
+                    {p.mode === "api" && <Field label="Form Name"><TextInput value={(p.firstNameApiKey as string) || "firstName"} onChange={(v) => up("firstNameApiKey", v)} placeholder="firstName" /></Field>}
                 </div>
 
                 {p.showLastName !== false && (
                     <div style={{ paddingBottom: 12, borderBottom: "1px solid var(--border)", marginBottom: 12 }}>
                         <Field label="Last Name"><TextInput value={(p.lastNameLabel as string) || "Last Name"} onChange={(v) => up("lastNameLabel", v)} /></Field>
                         <ToggleInput value={p.lastNameRequired === true} onChange={(v) => up("lastNameRequired", v)} label="Required Field" />
+                        {p.mode === "api" && <Field label="Form Name"><TextInput value={(p.lastNameApiKey as string) || "lastName"} onChange={(v) => up("lastNameApiKey", v)} placeholder="lastName" /></Field>}
                     </div>
                 )}
 
                 <div style={{ paddingBottom: 12, borderBottom: "1px solid var(--border)", marginBottom: 12 }}>
                     <Field label="Email"><TextInput value={(p.emailLabel as string) || "Email"} onChange={(v) => up("emailLabel", v)} /></Field>
-                    <ToggleInput value={p.emailRequired !== false} onChange={(v) => up("emailRequired", v)} label="Required Field" />
+                    {p.mode === "api" && <Field label="Form Name"><TextInput value={(p.emailApiKey as string) || "email"} onChange={(v) => up("emailApiKey", v)} placeholder="email" /></Field>}
                 </div>
+
+                {p.showGender === true && (
+                    <div style={{ paddingBottom: 12, borderBottom: "1px solid var(--border)", marginBottom: 12 }}>
+                        <Field label="Gender"><TextInput value={(p.genderLabel as string) || "Gender"} onChange={(v) => up("genderLabel", v)} /></Field>
+                        <ToggleInput value={p.genderRequired !== false} onChange={(v) => up("genderRequired", v)} label="Required Field" />
+                        {p.mode === "api" && <Field label="Form Name"><TextInput value={(p.genderApiKey as string) || "gender"} onChange={(v) => up("genderApiKey", v)} placeholder="gender" /></Field>}
+                    </div>
+                )}
 
                 <div>
                     <Field label="Message"><TextInput value={(p.messageLabel as string) || "Message"} onChange={(v) => up("messageLabel", v)} /></Field>
-                    <ToggleInput value={p.messageRequired !== false} onChange={(v) => up("messageRequired", v)} label="Required Field" />
+                    {p.mode === "api" && <Field label="Form Name"><TextInput value={(p.messageApiKey as string) || "message"} onChange={(v) => up("messageApiKey", v)} placeholder="message" /></Field>}
                 </div>
             </Section>
 

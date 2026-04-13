@@ -81,33 +81,6 @@ export const contactSections: SectionTemplate[] = [
       return root;
     },
   },
-  // ─── 1. Simple CTA Banner ────────────────────────────────────────────────────
-  {
-    id: "cta-banner",
-    name: "Simple CTA Banner",
-    category: "Contact",
-    preview: `<div style="font-family:sans-serif;padding:14px;text-align:center;margin:6px;border-radius:8px">
-      <div style="background:var(--primary);padding:10px;border-radius:6px;text-align:center">
-        <div style="font-size:10px;font-weight:800;color:#fff;margin-bottom:4px">Ready to get started?</div>
-        <div style="font-size:7px;color:#c7d2fe;margin-bottom:8px">Join thousands of creators.</div>
-        <div style="font-size:7px;background:#fff;color:var(--primary);padding:3px 10px;border-radius:4px;display:inline-block;font-weight:700">Create Free Account</div>
-      </div>
-    </div>`,
-    create: () => {
-      const cta = makeBlock("hero", {
-        align: "center", bgColor: "#4f46e5", textColor: "#ffffff",
-        padding: "6rem 2rem", minHeight: "auto", borderRadius: "24px",
-      });
-      cta.props.childBlocks = [
-        makeBlock("text", { content: "Ready to get started?", tag: "h2", fontSize: "3rem", bold: true, align: "center" }),
-        makeBlock("text", { content: "Join thousands of creators building on PageCraft today.", tag: "p", fontSize: "1.25rem", align: "center", opacity: 0.9 }),
-        makeBlock("button", { label: "Create Your Free Account", variant: "solid", bgColor: "#ffffff", textColor: "#4f46e5", size: "lg", align: "center", marginTop: "2rem", borderRadius: "8px" }),
-      ];
-      const container = makeBlock("container", { padding: "4rem 2rem" });
-      container.props.childBlocks = [cta];
-      return container;
-    },
-  },
 
   // ─── 4. Gradient Hero CTA with 3 info cards ──────────────────────────────────
   {
@@ -186,7 +159,7 @@ export const contactSections: SectionTemplate[] = [
         makeBlock("image", {
           src: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
           alt: "Contact office", objectFit: "cover",
-          aspectRatio: "3/4",
+          height: "100%", padding: "0"
         }),
       ];
 
@@ -202,11 +175,7 @@ export const contactSections: SectionTemplate[] = [
         buttonBg: "#0f172a", buttonTextColor: "#ffffff", buttonFullWidth: false, buttonAlign: "left"
       });
       rightPane.props.childBlocks = [
-        formBlock,
-        makeBlock("divider", { marginY: "2rem", color: "#f1f5f9" }),
-        makeBlock("text", { content: "📍  123 Bay Fremont St, San Francisco, CA 94102", tag: "p", fontSize: "0.875rem", color: "#64748b" }),
-        makeBlock("text", { content: "📞  (415) 555-7890", tag: "p", fontSize: "0.875rem", color: "#64748b", marginTop: "0.4rem" }),
-        makeBlock("text", { content: "✉️  hello@company.com", tag: "p", fontSize: "0.875rem", color: "#64748b", marginTop: "0.4rem" }),
+        formBlock
       ];
       cols.props.col1 = [rightPane];
       root.props.childBlocks = [cols];

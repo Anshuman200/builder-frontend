@@ -4,39 +4,6 @@ import type { SectionTemplate } from "@/types";
 
 export const ctaSections: SectionTemplate[] = [
   {
-    id: "cta-centered",
-    name: "Centered CTA Banner",
-    category: "CTA",
-    preview: `<div style="font-family:sans-serif;padding:14px;background:#6366f1;text-align:center;border-radius:6px">
-      <div style="font-size:9px;font-weight:800;color:#fff;margin-bottom:4px">Ready to get started?</div>
-      <div style="font-size:6px;color:rgba(255,255,255,0.75);margin-bottom:8px">Join thousands of companies building with us.</div>
-      <div style="display:inline-block;background:#fff;color:#6366f1;font-size:6px;font-weight:700;padding:4px 10px;border-radius:4px">Get Started Free</div>
-    </div>`,
-    create: () => {
-      const root = makeBlock("container", {
-        bgColor: "#6366f1",
-        padding: "6rem 2rem",
-        textColor: "#ffffff",
-      });
-      root.props.childBlocks = [
-        makeBlock("text", { content: "Ready to Get Started?", tag: "h2", fontSize: "3rem", bold: true, align: "center", color: "#ffffff" }),
-        makeBlock("text", { content: "Join thousands of companies building beautiful landing pages with PageCraft. No credit card required.", tag: "p", fontSize: "1.25rem", align: "center", color: "rgba(255,255,255,0.80)", marginTop: "1rem" }),
-        makeBlock("button", {
-          text: "Get Started Free",
-          url: "#",
-          variant: "solid",
-          bgColor: "#ffffff",
-          textColor: "#6366f1",
-          align: "center",
-          size: "large",
-          borderRadius: "9999px",
-          marginTop: "2.5rem",
-        }),
-      ];
-      return root;
-    },
-  },
-  {
     id: "cta-split",
     name: "Split CTA with Image",
     category: "CTA",

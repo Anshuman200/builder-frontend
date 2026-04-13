@@ -571,10 +571,10 @@ export function InputFields({ p, up, prefix = "input", isDark = false }: Propert
     const heightKey = `${prefix}Height`;
 
     const defaults = {
-        bg: isDark ? "#1f1f1f" : "#f8fafc",
-        text: isDark ? "#ffffff" : "#111827",
-        placeholder: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.4)",
-        border: isDark ? "#303030" : "#e2e8f0",
+        bg: "#f8fafc",
+        text: "#111827",
+        placeholder: "rgba(0,0,0,0.4)",
+        border: "#e2e8f0",
         label: isDark ? "rgba(255,255,255,0.85)" : "#374151"
     };
 
