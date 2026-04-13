@@ -54,6 +54,9 @@ export default function DomainPage() {
     };
 
     const getStatusBadge = (domain: any) => {
+        if (domain.isInternalProxy) {
+            return <Badge status="processing" text="Live on Proxy" className="[&_.ant-badge-status-text]:text-blue-400! [&_.ant-badge-status-text]:font-bold! animate-pulse!" />;
+        }
         if (domain.status === 'active') {
             return <Badge status="success" text="Active" />;
         }
@@ -159,16 +162,18 @@ export default function DomainPage() {
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-center gap-2">
-                                                <div className="text-white font-bold text-base whitespace-nowrap">{d.domain}</div>
-                                                <Tooltip title="Copy Domain">
+                                                <div className="text-white font-bold text-base whitespace-nowrap truncate max-w-[150px] md:max-w-none">
+                                                    {d.isInternalProxy ? d.workerUrl?.replace(/^https?:\/\//, '') : d.domain}
+                                                </div>
+                                                <Tooltip title="Copy URL">
                                                     <Button
                                                         type="text"
                                                         size="small"
                                                         icon={<CopyOutlined />}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            navigator.clipboard.writeText(d.domain);
-                                                            message.success("Domain copied");
+                                                            navigator.clipboard.writeText(d.isInternalProxy ? d.workerUrl : d.domain);
+                                                            message.success("Copied to clipboard");
                                                         }}
                                                         className="bg-white/5! border-white/10! text-white/60! hover:text-white! h-6! w-6! flex items-center justify-center rounded-md!"
                                                     />
@@ -178,17 +183,29 @@ export default function DomainPage() {
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Tooltip title="Check Status">
+                                        {d.isInternalProxy ? (
                                             <Button
-                                                icon={<ReloadOutlined />}
-                                                loading={verifyMutation.isPending && verifyMutation.variables === d._id}
-                                                onClick={() => verifyDomain(d._id)}
-                                                className="bg-white/5! border-white/10! text-white! hover:bg-white/10!"
+                                                type="primary"
+                                                icon={<GlobalOutlined />}
+                                                onClick={() => router.push(`/domains/connect?pageId=${d.pageId}&skipDeploy=true`)}
+                                                className="bg-linear-to-r! from-indigo-600! to-purple-600! border-0! hover:scale-[1.02]! transition-all"
                                             >
-                                                <span className="hidden xl:inline">Check Status</span>
+                                                <span className="hidden md:inline">Connect Custom Domain</span>
+                                                <span className="md:hidden">Add Domain</span>
                                             </Button>
-                                        </Tooltip>
-                                        <Tooltip title="Delete Domain">
+                                        ) : (
+                                            <Tooltip title="Check Status">
+                                                <Button
+                                                    icon={<ReloadOutlined />}
+                                                    loading={verifyMutation.isPending && verifyMutation.variables === d._id}
+                                                    onClick={() => verifyDomain(d._id)}
+                                                    className="bg-white/5! border-white/10! text-white! hover:bg-white/10!"
+                                                >
+                                                    <span className="hidden xl:inline">Check Status</span>
+                                                </Button>
+                                            </Tooltip>
+                                        )}
+                                        <Tooltip title="Delete Deployment">
                                             <Button
                                                 danger
                                                 icon={<DeleteOutlined />}
@@ -275,7 +292,7 @@ export default function DomainPage() {
                                 </div>
                             )}
 
-                            {d.status === 'active' && (
+                            {d.status === 'active' && !d.isInternalProxy && (
                                 <div className="mt-4 p-4 bg-emerald-500/5! border border-emerald-500/10! rounded-md!">
                                     <div className="flex items-center gap-2 text-emerald-400">
                                         <CheckCircleOutlined className="text-lg" />

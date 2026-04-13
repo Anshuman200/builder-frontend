@@ -72,3 +72,14 @@ export const useCreateProxy = () => {
         }
     });
 };
+
+export const useProxyStatus = (pageId?: string) => {
+    return useQuery({
+        queryKey: ["proxy-status", pageId],
+        queryFn: async () => {
+            const { data } = await proxyApi.status(pageId!);
+            return data;
+        },
+        enabled: !!pageId,
+    });
+};

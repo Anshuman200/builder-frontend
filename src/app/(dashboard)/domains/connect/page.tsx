@@ -13,7 +13,7 @@ import {
     SyncOutlined,
     ArrowLeftOutlined
 } from '@ant-design/icons';
-import { useCreateDomain, useVerifyDomain, useCreateProxy } from "@/lib/api/domainHooks";
+import { useCreateDomain, useVerifyDomain, useCreateProxy, useProxyStatus } from "@/lib/api/domainHooks";
 import { useAuth } from "@/hooks/useAuth";
 import { useGoLivePage, usePage, usePages } from "@/lib/api/queries";
 // Removed plain CSS import in favor of Tailwind
@@ -41,8 +41,10 @@ function ConnectDomainContent() {
     const verifyMutation = useVerifyDomain();
     
     const pageIdFromUrl = searchParams.get("pageId") || "";
+    const skipDeploy = searchParams.get("skipDeploy") === "true";
 
     const { data: pageData, isLoading: pageLoading } = usePage(pageIdFromUrl, !!pageIdFromUrl);
+    const { data: existingProxy, isLoading: proxyLoading } = useProxyStatus(skipDeploy ? pageIdFromUrl : undefined);
     const { data: allPages = [], isLoading: allPagesLoading } = usePages();
 
     // Filter for private projects that are not yet live
@@ -65,6 +67,7 @@ function ConnectDomainContent() {
     const [autoValidating, setAutoValidating] = useState(false);
     const [validationProgress, setValidationProgress] = useState(0);
     const [validationSuccess, setValidationSuccess] = useState(false);
+    const [isSkipped, setIsSkipped] = useState(false);
 
     useEffect(() => {
         if (pageIdFromUrl) {
@@ -72,6 +75,13 @@ function ConnectDomainContent() {
             setTargetUrl(`${baseUrl}/preview/${pageIdFromUrl}`);
         }
     }, [pageIdFromUrl]);
+
+    useEffect(() => {
+        if (skipDeploy && existingProxy && !workerResult) {
+            setWorkerResult(existingProxy);
+            setCurrentStep(1);
+        }
+    }, [skipDeploy, existingProxy, workerResult]);
 
     const handleProjectSelect = (id: string) => {
         const baseUrl = `https://build.solidappmaker.in`
@@ -113,7 +123,7 @@ function ConnectDomainContent() {
                         pageId, 
                         originUrl: targetUrl 
                     });
-                    setWorkerResult(result);
+                    setWorkerResult(result.data || result);
                 }
                 await delay(DEPLOY_STEPS[i].ms);
             }
@@ -165,6 +175,28 @@ function ConnectDomainContent() {
             setCurrentStep(2);
         } catch (err: any) {
             setDomainError(err.message || "Failed to create domain");
+        }
+    };
+
+    const handleSkipDomain = async () => {
+        setIsSkipped(true);
+        try {
+            let pageIdToUse = pageIdFromUrl;
+            if (!pageIdToUse) {
+                try {
+                    const parsed = new URL(targetUrl);
+                    const match = parsed.pathname.match(/([0-9a-fA-F]{24})/);
+                    pageIdToUse = parsed.searchParams.get("id") || (match ? match[1] : "");
+                } catch (e) { }
+            }
+
+            if (pageIdToUse) {
+                await goLiveMutation.mutateAsync(pageIdToUse);
+                message.success("Project is now live via proxy URL!");
+            }
+            router.push('/domains');
+        } catch (err: any) {
+            message.error(err.message || "Failed to go live");
         }
     };
 
@@ -261,6 +293,8 @@ function ConnectDomainContent() {
                                     workerError={workerError}
                                     workerResult={workerResult}
                                     onNext={() => setCurrentStep(1)}
+                                    onSkip={handleSkipDomain}
+                                    isSkipping={goLiveMutation.isPending}
                                     onDeploy={handleDeployWorker}
                                     handleCopy={handleCopy}
                                     isPreFilled={!!pageIdFromUrl}
@@ -286,6 +320,8 @@ function ConnectDomainContent() {
                             {currentStep === 2 && (
                                 <StepComplete
                                     domainResult={domainResult}
+                                    workerResult={workerResult}
+                                    isSkipped={isSkipped}
                                     autoValidating={autoValidating}
                                     validationProgress={validationProgress}
                                     validationSuccess={validationSuccess}
@@ -317,21 +353,23 @@ function Header({ onBack }: { onBack: () => void }) {
 
 function StepDeployWorker({
     targetUrl, setTargetUrl, workerDeploying, deployStepLabel, deployProgress,
-    workerError, workerResult, onNext, onDeploy, handleCopy, isPreFilled, disabled,
+    workerError, workerResult, onNext, onSkip, isSkipping, onDeploy, handleCopy, isPreFilled, disabled,
     projects, onProjectSelect, projectsLoading, pageData
 }: any) {
     return (
         <Space orientation="vertical" style={{ width: '100%' }} size="large">
-            <Alert
-                title="Step 1: Deploy Landing Page Worker"
-                description="We need to deploy a proxy worker to Cloudflare to serve your landing page from your custom domain with SSL."
-                type="info"
-                showIcon
-                icon={<RocketOutlined />}
-                className="bg-indigo-500/10! border-indigo-500/20! rounded-md! [&_.ant-alert-message]:text-white! [&_.ant-alert-description]:text-white/70!"
-            />
+            {!workerResult && (
+                <Alert
+                    title="Step 1: Deploy Landing Page Worker"
+                    description="We need to deploy a proxy worker to Cloudflare to serve your landing page from your custom domain with SSL."
+                    type="info"
+                    showIcon
+                    icon={<RocketOutlined />}
+                    className="bg-indigo-500/10! border-indigo-500/20! rounded-md! [&_.ant-alert-message]:text-white! [&_.ant-alert-description]:text-white/70!"
+                />
+            )}
 
-            {isPreFilled && pageData && (
+            {!workerResult && isPreFilled && pageData && (
                 <div className="mb-8">
                     <label className="block mb-2 font-semibold text-white">Selected Project</label>
                     <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-md transition-all hover:bg-white/10">
@@ -355,7 +393,7 @@ function StepDeployWorker({
                 </div>
             )}
 
-            {!isPreFilled && (
+            {!workerResult && !isPreFilled && (
                 <div className="mb-8">
                     <label className="block mb-2 font-semibold text-white">Select Private Project</label>
                     <Select
@@ -408,39 +446,60 @@ function StepDeployWorker({
             {workerError && <Alert message={workerError} type="error" showIcon />}
 
             {workerResult && !workerDeploying && (
-                <Alert
-                    message="Setup Successful!"
-                    description={
-                        <div className="flex items-center gap-2 mt-2">
-                            <Text code className="flex-1 bg-indigo-500/10! border-indigo-500/20! text-indigo-300!">{workerResult.workerUrl}</Text>
+                <div className="p-1! rounded-2xl bg-linear-to-r from-indigo-500/20 to-purple-500/20 border border-white/10 overflow-hidden animate-in fade-in zoom-in duration-300">
+                    <div className="bg-[#1a1a1a] p-5 rounded-[14px]">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <Text className="text-white/70! text-xs font-bold uppercase tracking-wider">Live Proxy Link</Text>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                                <Text className="text-indigo-300! text-sm font-mono truncate block">{workerResult.workerUrl}</Text>
+                            </div>
                             <Button
-                                size="small"
+                                type="primary"
                                 icon={<CopyOutlined />}
                                 onClick={() => handleCopy(workerResult.workerUrl)}
-                                className="bg-indigo-500/20! border-indigo-500/30! text-indigo-300! hover:bg-indigo-500/30!"
-                            >
-                                Copy
-                            </Button>
+                                className="h-[46px]! w-[46px]! flex items-center justify-center bg-indigo-600! border-0! rounded-xl! hover:scale-105! transition-transform"
+                            />
                         </div>
-                    }
-                    type="success"
-                    showIcon
-                    className="bg-emerald-500/10! border-emerald-500/20! rounded-xl!"
-                />
+                    </div>
+                </div>
             )}
 
-            <div className="flex gap-4 mt-4">
-                <Button
-                    type="primary"
-                    size="large"
-                    block
-                    onClick={workerResult ? onNext : onDeploy}
-                    loading={workerDeploying}
-                    disabled={disabled && !workerResult}
-                    className="h-14! text-lg! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-2xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
-                >
-                    {workerResult ? 'Next: Add Domain →' : '🚀 Deploy Worker'}
-                </Button>
+            <div className="flex flex-col gap-3 mt-4">
+                {!workerResult ? (
+                    <Button
+                        type="primary"
+                        size="large"
+                        block
+                        onClick={onDeploy}
+                        loading={workerDeploying}
+                        disabled={disabled}
+                        className="h-14! text-lg! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-2xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
+                    >
+                        🚀 Publish
+                    </Button>
+                ) : (
+                    <div className="grid grid-cols-2 gap-4">
+                        <Button
+                            size="large"
+                            onClick={onSkip}
+                            loading={isSkipping}
+                            className="h-14! font-bold! bg-white/5! border-white/10! text-white! rounded-2xl! hover:bg-white/10!"
+                        >
+                            Continue
+                        </Button>
+                        <Button
+                            type="primary"
+                            size="large"
+                            onClick={onNext}
+                            className="h-14! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-2xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
+                        >
+                            🌐 Connect Domain
+                        </Button>
+                    </div>
+                )}
             </div>
         </Space>
     );
@@ -491,10 +550,18 @@ function StepAddDomain({ customDomain, setCustomDomain, domainCreating, domainEr
     );
 }
 
-function StepComplete({ domainResult, autoValidating, validationProgress, validationSuccess, onDone }: any) {
+function StepComplete({ domainResult, workerResult, isSkipped, autoValidating, validationProgress, validationSuccess, onDone }: any) {
     return (
         <Space orientation="vertical" style={{ width: '100%' }} size="large">
-            {domainResult?.requiresManualDns ? (
+            {isSkipped ? (
+                <Alert
+                    message="Setup Successful!"
+                    description="Your landing page is now live and ready to share via the proxy link."
+                    type="success"
+                    showIcon
+                    className="mb-4 bg-emerald-500/10! border-emerald-500/20! rounded-md!"
+                />
+            ) : domainResult?.requiresManualDns ? (
                 <Alert
                     message="Action Required: DNS Setup"
                     description="Your domain was added, but you need to configure your DNS records to activate it."
@@ -513,7 +580,41 @@ function StepComplete({ domainResult, autoValidating, validationProgress, valida
             )}
 
             <div className="p-12 bg-white/3 rounded-md border border-white/5">
-                {domainResult?.requiresManualDns ? (
+                {isSkipped ? (
+                    <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="inline-flex p-8 bg-emerald-500/10 rounded-full mb-6 border border-emerald-500/20 shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)]">
+                            <RocketOutlined className="text-7xl text-emerald-500" />
+                        </div>
+                        <Title level={2} className="text-white! m-0! mb-3!">Project is Live!</Title>
+                        <Text className="text-white/60! text-lg block mb-10">Your site is now accessible globally via the secure proxy link.</Text>
+                        
+                        <div className="max-w-xl mx-auto p-1! rounded-2xl bg-linear-to-r from-emerald-500/20 to-indigo-500/20 border border-white/10 overflow-hidden mb-12">
+                            <div className="bg-[#1a1a1a] p-6 rounded-[14px]">
+                                <div className="flex items-center gap-2 mb-4 justify-center">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                    <Text className="text-white/50! text-[10px] font-bold uppercase tracking-[0.2em]">Public Access URL</Text>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex-1 px-5 py-4 bg-white/5 border border-white/10 rounded-xl overflow-hidden group hover:border-white/20 transition-colors">
+                                        <Text className="text-emerald-400! text-base font-mono truncate block">{workerResult?.workerUrl}</Text>
+                                    </div>
+                                    <Button 
+                                        type="primary" 
+                                        icon={<CopyOutlined />} 
+                                        size="large"
+                                        onClick={() => {
+                                            if (workerResult?.workerUrl) {
+                                                navigator.clipboard.writeText(workerResult.workerUrl);
+                                                message.success("Link copied to clipboard!");
+                                            }
+                                        }}
+                                        className="h-[60px]! w-[60px]! flex items-center justify-center bg-emerald-600! border-0! rounded-xl! hover:scale-105! transition-transform shadow-lg shadow-emerald-900/20"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ) : domainResult?.requiresManualDns ? (
                     <div className="text-center">
                         <ClockCircleOutlined className="text-6xl text-amber-400 mb-4" />
                         <Title level={3} className="text-white!">Manual DNS Setup Pending</Title>
