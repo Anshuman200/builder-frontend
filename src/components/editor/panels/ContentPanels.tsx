@@ -3,7 +3,11 @@ import type { Block, EditorPage } from "@/types";
 import React from "react";
 import { useEditorStore, DEFAULT_THEME } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel, PANEL_COLORS } from "./shared";
+import {
+    Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel, PANEL_COLORS, ShadowInput,
+    TypographyFields, LayoutFields, CardFields, ButtonFields, ImageFields, PaddingFields,
+    InputFields
+} from "./shared";
 import { IconPicker } from "../IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,31 +17,23 @@ const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 export function FeaturesPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
-    const p = block.props;
+    const p: any = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
     return (
         <>
             <Section title="Content">
-                <Field label="Title"><TextInput value={(p.title as string) || ""} onChange={(v) => up("title", v)} placeholder="Our Features" /></Field>
-                <Field label="Subtitle"><TextInput value={(p.subtitle as string) || ""} onChange={(v) => up("subtitle", v)} placeholder="What makes us different" /></Field>
+                <TypographyFields p={p} up={up} />
             </Section>
             <Section title="Layout & Style">
-                <Field label="Section Layout"><SelectInput value={(p.layout as string) || "grid"} onChange={(v) => up("layout", v)} options={[{ label: "Card Grid", value: "grid" }, { label: "Alternating Row (Icon + Text)", value: "alternating" }, { label: "Horizontal List", value: "horizontal" }, { label: "Icon-Only Grid", value: "icon-grid" }, { label: "Bento / Asymmetric", value: "bento" }]} /></Field>
-                <Field label="Columns"><SelectInput value={String(p.columns || "3")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>
-                <Field label="Gap"><TextInput value={(p.gap as string) || "2rem"} onChange={(v) => up("gap", v)} placeholder="2rem" /></Field>
-                <Field label="Text Alignment"><SelectInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>
+                <LayoutFields p={p} up={up} options={{
+                    layouts: [{ label: "Card Grid", value: "grid" }, { label: "Alternating Row (Icon + Text)", value: "alternating" }, { label: "Horizontal List", value: "horizontal" }, { label: "Icon-Only Grid", value: "icon-grid" }, { label: "Bento / Asymmetric", value: "bento" }]
+                }} />
                 <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#1e293b"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
             <Section title="Card Styling">
-                <Field label="Card Style"><SelectInput value={(p.cardStyle as string) || "raised"} onChange={(v) => up("cardStyle", v)} options={[{ label: "None (Text Only)", value: "none" }, { label: "Raised Shadow", value: "raised" }, { label: "Outlined", value: "outlined" }, { label: "Filled / Tinted", value: "filled" }]} /></Field>
-                {(p.cardStyle === "raised" || p.cardStyle === "outlined") && (<Field label="Card Background"><ColorInput value={(p.cardBg as string) || "#ffffff"} onChange={(v) => up("cardBg", v)} onBlur={(v) => up("cardBg", v, true)} /></Field>)}
-                {p.cardStyle !== "none" && (<Field label="Border Radius"><BorderRadiusInput value={(p.cardRadius as string) || "16px"} onChange={(v) => up("cardRadius", v)} /></Field>)}
-                {p.cardStyle === "raised" && (<>
-                    <Field label="Card Shadow"><TextInput value={(p.cardShadow as string) || ""} onChange={(v) => up("cardShadow", v)} placeholder="0 16px 48px #00000033, 0 4px 16px #00000026" /></Field>
-                    <Field label="Card Hover Shadow"><TextInput value={(p.cardShadowHover as string) || ""} onChange={(v) => up("cardShadowHover", v)} placeholder="0 12px 40px rgba(0,0,0,0.12)" /></Field>
-                </>)}
+                <CardFields p={p} up={up} />
             </Section>
             <Section title="Typography">
                 <Field label="Section Title Size"><TextInput value={(p.titleSize as string) || "2.25rem"} onChange={(v) => up("titleSize", v)} placeholder="2.25rem" /></Field>
@@ -100,31 +96,24 @@ export function FeaturesPanel({ block }: { block: Block }) {
 
 export function TeamPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
-    const p = block.props;
+    const p: any = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
     return (
         <>
             <Section title="Content">
-                <Field label="Title"><TextInput value={(p.title as string) || ""} onChange={(v) => up("title", v)} placeholder="Meet Our Team" /></Field>
-                <Field label="Subtitle"><TextInput value={(p.subtitle as string) || ""} onChange={(v) => up("subtitle", v)} placeholder="The people behind the magic" /></Field>
+                <TypographyFields p={p} up={up} />
             </Section>
             <Section title="Layout & Grid">
-                <Field label="Section Layout"><SelectInput value={(p.layout as string) || "grid"} onChange={(v) => up("layout", v)} options={[{ label: "Card Grid", value: "grid" }, { label: "Horizontal List (Photo Left)", value: "list" }, { label: "Large Cards (1 per row)", value: "large" }, { label: "Compact Row (Mini Cards)", value: "compact" }, { label: "Circular Spotlight", value: "spotlight" }]} /></Field>
-                {((p.layout as string) || "grid") !== "list" && (
-                    <Field label="Columns"><SelectInput value={String(p.columns || "3")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>
-                )}
-                <Field label="Card Spacing"><TextInput value={(p.gap as string) || "2rem"} onChange={(v) => up("gap", v)} placeholder="e.g. 1rem or 24px" /></Field>
-                <Field label="Text Alignment"><SelectInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>
+                <LayoutFields p={p} up={up} options={{
+                    layouts: [{ label: "Card Grid", value: "grid" }, { label: "Horizontal List (Photo Left)", value: "list" }, { label: "Large Cards (1 per row)", value: "large" }, { label: "Compact Row (Mini Cards)", value: "compact" }, { label: "Circular Spotlight", value: "spotlight" }]
+                }} />
             </Section>
             <Section title="Card Styling">
-                <Field label="Card Style"><SelectInput value={(p.cardStyle as string) || "raised"} onChange={(v) => up("cardStyle", v)} options={[{ label: "None", value: "none" }, { label: "Raised Shadow", value: "raised" }, { label: "Outlined", value: "outlined" }, { label: "Filled / Tinted", value: "filled" }]} /></Field>
-                {(p.cardStyle === "raised" || p.cardStyle === "outlined" || p.cardStyle === "filled") && (<Field label="Card Background"><ColorInput value={(p.cardBg as string) || "#ffffff"} onChange={(v) => up("cardBg", v)} onBlur={(v) => up("cardBg", v, true)} /></Field>)}
-                <Field label="Radius"><BorderRadiusInput value={(p.cardRadius as string) || "16px"} onChange={(v) => up("cardRadius", v)} /></Field>
+                <CardFields p={p} up={up} />
                 <Field label="Card Height"><TextInput value={(p.cardHeight as string) || "auto"} onChange={(v) => up("cardHeight", v)} placeholder="auto or 400px" /></Field>
                 <Field label="Card Padding"><SelectInput value={(p.cardPadding as string) || "2rem 1.75rem"} onChange={(v) => up("cardPadding", v)} options={[{ label: "None", value: "0px" }, { label: "Compact (0.75rem 1rem)", value: "0.75rem 1rem" }, { label: "Small (1rem 1.25rem)", value: "1rem 1.25rem" }, { label: "Medium (1.5rem 1.5rem)", value: "1.5rem 1.5rem" }, { label: "Large (2rem 1.75rem)", value: "2rem 1.75rem" }, { label: "XL (3rem 2rem)", value: "3rem 2rem" }]} /></Field>
                 <Field label="Text Padding"><SelectInput value={(p.cardContentPadding as string) || "1rem 1.25rem"} onChange={(v) => up("cardContentPadding", v)} options={[{ label: "None", value: "0px" }, { label: "Tight (0.5rem 0.75rem)", value: "0.5rem 0.75rem" }, { label: "Small (0.75rem 1rem)", value: "0.75rem 1rem" }, { label: "Medium (1rem 1.25rem)", value: "1rem 1.25rem" }, { label: "Large (1.5rem 1.5rem)", value: "1.5rem 1.5rem" }, { label: "XL (2rem 1.75rem)", value: "2rem 1.75rem" }]} /></Field>
-                {(p.cardStyle === "raised" || p.cardStyle === "outlined") && (<Field label="Card Shadow"><SelectInput value={(p.cardShadow as string) || "0 16px 48px #00000033, 0 4px 16px #00000026"} onChange={(v) => up("cardShadow", v)} options={[{ label: "None", value: "none" }, { label: "Subtle", value: "0 1px 4px #0000001a" }, { label: "Soft", value: "0 4px 16px #0000001a" }, { label: "Medium", value: "0 4px 24px #0000001a, 0 1px 6px #0000000f" }, { label: "Elevated", value: "0 8px 32px #00000026, 0 2px 8px #0000001a" }, { label: "Deep (Default)", value: "0 16px 48px #00000033, 0 4px 16px #00000026" }, { label: "Glow Blue", value: "0 4px 32px #3b82f640, 0 1px 8px #3b82f626" }, { label: "Glow Purple", value: "0 4px 32px #8b5cf640, 0 1px 8px #8b5cf626" }]} /></Field>)}
             </Section>
             <Section title="Image Styling">
                 <Field label="Image Style"><SelectInput value={(p.imageStyle as string) || "circle"} onChange={(v) => up("imageStyle", v)} options={[{ label: "Circle", value: "circle" }, { label: "Square", value: "square" }, { label: "Floating Cutout", value: "float" }, { label: "Card Cover", value: "cover" }]} /></Field>
@@ -368,9 +357,10 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
             <Section title="Global Container">
                 <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Controls max-width & horizontal padding for top-level blocks.</div>
                 <Field label="Max Width"><TextInput value={l.maxWidth} onChange={(v) => upL("maxWidth", v)} placeholder="100dvw" /></Field>
-                <Field label="Desktop Padding X"><TextInput value={l.paddingX} onChange={(v) => upL("paddingX", v)} placeholder="32px" /></Field>
-                <Field label="Tablet Padding X (≤ 1024)"><TextInput value={l.tabletPaddingX} onChange={(v) => upL("tabletPaddingX", v)} placeholder="24px" /></Field>
-                <Field label="Mobile Padding X (≤ 768)"><TextInput value={l.mobilePaddingX} onChange={(v) => upL("mobilePaddingX", v)} placeholder="16px" /></Field>
+                <PaddingFields p={{ padding: l.paddingX, tabletPadding: l.tabletPaddingX, mobilePadding: l.mobilePaddingX }} up={(key, val) => {
+                    const map: any = { padding: "paddingX", tabletPadding: "tabletPaddingX", mobilePadding: "mobilePaddingX" };
+                    upL(map[key], val);
+                }} />
             </Section>
             <Section title="Page Features">
                 {EDITOR_FEATURES.enableScrollToTop && (
@@ -396,8 +386,9 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
 
 export function ContactFormPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
-    const p = block.props;
+    const p: any = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
+    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
 
     return (
         <>
@@ -437,10 +428,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
 
 
             <Section title="Submit Button">
-                <Field label="Button Text"><TextInput value={(p.submitLabel as string) || "Send Message →"} onChange={(v) => up("submitLabel", v)} /></Field>
-                <Field label="Button Color"><ColorInput value={(p.buttonBg as string) || "#6366f1"} onChange={(v) => up("buttonBg", v)} /></Field>
-                <Field label="Text Color"><ColorInput value={(p.buttonTextColor as string) || "#ffffff"} onChange={(v) => up("buttonTextColor", v)} /></Field>
-                <Field label="Border Radius"><BorderRadiusInput value={(p.buttonBorderRadius as string) || "10px"} onChange={(v) => up("buttonBorderRadius", v)} /></Field>
+                <ButtonFields p={p} up={up} prefix="button" textKey="submitLabel" />
                 <ToggleInput value={p.buttonFullWidth !== false} onChange={(v) => up("buttonFullWidth", v)} label="Full Width Button" />
                 {p.buttonFullWidth === false && (
                     <Field label="Alignment">
@@ -455,24 +443,22 @@ export function ContactFormPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Inside Text (Optional)">
-                <Field label="Title"><TextInput value={(p.titleText as string) || ""} onChange={(v) => up("titleText", v)} placeholder="Send us a message" /></Field>
-                <Field label="Subtitle"><TextInput value={(p.subtitleText as string) || ""} onChange={(v) => up("subtitleText", v)} placeholder="We'd love to hear from you." /></Field>
-                <Field label="Title Color"><ColorInput value={(p.titleColor as string) || "#0f172a"} onChange={(v) => up("titleColor", v)} /></Field>
-                <Field label="Subtitle Color"><ColorInput value={(p.subtitleColor as string) || "#64748b"} onChange={(v) => up("subtitleColor", v)} /></Field>
+                <TypographyFields p={p} up={up} prefix="title" />
             </Section>
 
-            <Section title="Container Style">
+            <Section title="Section Style">
+                <Field label="Background"><ColorInput value={(p.sectionBg as string) || "transparent"} onChange={(v) => up("sectionBg", v)} placeholder="transparent" /></Field>
+                <Field label="Padding"><TextInput value={(p.sectionPadding as string) || "4rem 1rem"} onChange={(v) => up("sectionPadding", v)} placeholder="4rem 1rem" /></Field>
+            </Section>
+
+            <Section title="Card Style">
                 <Field label="Background"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} /></Field>
                 <Field label="Padding"><TextInput value={(p.padding as string) || "3rem 2rem"} onChange={(v) => up("padding", v)} /></Field>
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "20px"} onChange={(v) => up("borderRadius", v)} /></Field>
             </Section>
 
             <Section title="Input Style">
-                <Field label="Background"><ColorInput value={(p.inputBg as string) || "#f8fafc"} onChange={(v) => up("inputBg", v)} /></Field>
-                <Field label="Border Color"><ColorInput value={(p.inputBorderColor as string) || "#e2e8f0"} onChange={(v) => up("inputBorderColor", v)} /></Field>
-                <Field label="Focus Color"><ColorInput value={(p.inputFocusBorderColor as string) || "#6366f1"} onChange={(v) => up("inputFocusBorderColor", v)} /></Field>
-                <Field label="Text Color"><ColorInput value={(p.inputTextColor as string) || "#111827"} onChange={(v) => up("inputTextColor", v)} /></Field>
-                <Field label="Label Color"><ColorInput value={(p.labelColor as string) || "#374151"} onChange={(v) => up("labelColor", v)} /></Field>
+                <InputFields p={p} up={up} isDark={isDark} />
             </Section>
             <AnimationPanel block={block} />
         </>
@@ -481,7 +467,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
 
 export function AccordionPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
-    const p = block.props;
+    const p: any = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
     return (
@@ -504,7 +490,11 @@ export function AccordionPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Layout & Style">
-                <Field label="Variant"><SelectInput value={(p.variant as string) || "contained"} onChange={(v) => up("variant", v)} options={[{ label: "Contained", value: "contained" }, { label: "Separated", value: "separated" }, { label: "Minimal", value: "minimal" }]} /></Field>
+                <LayoutFields p={p} up={up} options={{
+                    layouts: [{ label: "Contained", value: "contained" }, { label: "Separated", value: "separated" }, { label: "Minimal", value: "minimal" }],
+                    showCols: false,
+                    showAlign: false
+                }} />
                 <Field label="Divider"><SelectInput value={(p.divider as string) || "line"} onChange={(v) => up("divider", v)} options={[{ label: "Line", value: "line" }, { label: "None", value: "none" }]} /></Field>
                 <Field label="Max Width"><TextInput value={(p.maxWidth as string) || "800px"} onChange={(v) => up("maxWidth", v)} placeholder="800px or 100%" /></Field>
                 <Field label="Item Radius"><BorderRadiusInput value={(p.itemRadius as string) || "8px"} onChange={(v) => up("itemRadius", v)} /></Field>
@@ -542,14 +532,15 @@ export function AccordionPanel({ block }: { block: Block }) {
 
 export function StatsPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
-    const p = block.props;
+    const p: any = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
     return (
         <>
             <Section title="Layout & Style">
-                <Field label="Layout"><SelectInput value={(p.layout as string) || "grid"} onChange={(v) => up("layout", v)} options={[{ label: "Grid", value: "grid" }, { label: "Strip", value: "strip" }, { label: "KPI Cards", value: "kpi" }]} /></Field>
-                <Field label="Columns"><SelectInput value={String(p.columns || "4")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>
+                <LayoutFields p={p} up={up} options={{
+                    layouts: [{ label: "Grid", value: "grid" }, { label: "Strip", value: "strip" }, { label: "KPI Cards", value: "kpi" }]
+                }} />
                 <Field label="Background"><ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} /></Field>
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "var(--text)"} onChange={(v) => up("textColor", v)} /></Field>
                 <Field label="Accent Color"><ColorInput value={(p.accentColor as string) || "var(--primary)"} onChange={(v) => up("accentColor", v)} /></Field>
@@ -597,7 +588,7 @@ export function StatsPanel({ block }: { block: Block }) {
 
 export function ChartPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
-    const p = block.props;
+    const p: any = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
     return (
@@ -677,7 +668,7 @@ export function ChartPanel({ block }: { block: Block }) {
 
 export function LegalPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
-    const p = block.props;
+    const p: any = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
     const joditConfig = {
@@ -742,18 +733,13 @@ export function LegalPanel({ block }: { block: Block }) {
                 <ToggleInput label="Show Title" value={p.showTitle !== false} onChange={(v) => up("showTitle", v)} />
                 {p.showTitle !== false && (
                     <>
-                        <Field label="Title Text">
-                            <TextInput value={(p.title as string) || ""} onChange={(v) => up("title", v)} placeholder="e.g. Terms of Service" />
-                        </Field>
+                        <TypographyFields p={p} up={up} />
                         <Field label="Title Alignment">
                             <SelectInput
                                 value={(p.titleAlign as string) || "left"}
                                 onChange={(v) => up("titleAlign", v)}
                                 options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]}
                             />
-                        </Field>
-                        <Field label="Title Color">
-                            <ColorInput value={(p.titleColor as string) || "var(--text)"} onChange={(v) => up("titleColor", v)} onBlur={(v) => up("titleColor", v, true)} />
                         </Field>
                         <Field label="Title Weight">
                             <SelectInput value={(p.titleFontWeight as string) || "700"} onChange={(v) => up("titleFontWeight", v)} options={[{ label: "Light (300)", value: "300" }, { label: "Regular (400)", value: "400" }, { label: "Medium (500)", value: "500" }, { label: "Semibold (600)", value: "600" }, { label: "Bold (700)", value: "700" }, { label: "Extrabold (800)", value: "800" }]} />
@@ -787,6 +773,125 @@ export function LegalPanel({ block }: { block: Block }) {
                 </Field>
                 <AnimationPanel block={block} />
             </Section>
+        </>
+    );
+}
+
+export function DeleteAccountPanel({ block }: { block: Block }) {
+    const { updateBlock } = useEditorStore();
+    const p: any = block.props;
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
+    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
+
+    return (
+        <>
+            <Section title="API Configuration">
+                <Field label="API URL">
+                    <TextInput
+                        value={(p.apiUrl as string) || ""}
+                        onChange={(v) => up("apiUrl", v)}
+                        placeholder="https://api.example.com/delete-account"
+                    />
+                </Field>
+                <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>
+                    Endpoint to send the deletion request.
+                </div>
+            </Section>
+
+            <Section title="Heading & Text">
+                <TypographyFields p={p} up={up} prefix="title" />
+            </Section>
+
+            <Section title="Branding (Logo)">
+                <ImageFields p={p} up={up} prefix="logo" />
+                <Field label="Alignment">
+                    <SelectInput
+                        value={(p.logoAlign as string) || "center"}
+                        onChange={(v) => up("logoAlign", v)}
+                        options={[
+                            { label: "Left", value: "left" },
+                            { label: "Center", value: "center" },
+                            { label: "Right", value: "right" }
+                        ]}
+                    />
+                </Field>
+                <Field label="Height"><TextInput value={(p.logoHeight as string) || "48px"} onChange={(v) => up("logoHeight", v)} placeholder="48px" /></Field>
+                <Field label="Width"><TextInput value={(p.logoWidth as string) || "auto"} onChange={(v) => up("logoWidth", v)} placeholder="auto" /></Field>
+            </Section>
+
+            <Section title="Form Fields">
+                <ToggleInput value={p.showFirstName === true} onChange={(v) => up("showFirstName", v)} label="Show First Name" />
+                {p.showFirstName && <ToggleInput value={p.firstNameRequired === true} onChange={(v) => up("firstNameRequired", v)} label="First Name Required" />}
+
+                <ToggleInput value={p.showLastName === true} onChange={(v) => up("showLastName", v)} label="Show Last Name" />
+                {p.showLastName && <ToggleInput value={p.lastNameRequired === true} onChange={(v) => up("lastNameRequired", v)} label="Last Name Required" />}
+
+                <ToggleInput value={p.reasonShow !== false} onChange={(v) => up("reasonShow", v)} label="Show Reason Select" />
+                {p.reasonShow !== false && <ToggleInput value={p.reasonRequired === true} onChange={(v) => up("reasonRequired", v)} label="Reason Required" />}
+            </Section>
+
+            {p.reasonShow !== false && (
+                <Section title="Reason Options">
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 8 }}>Enter options one per line:</div>
+                    <TextareaInput
+                        value={(p.reasonOptions as string) || ""}
+                        onChange={(v) => up("reasonOptions", v)}
+                        placeholder="Privacy concerns&#10;Found better alternative..."
+                        rows={5}
+                    />
+                </Section>
+            )}
+
+            <Section title="Delete Button">
+                <ButtonFields p={p} up={up} prefix="button" hideLabel={true} />
+                <Field label="Label">
+                    <TextInput value={(p.submitLabel as string) || "Delete Account"} onChange={(v) => up("submitLabel", v)} />
+                </Field>
+            </Section>
+
+            <Section title="Style & Background">
+                <Field label="Section Background">
+                    <ColorInput value={(p.sectionBg as string) || "transparent"} onChange={(v) => up("sectionBg", v)} placeholder="transparent" />
+                </Field>
+                <Field label="Section Padding">
+                    <TextInput value={(p.sectionPadding as string) || "4rem 1rem"} onChange={(v) => up("sectionPadding", v)} placeholder="4rem 1rem" />
+                </Field>
+                <Field label="Card Background">
+                    <ColorInput value={(p.bgColor as string) || "var(--surface)"} onChange={(v) => up("bgColor", v)} />
+                </Field>
+                <Field label="BG Image">
+                    <MediaInput value={(p.bgImage as string) || ""} onChange={(v) => up("bgImage", v)} />
+                </Field>
+                <Field label="Text Color">
+                    <ColorInput value={(p.textColor as string) || "var(--text)"} onChange={(v) => up("textColor", v)} />
+                </Field>
+
+                <div style={{ height: 1, background: "var(--border)", margin: "8px 0" }} />
+                <InputFields p={p} up={up} isDark={isDark} />
+
+                <div style={{ height: 1, background: "var(--border)", margin: "8px 0" }} />
+
+                <Field label="Padding">
+                    <TextInput value={(p.padding as string) || "3rem 2rem"} onChange={(v) => up("padding", v)} />
+                </Field>
+                <Field label="Radius">
+                    <BorderRadiusInput value={(p.borderRadius as string) || "20px"} onChange={(v) => up("borderRadius", v)} />
+                </Field>
+                <Field label="Shadow">
+                    <ShadowInput value={(p.boxShadow as string) || ""} onChange={(v) => up("boxShadow", v)} />
+                </Field>
+            </Section>
+
+            <Section title="Feedback Messages">
+                <Field label="Success">
+                    <TextInput value={(p.successMessage as string) || ""} onChange={(v) => up("successMessage", v)} placeholder="Success message" />
+                </Field>
+                <Field label="Error">
+                    <TextInput value={(p.errorMessage as string) || ""} onChange={(v) => up("errorMessage", v)} placeholder="Error message" />
+                </Field>
+            </Section>
+
+            <AnimationPanel block={block} />
         </>
     );
 }

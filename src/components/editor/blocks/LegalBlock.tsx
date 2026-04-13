@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { BlockProps } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
+import { proxyApi } from "@/lib/api/client";
 
 /**
  * Helper to extract nested data from an object using a dot-notated string path.
@@ -25,9 +25,9 @@ export function LegalBlock({ block }: BlockProps) {
         queryKey: ["legal-data", block.id, apiUrl],
         queryFn: async () => {
             if (!apiUrl) return null;
-            // Use internal server proxy to bypass CORS
-            const res = await axios.get(`/api/proxy?url=${encodeURIComponent(apiUrl)}`);
-            return res.data;
+            // Use our backend proxy to bypass CORS
+            const { data } = await proxyApi.get(apiUrl);
+            return data;
         },
         enabled: mode === "api" && !!apiUrl,
         staleTime: 1000 * 60 * 5, // 5 minutes cache

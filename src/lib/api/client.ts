@@ -259,3 +259,8 @@ export const adminApi = {
 export const formsApi = {
     submit: (body: any) => request("/forms/submit", { method: "POST", body: JSON.stringify(body) }),
 };
+
+export const proxyApi = {
+    get: (url: string) => request(`/proxy?url=${encodeURIComponent(url)}`),
+};
+

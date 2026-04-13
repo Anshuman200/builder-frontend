@@ -518,6 +518,52 @@ export const BLOCK_TYPES: BlockConfig[] = [
     },
   },
   {
+    type: "deleteAccount",
+    label: "Delete Account",
+    icon: "Trash",
+    defaultProps: {
+      apiUrl: "",
+      showFirstName: false,
+      showLastName: false,
+      firstNameRequired: false,
+      lastNameRequired: false,
+      reasonRequired: false,
+      reasonOptions: "I don't use it anymore\nPrivacy concerns\nFound a better alternative\nToo many emails\nOther",
+      
+      titleText: "Delete Your Account",
+      subtitleText: "We're sorry to see you go. Please let us know why you're leaving so we can improve.",
+      titleColor: "var(--text)",
+      subtitleColor: "var(--text-muted)",
+      
+      logoUrl: "",
+      logoHeight: "48px",
+      logoWidth: "auto",
+      logoRadius: "0px",
+      logoShadow: "none",
+      
+      submitLabel: "Delete Account",
+      buttonBg: "#ef4444",
+      buttonTextColor: "#ffffff",
+      buttonBorderRadius: "10px",
+      
+      bgColor: "var(--surface)",
+      textColor: "var(--text)",
+      inputBg: "",
+      inputTextColor: "",
+      inputBorderColor: "",
+      labelColor: "",
+      padding: "3rem 2rem",
+      borderRadius: "20px",
+      boxShadow: "0 16px 48px #00000033, 0 4px 16px #00000026",
+      
+      successMessage: "Your account deletion request has been submitted.",
+      errorMessage: "Something went wrong. Please try again.",
+      
+      // Animation
+      animationPlayback: "once",
+    },
+  },
+  {
     type: "contactInfo",
     label: "Contact Info",
     icon: "Megaphone",

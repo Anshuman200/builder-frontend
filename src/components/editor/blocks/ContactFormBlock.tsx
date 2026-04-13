@@ -101,6 +101,10 @@ export function ContactFormBlock({ block }: BlockProps) {
     const titleColor = (p.titleColor as string) || "#0f172a";
     const subtitleColor = (p.subtitleColor as string) || "#64748b";
 
+    const inputHeight = (p.inputHeight as string) || "48px";
+    const inputRadius = (p.inputRadius as string) || "10px";
+    const inputPlaceholderColor = (p.inputPlaceholderColor as string) || "rgba(0,0,0,0.4)";
+
     const firstNameRequired = p.firstNameRequired !== false; // default true
     const lastNameRequired = p.lastNameRequired === true; // default false
     const emailRequired = p.emailRequired !== false; // default true
@@ -160,10 +164,11 @@ export function ContactFormBlock({ block }: BlockProps) {
     // ─── Input style ───────────────────────────────────────────────────────────
     const inputStyle: React.CSSProperties = {
         width: "100%",
-        padding: "0.75rem 1rem",
+        height: inputHeight,
+        padding: "0 1rem",
         background: inputBg,
         border: `1.5px solid ${inputBorderColor}`,
-        borderRadius: "10px",
+        borderRadius: inputRadius,
         fontSize: "0.9rem",
         color: inputTextColor,
         outline: "none",
@@ -208,8 +213,8 @@ export function ContactFormBlock({ block }: BlockProps) {
     };
 
     // ── Layout wrapper logic ──────────────────────────────────────────────────
-    const outerBg = (p.outerBg as string) || "transparent";
-    const outerPadding = (p.outerPadding as string) || "5rem 2rem";
+    const sectionBg = (p.sectionBg as string) || "transparent";
+    const sectionPadding = (p.sectionPadding as string) || "5rem 2rem";
 
     const formNode = (
         <div
@@ -339,9 +344,9 @@ export function ContactFormBlock({ block }: BlockProps) {
                             style={{
                                 width: buttonFullWidth ? "100%" : "auto",
                                 padding: "0.85rem 2rem",
-                                background: submitMutation.isPending ? `${buttonBg}99` : buttonBg,
-                                color: buttonTextColor,
-                                border: "none",
+                                background: submitMutation.isPending ? `${buttonBg}99` : (p.buttonVariant === "ghost" || p.buttonVariant === "outline") ? "transparent" : buttonBg,
+                                color: (p.buttonVariant === "ghost" || p.buttonVariant === "outline") ? buttonBg : buttonTextColor,
+                                border: p.buttonVariant === "outline" ? `2px solid ${buttonBg}` : p.buttonVariant === "ghost" ? "none" : "none",
                                 borderRadius: buttonBorderRadius,
                                 fontSize: "0.95rem",
                                 fontWeight: 700,
@@ -353,7 +358,7 @@ export function ContactFormBlock({ block }: BlockProps) {
                                 justifyContent: "center",
                                 gap: "0.5rem",
                                 fontFamily: "inherit",
-                                boxShadow: `0 4px 20px ${buttonBg}55`,
+                                boxShadow: p.buttonVariant === "solid" ? `0 4px 20px ${buttonBg}55` : "none",
                             }}
                             onMouseEnter={e => {
                                 if (!submitMutation.isPending) {
@@ -406,7 +411,7 @@ export function ContactFormBlock({ block }: BlockProps) {
         switch (layout) {
             case "split":
                 return (
-                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: outerBg, padding: outerPadding, width: "100%", boxSizing: "border-box" }}>
+                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: sectionBg, padding: sectionPadding, width: "100%", boxSizing: "border-box" }}>
                         <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", gap: "3rem", alignItems: "flex-start", flexWrap: "wrap" }}>
                             {infoPanel}
                             <div style={{ flex: 1, minWidth: 300 }}>{formNode}</div>
@@ -415,13 +420,13 @@ export function ContactFormBlock({ block }: BlockProps) {
                 );
             case "full":
                 return (
-                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: outerBg, padding: outerPadding, width: "100%", boxSizing: "border-box" }}>
+                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: sectionBg, padding: sectionPadding, width: "100%", boxSizing: "border-box" }}>
                         {formNode}
                     </section>
                 );
             case "card":
                 return (
-                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: outerBg, padding: outerPadding, display: "flex", justifyContent: "center", width: "100%", boxSizing: "border-box" }}>
+                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: sectionBg, padding: sectionPadding, display: "flex", justifyContent: "center", width: "100%", boxSizing: "border-box" }}>
                         <div style={{ width: "100%", maxWidth: 580, boxShadow: "0 20px 60px rgba(0,0,0,0.15)", borderRadius }}>
                             {formNode}
                         </div>
@@ -429,7 +434,7 @@ export function ContactFormBlock({ block }: BlockProps) {
                 );
             default: // centered
                 return (
-                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: outerBg, padding: outerPadding, display: "flex", justifyContent: "center", width: "100%", boxSizing: "border-box" }}>
+                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: sectionBg, padding: sectionPadding, display: "flex", justifyContent: "center", width: "100%", boxSizing: "border-box" }}>
                         <div style={{ width: "100%", maxWidth: 680 }}>
                             {formNode}
                         </div>
@@ -442,7 +447,14 @@ export function ContactFormBlock({ block }: BlockProps) {
         <>
             <Toast message={toast.message} type={toast.type} visible={toast.visible} />
             {wrapLayout()}
-            <style>{`@keyframes cfb-spin { to { transform: rotate(360deg); } }`}</style>
+            <style>{`
+                @keyframes cfb-spin { to { transform: rotate(360deg); } }
+                #block-${block.id} input::placeholder, 
+                #block-${block.id} textarea::placeholder { 
+                    color: ${inputPlaceholderColor}; 
+                    opacity: 1;
+                }
+            `}</style>
         </>
     );
 }

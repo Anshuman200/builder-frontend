@@ -216,6 +216,30 @@ export function SelectInput({ value, onChange, options }: { value: string; onCha
     );
 }
 
+// ─── ShadowInput ──────────────────────────────────────────────────────────────
+
+export const SHADOW_OPTIONS = [
+    { label: "None", value: "none" },
+    { label: "Subtle", value: "0 1px 4px #0000001a" },
+    { label: "Soft", value: "0 4px 16px #0000001a" },
+    { label: "Medium", value: "0 4px 24px #0000001a, 0 1px 6px #0000000f" },
+    { label: "Elevated", value: "0 8px 32px #00000026, 0 2px 8px #0000001a" },
+    { label: "Deep", value: "0 16px 48px #00000033, 0 4px 16px #00000026" },
+    { label: "Glow Blue", value: "0 4px 32px #3b82f640, 0 1px 8px #3b82f626" },
+    { label: "Glow Purple", value: "0 4px 32px #8b5cf640, 0 1px 8px #8b5cf626" }
+];
+
+export function ShadowInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+    return (
+        <SelectInput
+            value={value || "none"}
+            onChange={onChange}
+            options={SHADOW_OPTIONS}
+        />
+    );
+}
+
+
 // ─── BorderRadiusInput ────────────────────────────────────────────────────────
 
 function parseRadius(val: string): [string, string, string, string] {
@@ -259,7 +283,7 @@ const CornerIcon = ({ corner }: { corner: "tl" | "tr" | "br" | "bl" }) => {
     );
 };
 
-export function BorderRadiusInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+export function BorderRadiusInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
     const [tl, tr, br, bl] = parseRadius(value);
     const allEqual = tl === tr && tr === br && br === bl;
     const [linked, setLinked] = React.useState(allEqual);
@@ -339,14 +363,15 @@ function toHex(color: string): string {
     return "#" + m.slice(0, 3).map(n => Number(n).toString(16).padStart(2, "0")).join("");
 }
 
-export function ColorInput({ value, onChange, onBlur }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void }) {
-    const displayValue = resolveColor(value);
-    const isVariable = value.startsWith("var(");
+export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff" }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void; placeholder?: string }) {
+    const initialValue = value || placeholder;
+    const resolvedDisplayValue = resolveColor(initialValue);
+    const isVariable = initialValue.startsWith("var(");
 
     return (
         <div style={{ display: "flex", gap: 4, width: "100%" }}>
             <ColorPicker
-                value={isVariable ? displayValue : value}
+                value={isVariable ? resolvedDisplayValue : initialValue}
                 onChange={(color) => {
                     onChange(color.toRgbString());
                 }}
@@ -355,7 +380,7 @@ export function ColorInput({ value, onChange, onBlur }: { value: string; onChang
                 }}
                 showText={() => (
                     <span style={{ fontSize: 10, color: PANEL_COLORS.muted }}>
-                        {toHex(value)}
+                        {toHex(initialValue)}
                     </span>
                 )}
                 presets={[
@@ -374,7 +399,7 @@ export function ColorInput({ value, onChange, onBlur }: { value: string; onChang
                     onMouseEnter={e => e.currentTarget.style.background = PANEL_COLORS.inputHoverBg}
                     onMouseLeave={e => e.currentTarget.style.background = PANEL_COLORS.inputBg}
                 >
-                    <div style={{ width: 14, height: 14, borderRadius: 3, background: displayValue, border: "1px solid rgba(255,255,255,0.15)" }} />
+                    <div style={{ width: 14, height: 14, borderRadius: 3, background: resolvedDisplayValue, border: "1px solid rgba(255,255,255,0.15)" }} />
                     <span style={{ flex: 1, textAlign: "left", fontFamily: "monospace", fontSize: 11, opacity: 0.9, overflow: "hidden", textOverflow: "ellipsis" }}>{isVariable ? `${toHex(value)} (Theme)` : toHex(value)}</span>
                 </button>
             </ColorPicker>
@@ -424,6 +449,148 @@ export function ToggleInput({ value, onChange, label }: { value: boolean; onChan
         );
     }
     return control;
+}
+
+// ─── Property Groups ─────────────────────────────────────────────────────────
+
+interface PropertyGroupProps {
+    p: any;
+    up: (key: string, val: any, commit?: boolean) => void;
+    prefix?: string;
+}
+
+export function TypographyFields({ p, up, prefix = "", showSubtitle = true }: PropertyGroupProps & { showSubtitle?: boolean }) {
+    const titleKey = prefix ? (prefix === "title" ? "titleText" : `${prefix}Title`) : "title";
+    const subtitleKey = prefix ? (prefix === "title" ? "subtitleText" : `${prefix}Subtitle`) : "subtitle";
+    const titleColorKey = prefix ? `${prefix}Color` : "titleColor";
+    const subtitleColorKey = prefix ? (prefix === "title" ? "subtitleColor" : `${prefix}SubtitleColor`) : "subtitleColor";
+
+    // Backward compatibility / convenience for 'title' prefix
+    const finalTitleKey = (prefix === "title" && p.titleText === undefined && p.title !== undefined) ? "title" : titleKey;
+    const finalSubtitleKey = (prefix === "title" && p.subtitleText === undefined && p.subtitle !== undefined) ? "subtitle" : subtitleKey;
+
+    return (
+        <>
+            <Field label="Title"><TextInput value={p[finalTitleKey] || ""} onChange={(v) => up(finalTitleKey, v)} /></Field>
+            {showSubtitle && <Field label="Subtitle"><TextInput value={p[finalSubtitleKey] || ""} onChange={(v) => up(finalSubtitleKey, v)} /></Field>}
+            <Field label="Title Color"><ColorInput value={p[titleColorKey] || "var(--text)"} onChange={(v) => up(titleColorKey, v)} onBlur={(v) => up(titleColorKey, v, true)} /></Field>
+            {showSubtitle && <Field label="Subtitle Color"><ColorInput value={p[subtitleColorKey] || "var(--text-muted)"} onChange={(v) => up(subtitleColorKey, v)} onBlur={(v) => up(subtitleColorKey, v, true)} /></Field>}
+        </>
+    );
+}
+
+export function LayoutFields({ p, up, options = {} }: PropertyGroupProps & { options?: { layouts?: { label: string, value: string }[], showCols?: boolean, showGap?: boolean, showAlign?: boolean } }) {
+    const { layouts, showCols = true, showGap = true, showAlign = true } = options;
+    return (
+        <>
+            {layouts && <Field label="Layout"><SelectInput value={p.layout || layouts[0].value} onChange={(v) => up("layout", v)} options={layouts} /></Field>}
+            {showCols && <Field label="Columns"><SelectInput value={String(p.columns || "3")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>}
+            {showGap && <Field label="Gap"><TextInput value={p.gap || "2rem"} onChange={(v) => up("gap", v)} placeholder="2rem" /></Field>}
+            {showAlign && <Field label="Alignment"><SelectInput value={p.align || "center"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>}
+        </>
+    );
+}
+
+export function CardFields({ p, up, prefix = "card" }: PropertyGroupProps) {
+    const styleKey = `${prefix}Style`;
+    const bgKey = `${prefix}Bg`;
+    const radiusKey = `${prefix}Radius`;
+    const shadowKey = `${prefix}Shadow`;
+    const hoverShadowKey = `${prefix}ShadowHover`;
+
+    return (
+        <>
+            <Field label="Style"><SelectInput value={p[styleKey] || "raised"} onChange={(v) => up(styleKey, v)} options={[{ label: "None", value: "none" }, { label: "Raised Shadow", value: "raised" }, { label: "Outlined", value: "outlined" }, { label: "Filled", value: "filled" }]} /></Field>
+            {p[styleKey] !== "none" && (
+                <>
+                    <Field label="Background"><ColorInput value={p[bgKey] || "var(--background)"} onChange={(v) => up(bgKey, v)} onBlur={(v) => up(bgKey, v, true)} /></Field>
+                    <Field label="Radius"><BorderRadiusInput value={p[radiusKey] || "12px"} onChange={(v) => up(radiusKey, v)} /></Field>
+                    {p[styleKey] === "raised" && (
+                        <>
+                            <Field label="Shadow"><ShadowInput value={p[shadowKey] || "none"} onChange={(v) => up(shadowKey, v)} /></Field>
+                            <Field label="Hover Shadow"><ShadowInput value={p[hoverShadowKey] || "none"} onChange={(v) => up(hoverShadowKey, v)} /></Field>
+                        </>
+                    )}
+                </>
+            )}
+        </>
+    );
+}
+
+export function ButtonFields({ p, up, prefix = "button", hideLabel = false, textKey: customTextKey }: PropertyGroupProps & { hideLabel?: boolean; textKey?: string }) {
+    const textKey = customTextKey || (prefix === "button" ? "buttonText" : `${prefix}Text`);
+    const bgKey = `${prefix}Bg`;
+    const colorKey = `${prefix}TextColor`;
+    const radiusKey = `${prefix}BorderRadius`;
+    const variantKey = `${prefix}Variant`;
+
+    return (
+        <>
+            {!hideLabel && <Field label="Text"><TextInput value={p[textKey] || "Click Me"} onChange={(v) => up(textKey, v)} /></Field>}
+            <Field label="Variant"><SelectInput value={p[variantKey] || "solid"} onChange={(v) => up(variantKey, v)} options={[{ label: "Solid", value: "solid" }, { label: "Outline", value: "outline" }, { label: "Ghost", value: "ghost" }]} /></Field>
+            <Field label="Background"><ColorInput value={p[bgKey] || "var(--primary)"} onChange={(v) => up(bgKey, v)} onBlur={(v) => up(bgKey, v, true)} /></Field>
+            <Field label="Text Color"><ColorInput value={p[colorKey] || "#ffffff"} onChange={(v) => up(colorKey, v)} onBlur={(v) => up(colorKey, v, true)} /></Field>
+            <Field label="Radius"><BorderRadiusInput value={p[radiusKey] || "8px"} onChange={(v) => up(radiusKey, v)} /></Field>
+        </>
+    );
+}
+
+export function ImageFields({ p, up, prefix = "image" }: PropertyGroupProps) {
+    const urlKey = prefix === "image" ? "image" : `${prefix}Url`;
+    const radiusKey = `${prefix}Radius`;
+    const shadowKey = `${prefix}Shadow`;
+    const styleKey = `${prefix}Style`;
+
+    return (
+        <>
+            <Field label="Image Source"><MediaInput value={p[urlKey] || ""} onChange={(v) => up(urlKey, v)} /></Field>
+            <Field label="Style"><SelectInput value={p[styleKey] || "cover"} onChange={(v) => up(styleKey, v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Circle", value: "circle" }, { label: "Square", value: "square" }]} /></Field>
+            <Field label="Radius"><BorderRadiusInput value={p[radiusKey] || "8px"} onChange={(v) => up(radiusKey, v)} /></Field>
+            <Field label="Shadow"><ShadowInput value={p[shadowKey] || "none"} onChange={(v) => up(shadowKey, v)} /></Field>
+        </>
+    );
+}
+
+export function PaddingFields({ p, up }: PropertyGroupProps) {
+    return (
+        <>
+            <Field label="Desktop"><TextInput value={p.padding || ""} onChange={(v) => up("padding", v)} placeholder="64px 24px" /></Field>
+            <Field label="Tablet"><TextInput value={p.tabletPadding || ""} onChange={(v) => up("tabletPadding", v)} placeholder="48px 16px" /></Field>
+            <Field label="Mobile"><TextInput value={p.mobilePadding || ""} onChange={(v) => up("mobilePadding", v)} placeholder="32px 16px" /></Field>
+        </>
+    );
+}
+
+export function InputFields({ p, up, prefix = "input", isDark = false }: PropertyGroupProps & { isDark?: boolean }) {
+    const bgKey = `${prefix}Bg`;
+    const textColorKey = `${prefix}TextColor`;
+    const placeholderColorKey = `${prefix}PlaceholderColor`;
+    const borderColorKey = `${prefix}BorderColor`;
+    const labelColorKey = prefix === "input" ? "labelColor" : `${prefix}LabelColor`;
+    const radiusKey = `${prefix}Radius`;
+    const heightKey = `${prefix}Height`;
+
+    const defaults = {
+        bg: isDark ? "#1f1f1f" : "#f8fafc",
+        text: isDark ? "#ffffff" : "#111827",
+        placeholder: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.4)",
+        border: isDark ? "#303030" : "#e2e8f0",
+        label: isDark ? "rgba(255,255,255,0.85)" : "#374151"
+    };
+
+    const bgLabel = prefix === "input" ? "Input Background" : `${prefix.charAt(0).toUpperCase() + prefix.slice(1)} Background`;
+
+    return (
+        <>
+            <Field label={bgLabel}><ColorInput value={p[bgKey] || ""} onChange={(v) => up(bgKey, v)} placeholder={defaults.bg} /></Field>
+            <Field label="Text Color"><ColorInput value={p[textColorKey] || ""} onChange={(v) => up(textColorKey, v)} placeholder={defaults.text} /></Field>
+            <Field label="Placeholder"><ColorInput value={p[placeholderColorKey] || ""} onChange={(v) => up(placeholderColorKey, v)} placeholder={defaults.placeholder} /></Field>
+            <Field label="Border Color"><ColorInput value={p[borderColorKey] || ""} onChange={(v) => up(borderColorKey, v)} placeholder={defaults.border} /></Field>
+            <Field label="Label Color"><ColorInput value={p[labelColorKey] || ""} onChange={(v) => up(labelColorKey, v)} placeholder={defaults.label} /></Field>
+            <Field label="Height"><TextInput value={p[heightKey] || ""} onChange={(v) => up(heightKey, v)} placeholder="48px" /></Field>
+            <Field label="Border Radius"><BorderRadiusInput value={p[radiusKey] || ""} onChange={(v) => up(radiusKey, v)} placeholder="10px" /></Field>
+        </>
+    );
 }
 
 // ─── Section ──────────────────────────────────────────────────────────────────
