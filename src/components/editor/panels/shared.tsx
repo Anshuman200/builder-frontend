@@ -9,7 +9,7 @@ import type { Block, EditorPage } from "@/types";
  */
 
 import React from "react";
-import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon } from "@heroicons/react/24/outline";
 
 import { useEditorStore } from "@/stores/editorStore";
 import { ColorPicker, Dropdown, Popover, Tooltip } from "antd";
@@ -215,6 +215,86 @@ export function SelectInput({ value, onChange, options }: { value: string; onCha
         </Dropdown>
     );
 }
+
+// ─── LinkInput ────────────────────────────────────────────────────────────────
+
+export function LinkInput({ value, onChange, placeholder = "URL (e.g. /about)" }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+    const { page } = useEditorStore();
+    const routes = page?.routes || [];
+
+    const handleRouteSelect = (path: string) => {
+        onChange(path);
+    };
+
+    const items = [
+        {
+            key: 'routes-header',
+            label: <span style={{ fontSize: 10, fontWeight: 700, color: PANEL_COLORS.muted, textTransform: "uppercase" }}>Internal Pages</span>,
+            disabled: true,
+        },
+        ...routes.map(r => ({
+            key: r.path,
+            label: (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11 }}>
+                    <span>{r.name}</span>
+                    <span style={{ fontSize: 9, opacity: 0.5 }}>{r.path}</span>
+                </div>
+            ),
+            onClick: () => handleRouteSelect(r.path)
+        })),
+        { type: 'divider' as const },
+        {
+            key: 'external-header',
+            label: <span style={{ fontSize: 10, fontWeight: 700, color: PANEL_COLORS.muted, textTransform: "uppercase" }}>External</span>,
+            disabled: true,
+        },
+        {
+            key: 'manual',
+            label: <span style={{ fontSize: 11 }}>External URL...</span>,
+            onClick: () => {
+                const url = window.prompt("Enter external URL:", "https://");
+                if (url) onChange(url);
+            }
+        }
+    ];
+
+    return (
+        <div style={{ display: "flex", gap: 4, width: "100%" }}>
+            <TextInput
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+                style={{ flex: 1 }}
+            />
+            <Dropdown
+                menu={{ items }}
+                trigger={['click']}
+                placement="bottomRight"
+            >
+                <button
+                    style={{
+                        width: 26,
+                        height: 26,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: PANEL_COLORS.inputBg,
+                        border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                        borderRadius: 4,
+                        cursor: "pointer",
+                        color: PANEL_COLORS.muted,
+                        flexShrink: 0
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = PANEL_COLORS.inputHoverBg}
+                    onMouseLeave={e => e.currentTarget.style.background = PANEL_COLORS.inputBg}
+                >
+                    <LinkIcon style={{ width: 14, height: 14 }} />
+                </button>
+            </Dropdown>
+        </div>
+    );
+}
+
 
 // ─── ShadowInput ──────────────────────────────────────────────────────────────
 

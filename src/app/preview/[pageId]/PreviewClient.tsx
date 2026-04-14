@@ -14,10 +14,11 @@ import { useLiveHead } from "@/hooks/useLiveHead";
 import PrivatePageGate from "@/components/public/PrivatePageGate";
 import React from "react";
 
-export default function PreviewClient({ pageId }: { pageId: string }) {
+export default function PreviewClient({ pageId, initialPath = "/" }: { pageId: string, initialPath?: string }) {
     const { page, setPage } = useEditorStore();
     const [loading, setLoading] = useState(!page);
     const mainRef = React.useRef<HTMLDivElement>(null);
+    const [currentPath, setCurrentPath] = useState(initialPath);
 
     // Sync title and favicon live for browser tab
     useLiveHead(page);
@@ -54,6 +55,21 @@ export default function PreviewClient({ pageId }: { pageId: string }) {
         }
     }, [page?.theme]);
 
+    useEffect(() => {
+        // Handle hash-based routing for internal navigation within the editor/preview
+        const handler = () => {
+            const hash = window.location.hash.replace('#', '');
+            if (hash.startsWith('/')) {
+                setCurrentPath(hash);
+            } else if (!hash && initialPath) {
+                setCurrentPath(initialPath);
+            }
+        };
+        window.addEventListener("hashchange", handler);
+        handler(); // Initialize
+        return () => window.removeEventListener("hashchange", handler);
+    }, [initialPath]);
+
     if (loading || !page) {
         return (
             <div style={{
@@ -62,37 +78,57 @@ export default function PreviewClient({ pageId }: { pageId: string }) {
                 color: "#cbd5e1", background: "#0f172a",
             }}>
                 <ArrowPathIcon style={{ width: 28, height: 28, animation: "spin 1s linear infinite" }} />
-                <p style={{ fontSize: 14, margin: 0 }}>Loading preview…</p>
+                <p style={{ fontSize: 14, margin: 0 }}>Loading…</p>
             </div>
         );
     }
 
+    const normalizedPath = currentPath === "" ? "/" : currentPath;
+    const activeRoute = page.routes?.find(r => r.path === normalizedPath) 
+        || page.routes?.find(r => r.path === "/") 
+        || page.routes?.[0];
+    
+    const content = activeRoute?.content || page.content || [];
+    const header = page.globalBlocks?.header;
+    const footer = page.globalBlocks?.footer;
+
+    const Wrapper = ({ children }: { children: React.ReactNode }) => {
+        if (!page) return <>{children}</>;
+        return (
+            <PrivatePageGate pageId={pageId} isPrivate={page.visibility === 'PRIVATE'}>
+                <DndContext>
+                    <PreviewProvider>
+                        <main 
+                            ref={mainRef}
+                            style={{ background: "var(--background)", color: "var(--text)", minHeight: "100vh" }}
+                        >
+                            {children}
+                            <ScrollToTop />
+                            <ThemeSwitcher />
+                        </main>
+                    </PreviewProvider>
+                </DndContext>
+            </PrivatePageGate>
+        );
+    };
+
     return (
-        <PrivatePageGate pageId={pageId} isPrivate={page.visibility === 'PRIVATE'}>
-            <DndContext>
-                <PreviewProvider>
-                    <main 
-                        ref={mainRef}
-                        style={{ background: "var(--background)", color: "var(--text)", minHeight: "100vh" }}
-                    >
-                        {page.content.map((block: any) => (
-                            <BlockRenderer key={block.id} block={block} />
-                        ))}
-                        {page.content.length === 0 && (
-                            <div style={{
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                height: "60vh", flexDirection: "column", gap: 8,
-                                color: "#94a3b8",
-                            }}>
-                                <p style={{ fontSize: 16, margin: 0, fontWeight: 500 }}>This page has no content yet.</p>
-                                <p style={{ fontSize: 13, margin: 0 }}>Go back to the editor and add some blocks.</p>
-                            </div>
-                        )}
-                        <ScrollToTop />
-                        <ThemeSwitcher />
-                    </main>
-                </PreviewProvider>
-            </DndContext>
-        </PrivatePageGate>
+        <Wrapper>
+            {(header && !activeRoute?.hideHeader) && <BlockRenderer key={`header-${header.id}`} block={header} />}
+            {content.map((block: any) => (
+                <BlockRenderer key={block.id} block={block} />
+            ))}
+            {content.length === 0 && (
+                <div style={{
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    height: "60vh", flexDirection: "column", gap: 8,
+                    color: "#94a3b8",
+                }}>
+                    <p style={{ fontSize: 16, margin: 0, fontWeight: 500 }}>This page has no content yet.</p>
+                    <p style={{ fontSize: 13, margin: 0 }}>Go back to the editor and add some blocks.</p>
+                </div>
+            )}
+            {(footer && !activeRoute?.hideFooter) && <BlockRenderer key={`footer-${footer.id}`} block={footer} />}
+        </Wrapper>
     );
 }

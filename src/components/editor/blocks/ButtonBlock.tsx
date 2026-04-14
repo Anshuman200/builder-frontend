@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { getIcon } from "@/lib/utils/icons";
-import { PreviewContext, BlockProps } from "./shared";
+import { PreviewContext, BlockProps, useLinkHandler } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
@@ -18,6 +18,7 @@ const BTN_SHADOWS: Record<string, string> = {
 
 export function ButtonBlock({ block }: BlockProps) {
     const isPreview = React.useContext(PreviewContext);
+    const handleLink = useLinkHandler();
     const p = block.props;
     const variant = (p.variant as string) || "solid";
     const size = (p.size as string) || "md";
@@ -58,7 +59,7 @@ export function ButtonBlock({ block }: BlockProps) {
 
     return (
         <div id={(p.sectionId as string) || `block-${block.id}`} style={{ padding: "14px 24px", width: "100%", textAlign: align as React.CSSProperties["textAlign"] }}>
-            <a href={(p.href as string) || "#"} onClick={(e) => e.preventDefault()} style={btnStyle}>
+            <a href={(p.href as string) || "#"} onClick={(e) => handleLink((p.href as string) || "#", e)} style={btnStyle}>
                 {IconLeft && <IconLeft style={{ width: sizeStyle.iconSize, height: sizeStyle.iconSize }} />}
                 <span>{(p.label as string) || "Click me"}</span>
                 {IconRight && <IconRight style={{ width: sizeStyle.iconSize, height: sizeStyle.iconSize }} />}

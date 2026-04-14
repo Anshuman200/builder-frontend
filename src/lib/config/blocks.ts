@@ -907,9 +907,37 @@ export function injectProjectName(block: Block, projectName: string): Block {
 }
 
 // ─── Migrate an entire page's blocks to replace PageCraft with project name ───
-export function migrateProjectName(blocks: Block[], projectName: string): Block[] {
-  if (!projectName || projectName === "PageCraft") return blocks;
-  return blocks.map(b => injectProjectName(b, projectName));
+export function migrateProjectName(data: any, projectName: string): any {
+  if (!projectName || projectName === "PageCraft" || !data) return data;
+  
+  // If it's an array of blocks
+  if (Array.isArray(data)) {
+    return data.map(b => injectProjectName(b, projectName));
+  }
+  
+  // If it's an EditorPage object
+  const pageDetails = { ...data };
+  if (pageDetails.content && Array.isArray(pageDetails.content)) {
+    pageDetails.content = pageDetails.content.map((b: Block) => injectProjectName(b, projectName));
+  }
+  
+  if (pageDetails.globalBlocks) {
+    if (pageDetails.globalBlocks.header) {
+      pageDetails.globalBlocks.header = injectProjectName(pageDetails.globalBlocks.header, projectName);
+    }
+    if (pageDetails.globalBlocks.footer) {
+      pageDetails.globalBlocks.footer = injectProjectName(pageDetails.globalBlocks.footer, projectName);
+    }
+  }
+  
+  if (pageDetails.routes && Array.isArray(pageDetails.routes)) {
+    pageDetails.routes = pageDetails.routes.map((r: any) => ({
+      ...r,
+      content: r.content.map((b: Block) => injectProjectName(b, projectName))
+    }));
+  }
+  
+  return pageDetails;
 }
 
 // ✅ Create a block with default props + pre-built templates

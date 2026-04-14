@@ -20,6 +20,38 @@ export function PreviewProvider({ children }: { children: React.ReactNode }) {
     return <PreviewContext.Provider value={true}>{children}</PreviewContext.Provider>;
 }
 
+/**
+ * useLinkHandler - Shared hook for blocks to handle internal vs external links
+ * In preview mode, internal links (starting with /) are handled via hash changes.
+ */
+export function useLinkHandler() {
+    const isPreview = React.useContext(PreviewContext);
+    
+    return (url: string, e?: React.MouseEvent) => {
+        if (!isPreview) {
+            if (e) e.preventDefault();
+            return;
+        }
+
+        // Anchor links (e.g. #contact)
+        if (url.startsWith("#") && url.length > 1) {
+            if (e) e.preventDefault();
+            const el = document.getElementById(url.substring(1));
+            if (el) el.scrollIntoView({ behavior: "smooth" });
+            return;
+        }
+
+        // Internal routes (e.g. /about)
+        if (url.startsWith("/") && isPreview) {
+            if (e) e.preventDefault();
+            window.location.hash = url;
+            return;
+        }
+
+        // External links or other manual URLs — let them follow default behavior in preview
+    };
+}
+
 // ─── Shared types ─────────────────────────────────────────────────────────────
 
 export interface BlockProps {

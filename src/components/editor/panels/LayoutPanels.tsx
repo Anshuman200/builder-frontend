@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel } from "./shared";
+import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel, LinkInput } from "./shared";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
 
@@ -17,7 +17,7 @@ export function ButtonPanel({ block }: { block: Block }) {
         <>
             <Section title="Content">
                 <Field label="Label"><TextInput value={(p.label as string) || ""} onChange={(v) => up("label", v)} placeholder="Click me" /></Field>
-                <Field label="Link (href)"><TextInput value={(p.href as string) || ""} onChange={(v) => up("href", v)} placeholder="#" /></Field>
+                <Field label="Link (href)"><LinkInput value={(p.href as string) || ""} onChange={(v) => up("href", v)} placeholder="#" /></Field>
             </Section>
             <Section title="Appearance">
                 <Field label="Variant"><SelectInput value={variant} onChange={(v) => up("variant", v)} options={[{ label: "Solid", value: "solid" }, { label: "Outline", value: "outline" }, { label: "Ghost", value: "ghost" }, { label: "Soft", value: "soft" }, { label: "Gradient", value: "gradient" }, { label: "Link", value: "link" }]} /></Field>
@@ -91,7 +91,7 @@ export function HeaderPanel({ block }: { block: Block }) {
                 <ToggleInput value={p.showCta !== false} onChange={(v) => up("showCta", v)} label="Show CTA Button" />
                 {p.showCta !== false && (<>
                     <Field label="Button Text"><TextInput value={(p.ctaText as string) || "Get Started"} onChange={(v) => up("ctaText", v)} placeholder="Get Started" /></Field>
-                    <Field label="Button URL"><TextInput value={(p.ctaUrl as string) || "#"} onChange={(v) => up("ctaUrl", v)} placeholder="https://..." /></Field>
+                    <Field label="Button URL"><LinkInput value={(p.ctaUrl as string) || "#"} onChange={(v) => up("ctaUrl", v)} placeholder="https://..." /></Field>
                     <Field label="Design Style"><SelectInput value={(p.ctaVariant as string) || "solid"} onChange={(v) => up("ctaVariant", v)} options={[{ label: "Solid Filled", value: "solid" }, { label: "Outline", value: "outline" }]} /></Field>
                     <Field label="Base Color"><ColorInput value={(p.ctaBgColor as string) || "#6366f1"} onChange={(v) => up("ctaBgColor", v)} onBlur={(v) => up("ctaBgColor", v, true)} /></Field>
                     {p.ctaVariant === "solid" && (<Field label="Text Color"><ColorInput value={(p.ctaTextColor as string) || "#ffffff"} onChange={(v) => up("ctaTextColor", v)} onBlur={(v) => up("ctaTextColor", v, true)} /></Field>)}
@@ -106,8 +106,8 @@ export function HeaderPanel({ block }: { block: Block }) {
                                 <span style={{ fontSize: 10, fontWeight: 600 }}>Link {idx + 1}</span>
                                 <button onClick={() => { const nL = [...((p.links as any[]) || [])]; nL.splice(idx, 1); up("links", nL); }} style={{ background: "transparent", border: "none", color: "var(--error, red)", cursor: "pointer", fontSize: 12 }}>&times;</button>
                             </div>
-                            <input value={link.label} onChange={(e) => { const nL = (p.links as any[]) || []; up("links", nL.map((l, i) => i === idx ? { ...l, label: e.target.value } : l)); }} placeholder="Label" style={{ fontSize: 11, padding: "4px 8px" }} />
-                            <input value={link.url} onChange={(e) => { const nL = (p.links as any[]) || []; up("links", nL.map((l, i) => i === idx ? { ...l, url: e.target.value } : l)); }} placeholder="URL (e.g. /about)" style={{ fontSize: 11, padding: "4px 8px" }} />
+                            <input value={link.label} onChange={(e) => { const nL = (p.links as any[]) || []; up("links", nL.map((l, i) => i === idx ? { ...l, label: e.target.value } : l)); }} placeholder="Label" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
+                            <LinkInput value={link.url} onChange={(v) => { const nL = (p.links as any[]) || []; up("links", nL.map((l, i) => i === idx ? { ...l, url: v } : l)); }} placeholder="URL (e.g. /about)" />
                         </div>
                     ))}
                     <button onClick={() => { const nL = [...((p.links as any[]) || [])]; nL.push({ id: crypto.randomUUID(), label: "New Link", url: "#" }); up("links", nL); }} style={{ padding: "6px 0", background: "var(--primary-light)", color: "var(--primary)", border: "none", borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>+ Add Nav Link</button>
@@ -153,15 +153,66 @@ export function FooterPanel({ block }: { block: Block }) {
                         <div key={link.id || idx} style={{ display: "flex", flexDirection: "column", gap: 4, padding: 8, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6 }}>
                             <div style={{ display: "flex", justifyContent: "space-between" }}>
                                 <span style={{ fontSize: 10, fontWeight: 600 }}>Link {idx + 1}</span>
-                                <button onClick={() => { const nL = [...((p.links as any[]) || [])]; nL.splice(idx, 1); up("links", nL); }} style={{ background: "transparent", border: "none", color: "var(--error, red)", cursor: "pointer", fontSize: 12 }}>&times;</button>
+                                <button onClick={() => { const nL = (p.links as any[]) || []; up("links", nL.filter((_, i) => i !== idx)); }} style={{ background: "transparent", border: "none", color: "var(--error, red)", cursor: "pointer", fontSize: 12 }}>&times;</button>
                             </div>
-                            <input value={link.label} onChange={(e) => { const nL = [...((p.links as any[]) || [])]; nL[idx].label = e.target.value; up("links", nL); }} placeholder="Label" style={{ fontSize: 11, padding: "4px 8px" }} />
-                            <input value={link.url} onChange={(e) => { const nL = [...((p.links as any[]) || [])]; nL[idx].url = e.target.value; up("links", nL); }} placeholder="URL (e.g. #contact)" style={{ fontSize: 11, padding: "4px 8px" }} />
+                            <input value={link.label} onChange={(e) => { const nL = (p.links as any[]) || []; up("links", nL.map((l, i) => i === idx ? { ...l, label: e.target.value } : l)); }} placeholder="Label" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
+                            <LinkInput value={link.url} onChange={(v) => { const nL = (p.links as any[]) || []; up("links", nL.map((l, i) => i === idx ? { ...l, url: v } : l)); }} placeholder="URL (e.g. #contact)" />
                         </div>
                     ))}
-                    <button onClick={() => { const nL = [...((p.links as any[]) || [])]; nL.push({ id: crypto.randomUUID(), label: "New Link", url: "#" }); up("links", nL); }} style={{ padding: "6px 0", background: "var(--primary-light)", color: "var(--primary)", border: "none", borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>+ Add Link</button>
+                    <button onClick={() => { const nL = (p.links as any[]) || []; up("links", [...nL, { id: crypto.randomUUID(), label: "New Link", url: "#" }]); }} style={{ padding: "6px 0", background: "var(--primary-light)", color: "var(--primary)", border: "none", borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>+ Add Link</button>
                 </div>
             </Section>
+
+            {p.layout === "columns" && (
+                <Section title="Column Link Groups">
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        {((p.linkGroups as any[]) || []).map((group, gIdx) => (
+                            <div key={group.id} style={{ padding: 10, border: "1px solid var(--border)", borderRadius: 8, background: "var(--surface)" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                                    <input value={group.heading} onChange={(e) => { const nG = [...(p.linkGroups as any[])]; nG[gIdx] = { ...nG[gIdx], heading: e.target.value }; up("linkGroups", nG); }} placeholder="Group Heading" style={{ fontWeight: 700, fontSize: 12, background: "transparent", border: "none", borderBottom: "1px solid var(--border)", color: "var(--text)", outline: "none", width: "80%" }} />
+                                    <button onClick={() => { const nG = (p.linkGroups as any[]).filter((_, i) => i !== gIdx); up("linkGroups", nG); }} style={{ background: "transparent", border: "none", color: "var(--error)", cursor: "pointer" }}>&times;</button>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
+                                    {group.links.map((link: any, lIdx: number) => (
+                                        <div key={link.id} style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                                            <input value={link.label} onChange={(e) => {
+                                                const nG = [...(p.linkGroups as any[])];
+                                                const nL = [...nG[gIdx].links];
+                                                nL[lIdx] = { ...nL[lIdx], label: e.target.value };
+                                                nG[gIdx] = { ...nG[gIdx], links: nL };
+                                                up("linkGroups", nG);
+                                            }} placeholder="Label" style={{ flex: 1, fontSize: 11, padding: "4px 6px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)" }} />
+                                            <LinkInput value={link.url} onChange={(v) => {
+                                                const nG = [...(p.linkGroups as any[])];
+                                                const nL = [...nG[gIdx].links];
+                                                nL[lIdx] = { ...nL[lIdx], url: v };
+                                                nG[gIdx] = { ...nG[gIdx], links: nL };
+                                                up("linkGroups", nG);
+                                            }} placeholder="URL" />
+                                            <button onClick={() => {
+                                                const nG = [...(p.linkGroups as any[])];
+                                                const nL = nG[gIdx].links.filter((_: any, i: number) => i !== lIdx);
+                                                nG[gIdx] = { ...nG[gIdx], links: nL };
+                                                up("linkGroups", nG);
+                                            }} style={{ background: "transparent", border: "none", opacity: 0.5, cursor: "pointer" }}>&times;</button>
+                                        </div>
+                                    ))}
+                                    <button onClick={() => {
+                                        const nG = [...(p.linkGroups as any[])];
+                                        const nL = [...nG[gIdx].links, { id: crypto.randomUUID(), label: "New Link", url: "#" }];
+                                        nG[gIdx] = { ...nG[gIdx], links: nL };
+                                        up("linkGroups", nG);
+                                    }} style={{ alignSelf: "flex-start", fontSize: 10, background: "none", border: "none", color: "var(--primary)", cursor: "pointer", padding: 0 }}>+ Add Link</button>
+                                </div>
+                            </div>
+                        ))}
+                        <button onClick={() => {
+                            const nG = [...((p.linkGroups as any[]) || []), { id: crypto.randomUUID(), heading: "New Group", links: [] }];
+                            up("linkGroups", nG);
+                        }} style={{ padding: "8px", background: "var(--primary)", color: "#fff", border: "none", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>+ Add Column Group</button>
+                    </div>
+                </Section>
+            )}
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
         </>
     );

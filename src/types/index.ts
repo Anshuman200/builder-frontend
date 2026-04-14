@@ -69,11 +69,26 @@ export interface MetaConfig {
     keywords?: string;
 }
 
+export interface RouteConfig {
+    id: string;
+    path: string;
+    name: string;
+    content: Block[];
+    meta?: MetaConfig;
+    hideHeader?: boolean;
+    hideFooter?: boolean;
+}
+
 export interface EditorPage {
     id: string;
     title: string;
     slug: string;
-    content: Block[];
+    content: Block[]; // Legacy content array
+    routes?: RouteConfig[]; // New multi-page routes
+    globalBlocks?: {
+        header: Block | null;
+        footer: Block | null;
+    };
     theme: ThemeConfig;
     meta: MetaConfig;
     status: "DRAFT" | "PUBLISHED" | "ARCHIVED" | string;

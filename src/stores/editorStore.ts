@@ -62,6 +62,7 @@ interface EditorStore {
     isDirty: boolean;
     isSaving: boolean;
     viewMode: "desktop" | "tablet" | "mobile";
+    activeRouteId: string | null;
     iconPicker: {
         open: boolean;
         value: string;
@@ -77,6 +78,11 @@ interface EditorStore {
 
     // ─ Actions ────────────────────────────────────────────────────────────────
     setPage: (page: EditorPage) => void;
+    setActiveRoute: (routeId: string) => void;
+    addRoute: (route: { path: string; name: string, hideHeader?: boolean, hideFooter?: boolean }) => void;
+    updateRoute: (routeId: string, updates: Partial<Pick<import("@/types").RouteConfig, "path" | "name" | "hideHeader" | "hideFooter">>) => void;
+    deleteRoute: (routeId: string) => void;
+
     selectBlock: (id: string | null) => void;
     hoverBlock: (id: string | null) => void;
     setViewMode: (mode: "desktop" | "tablet" | "mobile") => void;
@@ -161,6 +167,23 @@ function findAndDelete(blocks: Block[], id: string): Block[] {
         updated = deleteColProps(updated, id);
         return updated;
     });
+}
+
+function applyUpdaterDeep(page: EditorPage, activeRouteId: string | null, updater: (blocks: Block[]) => Block[]): void {
+    if (page.globalBlocks) {
+        if (page.globalBlocks.header) {
+            page.globalBlocks.header = updater([page.globalBlocks.header])[0] || null;
+        }
+        if (page.globalBlocks.footer) {
+            page.globalBlocks.footer = updater([page.globalBlocks.footer])[0] || null;
+        }
+    }
+    if (page.routes && activeRouteId) {
+        const route = page.routes.find(r => r.id === activeRouteId);
+        if (route) {
+            route.content = updater(route.content);
+        }
+    }
 }
 
 function findAndRemoveBlock(blocks: Block[], id: string): { newBlocks: Block[], removed: Block | null } {
@@ -390,15 +413,74 @@ export const useEditorStore = create<EditorStore>()(
             onSelect: () => { },
             anchorRect: null,
         },
+        activeRouteId: null,
         activeDrag: null,
 
         setPage: (page) =>
             set((state) => {
+                // Multi-page migration check
+                if (!page.routes || page.routes.length === 0) {
+                    const header = page.content?.find(b => b.type === "header") || null;
+                    const footer = page.content?.find(b => b.type === "footer") || null;
+                    const middle = page.content?.filter(b => b.type !== "header" && b.type !== "footer") || [];
+                    
+                    page.routes = [{
+                        id: "home",
+                        path: "/",
+                        name: "Home",
+                        content: middle
+                    }];
+                    page.globalBlocks = { header, footer };
+                    page.content = []; // Clear legacy
+                }
+
+                const fallbackRouteId = page.routes && page.routes.length > 0 ? page.routes[0].id : "home";
+                
                 state.page = page;
+                state.activeRouteId = fallbackRouteId;
                 state.isDirty = false;
                 state.history = [JSON.parse(JSON.stringify(page))];
                 state.historyIndex = 0;
             }),
+
+        setActiveRoute: (routeId) => set({ activeRouteId: routeId }),
+        addRoute: (route) => set((s) => {
+            if (!s.page) return;
+            if (!s.page.routes) s.page.routes = [];
+            const newRoute = { 
+                id: Math.random().toString(36).substr(2, 9), 
+                path: route.path, 
+                name: route.name, 
+                content: [],
+                hideHeader: route.hideHeader || false,
+                hideFooter: route.hideFooter || false
+            };
+            s.page.routes.push(newRoute);
+            s.activeRouteId = newRoute.id;
+            s.isDirty = true;
+            get().pushHistory();
+        }),
+        updateRoute: (routeId, updates) => set((s) => {
+            if (!s.page || !s.page.routes) return;
+            const r = s.page.routes.find(x => x.id === routeId);
+            if (r) {
+                if (updates.name !== undefined) r.name = updates.name;
+                if (updates.path !== undefined) r.path = updates.path;
+                if (updates.hideHeader !== undefined) r.hideHeader = updates.hideHeader;
+                if (updates.hideFooter !== undefined) r.hideFooter = updates.hideFooter;
+                s.isDirty = true;
+                get().pushHistory();
+            }
+        }),
+        deleteRoute: (routeId) => set((s) => {
+            if (!s.page || !s.page.routes) return;
+            s.page.routes = s.page.routes.filter(x => x.id !== routeId);
+            if (s.activeRouteId === routeId) {
+                s.activeRouteId = s.page.routes[0]?.id || null;
+            }
+            s.isDirty = true;
+            get().pushHistory();
+        }),
 
         selectBlock: (id) => set({ selectedBlockId: id }),
         hoverBlock: (id) => set({ hoveredBlockId: id }),
@@ -426,25 +508,23 @@ export const useEditorStore = create<EditorStore>()(
         addBlock: (block, parentId) => {
             set((s) => {
                 if (!s.page) return;
-                if (!s.page.content) s.page.content = [];
+                
+                // Initialize if empty
+                if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
+                if (!s.page.routes) s.page.routes = [];
+                const activeRoute = s.page.routes.find(r => r.id === s.activeRouteId);
+
                 if (parentId) {
-                    s.page.content = findAndUpdate(s.page.content, parentId, (b) => ({
-                        ...b,
-                        children: [...(b.children ?? []), block],
-                    }));
+                    applyUpdaterDeep(s.page, s.activeRouteId, (blocks) => findAndUpdate(blocks, parentId, (b) => ({
+                        ...b, children: [...(b.children ?? []), block]
+                    })));
                 } else {
                     if (block.type === "header") {
-                        s.page.content.unshift(block);
+                        s.page.globalBlocks.header = block;
                     } else if (block.type === "footer") {
-                        s.page.content.push(block);
-                    } else {
-                        // Insert before footer if it exists, otherwise push
-                        const footerIdx = s.page.content.findIndex(b => b.type === "footer");
-                        if (footerIdx !== -1) {
-                            s.page.content.splice(footerIdx, 0, block);
-                        } else {
-                            s.page.content.push(block);
-                        }
+                        s.page.globalBlocks.footer = block;
+                    } else if (activeRoute) {
+                        activeRoute.content.push(block);
                     }
                 }
                 s.isDirty = true;
@@ -455,9 +535,9 @@ export const useEditorStore = create<EditorStore>()(
         updateBlock: (id, props, commit) => {
             set((s) => {
                 if (!s.page) return;
-                s.page.content = findAndUpdate(s.page.content, id, (b) => ({
-                    ...b, props: { ...b.props, ...props },
-                }));
+                applyUpdaterDeep(s.page, s.activeRouteId, (blocks) => findAndUpdate(blocks, id, (b) => ({
+                    ...b, props: { ...b.props, ...props }
+                })));
                 s.isDirty = true;
             });
             if (commit) get().pushHistory();
@@ -466,9 +546,9 @@ export const useEditorStore = create<EditorStore>()(
         updateBlockStyle: (id, style, commit) => {
             set((s) => {
                 if (!s.page) return;
-                s.page.content = findAndUpdate(s.page.content, id, (b) => ({
-                    ...b, style: { ...b.style, ...style },
-                }));
+                applyUpdaterDeep(s.page, s.activeRouteId, (blocks) => findAndUpdate(blocks, id, (b) => ({
+                    ...b, style: { ...b.style, ...style }
+                })));
                 s.isDirty = true;
             });
             if (commit) get().pushHistory();
@@ -477,7 +557,7 @@ export const useEditorStore = create<EditorStore>()(
         deleteBlock: (id) => {
             set((s) => {
                 if (!s.page) return;
-                s.page.content = findAndDelete(s.page.content, id);
+                applyUpdaterDeep(s.page, s.activeRouteId, (blocks) => findAndDelete(blocks, id));
                 if (s.selectedBlockId === id) s.selectedBlockId = null;
                 s.isDirty = true;
             });
@@ -486,38 +566,50 @@ export const useEditorStore = create<EditorStore>()(
 
         moveBlock: (activeId, overId, position = "after", childProp?) =>
             set((s) => {
-                if (!s.page) return;
+                if (!s.page || !s.activeRouteId) return;
+                
+                const activeRoute = s.page.routes?.find(r => r.id === s.activeRouteId);
+                if (!activeRoute) return;
 
-                const { newBlocks: afterRemove, removed } = findAndRemoveBlock(s.page.content, activeId);
+                // Flatten to a single array for findAndRemove / insert actions 
+                // However, we only allow reordering within activeRoute.content OR internal to header/footer.
+                // You cannot move header to route or route block to header at root level.
+                
+                // Construct a virtual flattened tree:
+                let roots = [
+                    ...(s.page.globalBlocks?.header ? [s.page.globalBlocks.header] : []),
+                    ...activeRoute.content,
+                    ...(s.page.globalBlocks?.footer ? [s.page.globalBlocks.footer] : []),
+                ];
+
+                const { newBlocks: afterRemove, removed } = findAndRemoveBlock(roots, activeId);
                 if (!removed) return;
 
-                // Enforce positioning
-                if (removed.type === "header") {
-                    s.page.content = [removed, ...afterRemove];
-                } else if (removed.type === "footer") {
-                    s.page.content = [...afterRemove, removed];
+                if (removed.type === "header" || removed.type === "footer") {
+                    // Header/Footer cannot be moved. Reject move.
+                    return;
+                }
+
+                if (overId === "canvas-root") {
+                    // Append to end of route content
+                    activeRoute.content = activeRoute.content.filter(b => b.id !== activeId);
+                    activeRoute.content.push(removed);
                 } else {
-                    if (overId === "canvas-root") {
-                        // Insert before footer if exist
-                        const fIdx = afterRemove.findIndex(b => b.type === "footer");
-                        if (fIdx !== -1) {
-                            const updated = [...afterRemove];
-                            updated.splice(fIdx, 0, removed);
-                            s.page.content = updated;
-                        } else {
-                            s.page.content = [...afterRemove, removed];
+                    const { newBlocks: afterInsert, inserted } = insertBlockDeep(afterRemove, removed, overId, position, childProp);
+                    
+                    if (inserted) {
+                        // Extract back header/footer and assign route content
+                        const newHeader = afterInsert.find(b => b.type === "header") || null;
+                        const newFooter = afterInsert.find(b => b.type === "footer") || null;
+                        const newContent = afterInsert.filter(b => b.type !== "header" && b.type !== "footer");
+                        
+                        // We do NOT allow moving standard blocks into header/footer level as roots
+                        // If they went into Header/Footer children, that's fine, the newHeader will contain them.
+                        if (s.page.globalBlocks) {
+                            if (newHeader) s.page.globalBlocks.header = newHeader;
+                            if (newFooter) s.page.globalBlocks.footer = newFooter;
                         }
-                    } else {
-                        // Prevent moving generic blocks ABOVE header or BELOW footer at root level
-                        const targetBlock = afterRemove.find(b => b.id === overId);
-                        if (targetBlock?.type === "header" && position === "before") {
-                            s.page.content = [targetBlock, removed, ...afterRemove.filter(b => b.id !== overId)];
-                        } else if (targetBlock?.type === "footer" && position === "after") {
-                            s.page.content = [...afterRemove.filter(b => b.id !== overId), removed, targetBlock];
-                        } else {
-                            const { newBlocks: afterInsert, inserted } = insertBlockDeep(afterRemove, removed, overId, position, childProp);
-                            s.page.content = inserted ? afterInsert : [...afterRemove, removed];
-                        }
+                        activeRoute.content = newContent;
                     }
                 }
 
@@ -545,11 +637,8 @@ export const useEditorStore = create<EditorStore>()(
                 s.page.theme = { ...s.page.theme, ...theme };
 
                 // If mode changed (e.g. Light -> Dark), automatically sync blocks
-                if (newMode !== oldMode) {
-                    s.page.content = migrateBlockColors(s.page.content);
-                } else if (!oldMode && theme.mode) {
-                    // Force migration if we are initializing mode for the first time
-                    s.page.content = migrateBlockColors(s.page.content);
+                if (newMode !== oldMode || (!oldMode && theme.mode)) {
+                    applyUpdaterDeep(s.page, s.activeRouteId, migrateBlockColors);
                 }
 
                 s.isDirty = true;
@@ -626,7 +715,7 @@ export const useEditorStore = create<EditorStore>()(
             if (!s.page) return;
 
             // 1. Migrate Blocks
-            s.page.content = migrateBlockColors(s.page.content);
+            applyUpdaterDeep(s.page, s.activeRouteId, migrateBlockColors);
 
             // 2. Migrate Theme Colors (if any are hardcoded to old values)
             const c = s.page.theme.colors;

@@ -44,10 +44,20 @@ function findBlock(blocks: Block[] | undefined, id: string): Block | undefined {
 // ─── Main PropertiesPanel ────────────────────────────────────────────────────
 
 export default function PropertiesPanel() {
-    const { page, selectedBlockId, updateBlock } = useEditorStore();
+    const { page, selectedBlockId, updateBlock, activeRouteId } = useEditorStore();
+
+    let rootSearchBlocks: Block[] = [];
+    if (page) {
+        const activeRoute = page.routes?.find(r => r.id === activeRouteId);
+        rootSearchBlocks = [
+            ...(page.globalBlocks?.header ? [page.globalBlocks.header] : []),
+            ...(activeRoute?.content || page.content || []),
+            ...(page.globalBlocks?.footer ? [page.globalBlocks.footer] : [])
+        ];
+    }
 
     const selectedBlock = selectedBlockId && page
-        ? findBlock(page.content, selectedBlockId)
+        ? findBlock(rootSearchBlocks, selectedBlockId)
         : null;
 
     if (!selectedBlock) {

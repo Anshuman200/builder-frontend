@@ -29,9 +29,17 @@ export default function EditorShell() {
   const {
     page, undo, redo, deleteBlock, selectedBlockId, historyIndex,
     history, addBlock, moveBlock, selectBlock, updateBlock,
-    activeDrag, setActiveDrag
+    activeDrag, setActiveDrag, activeRouteId
   } = useEditorStore();
-  const blocks = page?.content ?? [];
+  
+  const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
+  const routeBlocks = activeRoute?.content || page?.content || [];
+  
+  const blocks = [
+    ...(page?.globalBlocks?.header ? [page?.globalBlocks?.header] : []),
+    ...routeBlocks,
+    ...(page?.globalBlocks?.footer ? [page?.globalBlocks?.footer] : [])
+  ];
 
   // ── Sensors ────────────────────────────────────────────────────────────────
   const sensors = useSensors(
@@ -160,24 +168,31 @@ export default function EditorShell() {
     } else if (data?.type === "canvas") {
       if (active.id !== over.id) {
         // For root-level reordering, use arrayMove for correct positioning
-        const blockIds = blocks.map(b => b.id);
-        const oldIndex = blockIds.indexOf(active.id as string);
-        const newIndex = blockIds.indexOf(over.id as string);
+        const { page, activeRouteId } = useEditorStore.getState();
+        const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
+        const contentArray = activeRoute?.content || page?.content || [];
+
+        const oldIndex = contentArray.findIndex(b => b.id === active.id);
+        const newIndex = contentArray.findIndex(b => b.id === over.id);
 
         if (oldIndex !== -1 && newIndex !== -1 && !colMatch && !childZoneMatch) {
-          // Both blocks are at root level — use arrayMove for correct sort
-          const { page } = useEditorStore.getState();
+          // Both blocks are at root level (in the route content) — use arrayMove for correct sort
           if (page) {
-            const newContent = arrayMove([...page.content], oldIndex, newIndex);
+            const newContent = arrayMove([...contentArray], oldIndex, newIndex);
             useEditorStore.setState((s) => {
               if (s.page) {
-                s.page.content = newContent;
+                const sActiveRoute = s.page.routes?.find(r => r.id === s.activeRouteId);
+                if (sActiveRoute) {
+                  sActiveRoute.content = newContent;
+                } else {
+                  s.page.content = newContent;
+                }
                 s.isDirty = true;
               }
             });
           }
         } else {
-          // Nested reorder — use moveBlock
+          // Nested reorder or header/footer movement attempted — use moveBlock
           moveBlock(active.id as string, targetId, position, childProp);
         }
       }

@@ -42,37 +42,39 @@ export default function EditorPage() {
 
     if (isGuest) {
       const p = loadPage(pageId);
-      const migrated = { ...p, content: migrateProjectName(p.content ?? [], p.title ?? "") };
+      const migrated = migrateProjectName(p, p.title ?? "");
       setPage(migrated);
       savePage(pageId, migrated); // persist so reload shows correct name
       markClean();
 
-      if (migrated.content.length === 0) {
+      const isEmpty = !migrated.routes || migrated.routes.length === 0 || migrated.routes[0].content.length === 0;
+      if (isEmpty) {
         setShowWizard(true);
       }
     } else if (apiPage && !hasLoadedApi) {
       if (hasLocalDraft(pageId)) {
         const local = loadPage(pageId);
-        const migrated = { ...local, content: migrateProjectName(local.content ?? [], local.title ?? "") };
+        const migrated = migrateProjectName(local, local.title ?? "");
         setPage(migrated);
         savePage(pageId, migrated); // persist migrated version
         setHasLoadedApi(true);
 
-        if (migrated.content.length === 0) {
+        const isEmpty = !migrated.routes || migrated.routes.length === 0 || migrated.routes[0].content.length === 0;
+        if (isEmpty) {
           setShowWizard(true);
         }
         // Do NOT markClean — auto-save will push to DB.
       } else {
         const pageData = apiPage.page || apiPage;
-        const content = Array.isArray(pageData.content) ? pageData.content : [];
-        const migrated = { ...pageData, content: migrateProjectName(content, pageData.title ?? "") };
+        const migrated = migrateProjectName(pageData, pageData.title ?? "");
         setPage(migrated);
         savePage(pageId, migrated); // persist migrated version to local
         markClean();
         setHasLoadedApi(true);
 
         // TRIGGER WIZARD IF EMPTY
-        if (content.length === 0) {
+        const isEmpty = !migrated.routes || migrated.routes.length === 0 || migrated.routes[0].content.length === 0;
+        if (isEmpty) {
           setShowWizard(true);
         }
       }
@@ -84,13 +86,13 @@ export default function EditorPage() {
     if (isError && !isGuest) {
       toastError("Failed to load page from server. It may have been deleted.");
       const local = loadPage(pageId);
-      if (local && local.content) {
-        setPage({ ...local, content: migrateProjectName(local.content, local.title ?? "") });
+      if (local && (local.content || local.routes)) {
+        setPage(migrateProjectName(local, local.title ?? ""));
       } else {
         setPage({
           id: pageId, title: "Untitled", slug: "untitled", status: "DRAFT",
           theme: { mode: "dark", colors: { primary: "#6366f1", secondary: "#8b5cf6", background: "#ffffff", surface: "#f8fafc", text: "#0f172a", textMuted: "#64748b", border: "#e2e8f0", accent: "#f59e0b" }, fonts: { heading: "Inter", body: "Inter" }, borderRadius: "md", spacing: "normal" },
-          meta: {}, content: []
+          meta: {}, content: [], routes: [], globalBlocks: { header: null, footer: null }
         });
       }
     }
@@ -170,11 +172,11 @@ export default function EditorPage() {
   return (
     <>
       <EditorShell />
-      <NewPageWizard 
+    <NewPageWizard 
         open={showWizard} 
         onClose={() => setShowWizard(false)} 
         onSubmit={handleWizardSubmit}
-        closable={!(isGuest && (!page?.content || page.content.length === 0))}
+        closable={!(isGuest && (!page?.routes || page.routes.length === 0 || page.routes[0].content.length === 0))}
       />
     </>
   );

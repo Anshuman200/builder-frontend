@@ -398,8 +398,8 @@ interface StepDeployWorkerProps {
 }
 
 function StepDeployWorker({
-    targetUrl, setTargetUrl, workerDeploying, deployStepLabel, deployProgress,
-    workerError, workerResult, onNext, onSkip, isSkipping, onDeploy, handleCopy, isPreFilled, disabled,
+    workerDeploying, deployProgress, workerError, workerResult,
+    onNext, onSkip, isSkipping, onDeploy, handleCopy, isPreFilled, disabled,
     projects, onProjectSelect, projectsLoading, pageData, currentDeployStep
 }: StepDeployWorkerProps) {
     return (

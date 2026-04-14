@@ -2,7 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps } from "./shared";
+import { PreviewContext, BlockProps, useLinkHandler } from "./shared";
 
 export function FooterBlock({ block }: BlockProps) {
     const p = block.props;
@@ -10,6 +10,7 @@ export function FooterBlock({ block }: BlockProps) {
     const layoutObj = useEditorStore((s) => s.page?.theme?.layout) || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
     const isPreview = React.useContext(PreviewContext);
     const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
+    const handleLink = useLinkHandler();
 
 
     const rawBg = (p.bgColor as string) || "#0f172a";
@@ -47,8 +48,7 @@ export function FooterBlock({ block }: BlockProps) {
     const linkGroups = (p.linkGroups as { id: string; heading: string; links: { id: string; label: string; url: string }[] }[]) || [];
 
     const NavLink = ({ link }: { link: { id: string; label: string; url: string } }) => {
-        const isAnchor = link.url.startsWith("#") && link.url.length > 1;
-        const handleNavClick = (e: React.MouseEvent) => { if (!isPreview) { e.preventDefault(); return; } if (isAnchor) { e.preventDefault(); const el = document.getElementById(link.url.substring(1)); if (el) el.scrollIntoView({ behavior: "smooth" }); } };
+        const handleNavClick = (e: React.MouseEvent) => { handleLink(link.url, e); };
         return (<a href={link.url} onClick={handleNavClick} style={{ color: "inherit", textDecoration: "none", fontWeight: 500, fontSize: "0.9rem", opacity: 0.75, transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.75"}>{link.label}</a>);
     };
 

@@ -2,15 +2,14 @@ import { Metadata } from 'next';
 import PreviewClient from './PreviewClient';
 import { request } from '@/lib/api/client';
 
-
-
 interface Props {
-  params: Promise<{ pageId: string }>;
+  params: Promise<{ 
+    pageId: string;
+  }>;
 }
 
 async function getPageData(id: string) {
   try {
-    // We use a direct fetch here to avoid browser-only things like window.dispatchEvent in the client wrapper
     const res = await request(`/pages/${id}`, { cache: 'no-store' });
     return res.data?.page || res.data;
   } catch (e) {
@@ -39,5 +38,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const { pageId } = await params;
-  return <PreviewClient pageId={pageId} />;
+  
+  return <PreviewClient pageId={pageId} initialPath="/" />;
 }

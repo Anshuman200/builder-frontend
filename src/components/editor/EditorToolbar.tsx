@@ -21,6 +21,9 @@ import {
   GlobeAltIcon,
   LockClosedIcon,
   EyeSlashIcon,
+  ChevronDownIcon,
+  PlusIcon,
+  DocumentIcon,
 } from "@heroicons/react/24/outline";
 import { Popover, Dropdown, Drawer, Switch, ColorPicker } from "antd";
 import Link from "next/link";
@@ -45,6 +48,7 @@ export default function EditorToolbar() {
     historyIndex, history,
     setViewMode, undo, redo,
     updateTitle, updateSlug, updateMeta, updateTheme, updatePageData, markClean,
+    activeRouteId, setActiveRoute, addRoute,
   } = useEditorStore();
   const { pageId } = useParams<{ pageId: string }>() ?? {};
   const router = useRouter();
@@ -81,9 +85,13 @@ export default function EditorToolbar() {
       title: page.title,
       slug: page.slug,
       content: page.content || [],
+      routes: page.routes || [],
+      globalBlocks: page.globalBlocks || { header: null, footer: null },
+      theme: page.theme || DEFAULT_THEME,
       meta: page.meta || {},
       category: page.category || 'Other',
-      status: page.status || 'DRAFT'
+      status: page.status || 'DRAFT',
+      visibility: page.visibility || 'PUBLIC'
     };
 
     if (thumbnailUrl !== undefined) {
@@ -95,9 +103,9 @@ export default function EditorToolbar() {
 
   // Handle thumbnail selection from capture or media library
   const handleUpdateThumbnails = async (newThumbnails: string[], active: string | null) => {
-    updatePageData({ 
-      thumbnail: active, 
-      thumbnails: newThumbnails 
+    updatePageData({
+      thumbnail: active,
+      thumbnails: newThumbnails
     });
 
     if (!pageId || pageId.length < 24) return;
@@ -153,7 +161,6 @@ export default function EditorToolbar() {
   }, [canUndo, canRedo, undo, redo]);
 
 
-
   // Sync / Auto-save on Login
   useEffect(() => {
     // If user just logged in and has unsaved changes, persist them!
@@ -197,7 +204,7 @@ export default function EditorToolbar() {
 
   function openPreview() {
     if (!pageId) return;
-    const previewUrl = typeof window !== "undefined" ? `${window.location.origin}/preview/${pageId}?capture=true` : `/preview/${pageId}?capture=true`;
+    const previewUrl = typeof window !== "undefined" ? `${window.location.origin}/preview/${pageId}` : `/preview/${pageId}`;
 
     // Open immediately to avoid popup blockers
     const newWin = typeof window !== "undefined" ? window.open("about:blank", "_blank") : null;
@@ -264,6 +271,42 @@ export default function EditorToolbar() {
     }
     router.push(target);
   }
+
+  // ── Page Switcher ─────────────────────────────────────────────────────────
+  const routes = page?.routes || [];
+  const activeRoute = routes.find(r => r.id === activeRouteId) || routes[0];
+
+  const pageMenuItems = [
+    {
+      key: 'header',
+      label: <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", padding: "4px 8px" }}>Screens / Pages</span>,
+      disabled: true,
+    },
+    ...routes.map(r => ({
+      key: r.id,
+      onClick: () => setActiveRoute(r.id),
+      label: (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "2px 4px" }}>
+          <DocumentIcon style={{ width: 14, height: 14, opacity: 0.6 }} />
+          <span style={{ fontSize: 13, fontWeight: r.id === activeRouteId ? 600 : 400, color: r.id === activeRouteId ? "var(--primary)" : "inherit" }}>
+            {r.name}
+          </span>
+          {r.id === activeRouteId && <div style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--primary)" }} />}
+        </div>
+      )
+    })),
+    { type: 'divider' as const },
+    {
+      key: 'add-page',
+      onClick: () => addRoute({ name: `New Page ${routes.length + 1}`, path: `/page-${routes.length + 1}` }),
+      label: (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 4px", color: "var(--primary)" }}>
+          <PlusIcon style={{ width: 14, height: 14 }} />
+          <span style={{ fontSize: 13, fontWeight: 600 }}>Add New Page</span>
+        </div>
+      )
+    }
+  ];
 
   return (
     <header style={{
@@ -337,6 +380,30 @@ export default function EditorToolbar() {
             {page?.title || "Untitled Page"}
           </button>
         )}
+        <div style={{ width: 1, height: 20, background: "var(--border)", flexShrink: 0, margin: "0 4px" }} />
+
+        {/* Page Switcher */}
+        <Dropdown menu={{ items: pageMenuItems }} trigger={['click']} placement="bottomLeft">
+          <button style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "4px 10px", height: 32,
+            background: "var(--surface)", border: "1px solid var(--border)",
+            borderRadius: 8, cursor: "pointer", transition: "all 0.2s",
+            minWidth: 120, justifyContent: "space-between"
+          }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = "var(--primary)"}
+            onMouseLeave={e => e.currentTarget.style.borderColor = "var(--border)"}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+              <DocumentIcon style={{ width: 14, height: 14, color: "var(--primary)" }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {activeRoute?.name || "Select Page"}
+              </span>
+            </div>
+            <ChevronDownIcon style={{ width: 12, height: 12, color: "var(--text-muted)" }} />
+          </button>
+        </Dropdown>
+
         <div style={{ width: 1, height: 20, background: "var(--border)", flexShrink: 0, margin: "0 4px" }} />
         <BlockPalette />
       </div>
@@ -593,8 +660,8 @@ export default function EditorToolbar() {
         zIndex={100}
         height="80%"
         styles={{
-          body: { 
-            padding: 0, 
+          body: {
+            padding: 0,
             backgroundColor: 'var(--bg-secondary)',
             height: '100%',
             overflowY: 'auto'

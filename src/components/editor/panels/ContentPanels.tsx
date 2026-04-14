@@ -11,6 +11,7 @@ import {
 import { IconPicker } from "../IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
 import { useAuth } from "@/hooks/useAuth";
+import { Dropdown } from "antd";
 import dynamic from "next/dynamic";
 
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
@@ -248,7 +249,7 @@ export function TeamPanel({ block }: { block: Block }) {
 }
 
 export function PageSettingsPanel({ page }: { page: EditorPage }) {
-    const { updateTheme, updatePageData } = useEditorStore();
+    const { updateTheme, updatePageData, activeRouteId, setActiveRoute, addRoute, updateRoute, deleteRoute } = useEditorStore();
     const { user } = useAuth();
     const theme = page.theme || DEFAULT_THEME;
     const l = theme.layout || DEFAULT_THEME.layout!;
@@ -264,6 +265,124 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                 <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Page Settings</p>
                 <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--text)", fontWeight: 600 }}>Global Configuration</p>
             </div>
+            
+            <Section title="Pages & Navigation">
+                <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Manage routes and multiple pages.</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {(page.routes || []).map((route) => {
+                        const isActive = route.id === activeRouteId;
+                        return (
+                            <div 
+                                key={route.id} 
+                                onClick={() => !isActive && setActiveRoute(route.id)}
+                                style={{
+                                    padding: "8px", 
+                                    background: isActive ? "rgba(99,102,241,0.08)" : "var(--surface)", 
+                                    border: `1px solid ${isActive ? "var(--primary)" : "var(--border)"}`, 
+                                    borderRadius: 6,
+                                    cursor: isActive ? "default" : "pointer",
+                                    transition: "all 0.2s",
+                                    position: "relative",
+                                    overflow: "hidden"
+                                }}
+                                onMouseEnter={e => !isActive && (e.currentTarget.style.borderColor = "var(--primary-light)")}
+                                onMouseLeave={e => !isActive && (e.currentTarget.style.borderColor = "var(--border)")}
+                            >
+                                {isActive && (
+                                    <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: "var(--primary)" }} />
+                                )}
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: isActive ? "var(--primary)" : "var(--text)" }}>{route.name}</span>
+                                    <div style={{ display: "flex", gap: 4 }}>
+                                        {isActive ? (
+                                            <span style={{ fontSize: 9, color: "var(--primary)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Editing</span>
+                                        ) : (
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); deleteRoute(route.id); }} 
+                                                style={{ padding: "2px 6px", fontSize: 10, background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "none", borderRadius: 4, cursor: "pointer" }}
+                                                title="Delete Page"
+                                            >
+                                                &times;
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }} onClick={e => e.stopPropagation()}>
+                                    <div>
+                                        <span style={{ fontSize: 9, color: "var(--text-muted)", display: "block", marginBottom: 2 }}>Name</span>
+                                        <input 
+                                            value={route.name} 
+                                            onChange={(e) => updateRoute(route.id, { name: e.target.value })}
+                                            style={{ width: "100%", fontSize: 11, padding: "4px 6px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)" }} 
+                                        />
+                                    </div>
+                                    <div>
+                                        <span style={{ fontSize: 9, color: "var(--text-muted)", display: "block", marginBottom: 2 }}>Path</span>
+                                        <input 
+                                            value={route.path} 
+                                            onChange={(e) => updateRoute(route.id, { path: e.target.value })}
+                                            style={{ width: "100%", fontSize: 11, padding: "4px 6px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)" }} 
+                                        />
+                                    </div>
+                                </div>
+                                <div style={{ display: "flex", gap: 12, paddingTop: 6, borderTop: "1px solid var(--border)" }} onClick={e => e.stopPropagation()}>
+                                    <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={!!route.hideHeader} 
+                                            onChange={(e) => updateRoute(route.id, { hideHeader: e.target.checked })}
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                        <span style={{ fontSize: 9, color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Hide Header</span>
+                                    </label>
+                                    <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={!!route.hideFooter} 
+                                            onChange={(e) => updateRoute(route.id, { hideFooter: e.target.checked })}
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                        <span style={{ fontSize: 9, color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Hide Footer</span>
+                                    </label>
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    <Dropdown
+                        trigger={['click']}
+                        menu={{
+                            items: [
+                                { key: 'standard', label: 'Standard Page (H+F)', onClick: () => addRoute({ name: "New Page", path: "/new-page" }) },
+                                { key: 'ghost', label: 'Ghost Page (Blank)', onClick: () => addRoute({ name: "Ghost Page", path: "/ghost", hideHeader: true, hideFooter: true }) },
+                                { key: 'no-header', label: 'No Header', onClick: () => addRoute({ name: "No Header", path: "/page", hideHeader: true }) },
+                                { key: 'no-footer', label: 'No Footer', onClick: () => addRoute({ name: "No Footer", path: "/page", hideFooter: true }) },
+                            ]
+                        }}
+                    >
+                        <button 
+                            style={{ 
+                                padding: "8px 0", 
+                                background: "var(--surface)", 
+                                border: "1px dashed var(--border)", 
+                                borderRadius: 6, 
+                                fontSize: 11, 
+                                fontWeight: 700, 
+                                color: "var(--primary)", 
+                                cursor: "pointer", 
+                                marginTop: 4,
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 6
+                            }}
+                        >
+                            <span style={{ fontSize: 14 }}>+</span> Add Page
+                        </button>
+                    </Dropdown>
+                </div>
+            </Section>
             <Section title="Global Theme">
                 <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Synchronize colors across all components.</div>
                 <Field label="Primary Color">

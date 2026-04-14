@@ -28,8 +28,16 @@ const VIEWPORT_WIDTHS = {
 // ─── Main Canvas ──────────────────────────────────────────────────────────────
 
 export default function EditorCanvas() {
-  const { page, viewMode, selectBlock, updateTheme } = useEditorStore();
-  const blocks = page?.content ?? [];
+  const { page, viewMode, selectBlock, updateTheme, activeRouteId } = useEditorStore();
+  
+  const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
+  const routeBlocks = activeRoute?.content ?? [];
+  
+  const blocks = [
+    ...(page?.globalBlocks?.header && !activeRoute?.hideHeader ? [page?.globalBlocks?.header] : []),
+    ...routeBlocks,
+    ...(page?.globalBlocks?.footer && !activeRoute?.hideFooter ? [page?.globalBlocks?.footer] : [])
+  ];
   const themeMode = page?.theme?.mode || "light";
   const isDark = themeMode === "dark";
 

@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps } from "./shared";
+import { PreviewContext, BlockProps, useLinkHandler } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function HeaderBlock({ block }: BlockProps) {
@@ -13,6 +13,7 @@ export function HeaderBlock({ block }: BlockProps) {
     const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
     const isPreview = React.useContext(PreviewContext);
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+    const handleLink = useLinkHandler();
 
     const layout = (p.layout as string) || "standard";
     const position = (p.position as string) || "static";
@@ -77,10 +78,9 @@ export function HeaderBlock({ block }: BlockProps) {
     const NavLinksElement = ({ isMobileMenu = false }: { isMobileMenu?: boolean }) => (
         <nav style={{ display: "flex", alignItems: "center", flexDirection: isMobileMenu ? "column" : "row", gap: isMobileMenu ? "1.5rem" : "2rem" }}>
             {links.map((link) => {
-                const isAnchor = link.url.startsWith("#") && link.url.length > 1;
                 const handleNavClick = (e: React.MouseEvent) => {
-                    if (!isPreview) { e.preventDefault(); return; }
-                    if (isAnchor) { e.preventDefault(); const el = document.getElementById(link.url.substring(1)); if (el) { el.scrollIntoView({ behavior: "smooth" }); if (isMobileMenu) setMobileMenuOpen(false); } }
+                    handleLink(link.url, e);
+                    if (isPreview && isMobileMenu) setMobileMenuOpen(false);
                 };
                 return (<a key={link.id} href={link.url} onClick={handleNavClick} style={{ color: "inherit", textDecoration: "none", fontWeight: 500, fontSize: isMobileMenu ? "1.1rem" : "0.95rem", opacity: 0.8, transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.8"}>{link.label}</a>);
             })}
@@ -110,7 +110,7 @@ export function HeaderBlock({ block }: BlockProps) {
                         {!isMobile && showCta && (
                             <div className={isPreview ? `header-${block.id}-desktop-cta` : undefined} style={{ display: isMobile ? "none" : "block" }}>
                                 {showCta && ctaText && (
-                                    <a href={ctaUrl} onClick={(e) => { if (!isPreview) { e.preventDefault(); return; } const isAnchor = ctaUrl.startsWith("#") && ctaUrl.length > 1; if (isAnchor) { e.preventDefault(); const el = document.getElementById(ctaUrl.substring(1)); if (el) el.scrollIntoView({ behavior: "smooth" }); } }} style={ctaStyle}
+                                    <a href={ctaUrl} onClick={(e) => handleLink(ctaUrl, e)} style={ctaStyle}
                                         onMouseEnter={e => { if (ctaVariant === "outline") { e.currentTarget.style.background = ctaBgColor; e.currentTarget.style.color = ctaTextColor; } else { e.currentTarget.style.opacity = "0.9"; } }}
                                         onMouseLeave={e => { if (ctaVariant === "outline") { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = ctaBgColor; } else { e.currentTarget.style.opacity = "1"; } }}
                                     >{ctaText}</a>
@@ -125,7 +125,7 @@ export function HeaderBlock({ block }: BlockProps) {
                 <div className={isPreview ? `header-${block.id}-mobile-menu ${mobileMenuOpen ? 'open' : ''}` : undefined} style={{ position: "absolute", top: "100%", left: 0, right: 0, background: style === "transparent" ? (isDark ? "#09090b" : "#ffffff") : background, color: textColor, zIndex: 40, display: "flex", flexDirection: "column", borderTop: "1px solid rgba(150,150,150,0.1)", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)", padding: "1.5rem 24px 2rem", transform: mobileMenuOpen ? "translateY(0)" : "translateY(-150%)", opacity: mobileMenuOpen ? 1 : 0, visibility: mobileMenuOpen ? "visible" : "hidden", transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, visibility 0.4s", pointerEvents: mobileMenuOpen ? "auto" : "none" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2rem" }}>
                         <NavLinksElement isMobileMenu={true} />
-                        {showCta && (<a href={ctaUrl} style={{ ...ctaStyle, width: "100%", marginTop: "1rem", padding: "12px 20px" }}>{ctaText}</a>)}
+                        {showCta && (<a href={ctaUrl} onClick={(e) => handleLink(ctaUrl, e)} style={{ ...ctaStyle, width: "100%", marginTop: "1rem", padding: "12px 20px" }}>{ctaText}</a>)}
                     </div>
                 </div>
             </header>
