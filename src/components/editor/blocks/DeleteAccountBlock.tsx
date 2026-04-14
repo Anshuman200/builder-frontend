@@ -16,9 +16,6 @@ export function DeleteAccountBlock({ block }: BlockProps) {
     const { updateBlock, selectBlock } = useEditorStore();
     const p = block.props;
     
-    const pageTheme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
-    const isDark = pageTheme.mode === "dark";
-    
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -60,10 +57,10 @@ export function DeleteAccountBlock({ block }: BlockProps) {
     const textColor = (p.textColor as string) || "var(--text)";
     
     // Input Styles
-    const inputBg = (p.inputBg as string) || (isDark ? "#1f1f1f" : "#f8fafc");
-    const inputTextColor = (p.inputTextColor as string) || (isDark ? "#ffffff" : "#111827");
-    const inputBorderColor = (p.inputBorderColor as string) || (isDark ? "#303030" : "#e2e8f0");
-    const labelColor = (p.labelColor as string) || (isDark ? "rgba(255,255,255,0.85)" : "#374151");
+    const inputBg = (p.inputBg as string) || "#f8fafc";
+    const inputTextColor = (p.inputTextColor as string) || "#111827";
+    const inputBorderColor = (p.inputBorderColor as string) || "#e2e8f0";
+    const labelColor = (p.labelColor as string) || "#374151";
 
     const padding = (p.padding as string) || "3rem 2rem";
     const borderRadius = (p.borderRadius as string) || "20px";
@@ -72,7 +69,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
 
     const inputHeight = (p.inputHeight as string) || "50px";
     const inputRadius = (p.inputRadius as string) || "10px";
-    const inputPlaceholderColor = (p.inputPlaceholderColor as string) || (isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.4)");
+    const inputPlaceholderColor = (p.inputPlaceholderColor as string) || "rgba(0,0,0,0.4)";
 
     const successMessageStr = (p.successMessage as string) || "Your account deletion request has been submitted.";
     const errorMessageStr = (p.errorMessage as string) || "Something went wrong. Please try again.";
@@ -118,7 +115,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
         margin: "0 auto",
         position: "relative",
         overflow: "hidden",
-        border: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(0,0,0,0.05)",
+        border: "1px solid rgba(0,0,0,0.05)",
     };
 
     const handleWrapperClick = (e: React.MouseEvent) => {
@@ -131,7 +128,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
     return (
         <ConfigProvider
             theme={{
-                algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
+                algorithm: theme.defaultAlgorithm,
                 token: {
                     colorPrimary: buttonBg,
                     borderRadius: parseInt(inputRadius) || 8,
@@ -152,7 +149,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
                         colorBgContainer: inputBg,
                         colorText: inputTextColor,
                         colorBorder: inputBorderColor,
-                        colorBgElevated: isDark ? "#1f1f1f" : "#ffffff",
+                        colorBgElevated: "#ffffff",
                         controlHeight: parseInt(inputHeight) || 40,
                     }
                 }
@@ -180,7 +177,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
                         <div style={{
                             position: "absolute",
                             inset: 0,
-                            background: isDark ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.8)",
+                            background: "rgba(255,255,255,0.8)",
                             backdropFilter: "blur(4px)",
                             zIndex: 0,
                         }} />

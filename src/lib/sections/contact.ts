@@ -210,7 +210,7 @@ export const contactSections: SectionTemplate[] = [
     </div>`,
     create: () => {
       const root = makeBlock("hero", {
-        bgColor: "#0d0d1a", textColor: "#ffffff",
+        bgColor: "#fff", textColor: "#000",
         padding: "6rem 2rem", minHeight: "auto", align: "center",
       });
 

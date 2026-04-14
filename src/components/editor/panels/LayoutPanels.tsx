@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel, LinkInput } from "./shared";
+import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel, LinkInput, ButtonFields } from "./shared";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
 
@@ -16,19 +16,13 @@ export function ButtonPanel({ block }: { block: Block }) {
     return (
         <>
             <Section title="Content">
-                <Field label="Label"><TextInput value={(p.label as string) || ""} onChange={(v) => up("label", v)} placeholder="Click me" /></Field>
+                <ButtonFields p={p} up={up} hideLabel={false} />
                 <Field label="Link (href)"><LinkInput value={(p.href as string) || ""} onChange={(v) => up("href", v)} placeholder="#" /></Field>
             </Section>
             <Section title="Appearance">
-                <Field label="Variant"><SelectInput value={variant} onChange={(v) => up("variant", v)} options={[{ label: "Solid", value: "solid" }, { label: "Outline", value: "outline" }, { label: "Ghost", value: "ghost" }, { label: "Soft", value: "soft" }, { label: "Gradient", value: "gradient" }, { label: "Link", value: "link" }]} /></Field>
                 <Field label="Size"><SelectInput value={(p.size as string) || "md"} onChange={(v) => up("size", v)} options={[{ label: "Small", value: "sm" }, { label: "Medium", value: "md" }, { label: "Large", value: "lg" }, { label: "Extra Large", value: "xl" }]} /></Field>
                 <Field label="Alignment"><SelectInput value={(p.align as string) || "left"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>
                 <ToggleInput value={!!(p.fullWidth)} onChange={(v) => up("fullWidth", v)} label="Full Width" />
-            </Section>
-            <Section title="Colors">
-                <Field label={variant === "gradient" ? "Unused (see Gradient)" : "Background Color"}><ColorInput value={(p.bgColor as string) || "#6366f1"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
-                <Field label="Text Color"><ColorInput value={(p.textColor as string) || ""} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
-                <Field label="Border Color"><ColorInput value={(p.borderColor as string) || ""} onChange={(v) => up("borderColor", v)} onBlur={(v) => up("borderColor", v, true)} /></Field>
             </Section>
             {variant === "gradient" && (
                 <Section title="Gradient">
@@ -37,17 +31,15 @@ export function ButtonPanel({ block }: { block: Block }) {
                     <Field label="Direction"><SelectInput value={(p.gradientDir as string) || "to right"} onChange={(v) => up("gradientDir", v)} options={[{ label: "→ Right", value: "to right" }, { label: "← Left", value: "to left" }, { label: "↓ Bottom", value: "to bottom" }, { label: "↗ Top Right", value: "to top right" }, { label: "↘ Bottom Right", value: "to bottom right" }]} /></Field>
                 </Section>
             )}
-            <Section title="Shape">
-                <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "9999px"} onChange={(v) => up("borderRadius", v)} /></Field>
+            <Section title="Shape & Shadow">
+                <Field label="Shadow"><SelectInput value={(p.shadow as string) || "none"} onChange={(v) => up("shadow", v)} options={[{ label: "None", value: "none" }, { label: "Small", value: "sm" }, { label: "Medium", value: "md" }, { label: "Large", value: "lg" }, { label: "Glow", value: "glow" }]} /></Field>
                 <Field label="Border Width"><TextInput value={(p.borderWidth as string) || "2px"} onChange={(v) => up("borderWidth", v)} placeholder="2px" /></Field>
+                <Field label="Border Color"><ColorInput value={(p.borderColor as string) || ""} onChange={(v) => up("borderColor", v)} onBlur={(v) => up("borderColor", v, true)} /></Field>
             </Section>
             <Section title="Typography">
                 <Field label="Font Size override"><TextInput value={(p.fontSize as string) || ""} onChange={(v) => up("fontSize", v)} placeholder="auto" /></Field>
                 <Field label="Font Weight"><SelectInput value={(p.fontWeight as string) || "700"} onChange={(v) => up("fontWeight", v)} options={[{ label: "Normal (400)", value: "400" }, { label: "Medium (500)", value: "500" }, { label: "Semibold (600)", value: "600" }, { label: "Bold (700)", value: "700" }, { label: "Black (900)", value: "900" }]} /></Field>
                 <Field label="Letter Spacing"><TextInput value={(p.letterSpacing as string) || "0.02em"} onChange={(v) => up("letterSpacing", v)} placeholder="0.02em" /></Field>
-            </Section>
-            <Section title="Shadow">
-                <Field label="Shadow"><SelectInput value={(p.shadow as string) || "none"} onChange={(v) => up("shadow", v)} options={[{ label: "None", value: "none" }, { label: "Small", value: "sm" }, { label: "Medium", value: "md" }, { label: "Large", value: "lg" }, { label: "Glow", value: "glow" }]} /></Field>
             </Section>
             <Section title="Icons">
                 <Field label="Left Icon"><IconPicker value={(p.iconLeft as string) || ""} onChange={(v) => up("iconLeft", v)} /></Field>

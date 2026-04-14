@@ -130,14 +130,17 @@ export default function EditorToolbar() {
     const timeoutId = setTimeout(async () => {
       try {
         const payload = getPlainPayload();
-        if (!payload) return;
+        if (!payload || !isDirty) return;
+        setIsSaving(true);
         await updateMutation.mutateAsync({ id: pageId, ...payload });
         markClean();
         clearLocalDraft(pageId);
       } catch (e) {
         console.error("Auto-save failed", e);
+      } finally {
+        setIsSaving(false);
       }
-    }, 2000);
+    }, 800);
 
     return () => clearTimeout(timeoutId);
   }, [page, user, pageId, isDirty, isSaving, markClean]);
@@ -435,9 +438,15 @@ export default function EditorToolbar() {
       <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, justifyContent: "flex-end" }}>
 
         {/* Save status */}
-        <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--text-muted)" }}>
-          <span style={{ width: 7, height: 7, borderRadius: "50%", background: isDirty ? "#f59e0b" : "#10b981", display: "inline-block" }} />
-          {isDirty ? "Unsaved" : "Saved"}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: "var(--text-muted)", minWidth: 80 }}>
+          <span style={{ 
+            width: 6, height: 6, borderRadius: "50%", 
+            background: isSaving ? "var(--primary)" : isDirty ? "#f59e0b" : "#10b981", 
+            boxShadow: isSaving ? "0 0 8px var(--primary)" : "none",
+            transition: "all 0.2s ease",
+            display: "inline-block" 
+          }} />
+          {isSaving ? "Saving..." : isDirty ? "Unsaved" : "Saved"}
         </div>
 
         {/* Undo / Redo */}

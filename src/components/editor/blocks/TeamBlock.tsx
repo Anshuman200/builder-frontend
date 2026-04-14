@@ -54,16 +54,13 @@ function SocialLinks({ socials, color, justify }: { socials: Record<string, Soci
 export function TeamBlock({ block }: BlockProps) {
     const p = block.props;
     const viewMode = useEditorStore((s) => s.viewMode);
-    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
-
     const isPreview = React.useContext(PreviewContext);
-
     const LIGHT_BGS = ["#ffffff", "#fff", "#f8fafc", "#f1f5f9"];
     const LIGHT_TEXTS = ["#1e293b", "#0f172a", "#111111", "#000", "#000000"];
     const rawBg = (p.bgColor as string) || "#ffffff";
     const rawText = (p.textColor as string) || "#1e293b";
-    const bgColor = isDark && LIGHT_BGS.includes(rawBg.toLowerCase()) ? "#09090b" : rawBg;
-    const textColor = isDark && LIGHT_TEXTS.includes(rawText.toLowerCase()) ? "#fafafa" : rawText;
+    const bgColor = rawBg;
+    const textColor = rawText;
     const title = typeof p.title === "string" ? p.title : "Meet Our Team";
     const subtitle = typeof p.subtitle === "string" ? p.subtitle : "The people behind the magic";
     const align = (p.align as string) || "center";
@@ -71,9 +68,14 @@ export function TeamBlock({ block }: BlockProps) {
     const columns = Number(p.columns) || 3;
     const gap = (p.gap as string) || "2rem";
 
+    const titleSize = (p.titleSize as string) || "2.25rem";
+    const subtitleSize = (p.subtitleSize as string) || "1.125rem";
+    const titleColor = (p.titleColor as string) || textColor;
+    const subtitleColor = (p.subtitleColor as string) || textColor;
+
     const cardStyle = (p.cardStyle as string) || "raised";
     const rawCardBg = (p.cardBg as string) || "#ffffff";
-    const cardBg = isDark && LIGHT_BGS.includes(rawCardBg.toLowerCase()) ? "#18181b" : rawCardBg;
+    const cardBg = rawCardBg;
     const cardRadius = (p.cardRadius as string) || "16px";
     const cardShadow = (p.cardShadow as string) || "0 4px 24px rgba(0,0,0,0.08), 0 1px 6px rgba(0,0,0,0.06)";
 
@@ -85,10 +87,10 @@ export function TeamBlock({ block }: BlockProps) {
     const rawRoleColor = (p.roleColor as string) || "#64748b";
     const rawDescColor = (p.descColor as string) || "#475569";
     const rawSocialColor = (p.socialColor as string) || "#94a3b8";
-    const nameColor = isDark && LIGHT_TEXTS.includes(rawNameColor.toLowerCase()) ? "#fafafa" : rawNameColor;
-    const roleColor = isDark && ["#64748b", "#475569"].includes(rawRoleColor.toLowerCase()) ? "#94a3b8" : rawRoleColor;
-    const descColor = isDark && ["#475569", "#334155"].includes(rawDescColor.toLowerCase()) ? "#cbd5e1" : rawDescColor;
-    const socialColor = isDark && ["#94a3b8", "#64748b"].includes(rawSocialColor.toLowerCase()) ? "#cbd5e1" : rawSocialColor;
+    const nameColor = rawNameColor;
+    const roleColor = rawRoleColor;
+    const descColor = rawDescColor;
+    const socialColor = rawSocialColor;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const members = (p.members as any[]) || [];
@@ -113,8 +115,8 @@ export function TeamBlock({ block }: BlockProps) {
         };
         if (layout === "list" && viewMode === "mobile") { base.flexDirection = "column"; base.alignItems = align === "center" ? "center" : "flex-start"; base.textAlign = align as React.CSSProperties["textAlign"]; }
         if (cardStyle === "raised") return { ...base, background: cardBg, boxShadow: cardShadow };
-        if (cardStyle === "outlined") return { ...base, background: cardBg, border: `1.5px solid ${isDark ? "#ffffff1a" : "#e2e8f0"}` };
-        if (cardStyle === "filled") return { ...base, background: p.cardBg ? cardBg : (isDark ? "#ffffff0d" : "rgba(var(--primary-rgb), 0.08)") };
+        if (cardStyle === "outlined") return { ...base, background: cardBg, border: `1.5px solid #e2e8f0` };
+        if (cardStyle === "filled") return { ...base, background: p.cardBg ? cardBg : "rgba(var(--primary-rgb), 0.08)" };
         return base;
     };
 
@@ -144,7 +146,7 @@ export function TeamBlock({ block }: BlockProps) {
                     background: ${cardBg};
                     border-radius: ${cardRadius};
                     box-shadow: ${cardStyle === 'raised' ? cardShadow : 'none'};
-                    border: ${cardStyle === 'outlined' ? `1.5px solid ${isDark ? "#ffffff1a" : "#e2e8f0"}` : 'none'};
+                    border: ${cardStyle === 'outlined' ? `1.5px solid #e2e8f0` : 'none'};
                     flex-direction: row;
                 }
                 .team-large-card-reverse-${block.id} {
@@ -155,7 +157,7 @@ export function TeamBlock({ block }: BlockProps) {
                     background: ${cardBg};
                     border-radius: ${cardRadius};
                     box-shadow: ${cardStyle === 'raised' ? cardShadow : 'none'};
-                    border: ${cardStyle === 'outlined' ? `1.5px solid ${isDark ? "#ffffff1a" : "#e2e8f0"}` : 'none'};
+                    border: ${cardStyle === 'outlined' ? `1.5px solid #e2e8f0` : 'none'};
                     flex-direction: row-reverse;
                 }
                 @media (max-width: 1024px) {
@@ -183,8 +185,8 @@ export function TeamBlock({ block }: BlockProps) {
             <section id={(p.sectionId as string) || `block-${block.id}`} className={`team-section-${block.id}`}>
                 <div style={{ boxSizing: "border-box", width: "100%" }}>
                     <div style={{ textAlign: align as React.CSSProperties["textAlign"] }}>
-                        {title && <h2 style={{ fontSize: "2.25rem", fontWeight: 700, margin: "0 0 1rem 0" }}>{title}</h2>}
-                        {subtitle && <p style={{ fontSize: "1.125rem", opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block" }}>{subtitle}</p>}
+                        {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor }}>{title}</h2>}
+                        {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor }}>{subtitle}</p>}
                     </div>
                     {/* ── Compact Row ───────────────────────────────────────────── */}
                     {layout === "compact" && (
@@ -201,7 +203,7 @@ export function TeamBlock({ block }: BlockProps) {
                                     background: cardStyle !== 'none' ? cardBg : 'transparent',
                                 };
                                 const raisedStyle = cardStyle === 'raised' ? { boxShadow: cardShadow } : {};
-                                const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid ${isDark ? "#ffffff1a" : "#e2e8f0"}` } : {};
+                                const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid #e2e8f0` } : {};
 
                                 return (
                                     <div key={`mc-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle }}>
@@ -272,11 +274,11 @@ export function TeamBlock({ block }: BlockProps) {
                                     borderRadius: cardStyle !== 'none' ? cardRadius : 0,
                                 };
                                 const raisedStyle = cardStyle === 'raised' ? { boxShadow: cardShadow } : {};
-                                const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid ${isDark ? "#ffffff1a" : "#e2e8f0"}` } : {};
+                                const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid #e2e8f0` } : {};
 
                                 return (
                                     <div key={`ms-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle }}>
-                                        <div style={{ width: 140, height: 140, borderRadius: "50%", overflow: "hidden", border: `4px solid ${isDark ? "rgba(255,255,255,0.12)" : "#e2e8f0"}`, marginBottom: "1rem", position: "relative" }}>
+                                        <div style={{ width: 140, height: 140, borderRadius: "50%", overflow: "hidden", border: `4px solid #e2e8f0`, marginBottom: "1rem", position: "relative" }}>
                                             {member.image ? (
                                                 <Image 
                                                     src={member.image} 
@@ -286,7 +288,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
                                             ) : (
-                                                <div style={{ width: "100%", height: "100%", background: isDark ? "#333" : "#e2e8f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem" }}>👤</div>
+                                                <div style={{ width: "100%", height: "100%", background: "#e2e8f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem" }}>👤</div>
                                             )}
                                         </div>
                                         <h3 style={{ margin: "0 0 0.25rem", fontSize: "1.1rem", fontWeight: 700, color: nameColor }}>{member.name}</h3>

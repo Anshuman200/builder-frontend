@@ -66,11 +66,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
       logoWidth: "120px",
 
       // Nav links
-      links: [
-        { id: "1", label: "Features", url: "#" },
-        { id: "2", label: "Pricing", url: "#" },
-        { id: "3", label: "About", url: "#" },
-      ],
+      links: [],
 
       // CTA Button
       showCta: true,
@@ -186,23 +182,23 @@ export const BLOCK_TYPES: BlockConfig[] = [
     label: "Button",
     icon: "MousePointerClick",
     defaultProps: {
-      label: "Click me",
+      buttonText: "Click me",
       href: "#",
       // Appearance
-      variant: "solid",         // solid | outline | ghost | soft | gradient | link
+      buttonVariant: "solid",    // solid | outline | ghost | soft | gradient | link
       size: "md",               // sm | md | lg | xl
       align: "left",
       fullWidth: true,
       // Colors
-      bgColor: "",              // overrides variant bg
-      textColor: "",
+      buttonBg: "var(--primary)",
+      buttonTextColor: "var(--button-text)",
       borderColor: "",
       // Gradient (only used when variant = gradient)
       gradientFrom: "#6366f1",
       gradientTo: "#8b5cf6",
       gradientDir: "to right",
       // Shape
-      borderRadius: "9999px",   // pill by default
+      buttonBorderRadius: "9999px",   // pill by default
       borderWidth: "2px",
       // Text style
       fontWeight: "700",
@@ -336,7 +332,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
 
       // Card Styling
       cardStyle: "raised", // none | raised | outlined | filled
-      cardBg: "var(--surface)",
+      cardBg: "#ffffff",
       cardRadius: "16px",
       cardHeight: "auto",
       cardPadding: "2rem 1.75rem",
@@ -390,7 +386,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
 
       // Card Styling
       cardStyle: "raised", // none | raised | outlined | filled
-      cardBg: "var(--surface)",
+      cardBg: "#ffffff",
       cardRadius: "16px",
       cardHeight: "auto",
       cardPadding: "2rem 1.75rem",
@@ -449,7 +445,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
     label: "Footer",
     icon: "PanelBottom",
     defaultProps: {
-      bgColor: "var(--surface)",
+      bgColor: "#ffffff",
       textColor: "var(--text)",
       padding: "48px 32px",
       tabletPadding: "32px 24px",
@@ -497,12 +493,13 @@ export const BLOCK_TYPES: BlockConfig[] = [
       submitLabel: "Send Message →",
       successMessage: "Thanks! We'll get back to you shortly.",
       errorMessage: "Something went wrong. Please try again.",
+      buttonVariant: "solid",
       buttonBg: "var(--primary)",
       buttonTextColor: "var(--button-text)",
       buttonBorderRadius: "10px",
       buttonFullWidth: true,
       buttonAlign: "right",
-      bgColor: "var(--surface)",
+      bgColor: "#ffffff",
       padding: "3rem 2rem",
       borderRadius: "20px",
       inputBg: "",
@@ -531,24 +528,25 @@ export const BLOCK_TYPES: BlockConfig[] = [
       lastNameRequired: false,
       reasonRequired: false,
       reasonOptions: "I don't use it anymore\nPrivacy concerns\nFound a better alternative\nToo many emails\nOther",
-      
+
       titleText: "Delete Your Account",
       subtitleText: "We're sorry to see you go. Please let us know why you're leaving so we can improve.",
       titleColor: "var(--text)",
       subtitleColor: "var(--text-muted)",
-      
+
       logoUrl: "",
       logoHeight: "48px",
       logoWidth: "auto",
       logoRadius: "0px",
       logoShadow: "none",
-      
+
       submitLabel: "Delete Account",
+      buttonVariant: "solid",
       buttonBg: "#ef4444",
       buttonTextColor: "#ffffff",
       buttonBorderRadius: "10px",
-      
-      bgColor: "var(--surface)",
+
+      bgColor: "#ffffff",
       textColor: "var(--text)",
       inputBg: "",
       inputTextColor: "",
@@ -557,43 +555,12 @@ export const BLOCK_TYPES: BlockConfig[] = [
       padding: "3rem 2rem",
       borderRadius: "20px",
       boxShadow: "0 16px 48px #00000033, 0 4px 16px #00000026",
-      
+
       successMessage: "Your account deletion request has been submitted.",
       errorMessage: "Something went wrong. Please try again.",
-      
-      // Animation
-      animationPlayback: "once",
-    },
-  },
-  {
-    type: "contactInfo",
-    label: "Contact Info",
-    icon: "Megaphone",
-    defaultProps: {
-      bgColor: "transparent",
-      textColor: "var(--text)",
-      padding: "16px 0",
-      items: [
-        { id: "1", title: "Email", content: "hello@example.com", icon: "Mail", color: "#6366f1" },
-        { id: "2", title: "Phone", content: "+1 (555) 000-0000", icon: "Phone", color: "#8b5cf6" },
-        { id: "3", title: "Address", content: "123 Business St, New York", icon: "MapPin", color: "#ec4899" },
-      ],
-      layout: "list", // list | grid
-      columns: 1,
-      gap: "1.5rem",
-      itemBg: "rgba(255,255,255,0.05)",
-      itemRadius: "12px",
-      itemPadding: "1rem 1.25rem",
-      showIcons: true,
-      iconSize: "24",
-      titleSize: "0.9rem",
-      contentSize: "1rem",
 
       // Animation
-      animationType: DEFAULT_CONFIG.animationFade.type,
-      animationDuration: DEFAULT_CONFIG.animationFade.duration,
-      animationDelay: DEFAULT_CONFIG.animationFade.delay,
-      animationPlayback: DEFAULT_CONFIG.animationFade.playback,
+      animationPlayback: "once",
     },
   },
   {
@@ -611,7 +578,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
           type: "container",
           props: {
             padding: "40px 24px",
-            bgColor: "rgba(255,255,255,0.03)",
+            bgColor: "#fff",
             borderRadius: "12px",
             maxWidth: "100%",
             contentAlign: "center",
@@ -741,7 +708,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
 
       // Card Styling
       cardStyle: "card", // none | card | glass | flat
-      cardBg: "var(--surface)",
+      cardBg: "#ffffff",
       cardRadius: "1.5rem",
       cardPadding: "1.5rem",
 
@@ -769,7 +736,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
       subtitle: "Last 30 days activity",
       height: "300px",
       padding: "2rem",
-      bgColor: "var(--surface)",
+      bgColor: "#ffffff",
       borderRadius: "1.5rem",
 
       // Data
@@ -909,18 +876,18 @@ export function injectProjectName(block: Block, projectName: string): Block {
 // ─── Migrate an entire page's blocks to replace PageCraft with project name ───
 export function migrateProjectName(data: any, projectName: string): any {
   if (!projectName || projectName === "PageCraft" || !data) return data;
-  
+
   // If it's an array of blocks
   if (Array.isArray(data)) {
     return data.map(b => injectProjectName(b, projectName));
   }
-  
+
   // If it's an EditorPage object
   const pageDetails = { ...data };
   if (pageDetails.content && Array.isArray(pageDetails.content)) {
     pageDetails.content = pageDetails.content.map((b: Block) => injectProjectName(b, projectName));
   }
-  
+
   if (pageDetails.globalBlocks) {
     if (pageDetails.globalBlocks.header) {
       pageDetails.globalBlocks.header = injectProjectName(pageDetails.globalBlocks.header, projectName);
@@ -929,14 +896,14 @@ export function migrateProjectName(data: any, projectName: string): any {
       pageDetails.globalBlocks.footer = injectProjectName(pageDetails.globalBlocks.footer, projectName);
     }
   }
-  
+
   if (pageDetails.routes && Array.isArray(pageDetails.routes)) {
     pageDetails.routes = pageDetails.routes.map((r: any) => ({
       ...r,
       content: r.content.map((b: Block) => injectProjectName(b, projectName))
     }));
   }
-  
+
   return pageDetails;
 }
 

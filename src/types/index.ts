@@ -77,6 +77,8 @@ export interface RouteConfig {
     meta?: MetaConfig;
     hideHeader?: boolean;
     hideFooter?: boolean;
+    showInHeader?: boolean;
+    showInFooter?: boolean;
 }
 
 export interface EditorPage {

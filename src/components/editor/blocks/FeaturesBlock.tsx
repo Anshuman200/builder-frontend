@@ -10,7 +10,6 @@ import { DEFAULT_THEME, hexToRgb } from "@/lib/utils/theme";
 export function FeaturesBlock({ block }: BlockProps) {
     const p = block.props;
     const viewMode = useEditorStore((s) => s.viewMode);
-    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
     const isPreview = React.useContext(PreviewContext);
 
     const bgColor = (p.bgColor as string) || "var(--background)";
@@ -43,6 +42,9 @@ export function FeaturesBlock({ block }: BlockProps) {
     const primaryRgb = hexToRgb(defaultPrimary) || "99, 102, 241";
     const iconColor = (p.iconColor as string) || defaultPrimary;
     const iconBg = (p.iconBg as string) || `rgba(${primaryRgb}, 0.15)`;
+    
+    const titleColor = (p.titleColor as string) || textColor;
+    const subtitleColor = (p.subtitleColor as string) || textColor;
 
     const desktopPadding = (p.padding as string) || "64px 24px";
     const tabletPadding = (p.tabletPadding as string) || "48px 16px";
@@ -53,8 +55,8 @@ export function FeaturesBlock({ block }: BlockProps) {
     const getCardSty = (): React.CSSProperties => {
         const base: React.CSSProperties = { display: "flex", flexDirection: "column", alignItems: align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start", textAlign: align as any, padding: cardStyle !== "none" ? "2rem 1.75rem" : "0.5rem", borderRadius: cardStyle !== "none" ? cardRadius : 0, transition: "transform 0.2s ease, box-shadow 0.2s ease" };
         if (cardStyle === "raised") return { ...base, background: cardBg, boxShadow: cardShadow };
-        if (cardStyle === "outlined") return { ...base, background: cardBg, border: `1.5px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}` };
-        if (cardStyle === "filled") return { ...base, background: isDark ? "rgba(255,255,255,0.05)" : `rgba(${primaryRgb}, 0.06)` };
+        if (cardStyle === "outlined") return { ...base, background: cardBg, border: `1.5px solid #e2e8f0` };
+        if (cardStyle === "filled") return { ...base, background: `rgba(${primaryRgb}, 0.06)` };
         return base;
     };
 
@@ -79,8 +81,8 @@ export function FeaturesBlock({ block }: BlockProps) {
 
     const SectionHeader = () => (
         <div style={{ textAlign: align as any, marginBottom: "3rem" }}>
-            {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0" }}>{title}</h2>}
-            {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block" }}>{subtitle}</p>}
+            {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor }}>{title}</h2>}
+            {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor }}>{subtitle}</p>}
         </div>
     );
 
@@ -118,7 +120,7 @@ export function FeaturesBlock({ block }: BlockProps) {
                 {features.map((feat, idx) => {
                     const even = idx % 2 === 0;
                     return (
-                        <div key={feat.id || idx} style={{ display: "flex", alignItems: "center", gap: "3rem", flexDirection: even ? "row" : "row-reverse", padding: "2rem 0", borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)"}` }}>
+                        <div key={feat.id || idx} style={{ display: "flex", alignItems: "center", gap: "3rem", flexDirection: even ? "row" : "row-reverse", padding: "2rem 0", borderBottom: `1px solid rgba(0,0,0,0.06)` }}>
                             <div style={{ flexShrink: 0 }}>
                                 <div style={{ width: 80, height: 80, borderRadius: iconRadius, background: iconBg, color: iconColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                     <IconWrapper feature={feat} />
@@ -140,7 +142,7 @@ export function FeaturesBlock({ block }: BlockProps) {
             <SectionHeader />
             <div style={{ display: "flex", gap, overflowX: "auto", paddingBottom: "0.5rem" }}>
                 {features.map((feat, idx) => (
-                    <div key={feat.id || idx} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.75rem", minWidth: 200, flex: 1, padding: "1.5rem", background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)", borderRadius: cardRadius, border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#e2e8f0"}` }}>
+                    <div key={feat.id || idx} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.75rem", minWidth: 200, flex: 1, padding: "1.5rem", background: "rgba(0,0,0,0.02)", borderRadius: cardRadius, border: `1px solid #e2e8f0` }}>
                         <IconWrapper feature={feat} />
                         <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: 0 }}>{feat.title}</h3>
                         <p style={{ fontSize: cardDescSize, opacity: 0.6, margin: 0, lineHeight: 1.6 }}>{feat.description}</p>
@@ -155,7 +157,7 @@ export function FeaturesBlock({ block }: BlockProps) {
             <SectionHeader />
             <div style={{ display: "grid", gridTemplateColumns: `repeat(${editorCols}, 1fr)`, gap }}>
                 {features.map((feat, idx) => (
-                    <div key={feat.id || idx} style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1.25rem 1.5rem", background: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)", borderRadius: cardRadius, border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#e2e8f0"}` }}>
+                    <div key={feat.id || idx} style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1.25rem 1.5rem", background: "rgba(0,0,0,0.02)", borderRadius: cardRadius, border: `1px solid #e2e8f0` }}>
                         <div style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 10, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", color: iconColor }}>
                             {(() => { const C = getIcon(feat.icon); return C ? <C style={{ width: 20, height: 20 }} /> : <Square2StackIcon style={{ width: 20, height: 20 }} />; })()}
                         </div>
@@ -176,7 +178,7 @@ export function FeaturesBlock({ block }: BlockProps) {
                 {features.map((feat, idx) => {
                     const wide = idx === 0 || idx === features.length - 1;
                     return (
-                        <div key={feat.id || idx} style={{ gridColumn: wide ? "span 2" : "span 1", gridRow: wide ? "span 1" : "span 1", background: isDark ? "rgba(255,255,255,0.05)" : `rgba(${primaryRgb}, 0.06)`, borderRadius: cardRadius, padding: "2rem", display: "flex", flexDirection: "column", justifyContent: "flex-end", position: "relative", overflow: "hidden", border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)"}` }}>
+                        <div key={feat.id || idx} style={{ gridColumn: wide ? "span 2" : "span 1", gridRow: wide ? "span 1" : "span 1", background: `rgba(${primaryRgb}, 0.06)`, borderRadius: cardRadius, padding: "2rem", display: "flex", flexDirection: "column", justifyContent: "flex-end", position: "relative", overflow: "hidden", border: `1px solid rgba(0,0,0,0.05)` }}>
                             <div style={{ position: "absolute", top: "1.5rem", left: "1.5rem" }}><IconWrapper feature={feat} /></div>
                             <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.4rem 0" }}>{feat.title}</h3>
                             <p style={{ fontSize: cardDescSize, opacity: 0.6, margin: 0, lineHeight: 1.6 }}>{feat.description}</p>
@@ -203,7 +205,7 @@ export function FeaturesBlock({ block }: BlockProps) {
                 <style>{`
           .features-${block.id} { padding: ${desktopPadding}; background: ${bgColor}; color: ${textColor}; }
           .features-grid-${block.id} { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: ${gap}; }
-          .features-card-${block.id} { ${cardStyle === "raised" ? `background:${cardBg};box-shadow:${cardShadow};` : ""}${cardStyle === "outlined" ? `background:${cardBg};border:1.5px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"};` : ""}${cardStyle === "filled" ? `background:${isDark ? "rgba(255,255,255,0.05)" : `rgba(${primaryRgb},0.06)`};` : ""}${cardStyle !== "none" ? `padding:2rem 1.75rem;border-radius:${cardRadius};` : ""}transition:transform 0.2s ease,box-shadow 0.2s ease; }
+          .features-card-${block.id} { ${cardStyle === "raised" ? `background:${cardBg};box-shadow:${cardShadow};` : ""}${cardStyle === "outlined" ? `background:${cardBg};border:1.5px solid #e2e8f0;` : ""}${cardStyle === "filled" ? `background:rgba(${primaryRgb},0.06);` : ""}${cardStyle !== "none" ? `padding:2rem 1.75rem;border-radius:${cardRadius};` : ""}transition:transform 0.2s ease,box-shadow 0.2s ease; }
           ${cardStyle === "raised" ? `.features-card-${block.id}:hover { transform:translateY(-4px);box-shadow:${cardShadowHover}; }` : ""}
           @media (max-width: 1024px) { .features-${block.id} { padding: ${tabletPadding}; } .features-grid-${block.id} { grid-template-columns: repeat(${Math.min(2, columns)}, 1fr); gap: 1.5rem; } }
           @media (max-width: 768px) { .features-${block.id} { padding: ${mobilePadding}; } .features-grid-${block.id} { grid-template-columns: 1fr; gap: 1.25rem; } }

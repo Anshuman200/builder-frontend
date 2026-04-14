@@ -421,17 +421,33 @@ export function BorderRadiusInput({ value, onChange, placeholder }: { value: str
 
 // ─── ColorInput ───────────────────────────────────────────────────────────────
 
-function resolveColor(raw: string): string {
+function resolveColor(raw: string, theme?: any): string {
     if (!raw || typeof window === "undefined") return raw || "#000000";
     if (!raw.startsWith("var(")) return raw;
     const varName = raw.slice(4, -1).split(",")[0].trim();
+    
+    // First, try to resolve from the project theme object if provided
+    if (theme?.colors) {
+        const c = theme.colors;
+        if (varName === "--primary") return c.primary;
+        if (varName === "--secondary") return c.secondary;
+        if (varName === "--background") return c.background;
+        if (varName === "--surface") return c.surface;
+        if (varName === "--text") return c.text;
+        if (varName === "--text-muted") return c.textMuted || "#64748b";
+        if (varName === "--border") return c.border;
+        if (varName === "--button-text") return c.buttonText || "#ffffff";
+        if (varName === "--accent") return c.accent || "#f59e0b";
+    }
+
+    // Fallback to computed style (global browser state)
     const resolved = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
     return resolved || "#000000";
 }
 
-function toHex(color: string): string {
+function toHex(color: string, theme?: any): string {
     if (!color || typeof document === "undefined") return "#000000";
-    const resolved = resolveColor(color);
+    const resolved = resolveColor(color, theme);
     if (/^#[0-9a-fA-F]{6}$/.test(resolved)) return resolved;
     const el = document.createElement("div");
     el.style.color = resolved;
@@ -444,8 +460,10 @@ function toHex(color: string): string {
 }
 
 export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff" }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void; placeholder?: string }) {
+    const { page } = useEditorStore();
+    const theme = page?.theme;
     const initialValue = value || placeholder;
-    const resolvedDisplayValue = resolveColor(initialValue);
+    const resolvedDisplayValue = resolveColor(initialValue, theme);
     const isVariable = initialValue.startsWith("var(");
 
     return (
@@ -480,7 +498,7 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff" }:
                     onMouseLeave={e => e.currentTarget.style.background = PANEL_COLORS.inputBg}
                 >
                     <div style={{ width: 14, height: 14, borderRadius: 3, background: resolvedDisplayValue, border: "1px solid rgba(255,255,255,0.15)" }} />
-                    <span style={{ flex: 1, textAlign: "left", fontFamily: "monospace", fontSize: 11, opacity: 0.9, overflow: "hidden", textOverflow: "ellipsis" }}>{isVariable ? `${toHex(value)} (Theme)` : toHex(value)}</span>
+                    <span style={{ flex: 1, textAlign: "left", fontFamily: "monospace", fontSize: 11, opacity: 0.9, overflow: "hidden", textOverflow: "ellipsis" }}>{isVariable ? `${toHex(value, theme)} (Theme)` : toHex(value, theme)}</span>
                 </button>
             </ColorPicker>
 
@@ -533,7 +551,7 @@ export function ToggleInput({ value, onChange, label }: { value: boolean; onChan
 
 // ─── Property Groups ─────────────────────────────────────────────────────────
 
-interface PropertyGroupProps {
+export interface PropertyGroupProps {
     p: any;
     up: (key: string, val: any, commit?: boolean) => void;
     prefix?: string;
@@ -604,12 +622,19 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
     const radiusKey = `${prefix}BorderRadius`;
     const variantKey = `${prefix}Variant`;
 
+    const variantOptions = [
+        { label: "Solid", value: "solid" },
+        { label: "Outline", value: "outline" },
+        { label: "Ghost", value: "ghost" },
+        { label: "Soft", value: "soft" },
+    ];
+
     return (
         <>
             {!hideLabel && <Field label="Text"><TextInput value={p[textKey] || "Click Me"} onChange={(v) => up(textKey, v)} /></Field>}
-            <Field label="Variant"><SelectInput value={p[variantKey] || "solid"} onChange={(v) => up(variantKey, v)} options={[{ label: "Solid", value: "solid" }, { label: "Outline", value: "outline" }, { label: "Ghost", value: "ghost" }]} /></Field>
+            <Field label="Variant"><SelectInput value={p[variantKey] || "solid"} onChange={(v) => up(variantKey, v)} options={variantOptions} /></Field>
             <Field label="Background"><ColorInput value={p[bgKey] || "var(--primary)"} onChange={(v) => up(bgKey, v)} onBlur={(v) => up(bgKey, v, true)} /></Field>
-            <Field label="Text Color"><ColorInput value={p[colorKey] || "#ffffff"} onChange={(v) => up(colorKey, v)} onBlur={(v) => up(colorKey, v, true)} /></Field>
+            <Field label="Text Color"><ColorInput value={p[colorKey] || "var(--button-text)"} onChange={(v) => up(colorKey, v)} onBlur={(v) => up(colorKey, v, true)} /></Field>
             <Field label="Radius"><BorderRadiusInput value={p[radiusKey] || "8px"} onChange={(v) => up(radiusKey, v)} /></Field>
         </>
     );
@@ -641,7 +666,7 @@ export function PaddingFields({ p, up }: PropertyGroupProps) {
     );
 }
 
-export function InputFields({ p, up, prefix = "input", isDark = false }: PropertyGroupProps & { isDark?: boolean }) {
+export function InputFields({ p, up, prefix = "input" }: PropertyGroupProps) {
     const bgKey = `${prefix}Bg`;
     const textColorKey = `${prefix}TextColor`;
     const placeholderColorKey = `${prefix}PlaceholderColor`;
@@ -655,7 +680,7 @@ export function InputFields({ p, up, prefix = "input", isDark = false }: Propert
         text: "#111827",
         placeholder: "rgba(0,0,0,0.4)",
         border: "#e2e8f0",
-        label: isDark ? "rgba(255,255,255,0.85)" : "#374151"
+        label: "#374151"
     };
 
     const bgLabel = prefix === "input" ? "Input Background" : `${prefix.charAt(0).toUpperCase() + prefix.slice(1)} Background`;

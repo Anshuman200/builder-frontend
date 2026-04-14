@@ -82,9 +82,6 @@ export function StatsBlock({ block }: BlockProps) {
                   if (cardStyle !== "card" && cardStyle !== "flat") return undefined;
                   const bg = (p.cardBg as string) || "var(--surface)";
                   // Resilience: If theme is dark but card color is white/light, force theme surface
-                  if (theme?.mode === "dark" && (bg === "#ffffff" || bg === "#fff" || bg === "#fafafa")) {
-                    return "var(--surface)";
-                  }
                   return bg;
                 })(),
                 borderRadius: p.cardRadius as string || "1.5rem",

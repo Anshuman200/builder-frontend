@@ -42,6 +42,6 @@ export const EDITOR_FEATURES = {
     enableAnimations: true,
 
     // Page Settings Features
-    enableThemeToggle: true,
+    enableThemeToggle: false,
     enableScrollToTop: true,
 };

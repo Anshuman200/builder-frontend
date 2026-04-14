@@ -1,6 +1,6 @@
 "use client";
 import type { Block, EditorPage } from "@/types";
-import React from "react";
+import React, { useMemo } from "react";
 import { useEditorStore, DEFAULT_THEME } from "@/stores/editorStore";
 
 import {
@@ -14,11 +14,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { Dropdown } from "antd";
 import dynamic from "next/dynamic";
 
-const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false }) as any;
 
 export function FeaturesPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
-    const p: any = block.props;
+    const p = block.props as any;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
     return (
@@ -97,7 +97,7 @@ export function FeaturesPanel({ block }: { block: Block }) {
 
 export function TeamPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
-    const p: any = block.props;
+    const p = block.props as any;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
     return (
@@ -265,20 +265,20 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                 <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Page Settings</p>
                 <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--text)", fontWeight: 600 }}>Global Configuration</p>
             </div>
-            
+
             <Section title="Pages & Navigation">
                 <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Manage routes and multiple pages.</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {(page.routes || []).map((route) => {
                         const isActive = route.id === activeRouteId;
                         return (
-                            <div 
-                                key={route.id} 
+                            <div
+                                key={route.id}
                                 onClick={() => !isActive && setActiveRoute(route.id)}
                                 style={{
-                                    padding: "8px", 
-                                    background: isActive ? "rgba(99,102,241,0.08)" : "var(--surface)", 
-                                    border: `1px solid ${isActive ? "var(--primary)" : "var(--border)"}`, 
+                                    padding: "8px",
+                                    background: isActive ? "rgba(99,102,241,0.08)" : "var(--surface)",
+                                    border: `1px solid ${isActive ? "var(--primary)" : "var(--border)"}`,
                                     borderRadius: 6,
                                     cursor: isActive ? "default" : "pointer",
                                     transition: "all 0.2s",
@@ -297,8 +297,8 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                                         {isActive ? (
                                             <span style={{ fontSize: 9, color: "var(--primary)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Editing</span>
                                         ) : (
-                                            <button 
-                                                onClick={(e) => { e.stopPropagation(); deleteRoute(route.id); }} 
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); deleteRoute(route.id); }}
                                                 style={{ padding: "2px 6px", fontSize: 10, background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "none", borderRadius: 4, cursor: "pointer" }}
                                                 title="Delete Page"
                                             >
@@ -310,35 +310,54 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }} onClick={e => e.stopPropagation()}>
                                     <div>
                                         <span style={{ fontSize: 9, color: "var(--text-muted)", display: "block", marginBottom: 2 }}>Name</span>
-                                        <input 
-                                            value={route.name} 
+                                        <input
+                                            value={route.name}
                                             onChange={(e) => updateRoute(route.id, { name: e.target.value })}
-                                            style={{ width: "100%", fontSize: 11, padding: "4px 6px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)" }} 
+                                            style={{ width: "100%", fontSize: 11, padding: "4px 6px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)" }}
                                         />
                                     </div>
                                     <div>
                                         <span style={{ fontSize: 9, color: "var(--text-muted)", display: "block", marginBottom: 2 }}>Path</span>
-                                        <input 
-                                            value={route.path} 
+                                        <input
+                                            value={route.path}
                                             onChange={(e) => updateRoute(route.id, { path: e.target.value })}
-                                            style={{ width: "100%", fontSize: 11, padding: "4px 6px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)" }} 
+                                            style={{ width: "100%", fontSize: 11, padding: "4px 6px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)" }}
                                         />
                                     </div>
                                 </div>
-                                <div style={{ display: "flex", gap: 12, paddingTop: 6, borderTop: "1px solid var(--border)" }} onClick={e => e.stopPropagation()}>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 12px", paddingTop: 6, borderTop: "1px solid var(--border)" }} onClick={e => e.stopPropagation()}>
+                                    <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }} title="Show this page in the header navigation">
+                                        <input
+                                            type="checkbox"
+                                            checked={route.showInHeader !== false}
+                                            onChange={(e) => updateRoute(route.id, { showInHeader: e.target.checked })}
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                        <span style={{ fontSize: 9, color: "var(--primary)", fontWeight: 700, textTransform: "uppercase" }}>In Header</span>
+                                    </label>
+                                    <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }} title="Show this page in the footer navigation">
+                                        <input
+                                            type="checkbox"
+                                            checked={!!route.showInFooter}
+                                            onChange={(e) => updateRoute(route.id, { showInFooter: e.target.checked })}
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                        <span style={{ fontSize: 9, color: "var(--primary)", fontWeight: 700, textTransform: "uppercase" }}>In Footer</span>
+                                    </label>
+                                    <div style={{ width: "100%", height: 0 }} />
                                     <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
-                                        <input 
-                                            type="checkbox" 
-                                            checked={!!route.hideHeader} 
+                                        <input
+                                            type="checkbox"
+                                            checked={!!route.hideHeader}
                                             onChange={(e) => updateRoute(route.id, { hideHeader: e.target.checked })}
                                             style={{ cursor: "pointer" }}
                                         />
                                         <span style={{ fontSize: 9, color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Hide Header</span>
                                     </label>
                                     <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
-                                        <input 
-                                            type="checkbox" 
-                                            checked={!!route.hideFooter} 
+                                        <input
+                                            type="checkbox"
+                                            checked={!!route.hideFooter}
                                             onChange={(e) => updateRoute(route.id, { hideFooter: e.target.checked })}
                                             style={{ cursor: "pointer" }}
                                         />
@@ -353,23 +372,23 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                         trigger={['click']}
                         menu={{
                             items: [
-                                { key: 'standard', label: 'Standard Page (H+F)', onClick: () => addRoute({ name: "New Page", path: "/new-page" }) },
-                                { key: 'ghost', label: 'Ghost Page (Blank)', onClick: () => addRoute({ name: "Ghost Page", path: "/ghost", hideHeader: true, hideFooter: true }) },
-                                { key: 'no-header', label: 'No Header', onClick: () => addRoute({ name: "No Header", path: "/page", hideHeader: true }) },
-                                { key: 'no-footer', label: 'No Footer', onClick: () => addRoute({ name: "No Footer", path: "/page", hideFooter: true }) },
+                                { key: 'standard', label: 'Standard Page (H+F + Nav)', onClick: () => addRoute({ name: "New Page", path: "/new-page", showInHeader: true }) },
+                                { key: 'ghost', label: 'Ghost Page (No H/F, No Nav)', onClick: () => addRoute({ name: "Ghost Page", path: "/ghost", hideHeader: true, hideFooter: true, showInHeader: false, showInFooter: false }) },
+                                { key: 'no-header', label: 'No Header Layout', onClick: () => addRoute({ name: "No Header", path: "/page", hideHeader: true }) },
+                                { key: 'no-footer', label: 'No Footer Layout', onClick: () => addRoute({ name: "No Footer", path: "/page", hideFooter: true }) },
                             ]
                         }}
                     >
-                        <button 
-                            style={{ 
-                                padding: "8px 0", 
-                                background: "var(--surface)", 
-                                border: "1px dashed var(--border)", 
-                                borderRadius: 6, 
-                                fontSize: 11, 
-                                fontWeight: 700, 
-                                color: "var(--primary)", 
-                                cursor: "pointer", 
+                        <button
+                            style={{
+                                padding: "8px 0",
+                                background: "var(--surface)",
+                                border: "1px dashed var(--border)",
+                                borderRadius: 6,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                color: "var(--primary)",
+                                cursor: "pointer",
                                 marginTop: 4,
                                 width: "100%",
                                 display: "flex",
@@ -507,7 +526,6 @@ export function ContactFormPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p: any = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
-    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
 
     return (
         <>
@@ -605,7 +623,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Input Style">
-                <InputFields p={p} up={up} isDark={isDark} />
+                <InputFields p={p} up={up} />
             </Section>
             <AnimationPanel block={block} />
         </>
@@ -818,14 +836,38 @@ export function LegalPanel({ block }: { block: Block }) {
     const p: any = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
-    const joditConfig = {
+    const joditConfig = useMemo(() => ({
         readonly: false,
         theme: "dark",
         height: 400,
         placeholder: 'Start typing here...',
         buttons: ['bold', 'italic', 'underline', 'strikethrough', 'ul', 'ol', 'font', 'fontsize', 'brush', 'image', 'table', 'link', 'align', 'undo', 'redo'],
-        style: { background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)' }
-    };
+        style: { background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)' },
+        // Improved paste behavior
+        askBeforePasteFromWord: false,
+        askBeforePasteHTML: false,
+        defaultActionOnPaste: 'insert_clear_html',
+    }), []);
+
+    // Local state for debounced updates to the store
+    const [localContent, setLocalContent] = React.useState(p.content || "");
+
+    // Sync local state when external props change (e.g. undo/redo)
+    React.useEffect(() => {
+        if (p.content !== localContent) {
+            setLocalContent(p.content || "");
+        }
+    }, [p.content]);
+
+    // Debounce the store update
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            if (localContent !== p.content) {
+                up("content", localContent);
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [localContent]);
 
     return (
         <>
@@ -868,9 +910,13 @@ export function LegalPanel({ block }: { block: Block }) {
                     <div style={{ marginBottom: 8, fontSize: 11, color: "var(--text-subtle)" }}>Edit your content using the rich text editor below:</div>
                     <div className="jodit-dark-theme-override">
                         <JoditEditor
-                            value={(p.content as string) || ""}
+                            value={localContent}
                             config={joditConfig}
-                            onBlur={(newContent) => up("content", newContent, true)}
+                            onChange={(newContent: any) => setLocalContent(newContent)}
+                            onBlur={(newContent: any) => {
+                                setLocalContent(newContent);
+                                up("content", newContent, true);
+                            }}
                         />
                     </div>
                 </Section>
@@ -928,7 +974,6 @@ export function DeleteAccountPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p: any = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
-    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
 
     return (
         <>
@@ -1014,7 +1059,7 @@ export function DeleteAccountPanel({ block }: { block: Block }) {
                 </Field>
 
                 <div style={{ height: 1, background: "var(--border)", margin: "8px 0" }} />
-                <InputFields p={p} up={up} isDark={isDark} />
+                <InputFields p={p} up={up} />
 
                 <div style={{ height: 1, background: "var(--border)", margin: "8px 0" }} />
 

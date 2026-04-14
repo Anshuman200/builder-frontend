@@ -10,7 +10,6 @@ export function HeaderBlock({ block }: BlockProps) {
     const p = block.props;
     const viewMode = useEditorStore((s) => s.viewMode);
     const layoutObj = useEditorStore((s) => s.page?.theme?.layout) || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
-    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
     const isPreview = React.useContext(PreviewContext);
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
     const handleLink = useLinkHandler();
@@ -23,9 +22,7 @@ export function HeaderBlock({ block }: BlockProps) {
     const HEADER_LIGHT_DEFAULTS = ["#ffffff", "#fff", "#f8fafc", "#f1f5f9", "transparent"];
     const isDefaultBg = HEADER_LIGHT_DEFAULTS.includes(rawBg.toLowerCase());
     let bgColor = rawBg;
-    if (isDark && isDefaultBg) bgColor = rawBg === "transparent" ? "transparent" : "#09090b";
     let textColor = rawText;
-    if (isDark) textColor = "#f8fafc";
 
     const desktopPadding = p.padding ? (p.padding as string) : "16px 0px";
     const tabletPadding = p.tabletPadding ? (p.tabletPadding as string) : desktopPadding;
@@ -52,14 +49,21 @@ export function HeaderBlock({ block }: BlockProps) {
     let background = bgColor, backdropFilter = "none", borderBottom = "none";
     if (style === "glass") { background = bgColor.length === 7 ? `${bgColor}cc` : bgColor; backdropFilter = "blur(12px)"; borderBottom = "1px solid rgba(255, 255, 255, 0.2)"; }
     else if (style === "transparent") { background = "transparent"; }
-    else if (isDark && style === "solid") { borderBottom = "1px solid rgba(255,255,255,0.08)"; }
 
     const isMobile = isPreview ? false : (viewMode === "mobile");
     const baseHeaderStyle: React.CSSProperties = { position: position as any, top: position !== "static" ? 0 : undefined, left: position !== "static" ? 0 : undefined, right: position !== "static" ? 0 : undefined, zIndex: 50, background, backdropFilter, borderBottom, color: textColor, width: "100%" };
     const ctaStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 20px", borderRadius: "9999px", fontWeight: 600, fontSize: "0.9rem", textDecoration: "none", cursor: isPreview ? "pointer" : "default", transition: "opacity 0.2s", background: ctaVariant === "solid" ? ctaBgColor : "transparent", color: ctaVariant === "solid" ? ctaTextColor : ctaBgColor, border: ctaVariant === "outline" ? `2px solid ${ctaBgColor}` : "none" };
 
     const LogoElement = () => (
-        <div style={{ fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em", color: textColor, display: "flex", alignItems: "center" }}>
+        <a 
+            href="/" 
+            onClick={(e) => handleLink("/", e)}
+            style={{ 
+                fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em", 
+                color: textColor, display: "flex", alignItems: "center",
+                textDecoration: "none", cursor: "pointer"
+            }}
+        >
             {logoType === "image" && logoImage ? (
                 <div style={{ width: logoWidth, height: "40px", position: "relative" }}>
                     <Image 
@@ -72,12 +76,25 @@ export function HeaderBlock({ block }: BlockProps) {
                     />
                 </div>
             ) : (<span>{logoText}</span>)}
-        </div>
+        </a>
     );
+
+    const routes = useEditorStore((s) => s.page?.routes) || [];
+    const dynamicLinks = routes
+        .filter(r => r.showInHeader !== false)
+        .map(r => ({ id: r.id, label: r.name, url: r.path }));
+    
+    // Combine static links with dynamic ones, avoiding duplicates by path
+    const mergedLinks = [...links];
+    dynamicLinks.forEach(dl => {
+        if (!mergedLinks.find(l => l.url === dl.url)) {
+            mergedLinks.push(dl);
+        }
+    });
 
     const NavLinksElement = ({ isMobileMenu = false }: { isMobileMenu?: boolean }) => (
         <nav style={{ display: "flex", alignItems: "center", flexDirection: isMobileMenu ? "column" : "row", gap: isMobileMenu ? "1.5rem" : "2rem" }}>
-            {links.map((link) => {
+            {mergedLinks.map((link) => {
                 const handleNavClick = (e: React.MouseEvent) => {
                     handleLink(link.url, e);
                     if (isPreview && isMobileMenu) setMobileMenuOpen(false);
@@ -122,7 +139,7 @@ export function HeaderBlock({ block }: BlockProps) {
                         </button>
                     </div>
                 </div>
-                <div className={isPreview ? `header-${block.id}-mobile-menu ${mobileMenuOpen ? 'open' : ''}` : undefined} style={{ position: "absolute", top: "100%", left: 0, right: 0, background: style === "transparent" ? (isDark ? "#09090b" : "#ffffff") : background, color: textColor, zIndex: 40, display: "flex", flexDirection: "column", borderTop: "1px solid rgba(150,150,150,0.1)", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)", padding: "1.5rem 24px 2rem", transform: mobileMenuOpen ? "translateY(0)" : "translateY(-150%)", opacity: mobileMenuOpen ? 1 : 0, visibility: mobileMenuOpen ? "visible" : "hidden", transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, visibility 0.4s", pointerEvents: mobileMenuOpen ? "auto" : "none" }}>
+                <div className={isPreview ? `header-${block.id}-mobile-menu ${mobileMenuOpen ? 'open' : ''}` : undefined} style={{ position: "absolute", top: "100%", left: 0, right: 0, background: style === "transparent" ? "#ffffff" : background, color: textColor, zIndex: 40, display: "flex", flexDirection: "column", borderTop: "1px solid rgba(150,150,150,0.1)", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)", padding: "1.5rem 24px 2rem", transform: mobileMenuOpen ? "translateY(0)" : "translateY(-150%)", opacity: mobileMenuOpen ? 1 : 0, visibility: mobileMenuOpen ? "visible" : "hidden", transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, visibility 0.4s", pointerEvents: mobileMenuOpen ? "auto" : "none" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2rem" }}>
                         <NavLinksElement isMobileMenu={true} />
                         {showCta && (<a href={ctaUrl} onClick={(e) => handleLink(ctaUrl, e)} style={{ ...ctaStyle, width: "100%", marginTop: "1rem", padding: "12px 20px" }}>{ctaText}</a>)}

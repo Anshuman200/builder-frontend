@@ -46,7 +46,7 @@ export const DEFAULT_THEME: ThemeConfig = {
         scrollToTop: true,
         scrollToTopPosition: "bottom-right",
         scrollToTopColor: "#6366f1",
-        themeSwitcher: true,
+        themeSwitcher: false,
         themeSwitcherPosition: "bottom-left",
     }
 };
@@ -79,8 +79,8 @@ interface EditorStore {
     // ─ Actions ────────────────────────────────────────────────────────────────
     setPage: (page: EditorPage) => void;
     setActiveRoute: (routeId: string) => void;
-    addRoute: (route: { path: string; name: string, hideHeader?: boolean, hideFooter?: boolean }) => void;
-    updateRoute: (routeId: string, updates: Partial<Pick<import("@/types").RouteConfig, "path" | "name" | "hideHeader" | "hideFooter">>) => void;
+    addRoute: (route: { path: string; name: string, hideHeader?: boolean, hideFooter?: boolean, showInHeader?: boolean, showInFooter?: boolean }) => void;
+    updateRoute: (routeId: string, updates: Partial<Pick<import("@/types").RouteConfig, "path" | "name" | "hideHeader" | "hideFooter" | "showInHeader" | "showInFooter">>) => void;
     deleteRoute: (routeId: string) => void;
 
     selectBlock: (id: string | null) => void;
@@ -266,32 +266,52 @@ function insertBlockDeep(
 }
 
 /**
+ * Ensures a page is strictly in light mode. Resets mode and base background/text colors if they were dark.
+ */
+function forceLightModeMigration(page: EditorPage): boolean {
+  let changed = false;
+  
+  // Ensure theme exists
+  if (!page.theme) {
+    page.theme = JSON.parse(JSON.stringify(DEFAULT_THEME));
+    changed = true;
+  }
+
+  if (page.theme.mode !== "light") {
+    page.theme.mode = "light";
+    changed = true;
+  }
+
+  const c = page.theme.colors;
+  const DARK_BGS = ["#020617", "#09090b", "#000000", "#111827", "#18181b"];
+  const LIGHT_TEXTS = ["#f8fafc", "#ffffff", "#f1f5f9", "#cbd5e1"];
+  const DARK_SURFACES = ["#0f172a", "#1e293b", "#1a1a1a", "#27272a"];
+
+  if (DARK_BGS.includes(c.background) || c.background === "var(--background)") {
+    c.background = "#ffffff";
+    changed = true;
+  }
+  if (LIGHT_TEXTS.includes(c.text) || c.text === "var(--text)") {
+    c.text = "#0f172a";
+    changed = true;
+  }
+  if (DARK_SURFACES.includes(c.surface) || c.surface === "var(--surface)") {
+    c.surface = "#f8fafc";
+    changed = true;
+  }
+
+  return changed;
+}
+
+/**
  * Recursively migrates hardcoded old default hex colors to CSS variables.
  */
 function migrateBlockColors(blocks: Block[]): Block[] {
     const COLOR_MAP: Record<string, string> = {
-        // Pure Darks
-        "#000000": "var(--text)",
-        // "#020617": "var(--bg)",
-        // "#09090b": "var(--bg)",
-        "#0f172a": "var(--primary)",
-        "#11181f": "var(--surface)",
-        "#111827": "var(--surface)",
-        // "#18181b": "var(--surface)",
-        "#1a1a1a": "var(--surface)",
-        "#1e293b": "var(--surface)",
         // Pure Lights
-        "#ffffff": "var(--background)",
-        "#fafafa": "var(--background)",
-        "#f8fafc": "var(--surface)",
-        "#f1f5f9": "var(--surface)",
-        "#e2e8f0": "var(--border)",
-        "#cbd5e1": "var(--border-strong)",
-        // Dark surfaces
-        "#18181b": "var(--surface)",
-        "#020617": "var(--background)",
-        "#09090b": "var(--background)",
-        // Brand Indigo/Violet
+        // "#ffffff": "var(--background)",
+        // "#f8fafc": "var(--surface)",
+        // Theme Colors (only map if they were defaults)
         "#6366f1": "var(--primary)",
         "#818cf8": "var(--primary)",
         "#8b5cf6": "var(--secondary)",
@@ -428,10 +448,21 @@ export const useEditorStore = create<EditorStore>()(
                         id: "home",
                         path: "/",
                         name: "Home",
-                        content: middle
+                        content: middle,
+                        showInHeader: false,
+                        showInFooter: false
                     }];
                     page.globalBlocks = { header, footer };
                     page.content = []; // Clear legacy
+                }
+
+                // Ensure globalBlocks exists even if routes exist
+                if (!page.globalBlocks) {
+                    page.globalBlocks = { header: null, footer: null };
+                }
+
+                if (!page.theme) {
+                    page.theme = JSON.parse(JSON.stringify(DEFAULT_THEME));
                 }
 
                 const fallbackRouteId = page.routes && page.routes.length > 0 ? page.routes[0].id : "home";
@@ -439,27 +470,41 @@ export const useEditorStore = create<EditorStore>()(
                 state.page = page;
                 state.activeRouteId = fallbackRouteId;
                 state.isDirty = false;
+
+                // Run migrations
+                const themeChanged = forceLightModeMigration(page);
+                const blocksMigratedArr = migrateBlockColors(page.routes[0]?.content || []); // Initial pass
+                // Note: full deep migration happens on setPage as well
+                
                 state.history = [JSON.parse(JSON.stringify(page))];
                 state.historyIndex = 0;
             }),
 
         setActiveRoute: (routeId) => set({ activeRouteId: routeId }),
-        addRoute: (route) => set((s) => {
-            if (!s.page) return;
-            if (!s.page.routes) s.page.routes = [];
-            const newRoute = { 
-                id: Math.random().toString(36).substr(2, 9), 
-                path: route.path, 
-                name: route.name, 
+        addRoute: (route) => {
+            const { page } = get();
+            if (!page) return;
+
+            const newRoute: import("@/types").RouteConfig = {
+                id: crypto.randomUUID(),
+                name: route.name,
+                path: route.path,
                 content: [],
-                hideHeader: route.hideHeader || false,
-                hideFooter: route.hideFooter || false
+                hideHeader: route.hideHeader,
+                hideFooter: route.hideFooter,
+                showInHeader: route.showInHeader ?? true,
+                showInFooter: route.showInFooter ?? false,
             };
-            s.page.routes.push(newRoute);
-            s.activeRouteId = newRoute.id;
-            s.isDirty = true;
-            get().pushHistory();
-        }),
+
+            set((s) => {
+                if (!s.page) return;
+                if (!s.page.routes) s.page.routes = [];
+                s.page.routes.push(newRoute);
+                s.activeRouteId = newRoute.id;
+                s.isDirty = true;
+                get().pushHistory();
+            });
+        },
         updateRoute: (routeId, updates) => set((s) => {
             if (!s.page || !s.page.routes) return;
             const r = s.page.routes.find(x => x.id === routeId);
@@ -468,6 +513,8 @@ export const useEditorStore = create<EditorStore>()(
                 if (updates.path !== undefined) r.path = updates.path;
                 if (updates.hideHeader !== undefined) r.hideHeader = updates.hideHeader;
                 if (updates.hideFooter !== undefined) r.hideFooter = updates.hideFooter;
+                if (updates.showInHeader !== undefined) r.showInHeader = updates.showInHeader;
+                if (updates.showInFooter !== undefined) r.showInFooter = updates.showInFooter;
                 s.isDirty = true;
                 get().pushHistory();
             }
@@ -617,7 +664,7 @@ export const useEditorStore = create<EditorStore>()(
             }),
 
         updateTheme: (theme, commit) => {
-            set((s) => {
+            set((s:any) => {
                 if (!s.page) return;
 
                 // Safety: Ensure theme object exists
@@ -633,18 +680,32 @@ export const useEditorStore = create<EditorStore>()(
                     const newColors = theme.mode === "dark" ? DARK_COLORS : LIGHT_COLORS;
                     s.page.theme.colors = { ...s.page.theme.colors, ...newColors };
                 }
+                const newTheme = { ...theme, mode: "light" }; // Hard enforce light mode
+                s.page.theme = { ...s.page.theme, ...newTheme };
 
-                s.page.theme = { ...s.page.theme, ...theme };
-
-                // If mode changed (e.g. Light -> Dark), automatically sync blocks
-                if (newMode !== oldMode || (!oldMode && theme.mode)) {
-                    applyUpdaterDeep(s.page, s.activeRouteId, migrateBlockColors);
+                // If background is missing or dark, ensure it's white
+                if (s.page.theme.colors.background === "#020617" || s.page.theme.colors.background === "#09090b") {
+                  s.page.theme.colors.background = "#ffffff";
                 }
 
+                applyUpdaterDeep(s.page, s.activeRouteId, migrateBlockColors);
                 s.isDirty = true;
             });
             if (commit) get().pushHistory();
         },
+
+        forceLightMode: () => set((s) => {
+            if (!s.page || !s.page.theme) return;
+            if (s.page.theme.mode === "light") return;
+            
+            s.page.theme.mode = "light";
+            s.page.theme.colors = { ...s.page.theme.colors, ...LIGHT_COLORS };
+            if (s.page.theme.colors.background === "#020617" || s.page.theme.colors.background === "#09090b") {
+                s.page.theme.colors.background = "#ffffff";
+            }
+            applyUpdaterDeep(s.page, s.activeRouteId, migrateBlockColors);
+            s.isDirty = true;
+        }),
 
         updateMeta: (meta) =>
             set((s) => {

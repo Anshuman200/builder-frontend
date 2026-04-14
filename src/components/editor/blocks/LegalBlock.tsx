@@ -33,7 +33,6 @@ export function LegalBlock({ block }: BlockProps) {
         staleTime: 1000 * 60 * 5, // 5 minutes cache
     });
 
-    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
     const viewMode = useEditorStore((s) => s.viewMode);
 
     // Determine final content
@@ -131,7 +130,7 @@ export function LegalBlock({ block }: BlockProps) {
                 .skeleton-container { width: 100%; }
                 .skeleton-line {
                     height: 14px;
-                    background: ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"};
+                    background: "rgba(0,0,0,0.05)";
                     margin-bottom: 12px;
                     border-radius: 4px;
                     position: relative;
@@ -141,7 +140,7 @@ export function LegalBlock({ block }: BlockProps) {
                     content: "";
                     position: absolute;
                     top: 0; left: 0; right: 0; bottom: 0;
-                    background: linear-gradient(90deg, transparent, ${isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)"}, transparent);
+                    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.03), transparent);
                     animation: shimmer 1.5s infinite;
                 }
                 .skeleton-line.full { width: 100%; }

@@ -56,7 +56,6 @@ export function ContactFormBlock({ block }: BlockProps) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
     const layout = (p.layout as string) || "centered";
-    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
 
     const [form] = Form.useForm();
     const submitMutation = useSubmitForm();
@@ -367,7 +366,7 @@ export function ContactFormBlock({ block }: BlockProps) {
 
     // ── Contact info panel for split layout ──────────────────────────────────
     const infoPanel = (
-        <div style={{ flex: "0 0 300px", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "2rem", background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)", borderRadius, border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}` }}>
+        <div style={{ flex: "0 0 300px", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "2rem", background: "rgba(0,0,0,0.02)", borderRadius, border: `1px solid #e2e8f0` }}>
             <h3 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 800, color: (p.titleColor as string) || "#0f172a" }}>Get in Touch</h3>
             <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.65, lineHeight: 1.7 }}>We'd love to hear from you. Fill out the form and we'll respond as soon as possible.</p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>

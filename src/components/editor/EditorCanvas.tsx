@@ -12,7 +12,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { EllipsisHorizontalIcon, TrashIcon, Squares2X2Icon, MoonIcon, SunIcon } from "@heroicons/react/24/outline";
+import { EllipsisHorizontalIcon, TrashIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { BlockRenderer } from "./blocks";
@@ -39,14 +39,10 @@ export default function EditorCanvas() {
     ...(page?.globalBlocks?.footer && !activeRoute?.hideFooter ? [page?.globalBlocks?.footer] : [])
   ];
   const themeMode = page?.theme?.mode || "light";
-  const isDark = themeMode === "dark";
 
   const isConstrained = viewMode !== "desktop";
   const canvasWidth = VIEWPORT_WIDTHS[viewMode];
 
-  const toggleTheme = () => {
-    updateTheme({ mode: isDark ? "light" : "dark" });
-  };
 
   const canvasRef = React.useRef<HTMLDivElement>(null);
 
@@ -94,11 +90,11 @@ export default function EditorCanvas() {
       <div
         id="editor-canvas-root"
         ref={canvasRef}
-        className={isDark ? "dark" : undefined}
         style={{
           width: canvasWidth,
           minHeight: "calc(100vh - 100px)",
-          background: isDark ? "#09090b" : "#ffffff",
+          background: "var(--background)",
+          color: "var(--text)",
           boxShadow: isConstrained ? "0 4px 24px rgba(0,0,0,0.15)" : "none",
           borderRadius: isConstrained ? 8 : 0,
           overflow: "clip",
@@ -113,65 +109,31 @@ export default function EditorCanvas() {
           }
         }}
       >
-        <DropZone blocks={blocks} />
+        <DropZone 
+          blocks={blocks} 
+          routeBlocksLength={routeBlocks.length}
+          headerId={page?.globalBlocks?.header?.id}
+          footerId={page?.globalBlocks?.footer?.id}
+        />
       </div>
 
-      {/* Floating theme toggle FAB — centered at bottom of scroll area */}
-      <div
-        style={{
-          position: "sticky",
-          bottom: 24,
-          zIndex: 200,
-          display: "flex",
-          justifyContent: "center",
-          width: "100%",
-          pointerEvents: "none",
-          marginTop: -56, // Pull up into view without adding scroll height
-        }}
-      >
-        <button
-          onClick={toggleTheme}
-          title={`Switch canvas to ${isDark ? "Light" : "Dark"} Mode`}
-          style={{
-            pointerEvents: "auto",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "10px 20px",
-            borderRadius: 999,
-            background: isDark
-              ? "linear-gradient(135deg, #27272a, #3f3f46)"
-              : "linear-gradient(135deg, #ffffff, #f1f5f9)",
-            color: isDark ? "#fafafa" : "#0f172a",
-            border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.1)",
-            cursor: "pointer",
-            fontSize: 13,
-            fontWeight: 600,
-            letterSpacing: "0.01em",
-            transition: "all 0.2s ease",
-            backdropFilter: "blur(8px)",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = "0 12px 32px rgba(0,0,0,0.22), 0 4px 8px rgba(0,0,0,0.12)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.1)";
-          }}
-        >
-          {isDark ? <SunIcon style={{ width: 15, height: 15 }} /> : <MoonIcon style={{ width: 15, height: 15 }} />}
-          {isDark ? "Light Mode" : "Dark Mode"}
-        </button>
-      </div>
     </div>
   );
 }
 
 // ─── Drop Zone ────────────────────────────────────────────────────────────────
 
-const DropZone = memo(function DropZone({ blocks }: { blocks: Block[] }) {
+const DropZone = memo(function DropZone({ 
+  blocks, 
+  routeBlocksLength, 
+  headerId, 
+  footerId 
+}: { 
+  blocks: Block[], 
+  routeBlocksLength: number,
+  headerId?: string,
+  footerId?: string
+}) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas-root" });
   const { selectBlock } = useEditorStore();
   const blockIds = blocks.map((b) => b.id);
@@ -281,18 +243,29 @@ const DropZone = memo(function DropZone({ blocks }: { blocks: Block[] }) {
         {blocks.length === 0 ? (
           <EmptyState isOver={isOver} />
         ) : (
-          blocks.map((block, index) => (
-            <React.Fragment key={block.id}>
-              <CanvasBlock
-                block={block}
-                isDropTarget={dropInfo.overId === block.id}
-                isFirst={index === 0}
-                isDraggingFromPalette={dropInfo.isDraggingFromPalette}
-                activeHeight={activeHeight}
-                dropPosition={dropInfo.position}
-              />
-            </React.Fragment>
-          ))
+          <>
+            {/* Initial empty state if no header and no content */}
+            {(!headerId && routeBlocksLength === 0) && (
+              <EmptyState isOver={isOver} />
+            )}
+
+            {blocks.map((block, index) => (
+              <React.Fragment key={block.id}>
+                <CanvasBlock
+                  block={block}
+                  isDropTarget={dropInfo.overId === block.id}
+                  isFirst={index === 0}
+                  isDraggingFromPalette={dropInfo.isDraggingFromPalette}
+                  activeHeight={activeHeight}
+                  dropPosition={dropInfo.position}
+                />
+                {/* Empty state after header if no content */}
+                {(block.id === headerId && routeBlocksLength === 0) && (
+                  <EmptyState isOver={isOver} />
+                )}
+              </React.Fragment>
+            ))}
+          </>
         )}
 
         {/* Bottom drop indicator when dragging at the very end */}

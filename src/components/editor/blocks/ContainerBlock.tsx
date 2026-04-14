@@ -11,23 +11,12 @@ export function ContainerBlock({ block }: BlockProps) {
     const bgImage = p.bgImage as string;
 
     const viewMode = useEditorStore((s) => s.viewMode);
-    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
-
     const isPreview = React.useContext(PreviewContext);
-
-    let background: string;
-    if (bgImage) {
-        background = bgImage.startsWith("linear-gradient") || bgImage.startsWith("radial-gradient")
+    const background = bgImage 
+        ? (bgImage.startsWith("linear-gradient") || bgImage.startsWith("radial-gradient")
             ? bgImage
-            : `url("${bgImage}") center/cover no-repeat`;
-    } else {
-        let bgColor = rawBg || "transparent";
-        const LIGHT_BGS = ["#ffffff", "#fff", "#f8fafc", "#f1f5f9"];
-        if (isDark && LIGHT_BGS.includes(bgColor.toLowerCase())) {
-            bgColor = bgColor.toLowerCase() === "#f8fafc" || bgColor.toLowerCase() === "#f1f5f9" ? "#09090b" : "transparent";
-        }
-        background = bgColor;
-    }
+            : `url("${bgImage}") center/cover no-repeat`)
+        : (rawBg || "transparent");
 
     const desktopPadding = (p.padding as string) || "24px";
     const tabletPadding = (p.tabletPadding as string) || desktopPadding;

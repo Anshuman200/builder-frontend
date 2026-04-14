@@ -9,7 +9,6 @@ export function FooterBlock({ block }: BlockProps) {
     const viewMode = useEditorStore((s) => s.viewMode);
     const layoutObj = useEditorStore((s) => s.page?.theme?.layout) || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
     const isPreview = React.useContext(PreviewContext);
-    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
     const handleLink = useLinkHandler();
 
 
@@ -26,8 +25,8 @@ export function FooterBlock({ block }: BlockProps) {
         return normalized === "#f8fafc" || normalized === "rgb(248,250,252)";
     };
 
-    const bgColor = isDark && isDefaultBg(rawBg) ? "#18181b" : rawBg;
-    const textColor = isDark && isDefaultText(rawText) ? "#e4e4e7" : rawText;
+    const bgColor = rawBg;
+    const textColor = rawText;
 
     const desktopPadding = p.padding ? (p.padding as string) : "48px 32px";
     const tabletPadding = p.tabletPadding ? (p.tabletPadding as string) : "32px 24px";
@@ -47,13 +46,34 @@ export function FooterBlock({ block }: BlockProps) {
     // Column link groups (for 'columns' layout)
     const linkGroups = (p.linkGroups as { id: string; heading: string; links: { id: string; label: string; url: string }[] }[]) || [];
 
+    const routes = useEditorStore((s) => s.page?.routes) || [];
+    const dynamicLinks = routes
+        .filter(r => !!r.showInFooter)
+        .map(r => ({ id: r.id, label: r.name, url: r.path }));
+    
+    // Combine static links with dynamic ones, avoiding duplicates by path
+    const mergedLinks = [...links];
+    dynamicLinks.forEach(dl => {
+        if (!mergedLinks.find(l => l.url === dl.url)) {
+            mergedLinks.push(dl);
+        }
+    });
+
     const NavLink = ({ link }: { link: { id: string; label: string; url: string } }) => {
         const handleNavClick = (e: React.MouseEvent) => { handleLink(link.url, e); };
         return (<a href={link.url} onClick={handleNavClick} style={{ color: "inherit", textDecoration: "none", fontWeight: 500, fontSize: "0.9rem", opacity: 0.75, transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.75"}>{link.label}</a>);
     };
 
     const Logo = () => (
-        <div style={{ fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em" }}>
+        <a 
+            href="/" 
+            onClick={(e) => handleLink("/", e)}
+            style={{ 
+                fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em",
+                color: "inherit", textDecoration: "none", cursor: "pointer",
+                display: "flex", alignItems: "center"
+            }}
+        >
             {logoType === "image" && logoImage ? (
                 <div style={{ width: logoWidth, height: "40px", position: "relative" }}>
                     <Image 
@@ -65,7 +85,7 @@ export function FooterBlock({ block }: BlockProps) {
                     />
                 </div>
             ) : (<span>{logoText}</span>)}
-        </div>
+        </a>
     );
 
     const innerPad = isPreview && !p.fullWidth ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX);
@@ -76,7 +96,7 @@ export function FooterBlock({ block }: BlockProps) {
             return (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", paddingLeft: innerPad, paddingRight: innerPad }}>
                     <Logo />
-                    <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>{links.map(link => <NavLink key={link.id} link={link} />)}</div>
+                    <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>{mergedLinks.map(link => <NavLink key={link.id} link={link} />)}</div>
                     {copyright && <p style={{ margin: 0, fontSize: "0.82rem", opacity: 0.5 }}>{copyright}</p>}
                 </div>
             );
@@ -88,9 +108,9 @@ export function FooterBlock({ block }: BlockProps) {
                 <div style={{ maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", paddingLeft: innerPad, paddingRight: innerPad, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "1.5rem" }}>
                     <Logo />
                     {description && <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.7, maxWidth: 440 }}>{description}</p>}
-                    {links.length > 0 && (
+                    {mergedLinks.length > 0 && (
                         <nav style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem", justifyContent: "center" }}>
-                            {links.map(link => <NavLink key={link.id} link={link} />)}
+                            {mergedLinks.map(link => <NavLink key={link.id} link={link} />)}
                         </nav>
                     )}
                     {copyright && <p style={{ margin: "1rem 0 0", fontSize: "0.82rem", opacity: 0.5, borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1.5rem", width: "100%" }}>{copyright}</p>}
@@ -115,7 +135,7 @@ export function FooterBlock({ block }: BlockProps) {
                         )) : (
                             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                                 <p style={{ margin: 0, fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.08em", opacity: 0.5 }}>Links</p>
-                                {links.map(link => <NavLink key={link.id} link={link} />)}
+                                {mergedLinks.map(link => <NavLink key={link.id} link={link} />)}
                             </div>
                         )}
                     </div>
@@ -133,7 +153,7 @@ export function FooterBlock({ block }: BlockProps) {
                         {description && (<p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.8, maxWidth: "250px" }}>{description}</p>)}
                     </div>
                     <nav className={isPreview ? `footer-${block.id}-links` : undefined} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: "1.5rem", alignItems: "center" }}>
-                        {links.map(link => <NavLink key={link.id} link={link} />)}
+                        {mergedLinks.map(link => <NavLink key={link.id} link={link} />)}
                     </nav>
                 </div>
                 {copyright && (

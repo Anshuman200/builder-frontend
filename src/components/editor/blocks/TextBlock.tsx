@@ -9,7 +9,6 @@ export function TextBlock({ block }: BlockProps) {
     const defaultSizes: Record<string, string> = { h1: "2.25rem", h2: "1.875rem", h3: "1.5rem", h4: "1.25rem", p: "1rem" };
     const tag = (p.tag as string) || "p";
     const viewMode = useEditorStore((s) => s.viewMode);
-    const isDark = useEditorStore((s) => (s.page?.theme?.mode || "light") === "dark");
 
 
     const desktopSize = (p.fontSize as string) || defaultSizes[tag] || "1rem";
@@ -17,11 +16,7 @@ export function TextBlock({ block }: BlockProps) {
     const mobileSize = (p.mobileFontSize as string) || tabletSize;
     const fontSize = viewMode === "mobile" ? mobileSize : viewMode === "tablet" ? tabletSize : desktopSize;
 
-    let finalColor = (p.color as string) || "inherit";
-    const LIGHT_TEXTS = ["#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#000000", "#111827", "#1f2937", "#374151", "#4b5563", "#6b7280"];
-    if (isDark && finalColor !== "inherit" && LIGHT_TEXTS.includes(finalColor.toLowerCase())) {
-        finalColor = ["#64748b", "#6b7280", "#475569", "#4b5563"].includes(finalColor.toLowerCase()) ? "#94a3b8" : "#f8fafc";
-    }
+    const finalColor = (p.color as string) || "inherit";
 
     const wrapperStyle: React.CSSProperties = {
         padding: (p.padding as string) || "12px 24px",

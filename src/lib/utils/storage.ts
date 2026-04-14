@@ -41,6 +41,8 @@ function createBlankPage(id: string): EditorPage {
     title: "Untitled Page",
     slug: slugify("untitled-page"),
     content: [],
+    routes: [{ id: "home", path: "/", name: "Home", content: [] }],
+    globalBlocks: { header: null, footer: null },
     theme: DEFAULT_THEME,
     meta: {},
     status: "DRAFT",
