@@ -44,9 +44,13 @@ export default function DomainPage() {
 
     const handleDeleteClick = (domain: any) => {
         if (!user?._id) return;
-        
+
+        const label = domain.isInternalProxy 
+            ? (domain.workerUrl?.replace(/^https?:\/\//, '') || 'Proxy') 
+            : domain.domain;
+
         startDelete(
-            [{ id: domain._id, label: domain.domain }],
+            [{ id: domain._id, label }],
             async (item) => {
                 await deleteMutation.mutateAsync({ id: item.id, userId: user._id });
             }
@@ -117,7 +121,7 @@ export default function DomainPage() {
                     icon={<GlobalOutlined />}
                     className="h-12! px-8! text-base! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
                 >
-                    Add Custom Domain
+                    Publish
                 </Button>
             </div>
 
@@ -128,8 +132,8 @@ export default function DomainPage() {
             ) : domains.length === 0 ? (
                 <Card className="bg-[#141414]! border-white/10! rounded-3xl! p-12! text-center shadow-2xl!">
                     <div className="text-6xl mb-6 block">🌐</div>
-                    <Title level={4} className="text-white!">No domains yet</Title>
-                    <Text className="text-white/50! block">Add your first custom domain to get started</Text>
+                    <Title level={4} className="text-white!">No Project Published yet</Title>
+                    <Text className="text-white/50! block">Publish your first project to get started</Text>
                     <div className="mt-8">
                         <Button
                             type="primary"
@@ -137,7 +141,7 @@ export default function DomainPage() {
                             onClick={() => router.push('/domains/connect')}
                             className="h-12! px-10! text-base! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
                         >
-                            Add Custom Domain
+                            Publish
                         </Button>
                     </div>
                 </Card>

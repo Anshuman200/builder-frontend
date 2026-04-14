@@ -20,6 +20,27 @@ import { useGoLivePage, usePage, usePages } from "@/lib/api/queries";
 
 const { Title, Text } = Typography;
 
+interface PageData {
+    _id: string;
+    title: string;
+    thumbnail?: string;
+    isPublic: boolean;
+    isLive: boolean;
+    slug?: string;
+}
+
+interface WorkerResult {
+    workerUrl: string;
+    [key: string]: any;
+}
+
+interface DomainResult {
+    _id: string;
+    requiresManualDns?: boolean;
+    status?: string;
+    [key: string]: any;
+}
+
 const DEPLOY_STEPS = [
     { id: "init", icon: "🚀", label: "Initializing Cloudflare Worker…", ms: 1000 },
     { id: "bundle", icon: "📦", label: "Bundling proxy script…", ms: 800 },
@@ -39,7 +60,7 @@ function ConnectDomainContent() {
     const createProxyMutation = useCreateProxy();
     const createDomainMutation = useCreateDomain();
     const verifyMutation = useVerifyDomain();
-    
+
     const pageIdFromUrl = searchParams.get("pageId") || "";
     const skipDeploy = searchParams.get("skipDeploy") === "true";
 
@@ -59,6 +80,7 @@ function ConnectDomainContent() {
     const [deployStepLabel, setDeployStepLabel] = useState("");
     const [workerError, setWorkerError] = useState("");
     const [workerResult, setWorkerResult] = useState<any>(null);
+    const [currentDeployStep, setCurrentDeployStep] = useState(-1);
 
     const [customDomain, setCustomDomain] = useState("");
     const [domainError, setDomainError] = useState("");
@@ -101,6 +123,7 @@ function ConnectDomainContent() {
         try {
             const totalSteps = DEPLOY_STEPS.length;
             for (let i = 0; i < totalSteps; i++) {
+                setCurrentDeployStep(i);
                 setDeployStepLabel(DEPLOY_STEPS[i].label);
                 setDeployProgress(((i + 1) / totalSteps) * 100);
 
@@ -118,20 +141,20 @@ function ConnectDomainContent() {
                     }
 
                     if (!pageId) throw new Error("URL must contain an ?id= parameter or a valid 24-character ID in the path");
-                    
-                    const result: any = await createProxyMutation.mutateAsync({ 
-                        pageId, 
-                        originUrl: targetUrl 
+
+                    const result: any = await createProxyMutation.mutateAsync({
+                        pageId,
+                        originUrl: targetUrl
                     });
                     setWorkerResult(result.data || result);
                 }
                 await delay(DEPLOY_STEPS[i].ms);
             }
-            setCurrentStep(1);
         } catch (err: any) {
             setWorkerError(err.message || "Failed to deploy worker");
         } finally {
             setWorkerDeploying(false);
+            setCurrentDeployStep(-1);
         }
     };
 
@@ -156,11 +179,11 @@ function ConnectDomainContent() {
 
             if (!user?._id) throw new Error("Authentication required");
 
-            const data: any = await createDomainMutation.mutateAsync({ 
-                domain: customDomain, 
-                targetUrl, 
-                userId: user._id, 
-                pageId: pageIdToUse || undefined 
+            const data: any = await createDomainMutation.mutateAsync({
+                domain: customDomain,
+                targetUrl,
+                userId: user!._id,
+                pageId: pageIdToUse || undefined
             });
             setDomainResult(data);
 
@@ -227,7 +250,7 @@ function ConnectDomainContent() {
                     await delay(15000);
                     if (!mounted) return;
 
-                    const updatedRecord: any = await verifyMutation.mutateAsync(domainResult._id);
+                    const updatedRecord: any = await verifyMutation.mutateAsync(domainResult!._id);
                     if (!mounted) return;
 
                     if (updatedRecord && updatedRecord.status === 'active') {
@@ -254,11 +277,11 @@ function ConnectDomainContent() {
                 <Header onBack={() => router.push('/domains')} />
 
                 <div className="perspective-[1000px]">
-                    <Card className="bg-[#141414]! border-white/10! rounded-2xl! overflow-hidden shadow-2xl!">
+                    <div className="bg-[#141414]! border-white/10! rounded-t-2xl! rounded-b-none! overflow-hidden shadow-2xl!">
                         <div className="bg-linear-to-br from-indigo-500/20 to-purple-600/20 p-8 border-b border-white/10 rounded-md">
                             <Title level={2} className="text-white! m-0! mb-6!">
                                 <RocketOutlined className="mr-3 text-indigo-400" />
-                                Connect Domain
+                                Publish Project
                             </Title>
                             <Steps
                                 current={currentStep}
@@ -303,6 +326,7 @@ function ConnectDomainContent() {
                                     onProjectSelect={handleProjectSelect}
                                     projectsLoading={allPagesLoading}
                                     pageData={pageData}
+                                    currentDeployStep={currentDeployStep}
                                 />
                             )}
 
@@ -329,7 +353,7 @@ function ConnectDomainContent() {
                                 />
                             )}
                         </div>
-                    </Card>
+                    </div>
                 </div>
             </div>
         </div>
@@ -351,16 +375,38 @@ function Header({ onBack }: { onBack: () => void }) {
     );
 }
 
+interface StepDeployWorkerProps {
+    targetUrl: string;
+    setTargetUrl: (url: string) => void;
+    workerDeploying: boolean;
+    deployStepLabel: string;
+    deployProgress: number;
+    workerError: string;
+    workerResult: WorkerResult | null;
+    onNext: () => void;
+    onSkip: () => void;
+    isSkipping: boolean;
+    onDeploy: () => void;
+    handleCopy: (text: string) => void;
+    isPreFilled: boolean;
+    disabled: boolean;
+    projects: PageData[];
+    onProjectSelect: (id: string) => void;
+    projectsLoading: boolean;
+    pageData?: PageData;
+    currentDeployStep: number;
+}
+
 function StepDeployWorker({
     targetUrl, setTargetUrl, workerDeploying, deployStepLabel, deployProgress,
     workerError, workerResult, onNext, onSkip, isSkipping, onDeploy, handleCopy, isPreFilled, disabled,
-    projects, onProjectSelect, projectsLoading, pageData
-}: any) {
+    projects, onProjectSelect, projectsLoading, pageData, currentDeployStep
+}: StepDeployWorkerProps) {
     return (
         <Space orientation="vertical" style={{ width: '100%' }} size="large">
             {!workerResult && (
                 <Alert
-                    title="Step 1: Deploy Landing Page Worker"
+                    title="Step 1: Deploy"
                     description="We need to deploy a proxy worker to Cloudflare to serve your landing page from your custom domain with SSL."
                     type="info"
                     showIcon
@@ -369,7 +415,7 @@ function StepDeployWorker({
                 />
             )}
 
-            {!workerResult && isPreFilled && pageData && (
+            {!workerResult && !workerDeploying && isPreFilled && pageData && (
                 <div className="mb-8">
                     <label className="block mb-2 font-semibold text-white">Selected Project</label>
                     <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-md transition-all hover:bg-white/10">
@@ -393,18 +439,18 @@ function StepDeployWorker({
                 </div>
             )}
 
-            {!workerResult && !isPreFilled && (
+            {!workerResult && !workerDeploying && !isPreFilled && (
                 <div className="mb-8">
                     <label className="block mb-2 font-semibold text-white">Select Private Project</label>
                     <Select
                         size="large"
                         placeholder="Choose a project to connect..."
                         className="w-full group"
-                        dropdownClassName="!bg-[#1f1f1f] !border !border-white/10 !p-1.5"
+                        popupClassName="!bg-[#1f1f1f] !border !border-white/10 !p-1.5"
                         rootClassName="[&_.ant-select-selector]:!bg-white/5 [&_.ant-select-selector]:!border-white/10 [&_.ant-select-selector]:!text-white [&_.ant-select-selection-placeholder]:!text-white/30"
                         onChange={onProjectSelect}
                         loading={projectsLoading}
-                        options={projects.map((p: any) => ({
+                        options={projects.map((p) => ({
                             label: (
                                 <div className="flex items-center gap-3 py-1 text-white">
                                     <div className="w-9 h-9 rounded-md overflow-hidden shrink-0 border border-white/10 bg-black">
@@ -434,12 +480,53 @@ function StepDeployWorker({
             {/* Project Preview URL is handled internally now */}
 
             {workerDeploying && (
-                <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
-                    <div className="flex items-center gap-3 mb-3">
-                        <LoadingOutlined className="text-indigo-400 text-xl" />
-                        <Text className="text-white!">{deployStepLabel}</Text>
+                <div className="p-8 bg-white/5 rounded-2xl border border-white/10 animate-in fade-in zoom-in duration-300">
+                    <div className="mb-8">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <LoadingOutlined className="text-indigo-400 text-xl" />
+                                <Text className="text-white! font-medium">Deployment in Progress</Text>
+                            </div>
+                            <Text className="text-indigo-400! font-mono text-sm">{Math.floor(deployProgress)}%</Text>
+                        </div>
+                        <Progress
+                            percent={Math.floor(deployProgress)}
+                            showInfo={false}
+                            strokeColor={{ '0%': '#6366f1', '100%': '#a855f7' }}
+                            trailColor="rgba(255,255,255,0.05)"
+                            className="m-0!"
+                        />
                     </div>
-                    <Progress percent={Math.floor(deployProgress)} status="active" strokeColor={{ '0%': '#6366f1', '100%': '#a855f7' }} className="[&_.ant-progress-text]:text-white/50!" />
+
+                    <div className="flex flex-col gap-4">
+                        {DEPLOY_STEPS.map((step, index) => {
+                            const isCompleted = index < currentDeployStep;
+                            const isActive = index === currentDeployStep;
+                            const isPending = index > currentDeployStep;
+
+                            return (
+                                <div
+                                    key={step.id}
+                                    className={`flex items-center gap-4 transition-all duration-300 ${isActive ? 'opacity-100' : isCompleted ? 'opacity-70' : 'opacity-30'}`}
+                                >
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm border transition-all duration-500 ${isCompleted ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' :
+                                        isActive ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-400 animate-pulse' :
+                                            'bg-white/5 border-white/10 text-white/30'
+                                        }`}>
+                                        {isCompleted ? <CheckCircleOutlined /> : step.icon}
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <Text className={`text-sm! font-medium! ${isActive ? 'text-white' : 'text-white/70'}`}>
+                                            {step.label}
+                                        </Text>
+                                        {isActive && (
+                                            <div className="h-0.5 w-12 bg-linear-to-r from-indigo-500 to-transparent mt-1" />
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             )}
 
@@ -476,7 +563,7 @@ function StepDeployWorker({
                         onClick={onDeploy}
                         loading={workerDeploying}
                         disabled={disabled}
-                        className="h-14! text-lg! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-2xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
+                        className="h-12! text-lg! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-2xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
                     >
                         🚀 Publish
                     </Button>
@@ -486,7 +573,7 @@ function StepDeployWorker({
                             size="large"
                             onClick={onSkip}
                             loading={isSkipping}
-                            className="h-14! font-bold! bg-white/5! border-white/10! text-white! rounded-2xl! hover:bg-white/10!"
+                            className="h-12! font-bold! bg-white/5! border-white/10! text-white! rounded-2xl! hover:bg-white/10!"
                         >
                             Continue
                         </Button>
@@ -494,7 +581,7 @@ function StepDeployWorker({
                             type="primary"
                             size="large"
                             onClick={onNext}
-                            className="h-14! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-2xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
+                            className="h-12! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-2xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
                         >
                             🌐 Connect Domain
                         </Button>
@@ -505,7 +592,16 @@ function StepDeployWorker({
     );
 }
 
-function StepAddDomain({ customDomain, setCustomDomain, domainCreating, domainError, onBack, onCreate }: any) {
+interface StepAddDomainProps {
+    customDomain: string;
+    setCustomDomain: (domain: string) => void;
+    domainCreating: boolean;
+    domainError: string;
+    onBack: () => void;
+    onCreate: () => void;
+}
+
+function StepAddDomain({ customDomain, setCustomDomain, domainCreating, domainError, onBack, onCreate }: StepAddDomainProps) {
     return (
         <Space orientation="vertical" style={{ width: '100%' }} size="large">
             <Alert
@@ -533,7 +629,7 @@ function StepAddDomain({ customDomain, setCustomDomain, domainCreating, domainEr
             {domainError && <Alert message={domainError} type="error" showIcon />}
 
             <div className="flex gap-4 mt-4">
-                <Button size="large" onClick={onBack} disabled={domainCreating} className="h-14! flex-1! bg-white/5! border-white/10! text-white! rounded-2xl! hover:bg-white/10!">
+                <Button size="large" onClick={onBack} disabled={domainCreating} className="h-12! flex-1! bg-white/5! border-white/10! text-white! rounded-2xl! hover:bg-white/10!">
                     ← Back
                 </Button>
                 <Button
@@ -541,7 +637,7 @@ function StepAddDomain({ customDomain, setCustomDomain, domainCreating, domainEr
                     size="large"
                     onClick={onCreate}
                     loading={domainCreating}
-                    className="h-14! flex-2! text-lg! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-md! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
+                    className="h-12! flex-2! text-lg! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-md! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
                 >
                     {domainCreating ? 'Connecting...' : '🌐 Connect Domain'}
                 </Button>
@@ -550,7 +646,18 @@ function StepAddDomain({ customDomain, setCustomDomain, domainCreating, domainEr
     );
 }
 
-function StepComplete({ domainResult, workerResult, isSkipped, autoValidating, validationProgress, validationSuccess, onDone }: any) {
+interface StepCompleteProps {
+    domainResult: DomainResult | null;
+    workerResult: WorkerResult | null;
+    isSkipped: boolean;
+    autoValidating: boolean;
+    validationProgress: number;
+    validationSuccess: boolean;
+    onDone: () => void;
+}
+
+function StepComplete({ domainResult, workerResult, isSkipped, autoValidating, validationProgress, validationSuccess, onDone }: StepCompleteProps) {
+    const { message } = App.useApp();
     return (
         <Space orientation="vertical" style={{ width: '100%' }} size="large">
             {isSkipped ? (
@@ -587,7 +694,7 @@ function StepComplete({ domainResult, workerResult, isSkipped, autoValidating, v
                         </div>
                         <Title level={2} className="text-white! m-0! mb-3!">Project is Live!</Title>
                         <Text className="text-white/60! text-lg block mb-10">Your site is now accessible globally via the secure proxy link.</Text>
-                        
+
                         <div className="max-w-xl mx-auto p-1! rounded-2xl bg-linear-to-r from-emerald-500/20 to-indigo-500/20 border border-white/10 overflow-hidden mb-12">
                             <div className="bg-[#1a1a1a] p-6 rounded-[14px]">
                                 <div className="flex items-center gap-2 mb-4 justify-center">
@@ -598,9 +705,9 @@ function StepComplete({ domainResult, workerResult, isSkipped, autoValidating, v
                                     <div className="flex-1 px-5 py-4 bg-white/5 border border-white/10 rounded-xl overflow-hidden group hover:border-white/20 transition-colors">
                                         <Text className="text-emerald-400! text-base font-mono truncate block">{workerResult?.workerUrl}</Text>
                                     </div>
-                                    <Button 
-                                        type="primary" 
-                                        icon={<CopyOutlined />} 
+                                    <Button
+                                        type="primary"
+                                        icon={<CopyOutlined />}
                                         size="large"
                                         onClick={() => {
                                             if (workerResult?.workerUrl) {

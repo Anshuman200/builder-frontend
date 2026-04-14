@@ -19,8 +19,8 @@ export const useDomains = (userId?: string) => {
 export const useCreateDomain = () => {
     const queryClient = useQueryClient();
     const { message } = App.useApp();
-    return useMutation({
-        mutationFn: (body: { domain: string, targetUrl: string, userId: string, pageId?: string }) => 
+    return useMutation<any, any, { domain: string, targetUrl: string, userId: string, pageId?: string }>({
+        mutationFn: (body) =>
             domainApi.create(body.domain, body.targetUrl, body.userId, body.pageId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["domains"] });
@@ -35,7 +35,7 @@ export const useCreateDomain = () => {
 export const useVerifyDomain = () => {
     const queryClient = useQueryClient();
     const { message } = App.useApp();
-    return useMutation({
+    return useMutation<any, any, string>({
         mutationFn: (id: string) => domainApi.verify(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["domains"] });
@@ -50,8 +50,8 @@ export const useVerifyDomain = () => {
 export const useDeleteDomain = () => {
     const queryClient = useQueryClient();
     const { message } = App.useApp();
-    return useMutation({
-        mutationFn: ({ id, userId }: { id: string, userId?: string }) => domainApi.delete(id, userId),
+    return useMutation<any, any, { id: string, userId?: string }>({
+        mutationFn: ({ id, userId }) => domainApi.delete(id, userId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["domains"] });
             message.success("Domain removed");
@@ -63,10 +63,17 @@ export const useDeleteDomain = () => {
 };
 
 export const useCreateProxy = () => {
+    const queryClient = useQueryClient();
     const { message } = App.useApp();
-    return useMutation({
-        mutationFn: ({ pageId, originUrl }: { pageId: string, originUrl: string }) => 
+    return useMutation<any, any, { pageId: string, originUrl: string }>({
+        mutationFn: ({ pageId, originUrl }) =>
             proxyApi.create(pageId, originUrl),
+        onSuccess: (_, variables) => {
+            const { pageId } = variables;
+            queryClient.invalidateQueries({ queryKey: ["domains"] });
+            queryClient.invalidateQueries({ queryKey: ["proxy-status", pageId] });
+            message.success("Worker deployed successfully!");
+        },
         onError: (err: any) => {
             message.error(err.message || "Failed to deploy worker proxy");
         }
@@ -77,8 +84,9 @@ export const useProxyStatus = (pageId?: string) => {
     return useQuery({
         queryKey: ["proxy-status", pageId],
         queryFn: async () => {
-            const { data } = await proxyApi.status(pageId!);
-            return data;
+            if (!pageId) return null;
+            const res: any = await proxyApi.status(pageId);
+            return res.data || res;
         },
         enabled: !!pageId,
     });
