@@ -83,7 +83,7 @@ export const carouselSections: SectionTemplate[] = [
         makeBlock("button", { label: "Explore Dashboard →", variant: "solid", bgColor: "#6366f1", marginTop: "2rem" }),
       ];
       cols1.props.col1 = [
-        makeBlock("image", { src: "https://images.unsplash.com/photo-1551288049-bbdac8626ad1?w=800&q=80", borderRadius: "24px", height: "400px" }),
+        makeBlock("image", { src: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80", borderRadius: "24px", height: "400px" }),
       ];
       slide1.props.childBlocks = [cols1];
 

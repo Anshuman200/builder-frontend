@@ -1,6 +1,6 @@
 "use client";
 
-import type { Block, EditorPage } from "@/types";
+import type { Block } from "@/types";
 /**
  * PropertiesPanel.tsx — Thin dispatcher (kept for backward compat)
  *
@@ -11,7 +11,7 @@ import type { Block, EditorPage } from "@/types";
  *   panels/ContentPanels.tsx   ← FeaturesPanel, TeamPanel, PageSettingsPanel
  */
 
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 
 import { useEditorStore } from "@/stores/editorStore";
 import { Section, Field, TextInput } from "./panels/shared";
@@ -46,6 +46,24 @@ function findBlock(blocks: Block[] | undefined, id: string): Block | undefined {
 export default function PropertiesPanel() {
     const { page, selectedBlockId, updateBlock, activeRouteId } = useEditorStore();
 
+    // Ref for the scrollable aside container
+    const scrollRef = useRef<HTMLElement>(null);
+
+    // flashKey increments on every block click (even same block re-selected) to replay animation
+    const [flashKey, setFlashKey] = useState(0);
+
+    // Subscribe to selectBlockTick — fires whenever ANY click to selectBlock happens
+    useEffect(() => {
+        let prevTick = useEditorStore.getState().selectBlockTick;
+        return useEditorStore.subscribe((state) => {
+            if (state.selectBlockTick !== prevTick) {
+                prevTick = state.selectBlockTick;
+                scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+                setFlashKey(k => k + 1);
+            }
+        });
+    }, []);
+
     let rootSearchBlocks: Block[] = [];
     if (page) {
         const activeRoute = page.routes?.find(r => r.id === activeRouteId);
@@ -66,11 +84,50 @@ export default function PropertiesPanel() {
     }
 
     return (
-        <aside style={{ width: 380, flexShrink: 0, background: "var(--bg-secondary)", borderLeft: "1px solid var(--border)", overflowY: "auto", display: "flex", flexDirection: "column" }}>
-            {/* Panel Header */}
-            <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--border)" }}>
-                <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Properties</p>
-                <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--text)", fontWeight: 600, textTransform: "capitalize" }}>{selectedBlock.type} Block</p>
+        <aside
+            ref={scrollRef}
+            style={{
+                width: 380, flexShrink: 0,
+                background: "var(--bg-secondary)",
+                borderLeft: "1px solid var(--border)",
+                overflowY: "auto",
+                display: "flex", flexDirection: "column",
+            }}
+        >
+            {/* WhatsApp-style flash animation */}
+            <style>{`
+                @keyframes props-flash {
+                    0%   { background: rgba(99,102,241,0.20); box-shadow: inset 3px 0 0 rgba(99,102,241,0.8); }
+                    40%  { background: rgba(99,102,241,0.12); box-shadow: inset 3px 0 0 rgba(99,102,241,0.5); }
+                    100% { background: transparent; box-shadow: inset 3px 0 0 transparent; }
+                }
+                .props-header-flash {
+                    animation: props-flash 10.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+                }
+            `}</style>
+
+            {/* Panel Header — re-keyed so animation replays on each block switch */}
+            <div
+                key={`flash-${flashKey}`}
+                className="props-header-flash"
+                style={{
+                    padding: "12px 14px",
+                    borderBottom: "1px solid var(--border)",
+                }}
+            >
+                <p style={{
+                    margin: 0, fontSize: 10, fontWeight: 700,
+                    letterSpacing: "0.1em", textTransform: "uppercase",
+                    color: "var(--text-muted)",
+                }}>
+                    Properties
+                </p>
+                <p style={{
+                    margin: "2px 0 0", fontSize: 12,
+                    color: "var(--text)", fontWeight: 600, textTransform: "capitalize",
+                }}>
+                    {selectedBlock.type} Block
+                </p>
             </div>
 
             {/* Type-specific editors */}

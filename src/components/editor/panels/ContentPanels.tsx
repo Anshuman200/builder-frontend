@@ -1,6 +1,6 @@
 "use client";
 import type { Block, EditorPage } from "@/types";
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useRef } from "react";
 import { useEditorStore, DEFAULT_THEME } from "@/stores/editorStore";
 
 import {
@@ -20,6 +20,25 @@ export function FeaturesPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props as any;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
+
+    // Scroll-to + flash when a feature card is clicked on canvas
+    const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const [flashIdx, setFlashIdx] = React.useState<number | null>(null);
+    useEffect(() => {
+        let prev = useEditorStore.getState().subItemFocus;
+        return useEditorStore.subscribe((state) => {
+            const f = state.subItemFocus;
+            if (f && f.blockId === block.id && f !== prev) {
+                prev = f;
+                const el = itemRefs.current[f.index];
+                if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                    setFlashIdx(f.index);
+                    setTimeout(() => setFlashIdx(null), 2000);
+                }
+            }
+        });
+    }, [block.id]);
 
     return (
         <>
@@ -55,10 +74,22 @@ export function FeaturesPanel({ block }: { block: Block }) {
                 <Field label="Mobile ≤ 768px"><TextInput value={(p.mobilePadding as string) || ""} onChange={(v) => up("mobilePadding", v)} placeholder="32px 16px" /></Field>
             </Section>
             <Section title="Feature Items">
+                <style>{`
+                    @keyframes subitem-flash {
+                        0%   { background: rgba(99,102,241,0.18); box-shadow: inset 3px 0 0 #6366f1; }
+                        60%  { background: rgba(99,102,241,0.10); box-shadow: inset 3px 0 0 #6366f188; }
+                        100% { background: transparent; box-shadow: inset 3px 0 0 transparent; }
+                    }
+                    .subitem-flash { animation: subitem-flash 2s cubic-bezier(0.22,1,0.36,1) forwards; }
+                `}</style>
                 <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Add or remove feature items below.</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {((p.features as any[]) || []).map((feature, idx) => (
-                        <div key={feature.id || idx} style={{ display: "flex", flexDirection: "column", gap: 4, padding: 8, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6 }}>
+                        <div key={feature.id || idx}
+                            ref={(el) => { itemRefs.current[idx] = el; }}
+                            className={flashIdx === idx ? "subitem-flash" : undefined}
+                            style={{ display: "flex", flexDirection: "column", gap: 4, padding: 8, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6, transition: "background 0.2s" }}
+                        >
                             <div style={{ display: "flex", justifyContent: "space-between" }}>
                                 <span style={{ fontSize: 10, fontWeight: 600 }}>Feature {idx + 1}</span>
                                 <button onClick={() => { const nF = [...((p.features as any[]) || [])]; nF.splice(idx, 1); up("features", nF); }} style={{ background: "transparent", border: "none", color: "var(--error, red)", cursor: "pointer", fontSize: 12 }}>&times;</button>
@@ -100,6 +131,25 @@ export function TeamPanel({ block }: { block: Block }) {
     const p = block.props as any;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
+    // Scroll-to + flash when a member card is clicked on canvas
+    const memberRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const [flashIdx, setFlashIdx] = React.useState<number | null>(null);
+    useEffect(() => {
+        let prev = useEditorStore.getState().subItemFocus;
+        return useEditorStore.subscribe((state) => {
+            const f = state.subItemFocus;
+            if (f && f.blockId === block.id && f !== prev) {
+                prev = f;
+                const el = memberRefs.current[f.index];
+                if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                    setFlashIdx(f.index);
+                    setTimeout(() => setFlashIdx(null), 2000);
+                }
+            }
+        });
+    }, [block.id]);
+
     return (
         <>
             <Section title="Content">
@@ -136,7 +186,11 @@ export function TeamPanel({ block }: { block: Block }) {
             <Section title="Team Members">
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {((p.members as any[]) || []).map((member, idx) => (
-                        <div key={member.id || idx} style={{ background: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 8, overflow: "hidden" }}>
+                        <div key={member.id || idx}
+                            ref={(el) => { memberRefs.current[idx] = el; }}
+                            className={flashIdx === idx ? "subitem-flash" : undefined}
+                            style={{ background: "#1a1a1a", border: "1px solid #2d2d2d", borderRadius: 8, overflow: "hidden" }}
+                        >
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px", background: "#222", borderBottom: "1px solid #2d2d2d" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                                     {member.image ? (

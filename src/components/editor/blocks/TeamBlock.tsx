@@ -54,6 +54,7 @@ function SocialLinks({ socials, color, justify }: { socials: Record<string, Soci
 export function TeamBlock({ block }: BlockProps) {
     const p = block.props;
     const viewMode = useEditorStore((s) => s.viewMode);
+    const focusSubItem = useEditorStore((s) => s.focusSubItem);
     const isPreview = React.useContext(PreviewContext);
     const LIGHT_BGS = ["#ffffff", "#fff", "#f8fafc", "#f1f5f9"];
     const LIGHT_TEXTS = ["#1e293b", "#0f172a", "#111111", "#000", "#000000"];
@@ -206,7 +207,9 @@ export function TeamBlock({ block }: BlockProps) {
                                 const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid #e2e8f0` } : {};
 
                                 return (
-                                    <div key={`mc-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle }}>
+                                    <div key={`mc-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle }}
+                                        onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                    >
                                         {member.image && (
                                             <div style={{ width: 56, height: 56, borderRadius: "50%", overflow: "hidden", position: "relative", flexShrink: 0 }}>
                                                 <Image 
@@ -235,7 +238,9 @@ export function TeamBlock({ block }: BlockProps) {
                     {layout === "large" && (
                         <div style={{ display: "flex", flexDirection: "column", gap, marginTop: title || subtitle ? "3rem" : 0 }}>
                             {members.map((member: any, idx: number) => (
-                                <div key={`ml-${idx}`} className={idx % 2 !== 0 ? `team-large-card-reverse-${block.id}` : `team-large-card-${block.id}`}>
+                                <div key={`ml-${idx}`} className={idx % 2 !== 0 ? `team-large-card-reverse-${block.id}` : `team-large-card-${block.id}`}
+                                    onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                >
                                     {member.image && (
                                         <div style={{ width: 160, height: 160, borderRadius: imageRadius, overflow: "hidden", position: "relative", flexShrink: 0 }}>
                                             <Image 
@@ -277,7 +282,9 @@ export function TeamBlock({ block }: BlockProps) {
                                 const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid #e2e8f0` } : {};
 
                                 return (
-                                    <div key={`ms-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle }}>
+                                    <div key={`ms-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle }}
+                                        onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                    >
                                         <div style={{ width: 140, height: 140, borderRadius: "50%", overflow: "hidden", border: `4px solid #e2e8f0`, marginBottom: "1rem", position: "relative" }}>
                                             {member.image ? (
                                                 <Image 
@@ -373,12 +380,16 @@ export function TeamBlock({ block }: BlockProps) {
 
                                 if (isFloat) {
                                     return (
-                                        <div key={`member-${idx}`} style={{ paddingTop: `calc(${imageSize} / 2)`, display: "flex", flexDirection: "column" }}>
+                                        <div key={`member-${idx}`} style={{ paddingTop: `calc(${imageSize} / 2)`, display: "flex", flexDirection: "column" }}
+                                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                        >
                                             <div style={{ ...resolvedCardStyle, flex: 1 }}>{imageEl}{contentEl}</div>
                                         </div>
                                     );
                                 }
-                                return (<div key={`member-${idx}`} style={resolvedCardStyle}>{imageEl}{contentEl}</div>);
+                                return (<div key={`member-${idx}`} style={resolvedCardStyle}
+                                    onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                >{imageEl}{contentEl}</div>);
                             })}
                         </div>
                     )}

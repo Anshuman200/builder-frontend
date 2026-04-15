@@ -188,7 +188,7 @@ export function ChildBlockWrapper({
                     border: "1px solid #e2e8f0",
                     boxShadow: "0 2px 12px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)",
                 }}>
-                    <button
+                    {/* <button
                         {...attributes}
                         {...listeners}
                         title="Drag to move"
@@ -201,7 +201,7 @@ export function ChildBlockWrapper({
                             <circle cx="2.5" cy="7" r="1.4"/><circle cx="7.5" cy="7" r="1.4"/>
                             <circle cx="2.5" cy="11.5" r="1.4"/><circle cx="7.5" cy="11.5" r="1.4"/>
                         </svg>
-                    </button>
+                    </button> */}
                     <button
                         title="Delete block"
                         onClick={(e) => { e.stopPropagation(); deleteBlock(block.id); }}

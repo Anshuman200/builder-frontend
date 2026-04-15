@@ -10,6 +10,7 @@ import { DEFAULT_THEME, hexToRgb } from "@/lib/utils/theme";
 export function FeaturesBlock({ block }: BlockProps) {
     const p = block.props;
     const viewMode = useEditorStore((s) => s.viewMode);
+    const focusSubItem = useEditorStore((s) => s.focusSubItem);
     const isPreview = React.useContext(PreviewContext);
 
     const bgColor = (p.bgColor as string) || "var(--background)";
@@ -102,7 +103,9 @@ export function FeaturesBlock({ block }: BlockProps) {
             ) : (
                 <div style={{ display: "grid", gridTemplateColumns: `repeat(${editorCols}, 1fr)`, gap: editorCols === 1 ? "1.25rem" : gap }}>
                     {features.map((feat, idx) => (
-                        <div key={feat.id || idx} style={{ ...getCardSty() }}>
+                        <div key={feat.id || idx} style={{ ...getCardSty() }}
+                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                        >
                             <div style={{ marginBottom: "1.25rem" }}><IconWrapper feature={feat} /></div>
                             <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.5rem 0" }}>{feat.title}</h3>
                             <p style={{ fontSize: cardDescSize, opacity: 0.65, margin: 0, lineHeight: 1.65 }}>{feat.description}</p>

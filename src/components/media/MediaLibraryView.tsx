@@ -665,10 +665,10 @@ export default function MediaLibraryView({
                             <div className="flex flex-col items-center justify-center py-40 bg-white/2 rounded-[3rem] border border-dashed border-white/5">
                                 <Empty
                                     image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                    description={<span className="text-white/20 font-black tracking-widest uppercase text-[10px]">No assets found</span>}
+                                    description={<span className="text-white font-black tracking-widest uppercase text-[10px]">No assets found</span>}
                                 />
                                 {tab === 'my' && (
-                                    <Button ghost onClick={() => setTab('upload')} className="mt-8 border-white/10 text-white/50 hover:text-white hover:border-white font-black uppercase text-[10px] tracking-widest h-10 px-8 rounded-xl">Upload First Asset</Button>
+                                    <Button ghost onClick={() => setTab('upload')} className="mt-8 border-white! text-white! hover:text-white hover:border-white font-black uppercase text-[10px] tracking-widest h-10 px-8 rounded-xl">Upload First Asset</Button>
                                 )}
                             </div>
                         )}

@@ -56,6 +56,7 @@ export const DEFAULT_THEME: ThemeConfig = {
 interface EditorStore {
     page: EditorPage | null;
     selectedBlockId: string | null;
+    selectBlockTick: number;
     hoveredBlockId: string | null;
     history: EditorPage[];
     historyIndex: number;
@@ -75,6 +76,7 @@ interface EditorStore {
         templateId?: string;
         block?: Block;
     } | null;
+    subItemFocus: { blockId: string; index: number } | null;
 
     // ─ Actions ────────────────────────────────────────────────────────────────
     setPage: (page: EditorPage) => void;
@@ -85,6 +87,7 @@ interface EditorStore {
 
     selectBlock: (id: string | null) => void;
     hoverBlock: (id: string | null) => void;
+    focusSubItem: (blockId: string, index: number) => void;
     setViewMode: (mode: "desktop" | "tablet" | "mobile") => void;
     setIsSaving: (v: boolean) => void;
     setActiveDrag: (drag: EditorStore["activeDrag"]) => void;
@@ -421,6 +424,7 @@ export const useEditorStore = create<EditorStore>()(
     immer((set, get) => ({
         page: null,
         selectedBlockId: null,
+        selectBlockTick: 0,
         hoveredBlockId: null,
         history: [],
         historyIndex: -1,
@@ -435,6 +439,7 @@ export const useEditorStore = create<EditorStore>()(
         },
         activeRouteId: null,
         activeDrag: null,
+        subItemFocus: null,
 
         setPage: (page) =>
             set((state) => {
@@ -529,8 +534,9 @@ export const useEditorStore = create<EditorStore>()(
             get().pushHistory();
         }),
 
-        selectBlock: (id) => set({ selectedBlockId: id }),
+        selectBlock: (id) => set((s) => { s.selectedBlockId = id; s.selectBlockTick = (s.selectBlockTick || 0) + 1; }),
         hoverBlock: (id) => set({ hoveredBlockId: id }),
+        focusSubItem: (blockId, index) => set({ subItemFocus: { blockId, index } }),
         setViewMode: (mode) => set({ viewMode: mode }),
         setIsSaving: (v) => set({ isSaving: v }),
         setActiveDrag: (drag: EditorStore["activeDrag"]) => set({ activeDrag: drag }),
