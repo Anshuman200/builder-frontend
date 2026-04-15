@@ -2,10 +2,11 @@
 
 import type { BlockConfig, SectionTemplate } from "@/types";
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { useDraggable } from "@dnd-kit/core";
 import {
   MagnifyingGlassIcon, XMarkIcon, PlusIcon, FaceFrownIcon,
-  ChevronRightIcon,
+  ChevronRightIcon, ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
@@ -23,12 +24,179 @@ const CATEGORY_ICONS: Record<string, string> = {
   Testimonial: "💬", Contact: "📬", Footer: "📄", FAQ: "❓", CTA: "⚡",
 };
 
+/**
+ * Categories where having MORE THAN ONE on a page is very unusual.
+ * Adding a second one will show a confirmation dialog.
+ *
+ * Intentionally NOT singleton: Features, Team, Testimonial, Gallery,
+ * Carousel, Logos, Legal, CTA — users may legitimately stack these.
+ */
+const SINGLETON_CATEGORIES = new Set([
+  "Contact",    // one contact form per page
+  "Pricing",    // one pricing table per page
+  "Hero",       // one hero banner per page
+  "Navigation", // one nav per page (also handled as globalBlock)
+  "Footer",     // one footer per page (also handled as globalBlock)
+  "FAQ",        // one FAQ section per page
+  "Stats",      // one stats / numbers section per page
+]);
+
+/**
+ * Element block types that should be used at most once per page.
+ * These live in the Elements panel (not Sections).
+ */
+const SINGLETON_ELEMENT_TYPES = new Set([
+  "accordion",     // FAQ / accordion — one per page is enough
+  "contactForm",   // Contact form — one per page
+  "deleteAccount", // Delete account block — one per page
+]);
+
 // Auto-derive which block types are already covered by a section template.
 const SECTION_COVERED_TYPES = new Set<string>(
   SECTION_TEMPLATES.flatMap(t => {
     try { return [t.create().type]; } catch { return []; }
   })
 );
+
+// ─── Scroll to newly added block ──────────────────────────────────────────────
+function scrollToBlock(blockId: string) {
+  setTimeout(() => {
+    const el =
+      document.getElementById(`block-${blockId}`) ||
+      document.getElementById(blockId) ||
+      document.querySelector(`[data-block-id="${blockId}"]`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 200);
+}
+
+// ─── Custom dark-themed confirmation dialog ───────────────────────────────────
+function DarkConfirmModal({
+  title,
+  description,
+  confirmLabel = "Yes, Add Another",
+  onConfirm,
+  onCancel,
+}: {
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  // Close on Escape
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onCancel]);
+
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      onClick={onCancel}
+      style={{
+        position: "fixed", inset: 0, zIndex: 99999,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        background: "rgba(0,0,0,0.65)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: 420, maxWidth: "90vw",
+          background: "linear-gradient(145deg, #0d0d18 0%, #111124 100%)",
+          border: "1px solid rgba(245,158,11,0.2)",
+          borderRadius: 18,
+          padding: "24px 24px 20px",
+          boxShadow: "0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 40px rgba(245,158,11,0.06)",
+          animation: "darkModalIn 0.18s cubic-bezier(0.34,1.56,0.64,1)",
+        }}
+      >
+        <style>{`
+          @keyframes darkModalIn {
+            from { opacity: 0; transform: scale(0.92) translateY(8px); }
+            to   { opacity: 1; transform: scale(1)   translateY(0); }
+          }
+        `}</style>
+
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 14 }}>
+          <div style={{
+            width: 40, height: 40, flexShrink: 0, borderRadius: 12,
+            background: "rgba(245,158,11,0.1)",
+            border: "1px solid rgba(245,158,11,0.25)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 0 16px rgba(245,158,11,0.15)",
+          }}>
+            <ExclamationTriangleIcon style={{ width: 20, height: 20, color: "#f59e0b" }} />
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#f1f5f9", lineHeight: 1.3 }}>
+              {title}
+            </p>
+            <p style={{ margin: "6px 0 0", fontSize: 12.5, color: "#64748b", lineHeight: 1.6 }}>
+              {description}
+            </p>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "16px 0" }} />
+
+        {/* Actions */}
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+          <button
+            onClick={onCancel}
+            style={{
+              height: 36, padding: "0 18px", borderRadius: 10,
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "#94a3b8", fontSize: 13, fontWeight: 600, cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.09)"; e.currentTarget.style.color = "#cbd5e1"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#94a3b8"; }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            style={{
+              height: 36, padding: "0 20px", borderRadius: 10,
+              background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+              border: "none",
+              color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer",
+              boxShadow: "0 4px 20px rgba(245,158,11,0.35)",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 6px 24px rgba(245,158,11,0.5)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(245,158,11,0.35)"; }}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+// ─── Check if the current route already has a section of a given category ─────
+function findExistingInCategory(
+  content: any[],
+  category: string
+): boolean {
+  // Build a set of types belonging to this category
+  const typesInCategory = new Set(
+    SECTION_TEMPLATES
+      .filter(t => t.category === category)
+      .flatMap(t => { try { return [t.create().type]; } catch { return []; } })
+  );
+  return content.some(b => typesInCategory.has(b.type));
+}
 
 // ─── Sections popover panel ───────────────────────────────────────────────────
 function SectionsPanel({ onClose }: { onClose: () => void }) {
@@ -257,26 +425,41 @@ export default function BlockPalette() {
 
 // ─── Drawer section card ──────────────────────────────────────────────────────
 function DrawerSectionCard({ template, onAdd }: { template: SectionTemplate; onAdd: () => void }) {
-  const { addBlock, selectBlock, page } = useEditorStore();
+  const { addBlock, selectBlock, page, activeRouteId } = useEditorStore();
   const projectName = page?.title || "PageCraft";
+  const [showConfirm, setShowConfirm] = React.useState(false);
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `template:${template.id}`,
     data: { type: "section", templateId: template.id },
   });
 
-  function handleClick() {
+  function doAdd() {
     const rawBlock = template.create();
     const newBlock = injectProjectName(rawBlock, projectName);
     addBlock(newBlock);
     selectBlock(newBlock.id);
     onAdd();
+    scrollToBlock(newBlock.id);
+  }
+
+  function handleClick() {
+    // ── Duplicate guard ───────────────────────────────────────────────────
+    if (SINGLETON_CATEGORIES.has(template.category)) {
+      const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
+      const content = activeRoute?.content ?? page?.content ?? [];
+      if (findExistingInCategory(content, template.category)) {
+        setShowConfirm(true);
+        return;
+      }
+    }
+    doAdd();
   }
 
   const PREVIEW_H = 380;
   const SCALE = 0.245;
   const thumbH = Math.round(PREVIEW_H * SCALE);
 
-  return (
+  return (<>
     <div
       ref={setNodeRef}
       {...attributes}
@@ -300,28 +483,53 @@ function DrawerSectionCard({ template, onAdd }: { template: SectionTemplate; onA
         <PlusIcon style={{ width: 13, height: 13, color: "var(--primary)", flexShrink: 0 }} />
       </div>
     </div>
-  );
+
+    {showConfirm && (
+      <DarkConfirmModal
+        title={`Already have a ${template.category} section`}
+        description={`This page already has a ${template.category} section ("${template.name}"). Adding another one is unusual — are you sure?`}
+        confirmLabel="Yes, Add Another"
+        onConfirm={() => { setShowConfirm(false); doAdd(); }}
+        onCancel={() => setShowConfirm(false)}
+      />
+    )}
+  </>);
 }
 
 // ─── Element palette card ─────────────────────────────────────────────────────
 function PaletteCard({ config, onAdd }: { config: BlockConfig; onAdd: () => void }) {
-  const { addBlock, selectBlock, page } = useEditorStore();
+  const { addBlock, selectBlock, page, activeRouteId } = useEditorStore();
   const projectName = page?.title || "PageCraft";
+  const [showConfirm, setShowConfirm] = React.useState(false);
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `palette:${config.type}`,
     data: { type: "palette", blockType: config.type },
   });
   const Icon = getIcon(config.icon) ?? Square2StackIcon;
 
-  function handleClick() {
+  function doAdd() {
     const rawBlock = createBlock(config.type);
     const newBlock = injectProjectName(rawBlock, projectName);
     addBlock(newBlock);
     selectBlock(newBlock.id);
     onAdd();
+    scrollToBlock(newBlock.id);
   }
 
-  return (
+  function handleClick() {
+    // ── Singleton guard for element-level blocks ─────────────────────────
+    if (SINGLETON_ELEMENT_TYPES.has(config.type)) {
+      const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
+      const content = activeRoute?.content ?? page?.content ?? [];
+      if (content.some(b => b.type === config.type)) {
+        setShowConfirm(true);
+        return;
+      }
+    }
+    doAdd();
+  }
+
+  return (<>
     <div
       ref={setNodeRef}
       {...attributes}
@@ -342,6 +550,17 @@ function PaletteCard({ config, onAdd }: { config: BlockConfig; onAdd: () => void
       </div>
       <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text)" }}>{config.label}</span>
     </div>
+
+    {showConfirm && (
+      <DarkConfirmModal
+        title={`Already have a ${config.label}`}
+        description={`This page already has a ${config.label} block. Adding another one is unusual — are you sure?`}
+        confirmLabel="Yes, Add Another"
+        onConfirm={() => { setShowConfirm(false); doAdd(); }}
+        onCancel={() => setShowConfirm(false)}
+      />
+    )}
+  </>
   );
 }
 

@@ -26,6 +26,7 @@ import {
   DocumentIcon,
   SparklesIcon,
   DocumentPlusIcon,
+  CogIcon
 } from "@heroicons/react/24/outline";
 import { Popover, Dropdown, Drawer, Switch, ColorPicker } from "antd";
 import Link from "next/link";
@@ -115,7 +116,7 @@ export default function EditorToolbar() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
-    }).catch(() => {});
+    }).catch(() => { });
   };
 
   // Handle thumbnail selection from capture or media library
@@ -661,7 +662,7 @@ export default function EditorToolbar() {
         <button
           onClick={openPreview}
           title="Preview page"
-          className="size-8 bg-violet-700 flex justify-center items-center rounded-full cursor-pointer"
+          className="size-8 bg-violet-700 flex justify-center items-center rounded-full cursor-pointer hover:scale-105"
         >
           <EyeIcon style={{ width: 16, height: 16 }} />
         </button>
@@ -670,20 +671,9 @@ export default function EditorToolbar() {
           <button
             onClick={() => setDrawerOpen(true)}
             title="Page settings"
-            style={{
-              width: 32, height: 32,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              background: "none",
-              border: "1px solid var(--border)",
-              borderRadius: 6,
-              cursor: "pointer",
-              color: "var(--text-muted)",
-              transition: "all 0.15s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+            className="size-8 bg-violet-700 flex justify-center items-center rounded-full cursor-pointer hover:scale-105"
           >
-            <AdjustmentsHorizontalIcon style={{ width: 16, height: 16 }} />
+            <CogIcon style={{ width: 16, height: 16 }} />
           </button>
         </div>
 
