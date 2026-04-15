@@ -24,7 +24,38 @@ import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPan
 import { ButtonPanel, HeaderPanel, FooterPanel } from "./panels/LayoutPanels";
 import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel, AccordionPanel, StatsPanel, ChartPanel, LegalPanel, DeleteAccountPanel } from "./panels/ContentPanels";
 
-// ─── Block finder utility ─────────────────────────────────────────────────────
+// ─── Friendly label map ──────────────────────────────────────────────────────
+const BLOCK_LABEL_MAP: Record<string, string> = {
+  header: "Header Block",
+  hero: "Hero / Section Block",
+  container: "Container Block",
+  text: "Text / Heading Block",
+  image: "Image Block",
+  video: "Video Block",
+  icon: "Icon Block",
+  button: "Button Block",
+  divider: "Divider Block",
+  features: "Features Block",
+  team: "Team Block",
+  footer: "Footer Block",
+  contactForm: "Contact Form Block",
+  deleteAccount: "Delete Account Block",
+  accordion: "FAQ / Accordion Block",
+  columns: "Columns Block",
+  carousel: "Carousel Block",
+  wave: "Wave Divider Block",
+  masonry: "Masonry Gallery Block",
+  stats: "Stats & KPIs Block",
+  chart: "Data Chart Block",
+  "media-picker": "Media Picker Block",
+  tos: "Terms of Service Block",
+  privacy: "Privacy Policy Block",
+};
+function blockLabel(type: string): string {
+  return BLOCK_LABEL_MAP[type] ?? `${type.charAt(0).toUpperCase()}${type.slice(1)} Block`;
+}
+
+// ─── Main PropertiesPanel ────────────────────────────────────────────────────
 
 function findBlock(blocks: Block[] | undefined, id: string): Block | undefined {
     if (!blocks || !Array.isArray(blocks)) return undefined;
@@ -126,7 +157,7 @@ export default function PropertiesPanel() {
                     margin: "2px 0 0", fontSize: 12,
                     color: "var(--text)", fontWeight: 600, textTransform: "capitalize",
                 }}>
-                    {selectedBlock.type} Block
+                    {blockLabel(selectedBlock.type)}
                 </p>
             </div>
 

@@ -6,6 +6,7 @@ import { DndContext } from "@dnd-kit/core";
 import { useEditorStore } from "@/stores/editorStore";
 import { loadPage } from "@/lib/utils/storage";
 import { BlockRenderer, PreviewProvider } from "@/components/editor/blocks";
+import { ActivePathContext } from "@/components/editor/blocks/shared";
 import ScrollToTop from "@/components/shared/ScrollToTop";
 import { pagesApi } from "@/lib/api/client";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
@@ -119,14 +120,16 @@ export default function PreviewClient({ pageId, initialPath = "/" }: { pageId: s
             <PrivatePageGate pageId={pageId} isPrivate={page.visibility === 'PRIVATE'}>
                 <DndContext>
                     <PreviewProvider>
-                        <main
-                            ref={mainRef}
-                            className={page?.theme?.mode === 'dark' ? 'dark' : ''}
-                            style={{ background: "var(--background)", color: "var(--text)", minHeight: "100vh" }}
-                        >
-                            {children}
-                            <ScrollToTop />
-                        </main>
+                        <ActivePathContext.Provider value={normalizedPath}>
+                            <main
+                                ref={mainRef}
+                                className={page?.theme?.mode === 'dark' ? 'dark' : ''}
+                                style={{ background: "var(--background)", color: "var(--text)", minHeight: "100vh" }}
+                            >
+                                {children}
+                                <ScrollToTop />
+                            </main>
+                        </ActivePathContext.Provider>
                     </PreviewProvider>
                 </DndContext>
             </PrivatePageGate>

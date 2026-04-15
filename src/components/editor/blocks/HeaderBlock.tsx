@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, useLinkHandler } from "./shared";
+import { PreviewContext, BlockProps, useLinkHandler, useActivePath } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function HeaderBlock({ block }: BlockProps) {
@@ -13,6 +13,7 @@ export function HeaderBlock({ block }: BlockProps) {
     const isPreview = React.useContext(PreviewContext);
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
     const handleLink = useLinkHandler();
+    const activePath = useActivePath();
 
     const layout = (p.layout as string) || "standard";
     const position = (p.position as string) || "static";
@@ -92,6 +93,12 @@ export function HeaderBlock({ block }: BlockProps) {
         }
     });
 
+    // ── Nav style props (from Properties Panel) ──────────────────────────────
+    const navActiveStyle   = (p.navActiveStyle as string)  || "underline";
+    const navActiveColor   = (p.navActiveColor as string)  || ctaBgColor;
+    const navActiveWeight  = (p.navActiveWeight as string) || "700";
+    const navInactiveOpacity = parseFloat((p.navInactiveOpacity as string) || "0.75");
+
     const NavLinksElement = ({ isMobileMenu = false }: { isMobileMenu?: boolean }) => (
         <nav style={{ display: "flex", alignItems: "center", flexDirection: isMobileMenu ? "column" : "row", gap: isMobileMenu ? "1.5rem" : "2rem" }}>
             {mergedLinks.map((link) => {
@@ -99,7 +106,64 @@ export function HeaderBlock({ block }: BlockProps) {
                     handleLink(link.url, e);
                     if (isPreview && isMobileMenu) setMobileMenuOpen(false);
                 };
-                return (<a key={link.id} href={link.url} onClick={handleNavClick} style={{ color: "inherit", textDecoration: "none", fontWeight: 500, fontSize: isMobileMenu ? "1.1rem" : "0.95rem", opacity: 0.8, transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.8"}>{link.label}</a>);
+                const isActive = link.url === activePath;
+
+                // ── Per-style computed values ──────────────────────────────
+                const weight = isActive ? Number(navActiveWeight) : 500;
+                const opacity = isActive ? 1 : navInactiveOpacity;
+
+                // Underline
+                const borderBottom = (() => {
+                    if (isMobileMenu) return "none";
+                    if (navActiveStyle === "underline") {
+                        return isActive ? `2px solid ${navActiveColor}` : "2px solid transparent";
+                    }
+                    return "none";
+                })();
+
+                // Pill background
+                const pillBg    = navActiveStyle === "pill" && isActive ? navActiveColor : "transparent";
+                const pillColor = navActiveStyle === "pill" && isActive ? "#ffffff" : "inherit";
+                const pillRadius = "6px";
+                const pillPad    = navActiveStyle === "pill" ? (isMobileMenu ? "6px 16px" : "4px 14px") : undefined;
+
+                return (
+                    <span key={link.id} style={{ position: "relative", display: "inline-flex", flexDirection: "column", alignItems: "center" }}>
+                        <a
+                            href={link.url}
+                            onClick={handleNavClick}
+                            style={{
+                                color: pillColor,
+                                textDecoration: "none",
+                                fontWeight: weight,
+                                fontSize: isMobileMenu ? "1.1rem" : "0.95rem",
+                                opacity,
+                                transition: "opacity 0.2s, background 0.2s",
+                                paddingBottom: navActiveStyle === "underline" && !isMobileMenu ? "4px" : undefined,
+                                borderBottom,
+                                background: pillBg,
+                                borderRadius: navActiveStyle === "pill" ? pillRadius : undefined,
+                                padding: pillPad,
+                                display: "inline-block",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.opacity = "1"; }}
+                            onMouseLeave={e => { e.currentTarget.style.opacity = isActive ? "1" : String(navInactiveOpacity); }}
+                        >
+                            {link.label}
+                        </a>
+                        {/* Dot indicator */}
+                        {navActiveStyle === "dot" && isActive && !isMobileMenu && (
+                            <span style={{
+                                display: "block",
+                                width: 5, height: 5,
+                                borderRadius: "50%",
+                                background: navActiveColor,
+                                marginTop: 3,
+                                flexShrink: 0,
+                            }} />
+                        )}
+                    </span>
+                );
             })}
         </nav>
     );

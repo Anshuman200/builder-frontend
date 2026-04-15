@@ -69,7 +69,9 @@ export function ContainerBlock({ block }: BlockProps) {
                     </div>
                 )}
                 {childBlocks.map((child) => (<ChildBlockWrapper key={child.id} block={child} />))}
-                <DropZoneStrip zoneId={`container-${block.id}`} hasChildren={childBlocks.length > 0} emptyLabel="Drag blocks into this container" />
+                {childBlocks.length === 0 && (
+                    <DropZoneStrip zoneId={`container-${block.id}`} hasChildren={false} emptyLabel="Drag blocks into this container" />
+                )}
             </div>
         </>
     );

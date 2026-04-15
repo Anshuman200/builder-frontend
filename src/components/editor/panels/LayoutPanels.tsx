@@ -105,6 +105,58 @@ export function HeaderPanel({ block }: { block: Block }) {
                     <button onClick={() => { const nL = [...((p.links as any[]) || [])]; nL.push({ id: crypto.randomUUID(), label: "New Link", url: "#" }); up("links", nL); }} style={{ padding: "6px 0", background: "var(--primary-light)", color: "var(--primary)", border: "none", borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>+ Add Nav Link</button>
                 </div>
             </Section>
+
+            <Section title="Navigation Style">
+                <Field label="Active Style">
+                    <SelectInput
+                        value={(p.navActiveStyle as string) || "underline"}
+                        onChange={(v) => up("navActiveStyle", v)}
+                        options={[
+                            { label: "Underline", value: "underline" },
+                            { label: "Dot (below)", value: "dot" },
+                            { label: "Pill / Background", value: "pill" },
+                            { label: "Bold only", value: "bold" },
+                        ]}
+                    />
+                </Field>
+                {(p.navActiveStyle as string) && (
+                    <Field label="Active Color">
+                        <ColorInput
+                            value={(p.navActiveColor as string) || (p.ctaBgColor as string) || "#6366f1"}
+                            onChange={(v) => up("navActiveColor", v)}
+                            onBlur={(v) => up("navActiveColor", v, true)}
+                        />
+                    </Field>
+                )}
+                <Field label="Active Weight">
+                    <SelectInput
+                        value={(p.navActiveWeight as string) || "700"}
+                        onChange={(v) => up("navActiveWeight", v)}
+                        options={[
+                            { label: "Normal (400)", value: "400" },
+                            { label: "Medium (500)", value: "500" },
+                            { label: "Semibold (600)", value: "600" },
+                            { label: "Bold (700)", value: "700" },
+                        ]}
+                    />
+                </Field>
+                <Field label="Inactive Opacity">
+                    <SelectInput
+                        value={(p.navInactiveOpacity as string) || "0.75"}
+                        onChange={(v) => up("navInactiveOpacity", v)}
+                        options={[
+                            { label: "50%", value: "0.5" },
+                            { label: "60%", value: "0.6" },
+                            { label: "70%", value: "0.7" },
+                            { label: "75% (default)", value: "0.75" },
+                            { label: "80%", value: "0.8" },
+                            { label: "90%", value: "0.9" },
+                            { label: "Full (100%)", value: "1" },
+                        ]}
+                    />
+                </Field>
+            </Section>
+
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
         </>
     );

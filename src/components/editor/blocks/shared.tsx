@@ -20,6 +20,15 @@ export function PreviewProvider({ children }: { children: React.ReactNode }) {
     return <PreviewContext.Provider value={true}>{children}</PreviewContext.Provider>;
 }
 
+// ─── Active route path context ────────────────────────────────────────────────
+// Shared by PreviewClient (real navigation) and EditorCanvas (active edit route)
+// so HeaderBlock can highlight the correct nav link without prop-drilling.
+
+export const ActivePathContext = React.createContext<string>("/");
+export function useActivePath() {
+    return React.useContext(ActivePathContext);
+}
+
 /**
  * useLinkHandler - Shared hook for blocks to handle internal vs external links
  * In preview mode, internal links (starting with /) are handled via hash changes.
@@ -135,11 +144,14 @@ export function ChildBlockWrapper({
     const viewport = animPlayback === "always" ? { once: false, margin: "-50px" } : { once: true, margin: "-50px" };
     const transition = { duration: animDuration, delay: animDelay, ease: "easeOut" } as any;
 
+    // Propagate explicit height:100% so image blocks inside columns can fill their parent.
+    const needsFullHeight = block.props.height === "100%";
+
     if (isPreview) {
         if (animType !== "none" && variants) {
             return (
                 <motion.div
-                    style={{ position: "relative", width: "100%" }}
+                    style={{ position: "relative", width: "100%", height: needsFullHeight ? "100%" : undefined }}
                     initial="hidden"
                     whileInView="visible"
                     viewport={viewport}
@@ -152,7 +164,7 @@ export function ChildBlockWrapper({
         }
 
         return (
-            <div style={{ position: "relative", width: "100%" }}>
+            <div style={{ position: "relative", width: "100%", height: needsFullHeight ? "100%" : undefined }}>
                 {children || <BlockRendererRef block={block} />}
             </div>
         );
@@ -164,6 +176,7 @@ export function ChildBlockWrapper({
             style={{
                 position: "relative",
                 width: "100%",
+                height: needsFullHeight ? "100%" : undefined,
                 transform: CSS.Translate.toString(transform),
                 opacity: isDragging ? 0.3 : 1,
             }}

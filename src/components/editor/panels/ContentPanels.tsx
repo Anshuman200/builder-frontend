@@ -314,7 +314,7 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
     const upP = (key: string, val: unknown) => updatePageData({ [key]: val });
 
     return (
-        <aside style={{ width: 240, flexShrink: 0, background: "var(--bg-secondary)", borderLeft: "1px solid var(--border)", overflowY: "auto", display: "flex", flexDirection: "column" }}>
+        <aside style={{ width: 380, flexShrink: 0, background: "var(--bg-secondary)", borderLeft: "1px solid var(--border)", overflowY: "auto", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--border)" }}>
                 <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Page Settings</p>
                 <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--text)", fontWeight: 600 }}>Global Configuration</p>
@@ -611,7 +611,22 @@ export function ContactFormPanel({ block }: { block: Block }) {
                 <ToggleInput value={p.showGender === true} onChange={(v) => up("showGender", v)} label="Show Gender Field" />
             </Section>
 
-            <Section title="Field Labels & Validation">
+            <Section title="Spacing">
+                <Field label="Section Background"><ColorInput value={(p.sectionBg as string) || "transparent"} onChange={(v) => up("sectionBg", v)} placeholder="transparent" /></Field>
+                <Field label="Section Padding"><TextInput value={(p.sectionPadding as string) || "4rem 1rem"} onChange={(v) => up("sectionPadding", v)} placeholder="4rem 1rem (top/bottom left/right)" /></Field>
+            </Section>
+
+            <Section title="Card Style">
+                <Field label="Card Background"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} /></Field>
+                <Field label="Card Padding"><TextInput value={(p.padding as string) || "3rem 2rem"} onChange={(v) => up("padding", v)} placeholder="3rem 2rem" /></Field>
+                <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "20px"} onChange={(v) => up("borderRadius", v)} /></Field>
+            </Section>
+
+            <Section title="Input Style">
+                <InputFields p={p} up={up} />
+            </Section>
+
+            <Section title="Field Labels &amp; Validation">
                 <div style={{ paddingBottom: 12, borderBottom: "1px solid var(--border)", marginBottom: 12 }}>
                     <Field label="First Name"><TextInput value={(p.firstNameLabel as string) || "First Name"} onChange={(v) => up("firstNameLabel", v)} /></Field>
                     {p.mode === "api" && <Field label="Form Name"><TextInput value={(p.firstNameApiKey as string) || "firstName"} onChange={(v) => up("firstNameApiKey", v)} placeholder="firstName" /></Field>}
@@ -644,8 +659,6 @@ export function ContactFormPanel({ block }: { block: Block }) {
                 </div>
             </Section>
 
-
-
             <Section title="Submit Button">
                 <ButtonFields p={p} up={up} prefix="button" textKey="submitLabel" />
                 <ToggleInput value={p.buttonFullWidth !== false} onChange={(v) => up("buttonFullWidth", v)} label="Full Width Button" />
@@ -665,20 +678,6 @@ export function ContactFormPanel({ block }: { block: Block }) {
                 <TypographyFields p={p} up={up} prefix="title" />
             </Section>
 
-            <Section title="Section Style">
-                <Field label="Background"><ColorInput value={(p.sectionBg as string) || "transparent"} onChange={(v) => up("sectionBg", v)} placeholder="transparent" /></Field>
-                <Field label="Padding"><TextInput value={(p.sectionPadding as string) || "4rem 1rem"} onChange={(v) => up("sectionPadding", v)} placeholder="4rem 1rem" /></Field>
-            </Section>
-
-            <Section title="Card Style">
-                <Field label="Background"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} /></Field>
-                <Field label="Padding"><TextInput value={(p.padding as string) || "3rem 2rem"} onChange={(v) => up("padding", v)} /></Field>
-                <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "20px"} onChange={(v) => up("borderRadius", v)} /></Field>
-            </Section>
-
-            <Section title="Input Style">
-                <InputFields p={p} up={up} />
-            </Section>
             <AnimationPanel block={block} />
         </>
     );

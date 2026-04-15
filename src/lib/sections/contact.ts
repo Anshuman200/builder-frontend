@@ -142,18 +142,18 @@ export const contactSections: SectionTemplate[] = [
     name: "Image Split Contact",
     category: "Contact",
     preview: `<div style="font-family:sans-serif;display:flex;border-radius:8px;overflow:hidden;min-height:80px">
-      <div style="flex:1;background:linear-gradient(to bottom,#a78bfa,#6366f1);min-height:80px;position:relative">
-        <div style="position:absolute;inset:0;background:#6366f1;opacity:0.7"></div>
-      </div>
-      <div style="flex:1;padding:10px;background:#fff">
-        <div style="font-size:9px;font-weight:800;color:#0f172a;margin-bottom:3px">Contact Us</div>
-        ${["", "", "", ""].map(() => `<div style="height:5px;background:#f1f5f9;border-radius:2px;margin-bottom:3px"></div>`).join("")}
-        <div style="height:8px;background:#6366f1;border-radius:2px;margin-top:4px"></div>
-      </div>
-    </div>`,
+              <div style="flex:1;background:linear-gradient(to bottom,#a78bfa,#6366f1);min-height:80px;position:relative">
+                <div style="position:absolute;inset:0;background:#6366f1;opacity:0.7"></div>
+              </div>
+              <div style="flex:1;padding:10px;background:#fff">
+                <div style="font-size:9px;font-weight:800;color:#0f172a;margin-bottom:3px">Contact Us</div>
+                ${["", "", "", ""].map(() => `<div style="height:5px;background:#f1f5f9;border-radius:2px;margin-bottom:3px"></div>`).join("")}
+                <div style="height:8px;background:#6366f1;border-radius:2px;margin-top:4px"></div>
+              </div>
+            </div>`,
     create: () => {
       const root = makeBlock("container", { bgColor: "#ffffff", padding: "0" });
-      const cols = makeBlock("columns", { leftWidth: "45", gap: "0" });
+      const cols = makeBlock("columns", { leftWidth: "45", gap: "0", padding: "0" });
 
       cols.props.col0 = [
         makeBlock("image", {
@@ -164,7 +164,7 @@ export const contactSections: SectionTemplate[] = [
       ];
 
       const rightPane = makeBlock("hero", {
-        bgColor: "#ffffff", padding: "5rem 4rem", minHeight: "auto",
+        bgColor: "#ffffff", padding: "2rem 2rem", minHeight: "auto",
         borderRadius: "0", align: "left", textColor: "#0f172a",
       });
       const formBlock = makeBlock("contactForm", {

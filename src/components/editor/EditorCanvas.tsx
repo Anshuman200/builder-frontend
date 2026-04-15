@@ -16,6 +16,7 @@ import { EllipsisHorizontalIcon, TrashIcon, Squares2X2Icon } from "@heroicons/re
 import { useEditorStore } from "@/stores/editorStore";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { BlockRenderer } from "./blocks";
+import { ActivePathContext } from "./blocks/shared";
 
 
 // Viewport widths per mode
@@ -39,6 +40,7 @@ export default function EditorCanvas() {
     ...(page?.globalBlocks?.footer && !activeRoute?.hideFooter ? [page?.globalBlocks?.footer] : [])
   ];
   const themeMode = page?.theme?.mode || "light";
+  const activeRoutePath = activeRoute?.path || "/";
 
   const isConstrained = viewMode !== "desktop";
   const canvasWidth = VIEWPORT_WIDTHS[viewMode];
@@ -90,6 +92,7 @@ export default function EditorCanvas() {
       <div
         id="editor-canvas-root"
         ref={canvasRef}
+        className={themeMode === "dark" ? "dark" : ""}
         style={{
           width: canvasWidth,
           minHeight: "calc(100vh - 100px)",
@@ -109,12 +112,14 @@ export default function EditorCanvas() {
           }
         }}
       >
-        <DropZone 
-          blocks={blocks} 
-          routeBlocksLength={routeBlocks.length}
-          headerId={page?.globalBlocks?.header?.id}
-          footerId={page?.globalBlocks?.footer?.id}
-        />
+        <ActivePathContext.Provider value={activeRoutePath}>
+          <DropZone 
+            blocks={blocks} 
+            routeBlocksLength={routeBlocks.length}
+            headerId={page?.globalBlocks?.header?.id}
+            footerId={page?.globalBlocks?.footer?.id}
+          />
+        </ActivePathContext.Provider>
       </div>
 
     </div>

@@ -61,7 +61,9 @@ export function HeroBlock({ block }: BlockProps) {
                     {childBlocks.map((child) => (
                         <ChildBlockWrapper key={child.id} block={child} outlineColor="rgba(255,255,255,0.9)" outlineColorHover="rgba(255,255,255,0.5)" />
                     ))}
-                    <DropZoneStrip zoneId={`hero-${block.id}`} hasChildren={childBlocks.length > 0} stripColor="#ffffff" emptyLabel="Drag blocks here to build your Hero" />
+                    {childBlocks.length === 0 && (
+                        <DropZoneStrip zoneId={`hero-${block.id}`} hasChildren={false} stripColor="#ffffff" emptyLabel="Drag blocks here to build your Hero" />
+                    )}
                 </div>
             </section>
         </>

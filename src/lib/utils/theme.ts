@@ -33,20 +33,24 @@ export function hexToRgb(hex: string): string | null {
 export function applyThemeToElement(el: HTMLElement, theme: ThemeConfig) {
     const { colors, fonts, borderRadius, spacing } = theme;
 
+    // Helper: skip values that are CSS var() references to avoid circular deps
+    // e.g. `colors.primary = "var(--primary)"` → don't set `--primary: var(--primary)`
+    const safe = (v: string | undefined) => (v && !v.trim().startsWith("var(") ? v : null);
+
     // Apply colors
     if (colors) {
-        el.style.setProperty("--primary", colors.primary);
-        el.style.setProperty("--secondary", colors.secondary);
-        el.style.setProperty("--background", colors.background);
-        el.style.setProperty("--surface", colors.surface);
-        el.style.setProperty("--text", colors.text);
-        el.style.setProperty("--text-muted", colors.textMuted);
-        el.style.setProperty("--border", colors.border);
-        el.style.setProperty("--accent", colors.accent);
-        if (colors.buttonText) el.style.setProperty("--button-text", colors.buttonText);
-        if (colors.overlay) el.style.setProperty("--overlay", colors.overlay);
+        if (safe(colors.primary))    el.style.setProperty("--primary",    colors.primary);
+        if (safe(colors.secondary))  el.style.setProperty("--secondary",  colors.secondary);
+        if (safe(colors.background)) el.style.setProperty("--background", colors.background);
+        if (safe(colors.surface))    el.style.setProperty("--surface",    colors.surface);
+        if (safe(colors.text))       el.style.setProperty("--text",       colors.text);
+        if (safe(colors.textMuted))  el.style.setProperty("--text-muted", colors.textMuted);
+        if (safe(colors.border))     el.style.setProperty("--border",     colors.border);
+        if (safe(colors.accent))     el.style.setProperty("--accent",     colors.accent);
+        if (colors.buttonText && safe(colors.buttonText)) el.style.setProperty("--button-text", colors.buttonText);
+        if (colors.overlay   && safe(colors.overlay))    el.style.setProperty("--overlay",     colors.overlay);
 
-        const primaryRgb = hexToRgb(colors.primary);
+        const primaryRgb = safe(colors.primary) ? hexToRgb(colors.primary) : null;
         if (primaryRgb) el.style.setProperty("--primary-rgb", primaryRgb);
     }
 

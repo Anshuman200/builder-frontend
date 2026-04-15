@@ -15,7 +15,18 @@ function ColumnDropZone({ zoneId, blocks, label, flexBasis }: { zoneId: string; 
     return (
         <div
             ref={setNodeRef}
-            style={{ flex: isStacked ? "none" : `${flexBasis.replace("%", "")} ${flexBasis.replace("%", "")} 0%`, width: isStacked ? "100%" : undefined, minHeight: isPreview && blocks.length === 0 ? 0 : 80, border: isPreview ? "none" : `2px dashed ${isOver ? "#6366f1" : "#e2e8f0"}`, borderRadius: 6, background: !isPreview && isOver ? "rgba(99,102,241, 0.04)" : "transparent", transition: "all 0.15s", overflow: "hidden" }}
+            style={{
+                flex: isStacked ? "none" : `${flexBasis.replace("%", "")} ${flexBasis.replace("%", "")} 0%`,
+                width: isStacked ? "100%" : undefined,
+                minHeight: blocks.length === 0 ? 80 : undefined,
+                alignSelf: "stretch",
+                border: isPreview ? "none" : `2px dashed ${isOver ? "#6366f1" : "#e2e8f0"}`,
+                borderRadius: 6,
+                background: !isPreview && isOver ? "rgba(99,102,241, 0.04)" : "transparent",
+                transition: "all 0.15s",
+                overflow: "hidden",
+                position: "relative",
+            }}
         >
             {blocks.length > 0 ? (
                 blocks.map((child) => <ChildBlockWrapper key={child.id} block={child} />)

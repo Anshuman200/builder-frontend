@@ -629,19 +629,7 @@ export default function EditorToolbar() {
           <button
             onClick={() => setShowCapturePicker(true)}
             title="Capture page thumbnail"
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "5px 10px",
-              background: page?.thumbnail ? "rgba(99,102,241,0.15)" : "var(--surface)",
-              color: page?.thumbnail ? "#818cf8" : "var(--text-muted)",
-              border: `1px solid ${page?.thumbnail ? "rgba(99,102,241,0.4)" : "var(--border)"}`,
-              borderRadius: 7,
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "all 0.15s",
-              position: "relative",
-            }}
+            className="size-8 bg-violet-700 flex justify-center items-center rounded-full cursor-pointer hover:scale-105"
           >
             {page?.thumbnail ? (
               <span style={{ position: "relative", width: 14, height: 14, flexShrink: 0 }}>
@@ -652,9 +640,8 @@ export default function EditorToolbar() {
                 />
               </span>
             ) : (
-              <CameraIcon style={{ width: 13, height: 13 }} />
+              <CameraIcon style={{ width: 16, height: 16 }} />
             )}
-            Thumbnail
           </button>
         )}
 

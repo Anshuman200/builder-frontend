@@ -43,6 +43,7 @@ export function ImageBlock({ block }: BlockProps) {
         display: "flex",
         flexDirection: "column",
         width: "100%",
+        height: height === "100%" ? "100%" : undefined,
         alignItems:
             align === "left" ? "flex-start"
             : align === "right" ? "flex-end"
