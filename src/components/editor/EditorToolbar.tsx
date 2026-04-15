@@ -107,6 +107,17 @@ export default function EditorToolbar() {
     return payload;
   };
 
+  // Fire-and-forget: keep preview cache in sync with every save
+  const pushPreviewCache = (payload?: any) => {
+    const data = payload || (page ? { ...page } : null);
+    if (!data || !pageId || pageId.length < 24) return;
+    fetch(`/api/preview/${pageId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).catch(() => {});
+  };
+
   // Handle thumbnail selection from capture or media library
   const handleUpdateThumbnails = async (newThumbnails: string[], active: string | null) => {
     updatePageData({
@@ -141,6 +152,7 @@ export default function EditorToolbar() {
         await updateMutation.mutateAsync({ id: pageId, ...payload });
         markClean();
         clearLocalDraft(pageId);
+        pushPreviewCache(payload);
       } catch (e) {
         console.error("Auto-save failed", e);
       } finally {
@@ -203,6 +215,7 @@ export default function EditorToolbar() {
       await updateMutation.mutateAsync({ id: pageId, ...payload });
       markClean();
       clearLocalDraft(pageId);
+      pushPreviewCache(payload);
     } catch (e) {
       console.error("Manual save failed", e);
     } finally {

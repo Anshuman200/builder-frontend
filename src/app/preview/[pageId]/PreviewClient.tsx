@@ -27,6 +27,26 @@ export default function PreviewClient({ pageId, initialPath = "/" }: { pageId: s
             if (!pageId) return;
 
             try {
+                // ── 1. Try the preview cache (holds current unsaved editor state) ──
+                //    This is written by openPreview() in EditorToolbar before opening this tab.
+                const cacheRes = await fetch(`/api/preview/${pageId}`);
+                if (cacheRes.ok) {
+                    const cached = await cacheRes.json();
+                    if (cached && !cached.error) {
+                        setPage({
+                            ...cached,
+                            content: Array.isArray(cached.content) ? cached.content : [],
+                        });
+                        setLoading(false);
+                        return;
+                    }
+                }
+            } catch (_) {
+                // cache miss — fall through
+            }
+
+            try {
+                // ── 2. Fall back to backend database (last saved state) ──
                 const res = await pagesApi.get(pageId);
                 const data = res.data?.page || res.data;
 
@@ -36,10 +56,12 @@ export default function PreviewClient({ pageId, initialPath = "/" }: { pageId: s
                         content: Array.isArray(data.content) ? data.content : []
                     });
                 } else {
+                    // ── 3. Last resort: local draft ──
                     setPage(loadPage(pageId));
                 }
             } catch (e) {
                 console.error("Preview load failed", e);
+                // ── 3. Last resort: local draft ──
                 setPage(loadPage(pageId));
             } finally {
                 setLoading(false);

@@ -93,12 +93,16 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
                     <div
                         style={{
                             marginTop: mediaItems.length > 0 ? `${gap}px` : 0,
-                            width: `calc(${100 / colCount}% - ${(gap * (colCount - 1)) / colCount}px)`,
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "center",
                         }}
                     >
-                        {pickerItems.map((picker: Block) => (
-                            <ChildBlockWrapper key={picker.id} block={picker} />
-                        ))}
+                        <div style={{ width: "min(100%, 280px)" }}>
+                            {pickerItems.map((picker: Block) => (
+                                <ChildBlockWrapper key={picker.id} block={picker} />
+                            ))}
+                        </div>
                     </div>
                 )}
 

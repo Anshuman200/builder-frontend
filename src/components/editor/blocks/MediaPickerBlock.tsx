@@ -171,44 +171,35 @@ export function MediaPickerBlock({ block }: BlockProps) {
                 onClick={() => !loading && setPickerOpen(true)}
                 style={{
                     width: "100%",
-                    aspectRatio: "1/1",
+                    height: "72px",
                     display: "flex",
-                    flexDirection: "column",
+                    flexDirection: "row",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: 12,
+                    gap: 10,
                     background: "var(--surface)",
                     border: "2px dashed var(--border)",
                     borderRadius: (block.props.borderRadius as string) || "12px",
                     cursor: loading ? "wait" : "pointer",
                     transition: "all 0.2s ease",
-                    padding: "20px",
+                    padding: "0 20px",
                     color: loading ? "var(--text-muted)" : "var(--text-subtle)",
                     opacity: loading ? 0.5 : 1,
-                }}
-                onMouseEnter={(e) => {
-                    if (loading) return;
-                    e.currentTarget.style.borderColor = "var(--primary)";
-                    e.currentTarget.style.background = "var(--primary-light)";
-                    e.currentTarget.style.color = "var(--primary)";
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "var(--border)";
-                    e.currentTarget.style.background = "var(--surface)";
-                    e.currentTarget.style.color = loading ? "var(--text-muted)" : "var(--text-subtle)";
+                    boxSizing: "border-box",
+                    marginBottom: "10px",
                 }}
             >
                 {loading ? (
                     <>
-                        <svg style={{ width: 32, height: 32, animation: "spin 1s linear infinite" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg style={{ width: 20, height: 20, animation: "spin 1s linear infinite", flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
                         </svg>
                         <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.02em" }}>Adding {pendingCount} item{pendingCount !== 1 ? "s" : ""}…</span>
                     </>
                 ) : (
                     <>
-                        <PlusCircleIcon style={{ width: 32, height: 32, strokeWidth: 1.5 }} />
+                        <PlusCircleIcon style={{ width: 20, height: 20, strokeWidth: 1.5, flexShrink: 0 }} />
                         <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.02em" }}>Add Media</span>
                     </>
                 )}
