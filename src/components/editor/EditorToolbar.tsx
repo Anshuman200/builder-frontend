@@ -24,6 +24,8 @@ import {
   ChevronDownIcon,
   PlusIcon,
   DocumentIcon,
+  SparklesIcon,
+  DocumentPlusIcon,
 } from "@heroicons/react/24/outline";
 import { Popover, Dropdown, Drawer, Switch, ColorPicker } from "antd";
 import Link from "next/link";
@@ -40,6 +42,7 @@ import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
 import BlockPalette from "./BlockPalette";
 import MediaPicker from "@/components/editor/MediaPicker";
 import { DEFAULT_THEME } from "@/stores/editorStore";
+import NewPageWizard from "@/components/editor/NewPageWizard";
 
 
 export default function EditorToolbar() {
@@ -66,6 +69,9 @@ export default function EditorToolbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [mediaPickerType, setMediaPickerType] = useState<"favicon" | "ogImage" | null>(null);
+  const [showNewPageMenu, setShowNewPageMenu] = useState(false);
+  const [showWizardModal, setShowWizardModal] = useState(false);
+  const [isCreatingPage, setIsCreatingPage] = useState(false);
 
   const theme = page?.theme || DEFAULT_THEME;
   const colors = theme.colors || DEFAULT_THEME.colors;
@@ -298,17 +304,6 @@ export default function EditorToolbar() {
         </div>
       )
     })),
-    { type: 'divider' as const },
-    {
-      key: 'add-page',
-      onClick: () => addRoute({ name: `New Page ${routes.length + 1}`, path: `/page-${routes.length + 1}` }),
-      label: (
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 4px", color: "var(--primary)" }}>
-          <PlusIcon style={{ width: 14, height: 14 }} />
-          <span style={{ fontSize: 13, fontWeight: 600 }}>Add New Page</span>
-        </div>
-      )
-    }
   ];
 
   return (
@@ -409,6 +404,141 @@ export default function EditorToolbar() {
 
         <div style={{ width: 1, height: 20, background: "var(--border)", flexShrink: 0, margin: "0 4px" }} />
         <BlockPalette />
+
+        {/* ── Add New Page Button ── */}
+        <Popover
+          open={showNewPageMenu}
+          onOpenChange={setShowNewPageMenu}
+          trigger="click"
+          placement="bottomLeft"
+          arrow={false}
+          overlayInnerStyle={{ padding: 0, background: "transparent", boxShadow: "none" }}
+          content={
+            <div style={{
+              width: 240,
+              background: "linear-gradient(145deg, #0d0d14 0%, #0f0f1a 100%)",
+              border: "1px solid rgba(99,102,241,0.25)",
+              borderRadius: 16,
+              overflow: "hidden",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset",
+            }}>
+              {/* Header */}
+              <div style={{
+                padding: "14px 16px 10px",
+                borderBottom: "1px solid rgba(255,255,255,0.06)",
+                background: "rgba(99,102,241,0.06)",
+              }}>
+                <p style={{ margin: 0, fontSize: 10, fontWeight: 800, color: "rgba(165,163,255,0.7)", letterSpacing: "0.12em", textTransform: "uppercase" }}>Add New Page</p>
+                <p style={{ margin: "3px 0 0", fontSize: 11, color: "rgba(255,255,255,0.3)", fontWeight: 500 }}>Choose how to start</p>
+              </div>
+
+              {/* Option 1: Blank */}
+              <button
+                onClick={() => {
+                  addRoute({ name: `Page ${routes.length + 1}`, path: `/page-${routes.length + 1}` });
+                  setShowNewPageMenu(false);
+                }}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", gap: 12,
+                  padding: "14px 16px", background: "transparent", border: "none",
+                  cursor: "pointer", transition: "all 0.15s", textAlign: "left",
+                  borderBottom: "1px solid rgba(255,255,255,0.05)",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.1))",
+                  border: "1px solid rgba(99,102,241,0.3)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  <DocumentPlusIcon style={{ width: 16, height: 16, color: "#818cf8" }} />
+                </div>
+                <div>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#fff" }}>Blank Page</p>
+                  <p style={{ margin: "2px 0 0", fontSize: 11, color: "rgba(255,255,255,0.35)", fontWeight: 500 }}>Start with a clean canvas</p>
+                </div>
+              </button>
+
+              {/* Option 2: Wizard */}
+              <button
+                onClick={() => {
+                  setShowNewPageMenu(false);
+                  setShowWizardModal(true);
+                }}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", gap: 12,
+                  padding: "14px 16px", background: "transparent", border: "none",
+                  cursor: "pointer", transition: "all 0.15s", textAlign: "left",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: "linear-gradient(135deg, rgba(16,185,129,0.2), rgba(99,102,241,0.1))",
+                  border: "1px solid rgba(16,185,129,0.3)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  <SparklesIcon style={{ width: 16, height: 16, color: "#34d399" }} />
+                </div>
+                <div>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#fff" }}>Use Wizard</p>
+                  <p style={{ margin: "2px 0 0", fontSize: 11, color: "rgba(255,255,255,0.35)", fontWeight: 500 }}>Pick sections to pre-fill</p>
+                </div>
+              </button>
+
+              {/* Footer hint */}
+              <div style={{ padding: "8px 16px", borderTop: "1px solid rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.15)" }}>
+                <p style={{ margin: 0, fontSize: 10, color: "rgba(255,255,255,0.2)", fontWeight: 500, letterSpacing: "0.04em" }}>
+                  {routes.length} page{routes.length !== 1 ? "s" : ""} in this project
+                </p>
+              </div>
+            </div>
+          }
+        >
+          <button
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              height: 30, padding: "0 10px",
+              background: showNewPageMenu
+                ? "linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.15))"
+                : "linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.06))",
+              border: `1px solid ${showNewPageMenu ? "rgba(99,102,241,0.6)" : "rgba(99,102,241,0.3)"}`,
+              borderRadius: 8, cursor: "pointer",
+              color: "#818cf8",
+              fontSize: 12, fontWeight: 700,
+              letterSpacing: "0.02em",
+              transition: "all 0.2s ease",
+              boxShadow: showNewPageMenu ? "0 0 12px rgba(99,102,241,0.2)" : "none",
+            }}
+            onMouseEnter={e => {
+              if (!showNewPageMenu) {
+                e.currentTarget.style.background = "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.12))";
+                e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)";
+                e.currentTarget.style.boxShadow = "0 0 10px rgba(99,102,241,0.15)";
+              }
+            }}
+            onMouseLeave={e => {
+              if (!showNewPageMenu) {
+                e.currentTarget.style.background = "linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.06))";
+                e.currentTarget.style.borderColor = "rgba(99,102,241,0.3)";
+                e.currentTarget.style.boxShadow = "none";
+              }
+            }}
+          >
+            <PlusIcon style={{ width: 13, height: 13, strokeWidth: 2.5 }} />
+            New Page
+            <ChevronDownIcon style={{
+              width: 11, height: 11, strokeWidth: 2.5,
+              transition: "transform 0.2s",
+              transform: showNewPageMenu ? "rotate(180deg)" : "rotate(0deg)",
+            }} />
+          </button>
+        </Popover>
       </div>
 
       {/* Center — viewport switcher */}
@@ -439,12 +569,12 @@ export default function EditorToolbar() {
 
         {/* Save status */}
         <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 500, color: "var(--text-muted)", minWidth: 80 }}>
-          <span style={{ 
-            width: 6, height: 6, borderRadius: "50%", 
-            background: isSaving ? "var(--primary)" : isDirty ? "#f59e0b" : "#10b981", 
+          <span style={{
+            width: 6, height: 6, borderRadius: "50%",
+            background: isSaving ? "var(--primary)" : isDirty ? "#f59e0b" : "#10b981",
             boxShadow: isSaving ? "0 0 8px var(--primary)" : "none",
             transition: "all 0.2s ease",
-            display: "inline-block" 
+            display: "inline-block"
           }} />
           {isSaving ? "Saving..." : isDirty ? "Unsaved" : "Saved"}
         </div>
@@ -518,22 +648,9 @@ export default function EditorToolbar() {
         <button
           onClick={openPreview}
           title="Preview page"
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "5px 12px",
-            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-            color: "#fff",
-            border: "none",
-            borderRadius: 7,
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: "pointer",
-            letterSpacing: "0.01em",
-            boxShadow: "0 2px 8px rgba(99,102,241,0.3)",
-          }}
+          className="size-8 bg-violet-700 flex justify-center items-center rounded-full cursor-pointer"
         >
-          <EyeIcon style={{ width: 13, height: 13 }} />
-          Preview
+          <EyeIcon style={{ width: 16, height: 16 }} />
         </button>
 
         <div style={{ position: "relative" }}>
@@ -633,6 +750,57 @@ export default function EditorToolbar() {
         defaultTab="login"
         redirectOnSuccess={false}
       />
+
+      {/* New Page Wizard — triggered from header button */}
+      <NewPageWizard
+        open={showWizardModal}
+        onClose={() => setShowWizardModal(false)}
+        isSubmitting={isCreatingPage}
+        initialStep={2}
+        excludeSections={["header", "footer"]}
+        onSubmit={async (title, slug, selectedSections) => {
+          setIsCreatingPage(true);
+          try {
+            // First add the new route
+            const newPath = slug ? `/${slug}` : `/page-${routes.length + 1}`;
+            addRoute({ name: title || `Page ${routes.length + 1}`, path: newPath });
+
+            // Give store a tick to update routes, then add sections to the new route
+            await new Promise(r => setTimeout(r, 50));
+            const { SECTION_TEMPLATES } = await import("@/lib/config/sections");
+            const { injectProjectName } = await import("@/lib/config/blocks");
+
+            const SECTION_ID_MAP: Record<string, string> = {
+              header: "nav-", hero: "hero-", features: "features-",
+              stats: "stats-", team: "team-", testimonials: "testimonials-",
+              pricing: "pricing-", contact: "contact-", cta: "cta-",
+              gallery: "gallery-", faq: "faq-", footer: "footer-",
+            };
+
+            const sorted = [
+              ...selectedSections.filter(id => id === "header"),
+              ...selectedSections.filter(id => id !== "header" && id !== "footer"),
+              ...selectedSections.filter(id => id === "footer"),
+            ];
+
+            const projectName = title || page?.title || "My Page";
+            sorted.forEach(id => {
+              const prefix = SECTION_ID_MAP[id];
+              if (prefix) {
+                const template = SECTION_TEMPLATES.find((t: any) => t.id.startsWith(prefix));
+                if (template) {
+                  const raw = template.create();
+                  const migrated = injectProjectName(raw, projectName);
+                  useEditorStore.getState().addBlock(migrated);
+                }
+              }
+            });
+
+            setShowWizardModal(false);
+          } finally {
+            setIsCreatingPage(false);
+          }
+        }} />
 
       {/* Capture Preview Modal */}
       {user && pageId && pageId.length >= 24 && (
