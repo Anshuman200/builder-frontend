@@ -131,9 +131,7 @@ export function GridBlock({ block }: BlockProps) {
 
         if (isTablet) {
             if (columns === 1) return "1fr";
-            if (columns === 2) return `repeat(2, ${trackSize})`;
-            if (columns === 3) return `repeat(2, ${trackSize})`;
-            return `repeat(3, ${trackSize})`;
+            return `repeat(2, ${trackSize})`;
         }
 
         return `repeat(${columns}, ${trackSize})`;
