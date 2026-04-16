@@ -4,6 +4,7 @@ import * as React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 import { SectionsPanel, ElementsPanel, scrollToBlock } from "./PalettePanels";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { IconButton } from "@/components/ui/IconButton";
 
 export function BlockPickerDrawer() {
   const { blockPicker, closeBlockPicker, addBlockAtTarget, selectBlock } = useEditorStore();
@@ -152,26 +153,16 @@ export function BlockPickerDrawer() {
             </button>
           </div>
 
-          <button
+          <IconButton
+            icon={<XMarkIcon />}
             onClick={closeBlockPicker}
             style={{
               position: "absolute",
               right: 24, top: "50%",
-              transform: "translateY(-50%)",
-              width: 36, height: 36,
-              borderRadius: 12,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              cursor: "pointer",
-              color: "var(--text-muted)",
-              transition: "all 0.2s"
+              transform: "translateY(-50%)"
             }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--surface-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--text)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--surface)"; (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
-          >
-            <XMarkIcon style={{ width: 22, height: 22 }} />
-          </button>
+            title="Close"
+          />
         </div>
 
         {/* Content Area */}

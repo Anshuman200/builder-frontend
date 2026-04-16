@@ -18,6 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button, Progress, Tag, Tooltip, Input, Modal, Empty, Image as AntImage } from "antd";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { IconButton } from "@/components/ui/IconButton";
 import PillSegmented from "@/components/ui/PillSegmented";
 import { s3Service } from "@/lib/services/s3-service";
 import MediaEditor from "./MediaEditor";
@@ -610,20 +611,26 @@ export default function MediaLibraryView({
                                                             ) : isOwner ? (
                                                                 <div className="flex gap-1 pointer-events-auto">
                                                                     <Tooltip title={m.isPublic ? "Public" : "Private"}>
-                                                                        <button
-                                                                            className={`p-1.5 rounded-lg backdrop-blur-md transition-all ${m.isPublic ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40' : 'bg-black/40 text-white/50 hover:bg-black/60'}`}
+                                                                        <IconButton
+                                                                            icon={m.isPublic ? <GlobeAltIcon /> : <LockClosedIcon />}
+                                                                            size="sm"
                                                                             onClick={(e) => { e.stopPropagation(); handleToggleVisibility(m._id, m.isPublic); }}
-                                                                        >
-                                                                            {m.isPublic ? <GlobeAltIcon className="w-3.5 h-3.5" /> : <LockClosedIcon className="w-3.5 h-3.5" />}
-                                                                        </button>
+                                                                            style={{ 
+                                                                                background: m.isPublic ? 'rgba(16, 185, 129, 0.15)' : 'rgba(0, 0, 0, 0.4)',
+                                                                                color: m.isPublic ? 'rgb(52, 211, 153)' : 'rgba(255, 255, 255, 0.5)',
+                                                                                border: 'none',
+                                                                                backdropFilter: 'blur(12px)'
+                                                                            }}
+                                                                        />
                                                                     </Tooltip>
                                                                     <Tooltip title="Delete">
-                                                                        <button
-                                                                            className="p-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-400/40 backdrop-blur-md transition-all"
+                                                                        <IconButton
+                                                                            icon={<TrashIcon />}
+                                                                            variant="danger"
+                                                                            size="sm"
                                                                             onClick={(e) => { e.stopPropagation(); handleDelete(m._id, m); }}
-                                                                        >
-                                                                            <TrashIcon className="w-3.5 h-3.5" />
-                                                                        </button>
+                                                                            style={{ backdropFilter: 'blur(12px)' }}
+                                                                        />
                                                                     </Tooltip>
                                                                 </div>
                                                             ) : (

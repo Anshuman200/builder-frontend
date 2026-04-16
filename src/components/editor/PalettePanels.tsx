@@ -9,6 +9,7 @@ import {
   ChevronRightIcon, ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { IconButton } from "@/components/ui/IconButton";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { BLOCK_TYPES, createBlock, injectProjectName } from "@/lib/config/blocks";
@@ -404,25 +405,12 @@ export function LibraryHeader({
       </div>
       {children}
       {onClose && (
-        <button
+        <IconButton
+          icon={<XMarkIcon />}
           onClick={onClose}
-          style={{
-            position: "absolute",
-            right: 24, top: 24,
-            width: 36, height: 36,
-            borderRadius: 12,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            cursor: "pointer",
-            color: "var(--text-muted)",
-            transition: "all 0.2s"
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--surface-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--text)"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--surface)"; (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
-        >
-          <XMarkIcon style={{ width: 22, height: 22 }} />
-        </button>
+          style={{ position: "absolute", right: 24, top: 24 }}
+          title="Close"
+        />
       )}
     </div>
   );
