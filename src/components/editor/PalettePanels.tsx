@@ -47,7 +47,7 @@ export const SECTION_COVERED_TYPES = new Set<string>(
 
 export function scrollToBlock(blockId: string) {
   if (!blockId) return;
-  
+
   // Multiple attempts to ensure the DOM has updated
   const attemptScroll = (retryCount = 0) => {
     const el =
@@ -56,19 +56,19 @@ export function scrollToBlock(blockId: string) {
       document.querySelector(`[data-block-id="${blockId}"]`);
 
     if (el) {
-      el.scrollIntoView({ 
-        behavior: "smooth", 
+      el.scrollIntoView({
+        behavior: "smooth",
         block: "center", // Center is better for new sections
-        inline: "nearest" 
+        inline: "nearest"
       });
-      
+
       // Flash highlight effect to let user know where it was added
       const originalOutline = el.style.outline;
       const originalTransition = el.style.transition;
-      
+
       el.style.transition = "outline 0.2s ease";
       el.style.outline = "4px solid var(--primary)";
-      
+
       setTimeout(() => {
         el.style.outline = "0px solid var(--primary)";
         setTimeout(() => {
@@ -218,24 +218,24 @@ export function DrawerSectionCard({ template, onAdd }: { template: SectionTempla
       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 24px rgba(0,0,0,0.15)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--primary-light)"; }}
       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}
     >
-      <div className="light" style={{ 
-        width: "100%", 
-        height: thumbH, 
-        overflow: "hidden", 
-        pointerEvents: "none", 
-        background: "#ffffff", 
+      <div className="light" style={{
+        width: "100%",
+        height: thumbH,
+        overflow: "hidden",
+        pointerEvents: "none",
+        background: "#ffffff",
         position: "relative",
         borderBottom: "1px solid rgba(0,0,0,0.05)"
       }}>
-        <div 
-          style={{ 
-            width: "100%", 
-            height: "100%", 
-            pointerEvents: "none", 
-            color: "#0f172a", 
-            fontFamily: "system-ui, sans-serif" 
-          }} 
-          dangerouslySetInnerHTML={{ __html: template.preview }} 
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            color: "#0f172a",
+            fontFamily: "system-ui, sans-serif"
+          }}
+          dangerouslySetInnerHTML={{ __html: template.preview }}
         />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.02), transparent)" }} />
       </div>
@@ -457,11 +457,6 @@ export function SectionsPanel({ onAdd, isGrid = false }: { onAdd: (block: any) =
             </div>
           ) : (
             <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24, color: "var(--text-muted)" }}>
-              <div className="relative">
-                <div className="w-56 h-56 rounded-lg bg-gray-900 flex items-center justify-center text-white shadow-lg">
-                  <PlusIcon className="w-6 h-6" />
-                </div>
-              </div>
               <div style={{ textAlign: "center" }}>
                 <h3 style={{ margin: 0, fontSize: 24, fontWeight: 900, color: "var(--text)", letterSpacing: "-0.01em" }}>Welcome to the Library</h3>
                 <p style={{ margin: "12px 0 0", fontSize: 15, color: "var(--text-muted)", maxWidth: 360, lineHeight: 1.6 }}>Select a category from the premium navigation above to start exploring beautiful sections and components.</p>
