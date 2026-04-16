@@ -56,6 +56,7 @@ import { StatsBlock } from "./blocks/StatsBlock";
 import { ChartBlock } from "./blocks/ChartBlock";
 import { LegalBlock } from "./blocks/LegalBlock";
 import { DeleteAccountBlock } from "./blocks/DeleteAccountBlock";
+import { GridBlock } from "./blocks/GridBlock";
  
 // ─── Block Renderer dispatch ──────────────────────────────────────────────────
  
@@ -83,6 +84,7 @@ export function BlockRenderer({ block }: { block: Block }) {
     case "media-picker": return <MediaPickerBlock block={block} />;
     case "stats": return <StatsBlock block={block} />;
     case "chart": return <ChartBlock block={block} />;
+    case "grid": return <GridBlock block={block} />;
     case "deleteAccount": return <DeleteAccountBlock block={block} />;
     case "tos":
     case "privacy":

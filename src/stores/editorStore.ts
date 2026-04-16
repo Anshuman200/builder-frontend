@@ -77,6 +77,15 @@ interface EditorStore {
         block?: Block;
     } | null;
     subItemFocus: { blockId: string; index: number } | null;
+    blockPicker: {
+        open: boolean;
+        target: {
+            id: string; // blockId or "canvas-root"
+            position: "before" | "after" | "inside";
+            childProp?: string;
+        } | null;
+        preferredTab?: "sections" | "elements";
+    };
 
     // ─ Actions ────────────────────────────────────────────────────────────────
     setPage: (page: EditorPage) => void;
@@ -100,7 +109,12 @@ interface EditorStore {
     updateBlock: (id: string, props: Partial<Block["props"]>, commit?: boolean) => void;
     updateBlockStyle: (id: string, style: Partial<BlockStyle>, commit?: boolean) => void;
     deleteBlock: (id: string) => void;
+    duplicateBlock: (id: string) => void;
     moveBlock: (activeId: string, overId: string, position?: "before" | "after" | "inside", childProp?: string) => void;
+
+    openBlockPicker: (target: { id: string, position: "before" | "after" | "inside", childProp?: string }, preferredTab?: "sections" | "elements") => void;
+    closeBlockPicker: () => void;
+    addBlockAtTarget: (block: Block, target: NonNullable<EditorStore["blockPicker"]["target"]>) => void;
 
     updateTheme: (theme: Partial<ThemeConfig>, commit?: boolean) => void;
     updateMeta: (meta: Partial<MetaConfig>) => void;
@@ -109,50 +123,76 @@ interface EditorStore {
     updatePageData: (data: Partial<Pick<EditorPage, "isTemplate" | "isPublic" | "isLocked" | "category" | "visibility" | "password" | "thumbnail" | "thumbnails">>) => void;
     migrateThemeColors: () => void;
     pushHistory: () => void;
-
+    
     undo: () => void;
     redo: () => void;
     markClean: () => void;
 }
 
 function updateColProps(b: Block, id: string, updater: (b: Block) => Block): Block {
-    const col0 = b.props.col0 as Block[] | undefined;
-    const col1 = b.props.col1 as Block[] | undefined;
-    const childBlocks = b.props.childBlocks as Block[] | undefined;
-    const newCol0 = col0 ? findAndUpdate(col0, id, updater) : col0;
-    const newCol1 = col1 ? findAndUpdate(col1, id, updater) : col1;
-    const newChildBlocks = childBlocks ? findAndUpdate(childBlocks, id, updater) : childBlocks;
-    if (newCol0 !== col0 || newCol1 !== col1 || newChildBlocks !== childBlocks) {
-        return {
-            ...b, props: {
-                ...b.props,
-                ...(newCol0 !== col0 ? { col0: newCol0 } : {}),
-                ...(newCol1 !== col1 ? { col1: newCol1 } : {}),
-                ...(newChildBlocks !== childBlocks ? { childBlocks: newChildBlocks } : {}),
+    const p = b.props;
+    let changed = false;
+    const newProps = { ...p };
+
+    // Common array props
+    for (const key of ["col0", "col1", "childBlocks"]) {
+        const arr = p[key] as Block[] | undefined;
+        if (arr) {
+            const next = findAndUpdate(arr, id, updater);
+            if (next !== arr) { 
+                newProps[key] = next;
+                changed = true;
             }
-        };
+        }
     }
-    return b;
+
+    // Grid items array
+    const items = p.items as { id: string, blocks: Block[] }[] | undefined;
+    if (items) {
+        const nextItems = items.map(item => {
+            const nextBlocks = findAndUpdate(item.blocks || [], id, updater);
+            if (nextBlocks !== item.blocks) {
+                changed = true;
+                return { ...item, blocks: nextBlocks };
+            }
+            return item;
+        });
+        if (changed) newProps.items = nextItems;
+    }
+
+    return changed ? { ...b, props: newProps } : b;
 }
 
 function deleteColProps(b: Block, id: string): Block {
-    const col0 = b.props.col0 as Block[] | undefined;
-    const col1 = b.props.col1 as Block[] | undefined;
-    const childBlocks = b.props.childBlocks as Block[] | undefined;
-    const newCol0 = col0 ? findAndDelete(col0, id) : col0;
-    const newCol1 = col1 ? findAndDelete(col1, id) : col1;
-    const newChildBlocks = childBlocks ? findAndDelete(childBlocks, id) : childBlocks;
-    if (newCol0 !== col0 || newCol1 !== col1 || newChildBlocks !== childBlocks) {
-        return {
-            ...b, props: {
-                ...b.props,
-                ...(newCol0 !== col0 ? { col0: newCol0 } : {}),
-                ...(newCol1 !== col1 ? { col1: newCol1 } : {}),
-                ...(newChildBlocks !== childBlocks ? { childBlocks: newChildBlocks } : {}),
+    const p = b.props;
+    let changed = false;
+    const newProps = { ...p };
+
+    for (const key of ["col0", "col1", "childBlocks"]) {
+        const arr = p[key] as Block[] | undefined;
+        if (arr) {
+            const next = findAndDelete(arr, id);
+            if (next !== arr) {
+                newProps[key] = next;
+                changed = true;
             }
-        };
+        }
     }
-    return b;
+
+    const items = p.items as { id: string, blocks: Block[] }[] | undefined;
+    if (items) {
+        const nextItems = items.map(item => {
+            const nextBlocks = findAndDelete(item.blocks || [], id);
+            if (nextBlocks !== item.blocks) {
+                changed = true;
+                return { ...item, blocks: nextBlocks };
+            }
+            return item;
+        });
+        if (changed) newProps.items = nextItems;
+    }
+
+    return changed ? { ...b, props: newProps } : b;
 }
 
 function findAndUpdate(blocks: Block[], id: string, updater: (b: Block) => Block): Block[] {
@@ -215,6 +255,19 @@ function findAndRemoveBlock(blocks: Block[], id: string): { newBlocks: Block[], 
             const res = findAndRemoveBlock(childBlocks, id);
             if (res.removed) { removed = res.removed; updated.props = { ...updated.props, childBlocks: res.newBlocks }; }
         }
+        const items = updated.props.items as { id: string, blocks: Block[] }[] | undefined;
+        if (items && !removed) {
+            const nextItems = items.map(item => {
+                if (removed || !item.blocks) return item;
+                const res = findAndRemoveBlock(item.blocks, id);
+                if (res.removed) {
+                    removed = res.removed;
+                    return { ...item, blocks: res.newBlocks };
+                }
+                return item;
+            });
+            if (removed) updated.props = { ...updated.props, items: nextItems };
+        }
         return updated;
     });
     return { newBlocks, removed };
@@ -234,33 +287,62 @@ function insertBlockDeep(
                 const updated = { ...b };
                 if (childProp === "children") {
                     updated.children = [...(updated.children || []), insertBlock];
+                    inserted = true;
+                } else if (childProp === "col0" || childProp === "col1" || childProp === "childBlocks") {
+                    updated.props = { ...updated.props, [childProp]: [...((updated.props[childProp] as Block[]) || []), insertBlock] };
+                    inserted = true;
                 } else {
-                    const existing = (updated.props[childProp] as Block[]) || [];
-                    updated.props = { ...updated.props, [childProp]: [...existing, insertBlock] };
+                    // Try to find the slot in items array if it exists (for Grid, Columns, etc)
+                    const items = updated.props.items as any[] | undefined;
+                    if (Array.isArray(items)) {
+                        const slotIdx = items.findIndex(s => s.id === childProp);
+                        if (slotIdx !== -1) {
+                            const newItems = [...items];
+                            newItems[slotIdx] = { 
+                                ...newItems[slotIdx], 
+                                blocks: [...(newItems[slotIdx].blocks || []), insertBlock] 
+                            };
+                            updated.props = { ...updated.props, items: newItems };
+                            inserted = true;
+                        }
+                    }
                 }
                 newBlocks.push(updated);
+            } else {
+                newBlocks.push(b);
             }
-            inserted = true;
         } else {
             const updated = { ...b };
             if (updated.children && !inserted) {
                 const res = insertBlockDeep(updated.children, insertBlock, targetId, position, childProp);
                 if (res.inserted) { updated.children = res.newBlocks; inserted = true; }
             }
-            const col0 = updated.props.col0 as Block[] | undefined;
-            if (col0 && !inserted) {
-                const res = insertBlockDeep(col0, insertBlock, targetId, position, childProp);
-                if (res.inserted) { updated.props = { ...updated.props, col0: res.newBlocks }; inserted = true; }
-            }
-            const col1 = updated.props.col1 as Block[] | undefined;
-            if (col1 && !inserted) {
-                const res = insertBlockDeep(col1, insertBlock, targetId, position, childProp);
-                if (res.inserted) { updated.props = { ...updated.props, col1: res.newBlocks }; inserted = true; }
-            }
-            const childBlocks = updated.props.childBlocks as Block[] | undefined;
-            if (childBlocks && !inserted) {
-                const res = insertBlockDeep(childBlocks, insertBlock, targetId, position, childProp);
-                if (res.inserted) { updated.props = { ...updated.props, childBlocks: res.newBlocks }; inserted = true; }
+            if (!inserted) {
+                const col0 = updated.props.col0 as Block[] | undefined;
+                if (col0 && !inserted) {
+                    const res = insertBlockDeep(col0, insertBlock, targetId, position, childProp);
+                    if (res.inserted) { updated.props = { ...updated.props, col0: res.newBlocks }; inserted = true; }
+                }
+                const col1 = updated.props.col1 as Block[] | undefined;
+                if (col1 && !inserted) {
+                    const res = insertBlockDeep(col1, insertBlock, targetId, position, childProp);
+                    if (res.inserted) { updated.props = { ...updated.props, col1: res.newBlocks }; inserted = true; }
+                }
+                const childBlocks = updated.props.childBlocks as Block[] | undefined;
+                if (childBlocks && !inserted) {
+                    const res = insertBlockDeep(childBlocks, insertBlock, targetId, position, childProp);
+                    if (res.inserted) { updated.props = { ...updated.props, childBlocks: res.newBlocks }; inserted = true; }
+                }
+                const items = updated.props.items as { id: string, blocks: Block[] }[] | undefined;
+                if (items && !inserted) {
+                    const nextItems = items.map(item => {
+                        if (inserted || !item.blocks) return item;
+                        const res = insertBlockDeep(item.blocks, insertBlock, targetId, position, childProp);
+                        if (res.inserted) { inserted = true; return { ...item, blocks: res.newBlocks }; }
+                        return item;
+                    });
+                    if (inserted) { updated.props = { ...updated.props, items: nextItems }; }
+                }
             }
             newBlocks.push(updated);
         }
@@ -420,6 +502,83 @@ function migrateBlockColors(blocks: Block[]): Block[] {
     });
 }
 
+export function recursiveClone(block: Block): Block {
+    const newId = crypto.randomUUID();
+    const newProps = { ...block.props };
+
+    if (Array.isArray(newProps.childBlocks)) {
+        newProps.childBlocks = newProps.childBlocks.map(recursiveClone);
+    }
+    if (Array.isArray(newProps.col0)) {
+        newProps.col0 = newProps.col0.map(recursiveClone);
+    }
+    if (Array.isArray(newProps.col1)) {
+        newProps.col1 = newProps.col1.map(recursiveClone);
+    }
+    if (Array.isArray(newProps.items)) {
+        newProps.items = (newProps.items as any[]).map(item => ({
+            ...item,
+            id: `slot-${crypto.randomUUID()}`,
+            blocks: Array.isArray(item.blocks) ? item.blocks.map(recursiveClone) : []
+        }));
+    }
+
+    // Generic nested objects with IDs (e.g. Accordion items, Carousel slides)
+    for (const key in newProps) {
+        const val = newProps[key];
+        if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'object' && val[0] !== null && 'id' in (val[0] as any)) {
+            newProps[key] = (val as any[]).map(v => ({ ...v, id: crypto.randomUUID() }));
+        }
+    }
+
+    return { ...block, id: newId, props: newProps };
+}
+
+function duplicateBlockDeep(blocks: Block[], targetId: string): { newBlocks: Block[], clonedId: string | null } {
+    let clonedId: string | null = null;
+    const items = blocks.flatMap(b => {
+        if (b.id === targetId) {
+            const clone = recursiveClone(b);
+            clonedId = clone.id;
+            return [b, clone]; // Insert after
+        }
+
+        let changed = false;
+        const newProps = { ...b.props };
+
+        ["childBlocks", "col0", "col1"].forEach(prop => {
+            if (Array.isArray(b.props[prop])) {
+                const res = duplicateBlockDeep(b.props[prop] as Block[], targetId);
+                if (res.clonedId) {
+                    newProps[prop] = res.newBlocks;
+                    clonedId = res.clonedId;
+                    changed = true;
+                }
+            }
+        });
+
+        // Search inside grid items
+        if (Array.isArray(b.props.items) && !changed) {
+            const items = b.props.items as any[];
+            const newItems = items.map(item => {
+                if (changed || !Array.isArray(item.blocks)) return item;
+                const res = duplicateBlockDeep(item.blocks, targetId);
+                if (res.clonedId) {
+                    clonedId = res.clonedId;
+                    changed = true;
+                    return { ...item, blocks: res.newBlocks };
+                }
+                return item;
+            });
+            if (changed) newProps.items = newItems;
+        }
+
+        if (changed) return [{ ...b, props: newProps }];
+        return [b];
+    });
+    return { newBlocks: items, clonedId };
+}
+
 export const useEditorStore = create<EditorStore>()(
     immer((set, get) => ({
         page: null,
@@ -440,6 +599,11 @@ export const useEditorStore = create<EditorStore>()(
         activeRouteId: null,
         activeDrag: null,
         subItemFocus: null,
+        blockPicker: {
+            open: false,
+            target: null,
+            preferredTab: "sections",
+        },
 
         setPage: (page) =>
             set((state) => {
@@ -558,7 +722,54 @@ export const useEditorStore = create<EditorStore>()(
             state.iconPicker.value = value;
         }),
 
+        openBlockPicker: (target, preferredTab = "sections") => set({ blockPicker: { open: true, target, preferredTab } }),
+        closeBlockPicker: () => set({ blockPicker: { open: false, target: null } }),
+        addBlockAtTarget: (block, target) => {
+            const freshBlock = recursiveClone(block);
+            set((s) => {
+                if (!s.page) return;
+                const activeRoute = s.page.routes?.find(r => r.id === s.activeRouteId);
+                if (!activeRoute) return;
+
+                if (target.id === "canvas-root") {
+                    // Just push to end of route
+                    activeRoute.content.push(freshBlock);
+                } else {
+                    // Reuse the deep insertion logic from moveBlock
+                    let roots = [
+                        ...(s.page.globalBlocks?.header ? [s.page.globalBlocks.header] : []),
+                        ...activeRoute.content,
+                        ...(s.page.globalBlocks?.footer ? [s.page.globalBlocks.footer] : []),
+                    ];
+
+                    const { newBlocks: afterInsert, inserted } = insertBlockDeep(
+                        roots, freshBlock, target.id, target.position, target.childProp
+                    );
+
+                    if (inserted) {
+                        const newHeader = afterInsert.find(b => b.type === "header") || null;
+                        const newFooter = afterInsert.find(b => b.type === "footer") || null;
+                        const newContent = afterInsert.filter(b => b.type !== "header" && b.type !== "footer");
+
+                        if (s.page.globalBlocks) {
+                            if (newHeader) s.page.globalBlocks.header = newHeader;
+                            if (newFooter) s.page.globalBlocks.footer = newFooter;
+                        }
+                        activeRoute.content = newContent;
+                    } else {
+                        // Fallback: just add to route if insertion failed
+                        activeRoute.content.push(freshBlock);
+                    }
+                }
+
+                s.isDirty = true;
+                s.blockPicker.open = false; // Auto-close on select
+            });
+            get().pushHistory();
+        },
+
         addBlock: (block, parentId) => {
+            const freshBlock = recursiveClone(block);
             set((s) => {
                 if (!s.page) return;
                 
@@ -569,15 +780,15 @@ export const useEditorStore = create<EditorStore>()(
 
                 if (parentId) {
                     applyUpdaterDeep(s.page, s.activeRouteId, (blocks) => findAndUpdate(blocks, parentId, (b) => ({
-                        ...b, children: [...(b.children ?? []), block]
+                        ...b, children: [...(b.children ?? []), freshBlock]
                     })));
                 } else {
-                    if (block.type === "header") {
-                        s.page.globalBlocks.header = block;
-                    } else if (block.type === "footer") {
-                        s.page.globalBlocks.footer = block;
+                    if (freshBlock.type === "header") {
+                        s.page.globalBlocks.header = freshBlock;
+                    } else if (freshBlock.type === "footer") {
+                        s.page.globalBlocks.footer = freshBlock;
                     } else if (activeRoute) {
-                        activeRoute.content.push(block);
+                        activeRoute.content.push(freshBlock);
                     }
                 }
                 s.isDirty = true;
@@ -607,6 +818,32 @@ export const useEditorStore = create<EditorStore>()(
             if (commit) get().pushHistory();
         },
 
+        duplicateBlock: (id) => {
+            set((s) => {
+                if (!s.page) return;
+                const activeRoute = s.page.routes?.find(r => r.id === s.activeRouteId);
+                
+                // If it's a global block, we don't necessarily want to duplicate it as a global block
+                // (Header/Footer are usually singletons), but we'll allow it if it's on canvas.
+                // For now, focus on route content.
+                if (activeRoute) {
+                    const { newBlocks, clonedId } = duplicateBlockDeep(activeRoute.content, id);
+                    if (clonedId) {
+                        activeRoute.content = newBlocks;
+                        s.selectedBlockId = clonedId; // Auto-select clone
+                        s.isDirty = true;
+                    }
+                } else if (s.page.content) {
+                    const { newBlocks, clonedId } = duplicateBlockDeep(s.page.content, id);
+                    if (clonedId) {
+                        s.page.content = newBlocks;
+                        s.selectedBlockId = clonedId;
+                        s.isDirty = true;
+                    }
+                }
+            });
+            get().pushHistory();
+        },
         deleteBlock: (id) => {
             set((s) => {
                 if (!s.page) return;

@@ -35,7 +35,7 @@ export function HeroPanel({ block }: { block: Block }) {
             <div style={{ padding: "10px 14px" }}>
                 <p style={{ margin: 0, fontSize: 11, color: "var(--text-subtle)", lineHeight: 1.5 }}>💡 Drag any block from the palette directly into the Hero section.</p>
             </div>
-            <AnimationPanel block={block} />
+            {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
         </>
     );
 }
@@ -555,6 +555,119 @@ export function CarouselPanel({ block }: { block: Block }) {
                 <Field label="AutoPlay Delay (ms)"><TextInput value={String(p.autoplaySpeed || 3000)} onChange={(v) => up("autoplaySpeed", Number(v))} placeholder="3000" /></Field>
             </Section>
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
+        </>
+    );
+}
+
+export function GridPanel({ block }: { block: Block }) {
+    const { updateBlock } = useEditorStore();
+    const p = block.props as any;
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
+    const items = (p.items as any[]) || [];
+
+    return (
+        <>
+            <Section title="Grid Layout">
+                <Field label="Desktop Columns">
+                    <SelectInput
+                        value={String(p.columns ?? 0)}
+                        onChange={(v) => up("columns", Number(v))}
+                        options={[
+                            { label: "Auto (Responsive)", value: "0" },
+                            { label: "1 Column", value: "1" },
+                            { label: "2 Columns", value: "2" },
+                            { label: "3 Columns", value: "3" },
+                            { label: "4 Columns", value: "4" },
+                            { label: "5 Columns", value: "5" },
+                            { label: "6 Columns", value: "6" },
+                        ]}
+                    />
+                </Field>
+                {p.columns > 0 && items.length < p.columns && (
+                    <div style={{ fontSize: 10, color: "#f59e0b", marginTop: 4, padding: "4px 8px", background: "rgba(245,158,11, 0.1)", borderRadius: 4 }}>
+                        ⚠️ {items.length} cells present for {p.columns} columns. Add {p.columns - items.length} more cells for a full row.
+                    </div>
+                )}
+                <Field label="Group Alignment">
+                    <SelectInput
+                        value={(p.gridAlign as string) || "stretch"}
+                        onChange={(v) => up("gridAlign", v)}
+                        options={[
+                            { label: "Left", value: "left" },
+                            { label: "Center", value: "center" },
+                            { label: "Right", value: "right" },
+                            { label: "Stretch (Full Width)", value: "stretch" },
+                        ]}
+                    />
+                </Field>
+                <div style={{ fontSize: 10, color: "var(--text-subtle)", marginTop: 4, padding: "0 8px" }}>
+                    Centers or justifies the entire group of cards when they don't fill a full row.
+                </div>
+                <Field label="Gap"><TextInput value={(p.gap as string) || "1.5rem"} onChange={(v) => up("gap", v)} placeholder="1.5rem" /></Field>
+            </Section>
+
+            <Section title="Item Alignment (Inner)">
+                <Field label="Horizontal">
+                    <SelectInput
+                        value={(p.align as string) || "center"}
+                        onChange={(v) => up("align", v)}
+                        options={[
+                            { label: "Left", value: "left" },
+                            { label: "Center", value: "center" },
+                            { label: "Right", value: "right" },
+                            { label: "Stretch", value: "stretch" },
+                        ]}
+                    />
+                </Field>
+                <Field label="Vertical">
+                    <SelectInput
+                        value={(p.verticalAlign as string) || "center"}
+                        onChange={(v) => up("verticalAlign", v)}
+                        options={[
+                            { label: "Top", value: "top" },
+                            { label: "Center", value: "center" },
+                            { label: "Bottom", value: "bottom" },
+                            { label: "Stretch", value: "stretch" },
+                        ]}
+                    />
+                </Field>
+            </Section>
+
+            <Section title="Grid Cells">
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {items.map((item, idx) => (
+                        <div key={item.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6 }}>
+                            <span style={{ fontSize: 11, fontWeight: 600 }}>Cell {idx + 1}</span>
+                            <button
+                                onClick={() => {
+                                    const next = [...items];
+                                    next.splice(idx, 1);
+                                    up("items", next, true);
+                                }}
+                                style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 14 }}
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    ))}
+                    <div style={{ fontSize: 10, color: "var(--text-subtle)", marginTop: 12 }}>
+                        Deleting a cell will permanently remove all blocks inside it.
+                    </div>
+                </div>
+            </Section>
+
+            <Section title="Style">
+                <Field label="Background"><ColorInput value={(p.bgColor as string) || ""} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
+                <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "0px"} onChange={(v) => up("borderRadius", v)} /></Field>
+            </Section>
+
+            <Section title="Padding (Responsive)">
+                <Field label="Desktop"><TextInput value={(p.padding as string) || ""} onChange={(v) => up("padding", v)} placeholder="24px" /></Field>
+                <Field label="Tablet"><TextInput value={(p.tabletPadding as string) || ""} onChange={(v) => up("tabletPadding", v)} placeholder="same as desktop" /></Field>
+                <Field label="Mobile"><TextInput value={(p.mobilePadding as string) || ""} onChange={(v) => up("mobilePadding", v)} placeholder="same as tablet" /></Field>
+            </Section>
+
+            <AnimationPanel block={block} />
         </>
     );
 }

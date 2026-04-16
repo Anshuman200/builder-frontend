@@ -12,7 +12,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { EllipsisHorizontalIcon, TrashIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+import { EllipsisHorizontalIcon, TrashIcon, Square2StackIcon, PlusIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { BlockRenderer } from "./blocks";
@@ -30,10 +30,10 @@ const VIEWPORT_WIDTHS = {
 
 export default function EditorCanvas() {
   const { page, viewMode, selectBlock, updateTheme, activeRouteId } = useEditorStore();
-  
+
   const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
   const routeBlocks = activeRoute?.content ?? [];
-  
+
   const blocks = [
     ...(page?.globalBlocks?.header && !activeRoute?.hideHeader ? [page?.globalBlocks?.header] : []),
     ...routeBlocks,
@@ -113,8 +113,8 @@ export default function EditorCanvas() {
         }}
       >
         <ActivePathContext.Provider value={activeRoutePath}>
-          <DropZone 
-            blocks={blocks} 
+          <DropZone
+            blocks={blocks}
             routeBlocksLength={routeBlocks.length}
             headerId={page?.globalBlocks?.header?.id}
             footerId={page?.globalBlocks?.footer?.id}
@@ -128,13 +128,13 @@ export default function EditorCanvas() {
 
 // ─── Drop Zone ────────────────────────────────────────────────────────────────
 
-const DropZone = memo(function DropZone({ 
-  blocks, 
-  routeBlocksLength, 
-  headerId, 
-  footerId 
-}: { 
-  blocks: Block[], 
+const DropZone = memo(function DropZone({
+  blocks,
+  routeBlocksLength,
+  headerId,
+  footerId
+}: {
+  blocks: Block[],
   routeBlocksLength: number,
   headerId?: string,
   footerId?: string
@@ -197,7 +197,7 @@ const DropZone = memo(function DropZone({
       if (overRect && activeRect) {
         const activeCenterY = activeRect.top + activeRect.height / 2;
         const relativeY = (activeCenterY - overRect.top) / overRect.height;
-        
+
         const isContainer = ["wave", "hero", "container", "features"].includes(over.data.current?.blockType as string || "");
 
         if (colMatch || childZoneMatch) {
@@ -254,22 +254,38 @@ const DropZone = memo(function DropZone({
               <EmptyState isOver={isOver} />
             )}
 
-            {blocks.map((block, index) => (
-              <React.Fragment key={block.id}>
-                <CanvasBlock
-                  block={block}
-                  isDropTarget={dropInfo.overId === block.id}
-                  isFirst={index === 0}
-                  isDraggingFromPalette={dropInfo.isDraggingFromPalette}
-                  activeHeight={activeHeight}
-                  dropPosition={dropInfo.position}
-                />
-                {/* Empty state after header if no content */}
-                {(block.id === headerId && routeBlocksLength === 0) && (
-                  <EmptyState isOver={isOver} />
-                )}
-              </React.Fragment>
-            ))}
+            {blocks.map((block, index) => {
+              const isFooter = block.id === footerId;
+              const isLast = index === blocks.length - 1;
+              const showInviteBeforeFooter = isFooter && routeBlocksLength > 0;
+              const showInviteAtBottom = isLast && !footerId && routeBlocksLength > 0;
+
+              return (
+                <React.Fragment key={block.id}>
+                  {showInviteBeforeFooter && (
+                    <AddSectionInvitation isOver={isOver && dropInfo.overId === "canvas-root"} />
+                  )}
+
+                  <CanvasBlock
+                    block={block}
+                    isDropTarget={dropInfo.overId === block.id}
+                    isFirst={index === 0}
+                    isDraggingFromPalette={dropInfo.isDraggingFromPalette}
+                    activeHeight={activeHeight}
+                    dropPosition={dropInfo.position}
+                  />
+
+                  {showInviteAtBottom && (
+                    <AddSectionInvitation isOver={isOver && dropInfo.overId === "canvas-root"} />
+                  )}
+
+                  {/* Empty state after header if no content */}
+                  {(block.id === headerId && routeBlocksLength === 0) && (
+                    <EmptyState isOver={isOver} />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </>
         )}
 
@@ -324,7 +340,7 @@ const CanvasBlock = memo(function CanvasBlock({
   activeHeight: number;
   dropPosition: "before" | "after" | "inside";
 }) {
-  const { selectedBlockId, hoveredBlockId, selectBlock, hoverBlock, deleteBlock } =
+  const { selectedBlockId, hoveredBlockId, selectBlock, hoverBlock, deleteBlock, duplicateBlock } =
     useEditorStore();
 
   const isSelected = selectedBlockId === block.id;
@@ -351,6 +367,7 @@ const CanvasBlock = memo(function CanvasBlock({
 
       <div
         ref={setNodeRef}
+        id={block.id}
         style={{
           position: "relative",
           transform: CSS.Transform.toString(transform),
@@ -455,10 +472,25 @@ const CanvasBlock = memo(function CanvasBlock({
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
             >
               <svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor" style={{ color: "#64748b" }}>
-                <circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/>
-                <circle cx="3" cy="8" r="1.5"/><circle cx="9" cy="8" r="1.5"/>
-                <circle cx="3" cy="13" r="1.5"/><circle cx="9" cy="13" r="1.5"/>
+                <circle cx="3" cy="3" r="1.5" /><circle cx="9" cy="3" r="1.5" />
+                <circle cx="3" cy="8" r="1.5" /><circle cx="9" cy="8" r="1.5" />
+                <circle cx="3" cy="13" r="1.5" /><circle cx="9" cy="13" r="1.5" />
               </svg>
+            </button>
+            {/* Duplicate */}
+            <button
+              title="Duplicate block"
+              onClick={(e) => { e.stopPropagation(); duplicateBlock(block.id); }}
+              style={{
+                width: 28, height: 28,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: "none", border: "none", cursor: "pointer",
+                color: "#475569", borderRadius: 6,
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#f1f5f9"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
+            >
+              <Square2StackIcon style={{ width: 14, height: 14 }} />
             </button>
             {/* Delete */}
             <button
@@ -492,24 +524,77 @@ const CanvasBlock = memo(function CanvasBlock({
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
 function EmptyState({ isOver }: { isOver: boolean }) {
+  const openBlockPicker = useEditorStore(s => s.openBlockPicker);
   return (
-    <div style={{
-      display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
-      minHeight: 400, gap: 12,
-      border: `2px dashed ${isOver ? "#6366f1" : "#e2e8f0"}`,
-      margin: 24, borderRadius: 10,
-      background: isOver ? "rgba(99,102,241,0.04)" : "transparent",
-      transition: "all 0.15s",
-    }}>
-      <Squares2X2Icon style={{ width: 28, height: 28, color: isOver ? "#6366f1" : "#cbd5e1" }} />
-      <p style={{
-        margin: 0, fontSize: 14,
-        color: isOver ? "#6366f1" : "#94a3b8",
-        fontWeight: 500,
+    <div
+      onClick={() => openBlockPicker({ id: "canvas-root", position: "after" }, "sections")}
+      style={{
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        minHeight: 400, gap: 12,
+        border: `2px dashed ${isOver ? "#6366f1" : "rgba(150,150,150,0.3)"}`,
+        margin: 24, borderRadius: 12,
+        background: isOver ? "rgba(99,102,241,0.05)" : "rgba(150,150,150,0.02)",
+        transition: "all 0.2s cubic-bezier(0.2, 0, 0, 1)",
+        cursor: "pointer",
+      }}
+    >
+      <div style={{
+        width: 56, height: 56, borderRadius: "50%",
+        background: isOver ? "#6366f1" : "rgba(150,150,150,0.1)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "all 0.2s",
       }}>
-        {isOver ? "Drop to add block" : "Drag a block to get started"}
-      </p>
+        <PlusIcon style={{ width: 24, height: 24, color: isOver ? "#fff" : "#94a3b8" }} />
+      </div>
+      <div style={{ textAlign: "center" }}>
+        <p style={{
+          margin: 0, fontSize: 16,
+          color: isOver ? "#6366f1" : "#1e293b",
+          fontWeight: 600,
+        }}>
+          {isOver ? "Drop to add block" : "Starting your page?"}
+        </p>
+        <p style={{ margin: "4px 0 0", fontSize: 13, color: "#64748b" }}>
+          Drag elements from the left to build your layout
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function AddSectionInvitation({ isOver }: { isOver: boolean }) {
+  const openBlockPicker = useEditorStore(s => s.openBlockPicker);
+  return (
+    <div
+      onClick={() =>
+        openBlockPicker({ id: "canvas-root", position: "after" }, "sections")
+      }
+      className={`
+    mx-6 mt-10 mb-20 p-6
+    flex flex-col items-center justify-center gap-2
+    rounded-xl border-2 border-dashed cursor-pointer
+    transition-all duration-200
+
+    ${isOver
+          ? "border-indigo-500 bg-indigo-500/5"
+          : "border-[rgba(150,150,150,0.2)] bg-transparent"
+        }
+
+    hover:border-indigo-500 hover:bg-indigo-500/5
+  `}
+    >
+      <PlusIcon
+        className={`w-5 h-5 ${isOver ? "text-indigo-500" : "text-slate-400"
+          }`}
+      />
+
+      <span
+        className={`text-[13px] font-semibold tracking-[0.02em] ${isOver ? "text-indigo-500" : "text-slate-500"
+          }`}
+      >
+        Add more sections
+      </span>
     </div>
   );
 }

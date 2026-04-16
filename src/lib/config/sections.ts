@@ -28,6 +28,7 @@ export { statsSections } from "../sections/stats";
 export { carouselSections } from "../sections/carousel";
 export { ctaSections } from "../sections/cta";
 export { legalSections } from "../sections/legal";
+export { gridSections } from "../sections/grid";
 
 // ─── Combined array (ordered display) ────────────────────────────────────────
 
@@ -45,10 +46,12 @@ import { statsSections } from "../sections/stats";
 import { carouselSections } from "../sections/carousel";
 import { ctaSections } from "../sections/cta";
 import { legalSections } from "../sections/legal";
+import { gridSections } from "../sections/grid";
 
 export const SECTION_TEMPLATES: SectionTemplate[] = [
     ...navigationSections,
     ...heroSections,
+    ...gridSections,
     ...teamSections,
     ...gallerySections,
     ...featuresSections,

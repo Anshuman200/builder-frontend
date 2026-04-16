@@ -20,7 +20,7 @@ import { Section, Field, TextInput } from "./panels/shared";
 export { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, PANEL_COLORS } from "./panels/shared";
 
 // ─── Per-panel imports ────────────────────────────────────────────────────────
-import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPanel, VideoPanel, ColumnsPanel, WavePanel, CarouselPanel } from "./panels/BasicPanels";
+import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPanel, VideoPanel, ColumnsPanel, WavePanel, CarouselPanel, GridPanel } from "./panels/BasicPanels";
 import { ButtonPanel, HeaderPanel, FooterPanel } from "./panels/LayoutPanels";
 import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel, AccordionPanel, StatsPanel, ChartPanel, LegalPanel, DeleteAccountPanel } from "./panels/ContentPanels";
 
@@ -62,12 +62,23 @@ function findBlock(blocks: Block[] | undefined, id: string): Block | undefined {
     for (const b of blocks) {
         if (b.id === id) return b;
         if (b.children) { const found = findBlock(b.children, id); if (found) return found; }
+        
+        // Search inside named column props
         const col0 = b.props.col0 as Block[] | undefined;
         const col1 = b.props.col1 as Block[] | undefined;
         const childBlocks = b.props.childBlocks as Block[] | undefined;
         if (col0) { const f = findBlock(col0, id); if (f) return f; }
         if (col1) { const f = findBlock(col1, id); if (f) return f; }
         if (childBlocks) { const f = findBlock(childBlocks, id); if (f) return f; }
+
+        // Search inside generic items array (Grid units)
+        const items = b.props.items as { id: string, blocks: Block[] }[] | undefined;
+        if (items) {
+            for (const item of items) {
+                const found = findBlock(item.blocks, id);
+                if (found) return found;
+            }
+        }
     }
     return undefined;
 }
@@ -179,6 +190,7 @@ export default function PropertiesPanel() {
             {selectedBlock.type === "accordion" && <AccordionPanel block={selectedBlock} />}
             {selectedBlock.type === "wave" && <WavePanel block={selectedBlock} />}
             {selectedBlock.type === "carousel" && <CarouselPanel block={selectedBlock} />}
+            {selectedBlock.type === "grid" && <GridPanel block={selectedBlock} />}
             {selectedBlock.type === "stats" && <StatsPanel block={selectedBlock} />}
             {selectedBlock.type === "chart" && <ChartPanel block={selectedBlock} />}
             {selectedBlock.type === "deleteAccount" && <DeleteAccountPanel block={selectedBlock} />}

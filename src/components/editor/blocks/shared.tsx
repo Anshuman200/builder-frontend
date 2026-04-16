@@ -235,23 +235,48 @@ export function ChildBlockWrapper({
 
 export function DropZoneStrip({
     zoneId,
+    childProp,
     hasChildren,
     stripColor = "#6366f1",
     emptyLabel = "Drag blocks here",
 }: {
     zoneId: string;
+    childProp?: string;
     hasChildren: boolean;
     stripColor?: string;
     emptyLabel?: string;
 }) {
     const isPreview = React.useContext(PreviewContext);
     const { setNodeRef, isOver } = useDroppable({ id: zoneId });
+    const { openBlockPicker } = useEditorStore();
 
     if (isPreview) return null;
 
     return (
         <div
             ref={setNodeRef}
+            onClick={(e) => {
+                e.stopPropagation();
+
+                // If explicit childProp is provided, use it. 
+                // Otherwise fallback to legacy parsing logic.
+                if (childProp) {
+                    openBlockPicker({ id: zoneId, position: "inside", childProp }, "elements");
+                    return;
+                }
+
+                // Parse zoneId: "hero-id", "container-id", or "col-0-id"
+                const colMatch = zoneId.match(/^col-([01])-(.+)$/);
+                const childMatch = zoneId.match(/^(?:hero|container|wave|features)-(.+)$/);
+                
+                if (colMatch) {
+                    openBlockPicker({ id: colMatch[2], position: "inside", childProp: `col${colMatch[1]}` }, "elements");
+                } else if (childMatch) {
+                    openBlockPicker({ id: childMatch[1], position: "inside", childProp: "childBlocks" }, "elements");
+                } else {
+                    openBlockPicker({ id: zoneId, position: "inside", childProp: "childBlocks" }, "elements");
+                }
+            }}
             style={{
                 width: "100%",
                 minHeight: hasChildren ? 44 : 120,
@@ -261,7 +286,7 @@ export function DropZoneStrip({
                 background: isOver ? `${stripColor}15` : "transparent",
                 transition: "all 0.15s",
                 marginTop: hasChildren ? 8 : 0,
-                cursor: "default",
+                cursor: "pointer",
                 boxSizing: "border-box",
             }}
         >

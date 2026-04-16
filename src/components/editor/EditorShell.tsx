@@ -24,10 +24,12 @@ import EditorCanvas from "./EditorCanvas";
 import PropertiesPanel from "./PropertiesPanel";
 import { BlockRenderer } from "./blocks";
 import { GlobalIconPicker } from "./GlobalIconPicker";
+import { BlockPickerDrawer } from "./BlockPickerDrawer";
+import { PlusIcon } from "@heroicons/react/24/outline";
 
 export default function EditorShell() {
   const {
-    page, undo, redo, deleteBlock, selectedBlockId, historyIndex,
+    page, undo, redo, deleteBlock, duplicateBlock, selectedBlockId, historyIndex,
     history, addBlock, moveBlock, selectBlock, updateBlock,
     activeDrag, setActiveDrag, activeRouteId
   } = useEditorStore();
@@ -90,10 +92,12 @@ export default function EditorShell() {
 
     // 1. Map nested zones to parent block but track if it was an internal zone
     const colMatch = overId.match(/^col-([01])-(.+)$/);
+    const gridMatch = overId.match(/^grid-([^-]+)-(.+)$/); // grid-{slotId}-{blockId}
     const childZoneMatch = overId.match(/^(?:hero|container|wave)-(.+)$/);
 
     let effectiveTargetId = overId;
     if (colMatch) effectiveTargetId = colMatch[2];
+    else if (gridMatch) effectiveTargetId = gridMatch[2];
     else if (childZoneMatch) effectiveTargetId = childZoneMatch[1];
 
     // 2. Calculate position using the target block's rect (or the strip's rect)
@@ -121,6 +125,9 @@ export default function EditorShell() {
           if (colMatch) {
             targetId = colMatch[2];
             childProp = `col${colMatch[1]}`;
+          } else if (gridMatch) {
+            targetId = gridMatch[2];
+            childProp = gridMatch[1]; // slot-0, slot-1, etc.
           } else if (childZoneMatch) {
             targetId = childZoneMatch[1];
             childProp = "childBlocks";
@@ -213,6 +220,11 @@ export default function EditorShell() {
 
       if (meta && !e.shiftKey && e.key === "z") { e.preventDefault(); undo(); return; }
       if (meta && e.shiftKey && e.key === "z") { e.preventDefault(); redo(); return; }
+      if (meta && e.key === "d") {
+        e.preventDefault();
+        if (selectedBlockId) duplicateBlock(selectedBlockId);
+        return;
+      }
       if (!isInput && selectedBlockId && (e.key === "Delete" || e.key === "Backspace")) {
         e.preventDefault();
         deleteBlock(selectedBlockId);
@@ -289,6 +301,7 @@ export default function EditorShell() {
         )}
       </DragOverlay>
       <GlobalIconPicker />
+      <BlockPickerDrawer />
     </DndContext>
   );
 }
