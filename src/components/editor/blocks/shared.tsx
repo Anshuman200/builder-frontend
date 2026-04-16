@@ -173,6 +173,7 @@ export function ChildBlockWrapper({
     return (
         <div
             ref={setNodeRef}
+            id={`block-${block.id}`}
             style={{
                 position: "relative",
                 width: "100%",

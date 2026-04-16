@@ -766,6 +766,7 @@ export const useEditorStore = create<EditorStore>()(
                 s.blockPicker.open = false; // Auto-close on select
             });
             get().pushHistory();
+            return freshBlock;
         },
 
         addBlock: (block, parentId) => {
@@ -794,6 +795,7 @@ export const useEditorStore = create<EditorStore>()(
                 s.isDirty = true;
             });
             get().pushHistory();
+            return freshBlock;
         },
 
         updateBlock: (id, props, commit) => {

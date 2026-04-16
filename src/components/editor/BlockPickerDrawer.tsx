@@ -31,9 +31,11 @@ export function BlockPickerDrawer() {
 
   const handleSelect = (block: any) => {
     if (blockPicker.target) {
-      addBlockAtTarget(block, blockPicker.target);
-      selectBlock(block.id);
-      scrollToBlock(block.id);
+      const newBlock = addBlockAtTarget(block, blockPicker.target) as any;
+      if (newBlock) {
+        selectBlock(newBlock.id);
+        scrollToBlock(newBlock.id);
+      }
       closeBlockPicker();
     }
   };

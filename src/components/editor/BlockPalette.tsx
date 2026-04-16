@@ -17,9 +17,11 @@ export default function BlockPalette() {
   }, [activeDrag]);
 
   const handleAdd = (block: any) => {
-    addBlock(block);
-    selectBlock(block.id);
-    scrollToBlock(block.id);
+    const newBlock = addBlock(block) as any;
+    if (newBlock) {
+      selectBlock(newBlock.id);
+      scrollToBlock(newBlock.id);
+    }
     setOpenPopover(null);
   };
 

@@ -56,13 +56,16 @@ export function scrollToBlock(blockId: string) {
       document.querySelector(`[data-block-id="${blockId}"]`);
 
     if (el) {
+      const rect = el.getBoundingClientRect();
+      const isLarge = rect.height > window.innerHeight * 0.8;
+      
       el.scrollIntoView({
         behavior: "smooth",
-        block: "center", // Center is better for new sections
+        block: isLarge ? "start" : "center",
         inline: "nearest"
       });
 
-      // Flash highlight effect to let user know where it was added
+      // Flash highlight effect
       const originalOutline = el.style.outline;
       const originalTransition = el.style.transition;
 
@@ -75,10 +78,10 @@ export function scrollToBlock(blockId: string) {
           el.style.outline = originalOutline;
           el.style.transition = originalTransition;
         }, 300);
-      }, 800);
+      }, 1000);
 
-    } else if (retryCount < 5) {
-      setTimeout(() => attemptScroll(retryCount + 1), 100);
+    } else if (retryCount < 8) {
+      setTimeout(() => attemptScroll(retryCount + 1), 150);
     }
   };
 
