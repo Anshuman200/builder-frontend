@@ -24,6 +24,7 @@ import { CommonContainer } from "@/components/layout/CommonContainer";
 import { TemplateCard } from "@/components/templates/TemplateCard";
 import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
 import PasswordUpdateModal from "@/components/shared/PasswordUpdateModal";
+import { SearchInput } from "@/components/ui/SearchInput";
 import { EllipsisVerticalIcon, KeyIcon } from "@heroicons/react/24/outline";
 
 interface Page {
@@ -167,15 +168,14 @@ export default function HomePage() {
             <p className="text-white/40 text-[10px] sm:text-xs md:text-base font-medium leading-relaxed">Manage and edit your high-performance landing pages</p>
           </div>
 
-          <div className="w-full md:w-72 bg-white/5 rounded-2xl px-4 flex items-center gap-3 border border-white/5 focus-within:border-indigo-500/50 focus-within:bg-white/10 transition-all group shrink-0">
-            <MagnifyingGlassIcon className="w-4 h-4 text-white/40 group-focus-within:text-indigo-400 transition-colors" />
-            <input
-              placeholder="Search projects..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="flex-1 bg-transparent border-none outline-none py-3 text-sm text-white placeholder:text-white/20"
-            />
-          </div>
+          <SearchInput
+            placeholder="Search projects..."
+            value={search}
+            onChange={v => setSearch(v)}
+            className="w-full md:w-72"
+            containerStyle={{ background: "rgba(255,255,255,0.05)", borderRadius: 16 }}
+            style={{ height: 44, border: "none" }}
+          />
         </div>
 
         {/* Categories / Tabs */}

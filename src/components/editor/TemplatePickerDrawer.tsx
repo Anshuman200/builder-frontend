@@ -9,6 +9,7 @@ import { CATEGORIES } from "@/lib/constants/templates";
 import { Modal, Spin } from "antd";
 import { pagesApi } from "@/lib/api/client";
 import { useToasts } from "@/hooks/useToasts";
+import { LibraryHeader } from "./PalettePanels";
 
 export function TemplatePickerDrawer() {
   const { templatePicker, closeTemplatePicker, applyTemplate } = useEditorStore();
@@ -141,97 +142,47 @@ export function TemplatePickerDrawer() {
         }}
       >
         {/* Header */}
-        <div style={{
-          padding: "0 24px",
-          height: 70,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid var(--border)",
-          background: "rgba(255,255,255,0.02)",
-          position: "relative"
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, minWidth: 0, flex: 1 }}>
-            <h2 style={{
-              margin: 0,
-              fontSize: 18,
-              fontWeight: 800,
-              color: "var(--text)",
-              letterSpacing: "-0.02em",
-              whiteSpace: "nowrap",
-              flexShrink: 0
-            }}>
-              Choose a Template
-            </h2>
-            <div style={{ height: 20, width: 1, background: "var(--border)", flexShrink: 0 }} />
-            <div className="no-scrollbar" style={{
-              display: "flex",
-              gap: 8,
-              overflowX: "auto",
-              whiteSpace: "nowrap",
-              paddingBottom: 4, // Avoid clipping focus states
-              minWidth: 0,
-              flex: 1
-            }}>
-              {CATEGORIES.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setCategory(cat)}
-                  style={{
-                    padding: "4px 12px",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    borderRadius: 99,
-                    background: category === cat ? "var(--primary)" : "var(--surface)",
-                    color: category === cat ? "#fff" : "var(--text-muted)",
-                    border: category === cat ? "none" : "1px solid var(--border)",
-                    cursor: "pointer",
-                    transition: "all 0.2s"
-                  }}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginLeft: 16, flexShrink: 0 }}>
-            <div style={{ position: "relative", width: "clamp(160px, 20vw, 300px)" }}>
-              <MagnifyingGlassIcon style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: "var(--text-muted)" }} />
-              <input
-                type="text"
-                placeholder="Search templates..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+        <LibraryHeader
+          title="Choose a Template"
+          search={search}
+          setSearch={setSearch}
+          placeholder="Search templates..."
+          onClose={closeTemplatePicker}
+        >
+          <div className="no-scrollbar" style={{
+            display: "flex",
+            gap: 8,
+            overflowX: "auto",
+            whiteSpace: "nowrap",
+            padding: "4px 24px 8px", // Added horizontal padding for mobile breathing room
+            minWidth: 0,
+            maxWidth: "100%",
+            justifyContent: "flex-start" // Changed to flex-start to prevent hiding first items on overflow
+          }}>
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setCategory(cat)}
                 style={{
-                  width: "100%",
-                  padding: "8px 12px 8px 36px",
-                  background: "var(--surface)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 10,
-                  fontSize: 13,
-                  color: "var(--text)",
-                  outline: "none"
+                  padding: "6px 16px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  borderRadius: 99,
+                  background: category === cat ? "var(--primary)" : "var(--surface)",
+                  color: category === cat ? "#fff" : "var(--text-muted)",
+                  border: category === cat ? "none" : "1px solid var(--border)",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  whiteSpace: "nowrap"
                 }}
-              />
-            </div>
-            <button
-              onClick={closeTemplatePicker}
-              style={{
-                width: 36, height: 36,
-                borderRadius: 12,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                cursor: "pointer",
-                color: "var(--text-muted)",
-                transition: "all 0.2s"
-              }}
-            >
-              <XMarkIcon style={{ width: 22, height: 22 }} />
-            </button>
+                onMouseEnter={e => { if (category !== cat) e.currentTarget.style.borderColor = "var(--primary-light)"; }}
+                onMouseLeave={e => { if (category !== cat) e.currentTarget.style.borderColor = "var(--border)"; }}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
-        </div>
+        </LibraryHeader>
 
         {/* Content Area */}
         <div style={{ flex: 1, overflow: "auto", padding: "32px 48px" }}>

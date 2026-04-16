@@ -19,6 +19,7 @@ interface SitePageRecord {
     createdAt?: string;
 }
 import { Table, Input, Button, Modal, Form, Switch } from "antd";
+import { SearchInput } from "@/components/ui/SearchInput";
 import {
     useAdminSitePages,
     useCreateSitePage,
@@ -262,13 +263,13 @@ export default function AdminSitePagesPage() {
             </div>
 
             <div style={{ marginBottom: 20 }}>
-                <Input
-                    prefix={<MagnifyingGlassIcon style={{ width: 16, height: 16, color: "var(--text-muted)" }} />}
+                <SearchInput
                     placeholder="Search pages..."
                     value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    size="large"
-                    style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text)", borderRadius: 12, maxWidth: 300 }}
+                    onChange={v => setSearch(v)}
+                    width="100%"
+                    containerStyle={{ maxWidth: 300 }}
+                    style={{ height: 44 }}
                 />
             </div>
 

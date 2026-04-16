@@ -23,6 +23,7 @@ import {
     useDeleteAdminUser,
 } from "@/lib/api/queries";
 import { Table, Input, Select, Tag, Button, Modal } from "antd";
+import { SearchInput } from "@/components/ui/SearchInput";
 import { UserProfileModal } from "@/components/admin/UserProfileModal";
 import { useToasts } from "@/hooks/useToasts";
 import { cn } from "@/lib/utils";
@@ -289,13 +290,12 @@ export default function AdminUsersPage() {
             {/* Filters */}
             <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                    <Input
-                        prefix={<MagnifyingGlassIcon style={{ width: 16, height: 16, color: "var(--text-muted)" }} />}
+                    <SearchInput
                         placeholder="Search by name or email..."
                         value={search}
-                        onChange={e => { setSearch(e.target.value); setPage(1); }}
-                        size="large"
-                        style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text)", borderRadius: 12 }}
+                        onChange={v => { setSearch(v); setPage(1); }}
+                        width="100%"
+                        style={{ height: 44 }}
                     />
                 </div>
                 <Select

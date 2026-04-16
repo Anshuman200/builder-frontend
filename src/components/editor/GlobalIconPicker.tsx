@@ -4,6 +4,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ICON_LIST } from "@/lib/utils/icons";
 import { useEditorStore } from "@/stores/editorStore";
+import { SearchInput } from "../ui/SearchInput";
 
 /**
  * GlobalIconPicker Singleton
@@ -85,34 +86,16 @@ export function GlobalIconPicker() {
                 onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
             >
                 {/* Search bar */}
-                <div style={{ padding: "10px 12px", borderBottom: "1px solid #2a2a2a", position: "relative", flexShrink: 0 }}>
-                    <MagnifyingGlassIcon
-                        style={{ position: "absolute", left: 20, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "#555", pointerEvents: "none" }}
-                    />
-                    <input
+                <div style={{ padding: "10px 12px", borderBottom: "1px solid #2a2a2a", flexShrink: 0 }}>
+                    <SearchInput
                         ref={inputRef}
                         value={query}
-                        onChange={e => setQuery(e.target.value)}
+                        onChange={v => setQuery(v)}
+                        onClear={() => setQuery("")}
                         placeholder="Search icons…"
-                        style={{
-                            width: "100%", boxSizing: "border-box",
-                            height: 30, paddingLeft: 28, paddingRight: query ? 28 : 10,
-                            fontSize: 12, background: "#242424",
-                            border: "1px solid #333", borderRadius: 6,
-                            color: "#ededed", outline: "none",
-                        }}
-                        onFocus={e => (e.currentTarget.style.borderColor = "var(--primary)")}
-                        onBlur={e => (e.currentTarget.style.borderColor = "#333")}
+                        width="100%"
+                        style={{ height: 30, fontSize: 12, background: "#242424", borderColor: "#333" }}
                     />
-                    {query && (
-                        <button
-                            type="button"
-                            onClick={() => setQuery("")}
-                            style={{ position: "absolute", right: 20, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#666", display: "flex", alignItems: "center", padding: 0 }}
-                        >
-                            <XMarkIcon style={{ width: 14, height: 14 }} />
-                        </button>
-                    )}
                 </div>
 
                 {/* Icon grid */}

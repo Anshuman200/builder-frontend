@@ -9,6 +9,7 @@ import {
     PaperAirplaneIcon
 } from "@heroicons/react/24/outline";
 import { Table, Input, Button, Modal, Form, Tag } from "antd";
+import { SearchInput } from "@/components/ui/SearchInput";
 import {
     useAdminInquiries,
     useReplyInquiry,
@@ -183,13 +184,13 @@ export default function AdminInquiriesPage() {
             </div>
 
             <div style={{ marginBottom: 20 }}>
-                <Input
-                    prefix={<MagnifyingGlassIcon style={{ width: 16, height: 16, color: "var(--text-muted)" }} />}
+                <SearchInput
                     placeholder="Search by name, email or subject..."
                     value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    size="large"
-                    style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text)", borderRadius: 12, maxWidth: 350 }}
+                    onChange={v => setSearch(v)}
+                    width="100%"
+                    containerStyle={{ maxWidth: 350 }}
+                    style={{ height: 44 }}
                 />
             </div>
 

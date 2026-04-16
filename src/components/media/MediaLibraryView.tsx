@@ -17,6 +17,7 @@ import {
     ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import { Button, Progress, Tag, Tooltip, Input, Modal, Empty, Image as AntImage } from "antd";
+import { SearchInput } from "@/components/ui/SearchInput";
 import PillSegmented from "@/components/ui/PillSegmented";
 import { s3Service } from "@/lib/services/s3-service";
 import MediaEditor from "./MediaEditor";
@@ -300,13 +301,12 @@ export default function MediaLibraryView({
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <Input
+                        <SearchInput
                             placeholder="Search media..."
-                            prefix={<MagnifyingGlassIcon className="w-4 h-4 text-white/30" />}
                             value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            className="bg-white/5 border-none text-white w-full md:w-64 rounded-xl h-11"
-                            variant="filled"
+                            onChange={v => setSearch(v)}
+                            className="w-full md:w-64"
+                            style={{ height: 44, background: "rgba(255,255,255,0.05)", border: "none" }}
                         />
                     </div>
                 </div>

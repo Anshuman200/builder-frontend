@@ -28,6 +28,7 @@ import {
 import { TemplatePreviewModal } from "@/components/admin/TemplatePreviewModal";
 import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
 import { Button, Input, Select, Skeleton, Dropdown } from "antd";
+import { SearchInput } from "@/components/ui/SearchInput";
 import { cn } from "@/lib/utils";
 import { useToasts } from "@/hooks/useToasts";
 import { CommonContainer } from "@/components/layout/CommonContainer";
@@ -232,13 +233,12 @@ export default function AdminTemplatesPage() {
 
                 {/* Search */}
                 <div className="flex-1 min-w-[220px]">
-                    <Input
-                        prefix={<MagnifyingGlassIcon className="w-4 h-4 text-(--text-muted)" />}
+                    <SearchInput
                         placeholder="Search by title..."
                         value={search}
-                        onChange={e => { setSearch(e.target.value); setPage(1); }}
-                        size="large"
-                        className="bg-(--surface) border-(--border) text-(--text) rounded-xl"
+                        onChange={v => { setSearch(v); setPage(1); }}
+                        width="100%"
+                        style={{ height: 44 }}
                     />
                 </div>
 

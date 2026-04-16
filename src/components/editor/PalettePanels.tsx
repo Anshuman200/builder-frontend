@@ -8,6 +8,7 @@ import {
   MagnifyingGlassIcon, XMarkIcon, PlusIcon, FaceFrownIcon,
   ChevronRightIcon, ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
+import { SearchInput } from "@/components/ui/SearchInput";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { BLOCK_TYPES, createBlock, injectProjectName } from "@/lib/config/blocks";
@@ -343,9 +344,93 @@ export function EmptyPaletteState() {
   );
 }
 
+export function LibraryHeader({
+  title,
+  search,
+  setSearch,
+  placeholder = "Search...",
+  children,
+  onClose,
+  maxWidth = 1600
+}: {
+  title: string;
+  search: string;
+  setSearch: (v: string) => void;
+  placeholder?: string;
+  children?: React.ReactNode;
+  onClose?: () => void;
+  maxWidth?: number;
+}) {
+  return (
+    <div style={{
+      padding: "20px 32px",
+      borderBottom: "1px solid var(--border)",
+      background: "rgba(255,255,255,0.01)",
+      backdropFilter: "blur(40px) saturate(160%)",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 20,
+      position: "relative"
+    }}>
+      <div style={{ 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center", 
+        gap: 20, 
+        width: "100%", 
+        maxWidth,
+        padding: "0 10px", // Breathing room for small screens
+        flexWrap: "wrap" // Allow wrap on very small devices
+      }}>
+        <h2 style={{
+          margin: 0,
+          fontSize: 13,
+          fontWeight: 800,
+          color: "var(--text-muted)",
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          whiteSpace: "nowrap",
+          flexShrink: 0
+        }}>
+          {title}
+        </h2>
+        <SearchInput
+          value={search}
+          onChange={v => setSearch(v)}
+          placeholder={placeholder}
+          autoFocus
+        />
+      </div>
+      {children}
+      {onClose && (
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            right: 24, top: 24,
+            width: 36, height: 36,
+            borderRadius: 12,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            cursor: "pointer",
+            color: "var(--text-muted)",
+            transition: "all 0.2s"
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--surface-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--text)"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "var(--surface)"; (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}
+        >
+          <XMarkIcon style={{ width: 22, height: 22 }} />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function SectionsPanel({ onAdd, isGrid = false }: { onAdd: (block: any) => void; isGrid?: boolean }) {
   const [search, setSearch] = React.useState("");
-  const [drawerCategory, setDrawerCategory] = React.useState<string | null>(null);
+  const [drawerCategory, setDrawerCategory] = React.useState<string | null>("Hero");
   const [lastDrawerCategory, setLastDrawerCategory] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -377,33 +462,12 @@ export function SectionsPanel({ onAdd, isGrid = false }: { onAdd: (block: any) =
   if (isGrid) {
     return (
       <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", background: "var(--bg-secondary)", borderRadius: 24, overflow: "hidden", border: "1px solid var(--border)" }}>
-        {/* State-of-the-Art Header */}
-        <div style={{
-          padding: "20px 32px",
-          borderBottom: "1px solid var(--border)",
-          background: "rgba(255,255,255,0.01)",
-          backdropFilter: "blur(40px) saturate(160%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center", // Center all items in header
-          gap: 20
-        }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, width: "100%" }}>
-            <h2 style={{ margin: 0, fontSize: 13, fontWeight: 800, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              Explore Library
-            </h2>
-            {/* Integrated Modern Search */}
-            <div style={{ position: "relative", width: 280 }}>
-              <MagnifyingGlassIcon className="absolute left-[12px] top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "var(--text-muted)", opacity: 0.6 }} />
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search templates or blocks..."
-                style={{ width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "8px 12px 8px 38px", fontSize: 14, color: "var(--text)", outline: "none", transition: "all 0.2s" }}
-              />
-            </div>
-          </div>
-
+        <LibraryHeader
+          title="Explore Library"
+          search={search}
+          setSearch={setSearch}
+          placeholder="Search templates or blocks..."
+        >
           {/* Premium Centered Tab Bar */}
           <div style={{
             display: "flex",
@@ -434,7 +498,7 @@ export function SectionsPanel({ onAdd, isGrid = false }: { onAdd: (block: any) =
               </button>
             ))}
           </div>
-        </div>
+        </LibraryHeader>
 
         {/* Expansive Results Grid */}
         <div style={{ flex: 1, overflowY: "auto", padding: "40px 60px" }}>
@@ -476,16 +540,14 @@ export function SectionsPanel({ onAdd, isGrid = false }: { onAdd: (block: any) =
     <div style={{ display: "flex", height: "100%", width: "100%", background: "var(--bg-secondary)", borderRadius: 14, overflow: "hidden" }}>
       <div style={{ width: 190, flexShrink: 0, display: "flex", flexDirection: "column", borderRight: "1px solid var(--border)", background: "var(--bg-secondary)" }}>
         <div style={{ padding: "10px 10px 8px", borderBottom: "1px solid var(--border)" }}>
-          <div style={{ position: "relative" }}>
-            <MagnifyingGlassIcon className="absolute left-[9px] top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none" style={{ color: "var(--text-muted)" }} />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search…"
-              autoFocus
-              style={{ width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 7, padding: "5px 8px 5px 27px", fontSize: 12, color: "var(--text)", outline: "none" }}
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onChange={v => setSearch(v)}
+            placeholder="Search…"
+            autoFocus
+            width="100%"
+            style={{ borderRadius: 7, padding: "5px 8px 5px 27px", fontSize: 12 }}
+          />
         </div>
         <div style={{ flex: 1, overflowY: "auto", padding: "6px" }}>
           {filteredCategories.map(cat => (
@@ -538,19 +600,46 @@ export function ElementsPanel({ onAdd, isGrid = false }: { onAdd: (block: any) =
     [search]
   );
 
+  if (isGrid) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", background: "var(--bg-secondary)", borderRadius: 24, overflow: "hidden", border: "1px solid var(--border)" }}>
+        <LibraryHeader
+          title="Explore Elements"
+          search={search}
+          setSearch={setSearch}
+          placeholder="Search elements..."
+        />
+
+        {/* Expansive Results Grid */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "40px 60px" }}>
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
+            gap: 24,
+            maxWidth: 1600,
+            margin: "0 auto"
+          }}>
+            {filteredElements.map(config => (
+              <PaletteCard key={config.type} config={config} onAdd={onAdd} />
+            ))}
+          </div>
+          {filteredElements.length === 0 && <EmptyPaletteState />}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ width: "100%", background: "var(--bg-secondary)", borderRadius: 14, overflow: "hidden", display: "flex", flexDirection: "column" }}>
       <div style={{ padding: "10px 10px 8px", borderBottom: "1px solid var(--border)" }}>
-        <div style={{ position: "relative" }}>
-          <MagnifyingGlassIcon className="absolute left-[9px] top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none" style={{ color: "var(--text-muted)" }} />
-          <input
+          <SearchInput
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={v => setSearch(v)}
             placeholder="Search elements…"
             autoFocus
-            style={{ width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 7, padding: "5px 8px 5px 27px", fontSize: 12, color: "var(--text)", outline: "none" }}
+            width="100%"
+            style={{ borderRadius: 7, padding: "5px 8px 5px 27px", fontSize: 12 }}
           />
-        </div>
       </div>
       <div style={{
         // flex: 1,
