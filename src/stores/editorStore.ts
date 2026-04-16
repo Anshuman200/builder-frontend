@@ -86,6 +86,9 @@ interface EditorStore {
         } | null;
         preferredTab?: "sections" | "elements";
     };
+    templatePicker: {
+        open: boolean;
+    };
 
     // ─ Actions ────────────────────────────────────────────────────────────────
     setPage: (page: EditorPage) => void;
@@ -114,7 +117,10 @@ interface EditorStore {
 
     openBlockPicker: (target: { id: string, position: "before" | "after" | "inside", childProp?: string }, preferredTab?: "sections" | "elements") => void;
     closeBlockPicker: () => void;
-    addBlockAtTarget: (block: Block, target: NonNullable<EditorStore["blockPicker"]["target"]>) => void;
+    addBlockAtTarget: (block: Block, target: NonNullable<EditorStore["blockPicker"]["target"]>) => Block;
+    openTemplatePicker: () => void;
+    closeTemplatePicker: () => void;
+    applyTemplate: (content: Block[], theme?: Partial<ThemeConfig>) => void;
 
     updateTheme: (theme: Partial<ThemeConfig>, commit?: boolean) => void;
     updateMeta: (meta: Partial<MetaConfig>) => void;
@@ -604,6 +610,9 @@ export const useEditorStore = create<EditorStore>()(
             target: null,
             preferredTab: "sections",
         },
+        templatePicker: {
+            open: false,
+        },
 
         setPage: (page) =>
             set((state) => {
@@ -767,6 +776,30 @@ export const useEditorStore = create<EditorStore>()(
             });
             get().pushHistory();
             return freshBlock;
+        },
+
+        openTemplatePicker: () => set((s) => { s.templatePicker.open = true; }),
+        closeTemplatePicker: () => set((s) => { s.templatePicker.open = false; }),
+        applyTemplate: (content, theme) => {
+            const freshContent = content.map(b => recursiveClone(b));
+            set((s) => {
+                if (!s.page) return;
+                const activeRoute = s.page.routes?.find(r => r.id === s.activeRouteId);
+                if (!activeRoute) return;
+
+                activeRoute.content = freshContent;
+                if (theme) {
+                    s.page.theme = {
+                        ...s.page.theme,
+                        ...theme,
+                        colors: { ...s.page.theme.colors, ...theme.colors },
+                        fonts: { ...s.page.theme.fonts, ...theme.fonts },
+                    } as ThemeConfig;
+                }
+                s.isDirty = true;
+                s.templatePicker.open = false;
+            });
+            get().pushHistory();
         },
 
         addBlock: (block, parentId) => {

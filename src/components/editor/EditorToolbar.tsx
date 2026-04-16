@@ -53,6 +53,7 @@ export default function EditorToolbar() {
     setViewMode, undo, redo,
     updateTitle, updateSlug, updateMeta, updateTheme, updatePageData, markClean,
     activeRouteId, setActiveRoute, addRoute,
+    openTemplatePicker,
   } = useEditorStore();
   const { pageId } = useParams<{ pageId: string }>() ?? {};
   const router = useRouter();
@@ -553,6 +554,35 @@ export default function EditorToolbar() {
             }} />
           </button>
         </Popover>
+
+        {/* ── Choose Template Button ── */}
+        <button
+          onClick={openTemplatePicker}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            height: 30, padding: "0 10px",
+            background: "linear-gradient(135deg, rgba(34,197,94,0.12), rgba(20,184,166,0.06))",
+            border: "1px solid rgba(34,197,94,0.3)",
+            borderRadius: 8, cursor: "pointer",
+            color: "#4ade80",
+            fontSize: 12, fontWeight: 700,
+            letterSpacing: "0.02em",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = "linear-gradient(135deg, rgba(34,197,94,0.2), rgba(20,184,166,0.12))";
+            e.currentTarget.style.borderColor = "rgba(34,197,94,0.5)";
+            e.currentTarget.style.boxShadow = "0 0 10px rgba(34,197,94,0.15)";
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = "linear-gradient(135deg, rgba(34,197,94,0.12), rgba(20,184,166,0.06))";
+            e.currentTarget.style.borderColor = "rgba(34,197,94,0.3)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+        >
+          <SparklesIcon style={{ width: 13, height: 13, strokeWidth: 2.5 }} />
+          Choose Template
+        </button>
       </div>
 
       {/* Center — viewport switcher */}

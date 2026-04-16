@@ -25,6 +25,7 @@ import PropertiesPanel from "./PropertiesPanel";
 import { BlockRenderer } from "./blocks";
 import { GlobalIconPicker } from "./GlobalIconPicker";
 import { BlockPickerDrawer } from "./BlockPickerDrawer";
+import { TemplatePickerDrawer } from "./TemplatePickerDrawer";
 import { PlusIcon } from "@heroicons/react/24/outline";
 
 export default function EditorShell() {
@@ -302,6 +303,7 @@ export default function EditorShell() {
       </DragOverlay>
       <GlobalIconPicker />
       <BlockPickerDrawer />
+      <TemplatePickerDrawer />
     </DndContext>
   );
 }
