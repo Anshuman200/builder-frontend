@@ -381,7 +381,7 @@ export function ContactFormBlock({ block }: BlockProps) {
     );
 
 
-    const sectionBg = (p.sectionBg as string) || "transparent";
+    const sectionBg = (p.sectionBg as string) || "#ffffff";
     const sectionPadding = (p.sectionPadding as string) || "5rem 2rem";
 
     const wrapLayout = () => {

@@ -183,7 +183,9 @@ export function ChildBlockWrapper({
                 height: needsFullHeight ? "100%" : undefined,
                 transform: CSS.Transform.toString(transform),
                 transition: sortableTransition || undefined,
-                opacity: isDragging ? 0.3 : 1,
+                // Keep a very faint ghost in the original spot to prevent "gray holes" 
+                // while still avoiding the double-rendering flicker.
+                opacity: isDragging ? 0.2 : 1,
             }}
             onClick={(e) => { e.stopPropagation(); selectBlock(block.id); }}
             onMouseEnter={() => hoverBlock(block.id)}

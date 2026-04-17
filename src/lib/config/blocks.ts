@@ -504,6 +504,8 @@ export const BLOCK_TYPES: BlockConfig[] = [
       buttonBorderRadius: "10px",
       buttonFullWidth: true,
       buttonAlign: "right",
+      sectionBg: "#ffffff",
+      sectionPadding: "5rem 2rem",
       bgColor: "#ffffff",
       padding: "3rem 2rem",
       borderRadius: "20px",
@@ -551,6 +553,8 @@ export const BLOCK_TYPES: BlockConfig[] = [
       buttonTextColor: "#ffffff",
       buttonBorderRadius: "10px",
 
+      sectionBg: "#ffffff",
+      sectionPadding: "4rem 1rem",
       bgColor: "#ffffff",
       textColor: "var(--text)",
       inputBg: "",

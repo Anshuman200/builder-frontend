@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel, LinkInput, ButtonFields } from "./shared";
+import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, AnimationPanel, LinkInput, ButtonFields, ToggleSwitch } from "./shared";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
 
@@ -22,7 +22,7 @@ export function ButtonPanel({ block }: { block: Block }) {
             <Section title="Appearance">
                 <Field label="Size"><SelectInput value={(p.size as string) || "md"} onChange={(v) => up("size", v)} options={[{ label: "Small", value: "sm" }, { label: "Medium", value: "md" }, { label: "Large", value: "lg" }, { label: "Extra Large", value: "xl" }]} /></Field>
                 <Field label="Alignment"><SelectInput value={(p.align as string) || "left"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>
-                <ToggleInput value={!!(p.fullWidth)} onChange={(v) => up("fullWidth", v)} label="Full Width" />
+                <ToggleSwitch value={!!(p.fullWidth)} onChange={(v) => up("fullWidth", v)} label="Full Width" />
             </Section>
             {variant === "gradient" && (
                 <Section title="Gradient">
@@ -81,7 +81,7 @@ export function HeaderPanel({ block }: { block: Block }) {
                 </>)}
             </Section>
             <Section title="Call to Action (CTA)">
-                <ToggleInput value={p.showCta !== false} onChange={(v) => up("showCta", v)} label="Show CTA Button" />
+                <ToggleSwitch value={p.showCta !== false} onChange={(v) => up("showCta", v)} label="Show CTA Button" />
                 {p.showCta !== false && (<>
                     <Field label="Button Text"><TextInput value={(p.ctaText as string) || "Get Started"} onChange={(v) => up("ctaText", v)} placeholder="Get Started" /></Field>
                     <Field label="Button URL"><LinkInput value={(p.ctaUrl as string) || "#"} onChange={(v) => up("ctaUrl", v)} placeholder="https://..." /></Field>
@@ -173,7 +173,7 @@ export function FooterPanel({ block }: { block: Block }) {
         <>
             <Section title="Layout & Styling">
                 <Field label="Section Layout"><SelectInput value={(p.layout as string) || "standard"} onChange={(v) => updateProps({ layout: v })} options={[{ label: "Standard (Logo + Links)", value: "standard" }, { label: "Centered (Logo Center)", value: "centered" }, { label: "Columns (Multi-section)", value: "columns" }, { label: "Minimal (1 line)", value: "minimal" }]} /></Field>
-                <ToggleInput label="Full Width Container" value={!!p.fullWidth} onChange={(v) => updateProps({ fullWidth: v })} />
+                <ToggleSwitch label="Full Width Container" value={!!p.fullWidth} onChange={(v) => updateProps({ fullWidth: v })} />
                 <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#0f172a"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#f8fafc"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>

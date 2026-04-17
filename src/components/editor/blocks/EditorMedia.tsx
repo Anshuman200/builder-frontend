@@ -135,10 +135,17 @@ export function EditorMedia({
 }: EditorMediaProps) {
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState(false);
+    const lastSrc = React.useRef(src);
 
     React.useEffect(() => {
-        setLoading(true);
-        setError(false);
+        // Only reset loading if the source URL actually changed.
+        // This prevents the initial mount effect from resetting a successful load
+        // that might have happened extremely fast (e.g., from browser cache).
+        if (src !== lastSrc.current) {
+            setLoading(true);
+            setError(false);
+            lastSrc.current = src;
+        }
     }, [src]);
 
     // Detect video by extension / prop

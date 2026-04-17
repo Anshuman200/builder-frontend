@@ -23,6 +23,8 @@ import BlockPalette from "./BlockPalette";
 import EditorCanvas from "./EditorCanvas";
 import PropertiesPanel from "./PropertiesPanel";
 import { BlockRenderer } from "./blocks";
+import { ActivePathContext, PreviewContext } from "./blocks/shared";
+import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { GlobalIconPicker } from "./GlobalIconPicker";
 import { BlockPickerDrawer } from "./BlockPickerDrawer";
 import { TemplatePickerDrawer } from "./TemplatePickerDrawer";
@@ -35,14 +37,18 @@ export default function EditorShell() {
     activeDrag, setActiveDrag, activeRouteId
   } = useEditorStore();
   
+  const [draggedWidth, setDraggedWidth] = useState<number | string>("auto");
+  const [draggedHeight, setDraggedHeight] = useState<number | string>("auto");
+
   const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
-  const routeBlocks = activeRoute?.content || page?.content || [];
-  
-  const blocks = [
+  const routeBlocks = useMemo(() => activeRoute?.content || page?.content || [], [activeRoute, page]);
+  const activeRoutePath = activeRoute?.path || "/";
+
+  const blocks = useMemo(() => [
     ...(page?.globalBlocks?.header ? [page?.globalBlocks?.header] : []),
     ...routeBlocks,
     ...(page?.globalBlocks?.footer ? [page?.globalBlocks?.footer] : [])
-  ];
+  ], [page?.globalBlocks, routeBlocks]);
 
   // ── Sensors ────────────────────────────────────────────────────────────────
   const sensors = useSensors(
@@ -50,19 +56,31 @@ export default function EditorShell() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  // ── Recursive block finder (searches col0/col1/childBlocks) ───────────────
   function findBlockById(bs: Block[], id: string): Block | undefined {
-    for (const b of bs) {
+    const stack = [...bs];
+    while (stack.length > 0) {
+      const b = stack.pop();
+      if (!b) continue;
       if (b.id === id) return b;
-      const col0 = b.props.col0 as Block[] | undefined;
-      const col1 = b.props.col1 as Block[] | undefined;
-      const child = b.props.childBlocks as Block[] | undefined;
-      const found =
-        (col0 && findBlockById(col0, id)) ||
-        (col1 && findBlockById(col1, id)) ||
-        (child && findBlockById(child, id));
-      if (found) return found;
+
+      if (b.children?.length) stack.push(...b.children);
+
+      const p = b.props || {};
+      for (const key in p) {
+        const val = p[key];
+        if (Array.isArray(val) && val.length > 0) {
+          for (const item of val) {
+            if (!item || typeof item !== "object") continue;
+            if ("id" in item && "type" in item) {
+              stack.push(item as Block);
+            } else if ("blocks" in item && Array.isArray(item.blocks)) {
+              stack.push(...(item.blocks as Block[]));
+            }
+          }
+        }
+      }
     }
+    return undefined;
   }
 
   function handleDragStart(event: DragStartEvent) {
@@ -72,13 +90,19 @@ export default function EditorShell() {
     } else if (data?.type === "section") {
       setActiveDrag({ type: "section", templateId: data.templateId });
     } else {
-      const block = findBlockById(blocks, event.active.id as string);
-      setActiveDrag({ type: "canvas", block });
+      const rect = event.active.rect.current.initial;
+      if (rect) {
+        setDraggedWidth(rect.width);
+        setDraggedHeight(rect.height);
+      }
+      setActiveDrag({ type: "canvas", blockId: event.active.id as string });
     }
   }
 
   function handleDragEnd(event: DragEndEvent) {
     setActiveDrag(null);
+    setDraggedWidth("auto");
+    setDraggedHeight("auto");
     const { active, over } = event;
     if (!over) return;
 
@@ -185,8 +209,8 @@ export default function EditorShell() {
     } else if (data?.type === "canvas") {
       if (active.id !== over.id) {
         if (position === "replace") {
-           useEditorStore.getState().swapBlocks(active.id as string, over.id as string);
-           return;
+          useEditorStore.getState().swapBlocks(active.id as string, over.id as string);
+          return;
         }
 
         // For root-level reordering, use arrayMove for correct positioning
@@ -306,12 +330,35 @@ export default function EditorShell() {
             {SECTION_TEMPLATES.find(t => t.id === activeDrag.templateId)?.name || "Section"}
           </div>
         )}
-        {activeDrag?.type === "canvas" && activeDrag.block && (
-          <div style={{
-            background: "#fff", border: "2px solid #6366f1",
-            borderRadius: 6, opacity: 0.9, pointerEvents: "none", minWidth: 200,
-          }}>
-            <BlockRenderer block={activeDrag.block} />
+        {activeDrag?.type === "canvas" && activeDrag.blockId && (
+          <div
+            ref={(el) => {
+              if (el) applyThemeToElement(el, page?.theme || DEFAULT_THEME);
+            }}
+            className={page?.theme?.mode === "dark" ? "dark" : ""}
+            style={{
+              background: "var(--background, #fff)",
+              color: "var(--text, #1e293b)",
+              border: "2px solid var(--primary, #6366f1)",
+              borderRadius: 12,
+              opacity: 0.95,
+              pointerEvents: "none",
+              width: draggedWidth,
+              height: draggedHeight,
+              overflow: "hidden",
+              boxShadow: "0 12px 48px rgba(0,0,0,0.25)",
+              transform: "none",
+              transformOrigin: "center top",
+            }}
+          >
+            <ActivePathContext.Provider value={activeRoutePath}>
+              <PreviewContext.Provider value={true}>
+                {(() => {
+                  const draggedBlock = findBlockById(blocks, activeDrag.blockId!);
+                  return draggedBlock ? <BlockRenderer block={draggedBlock} /> : null;
+                })()}
+              </PreviewContext.Provider>
+            </ActivePathContext.Provider>
           </div>
         )}
       </DragOverlay>

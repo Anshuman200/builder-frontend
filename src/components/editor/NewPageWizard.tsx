@@ -340,7 +340,7 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
               <div>
                 <h2 className="text-base font-black text-white tracking-tight">Create New Page</h2>
                 <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                  {initialStep === 2 ? "Pick sections to pre-fill" : step === 1 ? "Name your page" : "Choose sections to pre-fill"}
+                  {initialStep === 2 ? "Pick sections to pre-fill" : step === 1 ? "Name your Project" : "Choose sections to pre-fill"}
                 </p>
               </div>
             </div>

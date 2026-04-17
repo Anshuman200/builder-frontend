@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel } from "./shared";
+import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel, ToggleSwitch } from "./shared";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { Input as AntInput } from "antd";
 import { EDITOR_FEATURES } from "@/lib/config/features";
@@ -375,10 +375,10 @@ export function VideoPanel({ block }: { block: Block }) {
                 <div style={{ fontSize: 10, color: "var(--text-subtle)", marginTop: 4 }}>Supports YouTube, Vimeo, and direct .mp4 links.</div>
             </Section>
             <Section title="Playback Options">
-                <ToggleInput label="AutoPlay" value={!!(p.autoPlay)} onChange={(v: boolean) => up("autoPlay", v)} />
-                <ToggleInput label="Loop" value={!!(p.loop)} onChange={(v: boolean) => up("loop", v)} />
-                <ToggleInput label="Muted" value={!!(p.muted) === true} onChange={(v: boolean) => up("muted", v)} />
-                <ToggleInput label="Show Controls" value={!!(p.controls) === true} onChange={(v: boolean) => up("controls", v)} />
+                <ToggleSwitch label="AutoPlay" value={!!(p.autoPlay)} onChange={(v: boolean) => up("autoPlay", v)} />
+                <ToggleSwitch label="Loop" value={!!(p.loop)} onChange={(v: boolean) => up("loop", v)} />
+                <ToggleSwitch label="Muted" value={!!(p.muted) === true} onChange={(v: boolean) => up("muted", v)} />
+                <ToggleSwitch label="Show Controls" value={!!(p.controls) === true} onChange={(v: boolean) => up("controls", v)} />
             </Section>
             <Section title="Dimensions & Style">
                 <Field label="Width"><TextInput value={(p.width as string) || "100%"} onChange={(v) => up("width", v)} placeholder="100%" /></Field>
@@ -456,10 +456,10 @@ export function WavePanel({ block }: { block: Block }) {
                 <Field label="Padding Top"><TextInput value={(p.paddingTop as string) || ""} onChange={(v) => up("paddingTop", v)} placeholder="e.g., 5rem" /></Field>
                 <Field label="Padding Bottom"><TextInput value={(p.paddingBottom as string) || ""} onChange={(v) => up("paddingBottom", v)} placeholder="e.g., 2rem" /></Field>
                 <Field label="Global Padding"><TextInput value={(p.padding as string) || "24px"} onChange={(v) => up("padding", v)} placeholder="24px" /></Field>
-                <ToggleInput label="Flip Horizontal" value={!!p.flipHorizontal} onChange={(v: boolean) => up("flipHorizontal", v)} />
-                <ToggleInput label="Flip Vertical" value={!!p.flipVertical} onChange={(v: boolean) => up("flipVertical", v)} />
-                <ToggleInput label="Wave on Top" value={!!p.waveOnTop} onChange={(v: boolean) => up("waveOnTop", v)} />
-                <ToggleInput label="CSS Drift Animation" value={!!p.animated} onChange={(v: boolean) => up("animated", v)} />
+                <ToggleSwitch label="Flip Horizontal" value={!!p.flipHorizontal} onChange={(v: boolean) => up("flipHorizontal", v)} />
+                <ToggleSwitch label="Flip Vertical" value={!!p.flipVertical} onChange={(v: boolean) => up("flipVertical", v)} />
+                <ToggleSwitch label="Wave on Top" value={!!p.waveOnTop} onChange={(v: boolean) => up("waveOnTop", v)} />
+                <ToggleSwitch label="CSS Drift Animation" value={!!p.animated} onChange={(v: boolean) => up("animated", v)} />
             </Section>
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
         </>
@@ -534,10 +534,10 @@ export function CarouselPanel({ block }: { block: Block }) {
                 </div>
             </Section>
             <Section title="Settings">
-                <ToggleInput label="AutoPlay" value={!!p.autoplay} onChange={(v: boolean) => up("autoplay", v)} />
-                <ToggleInput label="Show Dots" value={!!p.dots} onChange={(v: boolean) => up("dots", v)} />
-                <ToggleInput label="Show Arrows" value={!!p.arrows} onChange={(v: boolean) => up("arrows", v)} />
-                <ToggleInput label="Fade Transition" value={!!p.fade} onChange={(v: boolean) => up("fade", v)} />
+                <ToggleSwitch label="AutoPlay" value={!!p.autoplay} onChange={(v: boolean) => up("autoplay", v)} />
+                <ToggleSwitch label="Show Dots" value={!!p.dots} onChange={(v: boolean) => up("dots", v)} />
+                <ToggleSwitch label="Show Arrows" value={!!p.arrows} onChange={(v: boolean) => up("arrows", v)} />
+                <ToggleSwitch label="Fade Transition" value={!!p.fade} onChange={(v: boolean) => up("fade", v)} />
             </Section>
             <Section title="Visuals">
                 <Field label="Height"><TextInput value={(p.height as string) || "500px"} onChange={(v) => up("height", v)} placeholder="500px" /></Field>

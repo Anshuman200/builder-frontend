@@ -26,33 +26,33 @@ import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel, Accordio
 
 // ─── Friendly label map ──────────────────────────────────────────────────────
 const BLOCK_LABEL_MAP: Record<string, string> = {
-  header: "Header Block",
-  hero: "Hero / Section Block",
-  container: "Container Block",
-  text: "Text / Heading Block",
-  image: "Image Block",
-  video: "Video Block",
-  icon: "Icon Block",
-  button: "Button Block",
-  divider: "Divider Block",
-  features: "Features Block",
-  team: "Team Block",
-  footer: "Footer Block",
-  contactForm: "Contact Form Block",
-  deleteAccount: "Delete Account Block",
-  accordion: "FAQ / Accordion Block",
-  columns: "Columns Block",
-  carousel: "Carousel Block",
-  wave: "Wave Divider Block",
-  masonry: "Masonry Gallery Block",
-  stats: "Stats & KPIs Block",
-  chart: "Data Chart Block",
-  "media-picker": "Media Picker Block",
-  tos: "Terms of Service Block",
-  privacy: "Privacy Policy Block",
+    header: "Header Block",
+    hero: "Hero / Section Block",
+    container: "Container Block",
+    text: "Text / Heading Block",
+    image: "Image Block",
+    video: "Video Block",
+    icon: "Icon Block",
+    button: "Button Block",
+    divider: "Divider Block",
+    features: "Features Block",
+    team: "Team Block",
+    footer: "Footer Block",
+    contactForm: "Contact Form Block",
+    deleteAccount: "Delete Account Block",
+    accordion: "FAQ / Accordion Block",
+    columns: "Columns Block",
+    carousel: "Carousel Block",
+    wave: "Wave Divider Block",
+    masonry: "Masonry Gallery Block",
+    stats: "Stats & KPIs Block",
+    chart: "Data Chart Block",
+    "media-picker": "Media Picker Block",
+    tos: "Terms of Service Block",
+    privacy: "Privacy Policy Block",
 };
 function blockLabel(type: string): string {
-  return BLOCK_LABEL_MAP[type] ?? `${type.charAt(0).toUpperCase()}${type.slice(1)} Block`;
+    return BLOCK_LABEL_MAP[type] ?? `${type.charAt(0).toUpperCase()}${type.slice(1)} Block`;
 }
 
 // ─── Main PropertiesPanel ────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ function findBlock(blocks: Block[] | undefined, id: string): Block | undefined {
     for (const b of blocks) {
         if (b.id === id) return b;
         if (b.children) { const found = findBlock(b.children, id); if (found) return found; }
-        
+
         // Search inside named column props
         const col0 = b.props.col0 as Block[] | undefined;
         const col1 = b.props.col1 as Block[] | undefined;
@@ -139,8 +139,9 @@ export default function PropertiesPanel() {
             {/* WhatsApp-style flash animation */}
             <style>{`
                 @keyframes props-flash {
-                    0%   { background: rgba(99,102,241,0.20); box-shadow: inset 3px 0 0 rgba(99,102,241,0.8); }
-                    40%  { background: rgba(99,102,241,0.12); box-shadow: inset 3px 0 0 rgba(99,102,241,0.5); }
+                    0%   { background: rgba(99,102,241,0.9); box-shadow: inset 3px 0 0 rgba(99,102,241,0.8); }
+                    40%  { background: rgba(99,102,241,0.5); box-shadow: inset 3px 0 0 rgba(99,102,241,0.5); }
+                    60%  { background: rgba(99,102,241,0.2); box-shadow: inset 3px 0 0 rgba(99,102,241,0.2); }
                     100% { background: transparent; box-shadow: inset 3px 0 0 transparent; }
                 }
                 .props-header-flash {

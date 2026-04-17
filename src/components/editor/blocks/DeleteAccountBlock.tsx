@@ -161,7 +161,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
                 style={{
                     width: "100%",
                     padding: (p.sectionPadding as string) || "4rem 1rem",
-                    background: (p.sectionBg as string) || "transparent",
+                    background: (p.sectionBg as string) || "#ffffff",
                     transition: "all 0.3s ease"
                 }}
                 onClick={handleWrapperClick}

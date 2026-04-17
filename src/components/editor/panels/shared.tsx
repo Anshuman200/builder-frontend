@@ -5,14 +5,14 @@ import type { Block, EditorPage } from "@/types";
  * panels/shared.tsx — All shared UI primitives for the Properties Panel
  *
  * Exports: PANEL_COLORS, Field, TextInput, TextareaInput, SelectInput,
- *          BorderRadiusInput, ColorInput, ToggleInput, Section
+ *          BorderRadiusInput, ColorInput, ToggleSwitch, Section
  */
 
 import React from "react";
 import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon } from "@heroicons/react/24/outline";
 
 import { useEditorStore } from "@/stores/editorStore";
-import { ColorPicker, Dropdown, Popover, Tooltip } from "antd";
+import { ColorPicker, Dropdown, Popover, Switch, Tooltip } from "antd";
 import MediaPicker from "../MediaPicker";
 import PillSegmented from "../../ui/PillSegmented";
 
@@ -524,7 +524,6 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff" }:
 }
 
 // ─── ToggleInput ──────────────────────────────────────────────────────────────
-
 export function ToggleInput({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label?: string }) {
     const control = (
         <PillSegmented
@@ -541,6 +540,25 @@ export function ToggleInput({ value, onChange, label }: { value: boolean; onChan
     if (label) {
         return (
             <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 4 }}>
+                <span style={{ fontSize: 11, fontWeight: 500, color: PANEL_COLORS.text }}>{label}</span>
+                {control}
+            </div>
+        );
+    }
+    return control;
+}
+
+// ─── ToggleSwitch ──────────────────────────────────────────────────────────────
+export function ToggleSwitch({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label?: string }) {
+    const control = (
+        <div className="flex items-center gap-2 mt-1">
+            <Switch checked={value} onChange={(v) => onChange(v)} />
+            <span className={`${value ? "text-green-500" : "text-red-500"} min-w-8 mx-auto`}>{value ? "Yes" : "No"}</span>
+        </div>
+    );
+    if (label) {
+        return (
+            <div className="flex justify-between">
                 <span style={{ fontSize: 11, fontWeight: 500, color: PANEL_COLORS.text }}>{label}</span>
                 {control}
             </div>

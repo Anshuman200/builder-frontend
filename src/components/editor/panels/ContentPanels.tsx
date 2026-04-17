@@ -6,7 +6,8 @@ import { useEditorStore, DEFAULT_THEME } from "@/stores/editorStore";
 import {
     Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel, PANEL_COLORS, ShadowInput,
     TypographyFields, LayoutFields, CardFields, ButtonFields, ImageFields, PaddingFields,
-    InputFields
+    InputFields,
+    ToggleSwitch
 } from "./shared";
 import { IconPicker } from "../IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
@@ -75,11 +76,12 @@ export function FeaturesPanel({ block }: { block: Block }) {
             <Section title="Feature Items">
                 <style>{`
                     @keyframes subitem-flash {
-                        0%   { background: rgba(99,102,241,0.18); box-shadow: inset 3px 0 0 #6366f1; }
-                        60%  { background: rgba(99,102,241,0.10); box-shadow: inset 3px 0 0 #6366f188; }
+                       0%   { background: rgba(99,102,241,0.9); box-shadow: inset 3px 0 0 rgba(99,102,241,0.8); }
+                        40%  { background: rgba(99,102,241,0.5); box-shadow: inset 3px 0 0 rgba(99,102,241,0.5); }
+                        60%  { background: rgba(99,102,241,0.2); box-shadow: inset 3px 0 0 rgba(99,102,241,0.2); }
                         100% { background: transparent; box-shadow: inset 3px 0 0 transparent; }
                     }
-                    .subitem-flash { animation: subitem-flash 2s cubic-bezier(0.22,1,0.36,1) forwards; }
+                    .subitem-flash { animation: subitem-flash 1s cubic-bezier(0.22,1,0.36,1) forwards; }
                 `}</style>
                 <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Add or remove feature items below.</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -501,7 +503,7 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
             <Section title="Page Features">
                 {EDITOR_FEATURES.enableScrollToTop && (
                     <>
-                        <ToggleInput value={f.scrollToTop} onChange={(v) => upF("scrollToTop", v)} label="Scroll to Top Button" />
+                        <ToggleSwitch value={f.scrollToTop} onChange={(v) => upF("scrollToTop", v)} label="Scroll to Top Button" />
                         {f.scrollToTop && (<>
                             <Field label="Position"><SelectInput value={f.scrollToTopPosition} onChange={(v) => upF("scrollToTopPosition", v)} options={[{ label: "Bottom Right", value: "bottom-right" }, { label: "Bottom Left", value: "bottom-left" }]} /></Field>
                             <Field label="Button Color"><ColorInput value={f.scrollToTopColor} onChange={(v) => upF("scrollToTopColor", v)} /></Field>
@@ -511,7 +513,7 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                 )}
                 {EDITOR_FEATURES.enableThemeToggle && (
                     <>
-                        <ToggleInput value={f.themeSwitcher} onChange={(v) => upF("themeSwitcher", v)} label="Theme Switcher Button" />
+                        <ToggleSwitch value={f.themeSwitcher} onChange={(v) => upF("themeSwitcher", v)} label="Theme Switcher Button" />
                         {f.themeSwitcher && (<Field label="Position"><SelectInput value={f.themeSwitcherPosition} onChange={(v) => upF("themeSwitcherPosition", v)} options={[{ label: "Bottom Left", value: "bottom-left" }, { label: "Bottom Right", value: "bottom-right" }]} /></Field>)}
                     </>
                 )}
@@ -551,8 +553,8 @@ export function ContactFormPanel({ block }: { block: Block }) {
 
             <Section title="Form Setup">
                 <Field label="Section Layout"><SelectInput value={(p.layout as string) || "centered"} onChange={(v) => up("layout", v)} options={[{ label: "Centered (Narrow)", value: "centered" }, { label: "Split — Form + Info Panel", value: "split" }, { label: "Full Width", value: "full" }, { label: "Card / Floating", value: "card" }]} /></Field>
-                <ToggleInput value={p.showLastName !== false} onChange={(v) => up("showLastName", v)} label="Show Last Name Field" />
-                <ToggleInput value={p.showGender === true} onChange={(v) => up("showGender", v)} label="Show Gender Field" />
+                <ToggleSwitch value={p.showLastName !== false} onChange={(v) => up("showLastName", v)} label="Show Last Name Field" />
+                <ToggleSwitch value={p.showGender === true} onChange={(v) => up("showGender", v)} label="Show Gender Field" />
             </Section>
 
             <Section title="Spacing">
@@ -579,7 +581,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
                 {p.showLastName !== false && (
                     <div style={{ paddingBottom: 12, borderBottom: "1px solid var(--border)", marginBottom: 12 }}>
                         <Field label="Last Name"><TextInput value={(p.lastNameLabel as string) || "Last Name"} onChange={(v) => up("lastNameLabel", v)} /></Field>
-                        <ToggleInput value={p.lastNameRequired === true} onChange={(v) => up("lastNameRequired", v)} label="Required Field" />
+                        <ToggleSwitch value={p.lastNameRequired === true} onChange={(v) => up("lastNameRequired", v)} label="Required Field" />
                         {p.mode === "api" && <Field label="Form Name"><TextInput value={(p.lastNameApiKey as string) || "lastName"} onChange={(v) => up("lastNameApiKey", v)} placeholder="lastName" /></Field>}
                     </div>
                 )}
@@ -592,7 +594,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
                 {p.showGender === true && (
                     <div style={{ paddingBottom: 12, borderBottom: "1px solid var(--border)", marginBottom: 12 }}>
                         <Field label="Gender"><TextInput value={(p.genderLabel as string) || "Gender"} onChange={(v) => up("genderLabel", v)} /></Field>
-                        <ToggleInput value={p.genderRequired !== false} onChange={(v) => up("genderRequired", v)} label="Required Field" />
+                        <ToggleSwitch value={p.genderRequired !== false} onChange={(v) => up("genderRequired", v)} label="Required Field" />
                         {p.mode === "api" && <Field label="Form Name"><TextInput value={(p.genderApiKey as string) || "gender"} onChange={(v) => up("genderApiKey", v)} placeholder="gender" /></Field>}
                     </div>
                 )}
@@ -605,7 +607,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
 
             <Section title="Submit Button">
                 <ButtonFields p={p} up={up} prefix="button" textKey="submitLabel" />
-                <ToggleInput value={p.buttonFullWidth !== false} onChange={(v) => up("buttonFullWidth", v)} label="Full Width Button" />
+                <ToggleSwitch value={p.buttonFullWidth !== false} onChange={(v) => up("buttonFullWidth", v)} label="Full Width Button" />
                 {p.buttonFullWidth === false && (
                     <Field label="Alignment">
                         <SelectInput value={(p.buttonAlign as string) || "right"} onChange={(v) => up("buttonAlign", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} />
@@ -763,37 +765,15 @@ export function ChartPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Display Options">
-                <ToggleInput label="Show Grid" value={p.showGrid !== false} onChange={(v) => up("showGrid", v)} />
-                <ToggleInput label="X Axis" value={p.showXAxis !== false} onChange={(v) => up("showXAxis", v)} />
-                <ToggleInput label="Y Axis" value={p.showYAxis !== false} onChange={(v) => up("showYAxis", v)} />
-                <ToggleInput label="Tooltip" value={p.showTooltip !== false} onChange={(v) => up("showTooltip", v)} />
-                <ToggleInput label="Legend" value={p.showLegend === true} onChange={(v) => up("showLegend", v)} />
+                <ToggleSwitch label="Show Grid" value={p.showGrid !== false} onChange={(v) => up("showGrid", v)} />
+                <ToggleSwitch label="X Axis" value={p.showXAxis !== false} onChange={(v) => up("showXAxis", v)} />
+                <ToggleSwitch label="Y Axis" value={p.showYAxis !== false} onChange={(v) => up("showYAxis", v)} />
+                <ToggleSwitch label="Tooltip" value={p.showTooltip !== false} onChange={(v) => up("showTooltip", v)} />
+                <ToggleSwitch label="Legend" value={p.showLegend === true} onChange={(v) => up("showLegend", v)} />
                 <Field label="Line Curve"><SelectInput value={(p.curve as string) || "smooth"} onChange={(v) => up("curve", v)} options={[{ label: "Smooth", value: "smooth" }, { label: "Step", value: "step" }, { label: "Linear", value: "linear" }]} /></Field>
             </Section>
 
             <Section title="Data Management">
-                <div style={{ padding: "0 0 12px", borderBottom: `1px solid ${PANEL_COLORS.border}`, marginBottom: 12 }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: PANEL_COLORS.muted, textTransform: "uppercase" }}>Quick Bulk Edit</span>
-                        <span style={{ fontSize: 9, color: PANEL_COLORS.muted, opacity: 0.6 }}>Format: Label, Value</span>
-                    </div>
-                    <textarea
-                        style={{ width: "100%", background: PANEL_COLORS.bg, border: `1px solid ${PANEL_COLORS.border}`, borderRadius: 8, padding: 8, fontSize: 11, color: PANEL_COLORS.text, outline: "none", resize: "vertical", minHeight: 60 }}
-                        placeholder="Jan, 400&#10;Feb, 600&#10;Mar, 800"
-                        onBlur={(e) => {
-                            const val = e.target.value.trim();
-                            if (!val) return;
-                            const lines = val.split("\n");
-                            const newData = lines.map(line => {
-                                const [name, value] = line.split(",").map(s => s.trim());
-                                return { name: name || "New", value: Number(value) || 0 };
-                            }).filter(d => d.name || d.value);
-                            if (newData.length > 0) up("data", newData, true);
-                            e.target.value = "";
-                        }}
-                    />
-                </div>
-
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 24px", gap: 8, padding: "0 4px" }}>
                         <span style={{ fontSize: 9, fontWeight: 700, color: PANEL_COLORS.muted }}>LABEL</span>
@@ -920,7 +900,7 @@ export function LegalPanel({ block }: { block: Block }) {
             )}
 
             <Section title="Title Settings">
-                <ToggleInput label="Show Title" value={p.showTitle !== false} onChange={(v) => up("showTitle", v)} />
+                <ToggleSwitch label="Show Title" value={p.showTitle !== false} onChange={(v) => up("showTitle", v)} />
                 {p.showTitle !== false && (
                     <>
                         <TypographyFields p={p} up={up} />
@@ -1009,14 +989,14 @@ export function DeleteAccountPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Form Fields">
-                <ToggleInput value={p.showFirstName === true} onChange={(v) => up("showFirstName", v)} label="Show First Name" />
-                {p.showFirstName && <ToggleInput value={p.firstNameRequired === true} onChange={(v) => up("firstNameRequired", v)} label="First Name Required" />}
+                <ToggleSwitch value={p.showFirstName === true} onChange={(v) => up("showFirstName", v)} label="Show First Name" />
+                {p.showFirstName && <ToggleSwitch value={p.firstNameRequired === true} onChange={(v) => up("firstNameRequired", v)} label="First Name Required" />}
 
-                <ToggleInput value={p.showLastName === true} onChange={(v) => up("showLastName", v)} label="Show Last Name" />
-                {p.showLastName && <ToggleInput value={p.lastNameRequired === true} onChange={(v) => up("lastNameRequired", v)} label="Last Name Required" />}
+                <ToggleSwitch value={p.showLastName === true} onChange={(v) => up("showLastName", v)} label="Show Last Name" />
+                {p.showLastName && <ToggleSwitch value={p.lastNameRequired === true} onChange={(v) => up("lastNameRequired", v)} label="Last Name Required" />}
 
-                <ToggleInput value={p.reasonShow !== false} onChange={(v) => up("reasonShow", v)} label="Show Reason Select" />
-                {p.reasonShow !== false && <ToggleInput value={p.reasonRequired === true} onChange={(v) => up("reasonRequired", v)} label="Reason Required" />}
+                <ToggleSwitch value={p.reasonShow !== false} onChange={(v) => up("reasonShow", v)} label="Show Reason Select" />
+                {p.reasonShow !== false && <ToggleSwitch value={p.reasonRequired === true} onChange={(v) => up("reasonRequired", v)} label="Reason Required" />}
             </Section>
 
             {p.reasonShow !== false && (

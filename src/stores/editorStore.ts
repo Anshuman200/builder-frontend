@@ -74,7 +74,7 @@ interface EditorStore {
         type: "palette" | "canvas" | "section";
         blockType?: string;
         templateId?: string;
-        block?: Block;
+        blockId?: string;
     } | null;
     subItemFocus: { blockId: string; index: number } | null;
     blockPicker: {
