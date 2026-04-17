@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useRef } from "react";
-import { MagnifyingGlassIcon, SwatchIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, SwatchIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { getIcon } from "@/lib/utils/icons";
 import { useEditorStore } from "@/stores/editorStore";
+import { IconButton } from "../ui/IconButton";
 
 interface IconPickerProps {
     value: string;          // e.g. "Star"
@@ -34,7 +35,7 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
             const rect = btnRef.current.getBoundingClientRect();
             // We use a tiny delay if another one was open to ensure Ant Design Popover resets cleanly
             if (iconPicker.open) hideIconPicker();
-            
+
             setTimeout(() => {
                 showIconPicker({
                     value: value || "",
@@ -76,7 +77,23 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
             <span style={{ flex: 1, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {value || "None"}
             </span>
-            <MagnifyingGlassIcon style={{ width: 10, height: 10, opacity: 0.4, flexShrink: 0 }} />
+            {value ? (
+                <IconButton
+                    icon={<XMarkIcon />}
+                    variant="ghost"
+                    size="sm"
+                    tooltip="Clear icon"
+                    onClick={(e) => { e.stopPropagation(); onChange(""); }}
+                />
+            ) : (
+                <IconButton
+                    icon={<MagnifyingGlassIcon />}
+                    variant="ghost"
+                    size="sm"
+                    tooltip="Pick an icon"
+                    onClick={(e) => { e.stopPropagation(); onChange(""); }}
+                />
+            )}
         </button>
     );
 }

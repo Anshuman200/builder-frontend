@@ -5,6 +5,7 @@ import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { ICON_LIST } from "@/lib/utils/icons";
 import { useEditorStore } from "@/stores/editorStore";
 import { SearchInput } from "../ui/SearchInput";
+import { IconButton } from "../ui/IconButton";
 
 /**
  * GlobalIconPicker Singleton
@@ -14,7 +15,7 @@ import { SearchInput } from "../ui/SearchInput";
 export function GlobalIconPicker() {
     const { iconPicker, hideIconPicker, setIconPickerValue } = useEditorStore();
     const { open, value, onSelect, anchorRect } = iconPicker;
-    
+
     const [query, setQuery] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
@@ -42,7 +43,7 @@ export function GlobalIconPicker() {
     const PADDING = 8;
     const PICKER_WIDTH = 260;
     const PICKER_HEIGHT = 340;
-    
+
     let top = anchorRect.top;
     let left = anchorRect.left + anchorRect.width + PADDING;
 
@@ -57,21 +58,21 @@ export function GlobalIconPicker() {
     return (
         <>
             {/* Backdrop to capture clicks outside */}
-            <div 
-                style={{ 
-                    position: "fixed", top: 0, left: 0, right: 0, bottom: 0, 
-                    zIndex: 99998, background: "transparent" 
-                }} 
+            <div
+                style={{
+                    position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+                    zIndex: 99998, background: "transparent"
+                }}
                 onClick={hideIconPicker}
             />
 
             {/* The Picker itself */}
-            <div 
+            <div
                 ref={pickerRef}
-                style={{ 
-                    position: "fixed", 
-                    top, left, 
-                    width: PICKER_WIDTH, 
+                style={{
+                    position: "fixed",
+                    top, left,
+                    width: PICKER_WIDTH,
                     maxHeight: PICKER_HEIGHT,
                     background: "#1a1a1a",
                     border: "1px solid #2a2a2a",
@@ -109,6 +110,49 @@ export function GlobalIconPicker() {
                         scrollbarWidth: "none",
                     }}
                 >
+                    {/* Option to clear icon */}
+                    {!query && (
+                        <button
+                            type="button"
+                            title="No Icon (Remove)"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setIconPickerValue("");
+                                onSelect("");
+                                setTimeout(() => hideIconPicker(), 100);
+                            }}
+                            style={{
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                width: "100%", aspectRatio: "1",
+                                padding: 8,
+                                borderRadius: 6,
+                                border: !value ? "2px solid var(--primary)" : "1px solid #2a2a2a",
+                                background: !value ? "rgba(99,102,241,0.1)" : "transparent",
+                                cursor: "pointer",
+                                color: !value ? "var(--primary)" : "#555",
+                                transition: "all 0.15s",
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.color = "#ef4444"}
+                            onMouseLeave={e => e.currentTarget.style.color = !value ? "var(--primary)" : "#555"}
+                        >
+                            <XMarkIcon style={{ width: 20, height: 20 }} />
+                        </button>
+                    )}
+                    <IconButton
+                        icon={<XMarkIcon style={{ width: 20, height: 20 }} />}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setIconPickerValue("");
+                            onSelect("");
+                            setTimeout(() => hideIconPicker(), 100);
+                        }}
+                        tooltip="No Icon (Remove)"
+                        variant="ghost"
+                        size="sm"
+                    />
+
                     {filtered.map(({ name, label, Icon }) => {
                         const isSelected = name === value;
                         return (
@@ -119,13 +163,13 @@ export function GlobalIconPicker() {
                                 onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    
+
                                     // 1. Update visual highlight immediately
                                     setIconPickerValue(name);
-                                    
+
                                     // 2. Perform global update
                                     onSelect(name);
-                                    
+
                                     // 3. Close with a tiny delay for visual confirmation
                                     setTimeout(() => {
                                         hideIconPicker();

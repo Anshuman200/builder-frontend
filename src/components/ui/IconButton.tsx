@@ -2,6 +2,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import AppToolTip from "../common/AppToolTip";
 
 interface IconProps {
   className?: string;
@@ -12,10 +13,11 @@ interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
   icon: React.ReactElement<IconProps>;
   variant?: "surface" | "ghost" | "primary" | "danger";
   size?: "sm" | "md" | "lg";
+  tooltip?: string;
 }
 
 export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
-  ({ icon, variant = "surface", size = "md", className, ...props }, ref) => {
+  ({ icon, variant = "surface", size = "md", className, tooltip, ...props }, ref) => {
 
     // Size mapping → Tailwind classes
     const sizeMap = {
@@ -72,20 +74,22 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
     });
 
     return (
-      <button
-        ref={ref}
-        className={cn(
-          "flex items-center justify-center transition-all duration-200 ease-out",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
-          "cursor-pointer",
-          sizeMap[size],
-          variantMap[variant],
-          className
-        )}
-        {...props}
-      >
-        {resizedIcon}
-      </button>
+      <AppToolTip title={tooltip}>
+        <button
+          ref={ref}
+          className={cn(
+            "flex items-center justify-center transition-all duration-200 ease-out",
+            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "cursor-pointer",
+            sizeMap[size],
+            variantMap[variant],
+            className
+          )}
+          {...props}
+        >
+          {resizedIcon}
+        </button>
+      </AppToolTip>
     );
   }
 );

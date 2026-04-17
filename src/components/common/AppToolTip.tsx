@@ -31,6 +31,7 @@ const AppToolTip = ({
                     {title}
                 </div>
             }
+            open={restProps.open}
             placement={placement}
             arrow={arrow}
             mouseEnterDelay={mouseEnterDelay}

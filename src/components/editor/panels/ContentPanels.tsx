@@ -7,7 +7,7 @@ import {
     Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel, PANEL_COLORS, ShadowInput,
     TypographyFields, LayoutFields, CardFields, ButtonFields, ImageFields, PaddingFields,
     InputFields,
-    ToggleSwitch
+    ToggleSwitch, AlignmentInput, PaddingInput
 } from "./shared";
 import { IconPicker } from "../IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
@@ -164,8 +164,8 @@ export function TeamPanel({ block }: { block: Block }) {
             <Section title="Card Styling">
                 <CardFields p={p} up={up} />
                 <Field label="Card Height"><TextInput value={(p.cardHeight as string) || "auto"} onChange={(v) => up("cardHeight", v)} placeholder="auto or 400px" /></Field>
-                <Field label="Card Padding"><SelectInput value={(p.cardPadding as string) || "2rem 1.75rem"} onChange={(v) => up("cardPadding", v)} options={[{ label: "None", value: "0px" }, { label: "Compact (0.75rem 1rem)", value: "0.75rem 1rem" }, { label: "Small (1rem 1.25rem)", value: "1rem 1.25rem" }, { label: "Medium (1.5rem 1.5rem)", value: "1.5rem 1.5rem" }, { label: "Large (2rem 1.75rem)", value: "2rem 1.75rem" }, { label: "XL (3rem 2rem)", value: "3rem 2rem" }]} /></Field>
-                <Field label="Text Padding"><SelectInput value={(p.cardContentPadding as string) || "1rem 1.25rem"} onChange={(v) => up("cardContentPadding", v)} options={[{ label: "None", value: "0px" }, { label: "Tight (0.5rem 0.75rem)", value: "0.5rem 0.75rem" }, { label: "Small (0.75rem 1rem)", value: "0.75rem 1rem" }, { label: "Medium (1rem 1.25rem)", value: "1rem 1.25rem" }, { label: "Large (1.5rem 1.5rem)", value: "1.5rem 1.5rem" }, { label: "XL (2rem 1.75rem)", value: "2rem 1.75rem" }]} /></Field>
+                <PaddingInput label="Card Padding" value={(p.cardPadding as string) || "2rem 1.75rem"} onChange={(v) => up("cardPadding", v)} />
+                <PaddingInput label="Text Padding" value={(p.cardContentPadding as string) || "1rem 1.25rem"} onChange={(v) => up("cardContentPadding", v)} />
             </Section>
             <Section title="Image Styling">
                 <Field label="Image Style"><SelectInput value={(p.imageStyle as string) || "circle"} onChange={(v) => up("imageStyle", v)} options={[{ label: "Circle", value: "circle" }, { label: "Square", value: "square" }, { label: "Floating Cutout", value: "float" }, { label: "Card Cover", value: "cover" }]} /></Field>
@@ -564,7 +564,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
 
             <Section title="Card Style">
                 <Field label="Card Background"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} /></Field>
-                <Field label="Card Padding"><TextInput value={(p.padding as string) || "3rem 2rem"} onChange={(v) => up("padding", v)} placeholder="3rem 2rem" /></Field>
+                <PaddingInput label="Card Padding" value={(p.padding as string) || "3rem 2rem"} onChange={(v) => up("padding", v)} placeholder="3rem 2rem" />
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "20px"} onChange={(v) => up("borderRadius", v)} /></Field>
             </Section>
 
@@ -609,9 +609,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
                 <ButtonFields p={p} up={up} prefix="button" textKey="submitLabel" />
                 <ToggleSwitch value={p.buttonFullWidth !== false} onChange={(v) => up("buttonFullWidth", v)} label="Full Width Button" />
                 {p.buttonFullWidth === false && (
-                    <Field label="Alignment">
-                        <SelectInput value={(p.buttonAlign as string) || "right"} onChange={(v) => up("buttonAlign", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} />
-                    </Field>
+                    <AlignmentInput label="Alignment" value={(p.buttonAlign as string) || "right"} onChange={(v) => up("buttonAlign", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} />
                 )}
             </Section>
 
@@ -686,7 +684,7 @@ export function AccordionPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Container Padding">
-                <Field label="Padding"><TextInput value={(p.padding as string) || "24px"} onChange={(v) => up("padding", v)} placeholder="e.g. 64px 24px" /></Field>
+                <PaddingInput value={(p.padding as string) || "24px"} onChange={(v) => up("padding", v)} placeholder="e.g. 64px 24px" />
             </Section>
 
             <AnimationPanel block={block} />
@@ -938,9 +936,7 @@ export function LegalPanel({ block }: { block: Block }) {
                 <Field label="Text Color">
                     <ColorInput value={(p.textColor as string) || "var(--text)"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} />
                 </Field>
-                <Field label="Section Padding">
-                    <TextInput value={(p.padding as string) || "64px 24px"} onChange={(v) => up("padding", v)} placeholder="64px 24px" />
-                </Field>
+                <PaddingInput label="Section Padding" value={(p.padding as string) || "64px 24px"} onChange={(v) => up("padding", v)} placeholder="64px 24px" />
                 <AnimationPanel block={block} />
             </Section>
         </>

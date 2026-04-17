@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, AnimationPanel, LinkInput, ButtonFields, ToggleSwitch } from "./shared";
+import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, AnimationPanel, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput } from "./shared";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
 
@@ -21,7 +21,7 @@ export function ButtonPanel({ block }: { block: Block }) {
             </Section>
             <Section title="Appearance">
                 <Field label="Size"><SelectInput value={(p.size as string) || "md"} onChange={(v) => up("size", v)} options={[{ label: "Small", value: "sm" }, { label: "Medium", value: "md" }, { label: "Large", value: "lg" }, { label: "Extra Large", value: "xl" }]} /></Field>
-                <Field label="Alignment"><SelectInput value={(p.align as string) || "left"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>
+                <AlignmentInput label="Alignment" value={(p.align as string) || "left"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} />
                 <ToggleSwitch value={!!(p.fullWidth)} onChange={(v) => up("fullWidth", v)} label="Full Width" />
             </Section>
             {variant === "gradient" && (
@@ -67,9 +67,9 @@ export function HeaderPanel({ block }: { block: Block }) {
                 <Field label="Text/Link Color"><ColorInput value={(p.textColor as string) || "#0f172a"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
             <Section title="Padding (Responsive)">
-                <Field label="Desktop"><TextInput value={(p.padding as string) || ""} onChange={(v) => up("padding", v)} placeholder="16px 32px" /></Field>
-                <Field label="Tablet ≤ 1024px"><TextInput value={(p.tabletPadding as string) || ""} onChange={(v) => up("tabletPadding", v)} placeholder="same as desktop" /></Field>
-                <Field label="Mobile ≤ 768px"><TextInput value={(p.mobilePadding as string) || ""} onChange={(v) => up("mobilePadding", v)} placeholder="same as tablet" /></Field>
+                <PaddingInput label="Desktop" value={(p.padding as string) || ""} onChange={(v) => up("padding", v)} placeholder="16px 32px" />
+                <PaddingInput label="Tablet" value={(p.tabletPadding as string) || ""} onChange={(v) => up("tabletPadding", v)} placeholder="same as desktop" />
+                <PaddingInput label="Mobile" value={(p.mobilePadding as string) || ""} onChange={(v) => up("mobilePadding", v)} placeholder="same as tablet" />
             </Section>
             <Section title="Brand (Logo)">
                 <Field label="Logo Type"><SelectInput value={(p.logoType as string) || "text"} onChange={(v) => up("logoType", v)} options={[{ label: "Text Only", value: "text" }, { label: "Image", value: "image" }]} /></Field>
@@ -178,9 +178,9 @@ export function FooterPanel({ block }: { block: Block }) {
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#f8fafc"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
             <Section title="Padding (Responsive)">
-                <Field label="Desktop"><TextInput value={(p.padding as string) || ""} onChange={(v) => up("padding", v)} placeholder="48px 32px" /></Field>
-                <Field label="Tablet ≤ 1024px"><TextInput value={(p.tabletPadding as string) || ""} onChange={(v) => up("tabletPadding", v)} placeholder="32px 24px" /></Field>
-                <Field label="Mobile ≤ 768px"><TextInput value={(p.mobilePadding as string) || ""} onChange={(v) => up("mobilePadding", v)} placeholder="24px 16px" /></Field>
+                <PaddingInput label="Desktop" value={(p.padding as string) || ""} onChange={(v) => up("padding", v)} placeholder="48px 32px" />
+                <PaddingInput label="Tablet" value={(p.tabletPadding as string) || ""} onChange={(v) => up("tabletPadding", v)} placeholder="32px 24px" />
+                <PaddingInput label="Mobile" value={(p.mobilePadding as string) || ""} onChange={(v) => up("mobilePadding", v)} placeholder="24px 16px" />
             </Section>
             <Section title="Brand & Content">
                 <Field label="Logo Type"><SelectInput value={(p.logoType as string) || "text"} onChange={(v) => up("logoType", v)} options={[{ label: "Text Only", value: "text" }, { label: "Image", value: "image" }]} /></Field>

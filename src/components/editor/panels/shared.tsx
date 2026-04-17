@@ -180,7 +180,7 @@ export function TextareaInput({ value, onChange, rows = 3, placeholder }: { valu
 
 // ─── SelectInput ──────────────────────────────────────────────────────────────
 
-export function SelectInput({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { label: string; value: string }[] }) {
+export function SelectInput({ value, onChange, options, placeholder }: { value: string; onChange: (v: string) => void; options: { label: string; value: string }[]; placeholder?: string }) {
     const selectedOption = options.find((o) => o.value === value) || options[0];
 
     const menuItems = options.map((o) => ({
@@ -567,6 +567,144 @@ export function ToggleSwitch({ value, onChange, label }: { value: boolean; onCha
     return control;
 }
 
+// ─── AlignmentInput ──────────────────────────────────────────────────────────
+
+const ALIGN_ICONS: Record<string, React.ReactNode> = {
+    left: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="21" y1="6" x2="3" y2="6" /><line x1="15" y1="12" x2="3" y2="12" /><line x1="17" y1="18" x2="3" y2="18" />
+        </svg>
+    ),
+    center: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="6" /><line x1="21" y1="12" x2="3" y2="12" /><line x1="18" y1="18" x2="6" y2="18" />
+        </svg>
+    ),
+    right: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="12" x2="9" y2="12" /><line x1="21" y1="18" x2="7" y2="18" />
+        </svg>
+    ),
+    justify: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="12" x2="3" y2="12" /><line x1="21" y1="18" x2="3" y2="18" />
+        </svg>
+    ),
+    top: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 3h16" /><path d="M8 21V7" /><path d="M12 21V7" /><path d="M16 21V7" />
+        </svg>
+    ),
+    middle: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12h18" /><path d="M8 3v18" /><path d="M12 3v18" /><path d="M16 3v18" />
+        </svg>
+    ),
+    bottom: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 21h16" /><path d="M8 3v14" /><path d="M12 3v14" /><path d="M16 3v14" />
+        </svg>
+    ),
+    stretch: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 3h16M4 21h16M8 3v18M12 3v18M16 3v18" />
+        </svg>
+    ),
+    "flex-start": (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 3h16" /><path d="M8 21V7" /><path d="M12 21V7" /><path d="M16 21V7" />
+        </svg>
+    ),
+    "flex-end": (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 21h16" /><path d="M8 3v14" /><path d="M12 3v14" /><path d="M16 3v14" />
+        </svg>
+    )
+};
+
+export function AlignmentInput({ value, onChange, label, type = "horizontal", options }: { value: string; onChange: (v: string) => void; label?: string; type?: "horizontal" | "vertical" | "flex-vertical"; options?: { label: string; value: string }[] }) {
+    const defaultOptions = type === "horizontal"
+        ? [{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }, { label: "Justify", value: "justify" }]
+        : type === "vertical"
+            ? [{ label: "Top", value: "top" }, { label: "Middle", value: "middle" }, { label: "Bottom", value: "bottom" }]
+            : [{ label: "Top", value: "flex-start" }, { label: "Center", value: "center" }, { label: "Bottom", value: "flex-end" }, { label: "Stretch", value: "stretch" }];
+
+    const items = (options || defaultOptions).map(opt => ({
+        label: (
+            <Tooltip title={opt.label}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", padding: "2px 0" }}>
+                    {ALIGN_ICONS[opt.value] || opt.label}
+                </div>
+            </Tooltip>
+        ),
+        value: opt.value
+    }));
+
+    return (
+        <Field label={label || (type === "horizontal" ? "Alignment" : "Vertical Align")}>
+            <div style={{ width: "100%" }}>
+                <PillSegmented
+                    value={items.some(i => i.value === value) ? value : items[1]?.value}
+                    onChange={onChange}
+                    options={items}
+                    block
+                    size="small"
+                />
+            </div>
+        </Field>
+    );
+}
+
+// ─── PaddingInput ─────────────────────────────────────────────────────────────
+
+export function PaddingInput({ value, onChange, label, placeholder }: { value: string; onChange: (v: string) => void; label?: string; placeholder?: string }) {
+    const options = [
+        { label: "None", value: "0px" },
+        { label: "Tight (8px)", value: "0.5rem" },
+        { label: "Compact (12px 16px)", value: "0.75rem 1rem" },
+        { label: "Small (16px 20px)", value: "1rem 1.25rem" },
+        { label: "Regular (24px)", value: "1.5rem" },
+        { label: "Spacious (2rem 1.75rem)", value: "2rem 1.75rem" },
+        { label: "Large (3rem 2rem)", value: "3rem 2rem" },
+        { label: "Huge (4rem 2.5rem)", value: "4rem 2.5rem" }
+    ];
+
+    // Handle initial/empty state by finding the closest match or defaulting to Regular
+    const currentVal = value || "0px";
+    const hasPreset = options.some(opt => opt.value === currentVal);
+
+    return (
+        <Field label={label || "Padding"}>
+            <SelectInput
+                value={hasPreset ? currentVal : options[4].value}
+                onChange={onChange}
+                options={options}
+                placeholder={placeholder}
+            />
+        </Field>
+    );
+}
+
+// ─── Section ──────────────────────────────────────────────────────────────────
+
+export function Section({ title, children }: { title: string; children: React.ReactNode }) {
+    return (
+        <div style={{ borderBottom: `1px solid ${PANEL_COLORS.border}`, padding: "12px 16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: PANEL_COLORS.text }}>{title}</p>
+                <div style={{ color: PANEL_COLORS.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 16, height: 16 }}>
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 1V9M1 5H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                </div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {children}
+            </div>
+        </div>
+    );
+}
+
 // ─── Property Groups ─────────────────────────────────────────────────────────
 
 export interface PropertyGroupProps {
@@ -602,7 +740,7 @@ export function LayoutFields({ p, up, options = {} }: PropertyGroupProps & { opt
             {layouts && <Field label="Layout"><SelectInput value={p.layout || layouts[0].value} onChange={(v) => up("layout", v)} options={layouts} /></Field>}
             {showCols && <Field label="Columns"><SelectInput value={String(p.columns || "3")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>}
             {showGap && <Field label="Gap"><TextInput value={p.gap || "2rem"} onChange={(v) => up("gap", v)} placeholder="2rem" /></Field>}
-            {showAlign && <Field label="Alignment"><SelectInput value={p.align || "center"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} /></Field>}
+            {showAlign && <AlignmentInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} />}
         </>
     );
 }
@@ -677,9 +815,9 @@ export function ImageFields({ p, up, prefix = "image" }: PropertyGroupProps) {
 export function PaddingFields({ p, up }: PropertyGroupProps) {
     return (
         <>
-            <Field label="Desktop"><TextInput value={p.padding || ""} onChange={(v) => up("padding", v)} placeholder="64px 24px" /></Field>
-            <Field label="Tablet"><TextInput value={p.tabletPadding || ""} onChange={(v) => up("tabletPadding", v)} placeholder="48px 16px" /></Field>
-            <Field label="Mobile"><TextInput value={p.mobilePadding || ""} onChange={(v) => up("mobilePadding", v)} placeholder="32px 16px" /></Field>
+            <PaddingInput label="Desktop" value={p.padding || ""} onChange={(v) => up("padding", v)} placeholder="64px 24px" />
+            <PaddingInput label="Tablet" value={p.tabletPadding || ""} onChange={(v) => up("tabletPadding", v)} placeholder="48px 16px" />
+            <PaddingInput label="Mobile" value={p.mobilePadding || ""} onChange={(v) => up("mobilePadding", v)} placeholder="32px 16px" />
         </>
     );
 }
@@ -713,26 +851,6 @@ export function InputFields({ p, up, prefix = "input" }: PropertyGroupProps) {
             <Field label="Height"><TextInput value={p[heightKey] || ""} onChange={(v) => up(heightKey, v)} placeholder="48px" /></Field>
             <Field label="Border Radius"><BorderRadiusInput value={p[radiusKey] || ""} onChange={(v) => up(radiusKey, v)} placeholder="10px" /></Field>
         </>
-    );
-}
-
-// ─── Section ──────────────────────────────────────────────────────────────────
-
-export function Section({ title, children }: { title: string; children: React.ReactNode }) {
-    return (
-        <div style={{ borderBottom: `1px solid ${PANEL_COLORS.border}`, padding: "12px 16px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: PANEL_COLORS.text }}>{title}</p>
-                <div style={{ color: PANEL_COLORS.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 16, height: 16 }}>
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 1V9M1 5H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {children}
-            </div>
-        </div>
     );
 }
 
