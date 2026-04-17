@@ -67,8 +67,7 @@ export default function MediaPicker({
                             const singleUrl = Array.isArray(urlOrUrls) ? urlOrUrls[0] : urlOrUrls;
                             onSelect([singleUrl]);
                         }
-                        // Using a micro-task delay to ensure state updates in the parent flow through before modal closes
-                        setTimeout(() => onClose(), 10);
+                        onClose();
                     }}
                 />
             </div>

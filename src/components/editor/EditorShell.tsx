@@ -26,6 +26,7 @@ import { BlockRenderer } from "./blocks";
 import { ActivePathContext, PreviewContext } from "./blocks/shared";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { GlobalIconPicker } from "./GlobalIconPicker";
+import { GlobalMediaPicker } from "./GlobalMediaPicker";
 import { BlockPickerDrawer } from "./BlockPickerDrawer";
 import { TemplatePickerDrawer } from "./TemplatePickerDrawer";
 import { PlusIcon } from "@heroicons/react/24/outline";
@@ -363,6 +364,7 @@ export default function EditorShell() {
         )}
       </DragOverlay>
       <GlobalIconPicker />
+      <GlobalMediaPicker />
       <BlockPickerDrawer />
       <TemplatePickerDrawer />
     </DndContext>

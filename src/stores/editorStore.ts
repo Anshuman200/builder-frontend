@@ -89,6 +89,12 @@ interface EditorStore {
     templatePicker: {
         open: boolean;
     };
+    mediaPicker: {
+        open: boolean;
+        type: "all" | "image" | "video";
+        onSelect: (url: string) => void;
+        title?: string;
+    };
 
     // ─ Actions ────────────────────────────────────────────────────────────────
     setPage: (page: EditorPage) => void;
@@ -107,6 +113,9 @@ interface EditorStore {
     showIconPicker: (params: { value: string; onSelect: (name: string) => void; anchorRect: { top: number; left: number; width: number; height: number } }) => void;
     hideIconPicker: () => void;
     setIconPickerValue: (value: string) => void;
+
+    showMediaPicker: (params: { type?: "all" | "image" | "video"; onSelect: (url: string) => void; title?: string }) => void;
+    hideMediaPicker: () => void;
 
     addBlock: (block: Block, parentId?: string) => void;
     updateBlock: (id: string, props: Partial<Block["props"]>, commit?: boolean) => void;
@@ -618,6 +627,12 @@ export const useEditorStore = create<EditorStore>()(
         templatePicker: {
             open: false,
         },
+        mediaPicker: {
+            open: false,
+            type: "all",
+            onSelect: () => { },
+            title: "Select Media",
+        },
 
         setPage: (page) =>
             set((state) => {
@@ -734,6 +749,19 @@ export const useEditorStore = create<EditorStore>()(
 
         setIconPickerValue: (value) => set((state) => {
             state.iconPicker.value = value;
+        }),
+
+        showMediaPicker: (params) => set((state) => {
+            state.mediaPicker = {
+                open: true,
+                type: params.type || "all",
+                onSelect: params.onSelect,
+                title: params.title || "Select Media",
+            };
+        }),
+
+        hideMediaPicker: () => set((state) => {
+            state.mediaPicker.open = false;
         }),
 
         openBlockPicker: (target, preferredTab = "sections") => set({ blockPicker: { open: true, target, preferredTab } }),
