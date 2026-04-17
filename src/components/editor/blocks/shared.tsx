@@ -7,6 +7,7 @@ import type { Block } from "@/types";
 
 import React from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TrashIcon, EllipsisHorizontalIcon, ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
@@ -104,9 +105,9 @@ export function ChildBlockWrapper({
     const isPicker = block.type === "media-picker";
     const showControls = (isSelected || isHovered) && !isPicker;
 
-    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    const { attributes, listeners, setNodeRef, transform, isDragging, transition: sortableTransition } = useSortable({
         id: block.id,
-        data: { type: "canvas" },
+        data: { type: "canvas", blockType: block.type },
         disabled: isPicker,
     });
 
@@ -180,7 +181,8 @@ export function ChildBlockWrapper({
                 position: "relative",
                 width: "100%",
                 height: needsFullHeight ? "100%" : undefined,
-                transform: CSS.Translate.toString(transform),
+                transform: CSS.Transform.toString(transform),
+                transition: sortableTransition || undefined,
                 opacity: isDragging ? 0.3 : 1,
             }}
             onClick={(e) => { e.stopPropagation(); selectBlock(block.id); }}
@@ -216,6 +218,19 @@ export function ChildBlockWrapper({
             )}
             {children || <BlockRendererRef block={block} />}
         </div>
+    );
+}
+
+// ─── SortableBlockGroup ───────────────────────────────────────────────────────
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+
+export function SortableBlockGroup({ blocks, children }: { blocks: Block[], children: React.ReactNode }) {
+    const isPreview = React.useContext(PreviewContext);
+    if (isPreview) return <>{children}</>;
+    return (
+        <SortableContext items={blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
+            {children}
+        </SortableContext>
     );
 }
 

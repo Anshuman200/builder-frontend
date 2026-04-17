@@ -2,7 +2,7 @@
 
 import React from "react";
 import type { Block } from "@/types";
-import { ChildBlockWrapper, PreviewContext, DropZoneStrip } from "./shared";
+import { ChildBlockWrapper, PreviewContext, DropZoneStrip, SortableBlockGroup } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 
 interface MasonryBlockProps {
@@ -72,19 +72,21 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
                                 }
                             `}</style>
                         )}
-                        {mediaItems.map((child: Block) => (
-                            <div
-                                key={child.id}
-                                style={{
-                                    breakInside: "avoid",
-                                    marginBottom: `${gap}px`,
-                                    borderRadius: "12px",
-                                    overflow: "hidden",
-                                }}
-                            >
-                                <ChildBlockWrapper block={child} />
-                            </div>
-                        ))}
+                        <SortableBlockGroup blocks={mediaItems}>
+                            {mediaItems.map((child: Block) => (
+                                <div
+                                    key={child.id}
+                                    style={{
+                                        breakInside: "avoid",
+                                        marginBottom: `${gap}px`,
+                                        borderRadius: "12px",
+                                        overflow: "hidden",
+                                    }}
+                                >
+                                    <ChildBlockWrapper block={child} />
+                                </div>
+                            ))}
+                        </SortableBlockGroup>
                     </div>
                 )}
 

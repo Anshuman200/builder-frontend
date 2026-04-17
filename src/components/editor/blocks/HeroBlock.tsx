@@ -2,7 +2,7 @@
 import React from "react";
 
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip } from "./shared";
+import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function HeroBlock({ block }: BlockProps) {
@@ -58,9 +58,11 @@ export function HeroBlock({ block }: BlockProps) {
                     className={isPreview ? `hero-inner-${block.id}` : undefined}
                     style={{ maxWidth: innerMaxWidth, margin: "0 auto", width: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "stretch", gap: 4, paddingLeft: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), paddingRight: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX) }}
                 >
-                    {childBlocks.map((child) => (
-                        <ChildBlockWrapper key={child.id} block={child} outlineColor="rgba(255,255,255,0.9)" outlineColorHover="rgba(255,255,255,0.5)" />
-                    ))}
+                    <SortableBlockGroup blocks={childBlocks}>
+                        {childBlocks.map((child) => (
+                            <ChildBlockWrapper key={child.id} block={child} outlineColor="rgba(255,255,255,0.9)" outlineColorHover="rgba(255,255,255,0.5)" />
+                        ))}
+                    </SortableBlockGroup>
                     <DropZoneStrip zoneId={`hero-${block.id}`} hasChildren={childBlocks.length > 0} stripColor="#ffffff" emptyLabel="Drag blocks here to build your Hero" />
                 </div>
             </section>

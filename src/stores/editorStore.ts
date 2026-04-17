@@ -114,6 +114,7 @@ interface EditorStore {
     deleteBlock: (id: string) => void;
     duplicateBlock: (id: string) => void;
     moveBlock: (activeId: string, overId: string, position?: "before" | "after" | "inside", childProp?: string) => void;
+    swapBlocks: (idA: string, idB: string) => void;
 
     openBlockPicker: (target: { id: string, position: "before" | "after" | "inside", childProp?: string }, preferredTab?: "sections" | "elements") => void;
     closeBlockPicker: () => void;
@@ -287,9 +288,13 @@ function insertBlockDeep(
     const newBlocks: Block[] = [];
     for (const b of blocks) {
         if (b.id === targetId) {
-            if (position === "before") newBlocks.push(insertBlock, b);
-            else if (position === "after") newBlocks.push(b, insertBlock);
-            else if (position === "inside" && childProp) {
+            if (position === "before") {
+                newBlocks.push(insertBlock, b);
+                inserted = true;
+            } else if (position === "after") {
+                newBlocks.push(b, insertBlock);
+                inserted = true;
+            } else if (position === "inside" && childProp) {
                 const updated = { ...b };
                 if (childProp === "children") {
                     updated.children = [...(updated.children || []), insertBlock];
@@ -886,6 +891,100 @@ export const useEditorStore = create<EditorStore>()(
             });
             get().pushHistory();
         },
+        swapBlocks: (idA, idB) => {
+            set((s) => {
+                if (!s.page) return;
+
+                let blockA: Block | null = null;
+                let blockB: Block | null = null;
+
+                // 1. Find both blocks
+                function search(blocks: Block[]) {
+                    for (const b of blocks) {
+                        if (b.id === idA) blockA = b;
+                        if (b.id === idB) blockB = b;
+                        if (blockA && blockB) return;
+                        if (b.children) search(b.children);
+                        if (b.props.col0) search(b.props.col0 as Block[]);
+                        if (b.props.col1) search(b.props.col1 as Block[]);
+                        if (b.props.items) {
+                            (b.props.items as any[]).forEach(item => {
+                                if (item.blocks) search(item.blocks);
+                            });
+                        }
+                    }
+                }
+
+                if (s.page.globalBlocks?.header) search([s.page.globalBlocks.header]);
+                if (s.page.globalBlocks?.footer) search([s.page.globalBlocks.footer]);
+                if (s.page.routes) {
+                    s.page.routes.forEach(r => { if (!blockA || !blockB) search(r.content); });
+                }
+
+                if (!blockA || !blockB) return;
+
+                const a = blockA as Block;
+                const b = blockB as Block;
+                const newA = { ...a };
+                const newB = { ...b };
+
+                function swapWalk(blocks: Block[]): Block[] {
+                    let changedAny = false;
+                    const nextBlocks = blocks.map(b => {
+                        if (b.id === idA) { changedAny = true; return newB; }
+                        if (b.id === idB) { changedAny = true; return newA; }
+
+                        let updated = b;
+                        let localChanged = false;
+
+                        if (updated.children && updated.children.length > 0) {
+                            const nextChildren = swapWalk(updated.children);
+                            if (nextChildren !== updated.children) {
+                                updated = { ...updated, children: nextChildren };
+                                localChanged = true;
+                            }
+                        }
+
+                        const newProps = { ...updated.props };
+                        for (const key of ["col0", "col1", "childBlocks"]) {
+                            const arr = updated.props[key] as Block[] | undefined;
+                            if (arr && arr.length > 0) {
+                                const nextArr = swapWalk(arr);
+                                if (nextArr !== arr) { newProps[key] = nextArr; localChanged = true; }
+                            }
+                        }
+
+                        const items = updated.props.items as { id: string, blocks: Block[] }[] | undefined;
+                        if (items && items.length > 0) {
+                            let itemsChanged = false;
+                            const nextItems = items.map(item => {
+                                if (item.blocks && item.blocks.length > 0) {
+                                    const nextBlocks = swapWalk(item.blocks);
+                                    if (nextBlocks !== item.blocks) {
+                                        itemsChanged = true;
+                                        return { ...item, blocks: nextBlocks };
+                                    }
+                                }
+                                return item;
+                            });
+                            if (itemsChanged) { newProps.items = nextItems; localChanged = true; }
+                        }
+
+                        if (localChanged) {
+                            changedAny = true;
+                            return { ...updated, props: newProps };
+                        }
+                        return updated;
+                    });
+                    return changedAny ? nextBlocks : blocks;
+                }
+
+                applyUpdaterDeep(s.page, s.activeRouteId, swapWalk);
+                s.isDirty = true;
+            });
+            get().pushHistory();
+        },
+
 
         moveBlock: (activeId, overId, position = "after", childProp?) =>
             set((s) => {

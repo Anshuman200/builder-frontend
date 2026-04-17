@@ -4,7 +4,7 @@ import React from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { recursiveClone, useEditorStore } from "@/stores/editorStore";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip } from "./shared";
+import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup } from "./shared";
 
 function GridSlot({ zoneId, slotId, blockId, blocks, onDelete, style }: { zoneId: string; slotId: string; blockId: string; blocks: Block[]; onDelete: () => void; style?: React.CSSProperties }) {
     const isPreview = React.useContext(PreviewContext);
@@ -44,7 +44,9 @@ function GridSlot({ zoneId, slotId, blockId, blocks, onDelete, style }: { zoneId
                 </button>
             )}
 
-            {blocks.map((child) => <ChildBlockWrapper key={child.id} block={child} />)}
+            <SortableBlockGroup blocks={blocks}>
+                {blocks.map((child) => <ChildBlockWrapper key={child.id} block={child} />)}
+            </SortableBlockGroup>
 
             {!isPreview && (
                 <div className="p-2 w-full">

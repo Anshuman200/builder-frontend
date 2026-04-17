@@ -86,7 +86,7 @@ export default function EditorShell() {
     const overId = over.id as string;
 
     let targetId = overId;
-    let position: "before" | "after" | "inside" = "after";
+    let position: "before" | "after" | "inside" | "replace" = "after";
     let childProp: string | undefined = undefined;
 
     const isRootOnly = data.blockType === "header" || data.blockType === "footer";
@@ -121,6 +121,8 @@ export default function EditorShell() {
           position = "after";
           targetId = effectiveTargetId;
           childProp = undefined;
+        } else if (relativeY > 0.3 && relativeY < 0.7 && !colMatch) {
+          position = "replace";
         } else {
           position = "inside";
           if (colMatch) {
@@ -144,7 +146,12 @@ export default function EditorShell() {
           position = "inside";
           childProp = "childBlocks";
         } else {
-          position = relativeY < 0.5 ? "before" : "after";
+          // Provide a 40% center zone for swapping blocks
+          if (relativeY >= 0.3 && relativeY <= 0.7) {
+            position = "replace";
+          } else {
+            position = relativeY < 0.5 ? "before" : "after";
+          }
         }
       }
     }
@@ -175,6 +182,11 @@ export default function EditorShell() {
       }
     } else if (data?.type === "canvas") {
       if (active.id !== over.id) {
+        if (position === "replace") {
+           useEditorStore.getState().swapBlocks(active.id as string, over.id as string);
+           return;
+        }
+
         // For root-level reordering, use arrayMove for correct positioning
         const { page, activeRouteId } = useEditorStore.getState();
         const activeRoute = page?.routes?.find(r => r.id === activeRouteId);

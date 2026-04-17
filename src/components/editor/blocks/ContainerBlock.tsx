@@ -2,7 +2,7 @@
 import React from "react";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip } from "./shared";
+import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup } from "./shared";
 
 export function ContainerBlock({ block }: BlockProps) {
     const p = block.props;
@@ -12,7 +12,7 @@ export function ContainerBlock({ block }: BlockProps) {
 
     const viewMode = useEditorStore((s) => s.viewMode);
     const isPreview = React.useContext(PreviewContext);
-    const background = bgImage 
+    const background = bgImage
         ? (bgImage.startsWith("linear-gradient") || bgImage.startsWith("radial-gradient")
             ? bgImage
             : `url("${bgImage}") center/cover no-repeat`)
@@ -68,7 +68,9 @@ export function ContainerBlock({ block }: BlockProps) {
                         <span style={{ fontSize: 11, fontWeight: 500 }}>Container</span>
                     </div>
                 )}
-                {childBlocks.map((child) => (<ChildBlockWrapper key={child.id} block={child} />))}
+                <SortableBlockGroup blocks={childBlocks}>
+                    {childBlocks.map((child) => (<ChildBlockWrapper key={child.id} block={child} />))}
+                </SortableBlockGroup>
                 <DropZoneStrip zoneId={`container-${block.id}`} hasChildren={childBlocks.length > 0} emptyLabel="Drag blocks into this container" />
             </div>
         </>

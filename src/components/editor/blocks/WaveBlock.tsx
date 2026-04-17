@@ -2,7 +2,7 @@
 
 import React from "react";
 import type { Block } from "@/types";
-import { ChildBlockWrapper, DropZoneStrip, PreviewContext, type BlockProps } from "./shared";
+import { ChildBlockWrapper, DropZoneStrip, PreviewContext, type BlockProps, SortableBlockGroup } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
@@ -215,9 +215,11 @@ export function WaveBlock({ block }: BlockProps) {
         flex: 1,
         gap: (props.contentGap as string) || "1rem"
       }}>
-        {childBlocks.map((child: Block) => (
-          <ChildBlockWrapper key={child.id} block={child} />
-        ))}
+        <SortableBlockGroup blocks={childBlocks}>
+          {childBlocks.map((child: Block) => (
+            <ChildBlockWrapper key={child.id} block={child} />
+          ))}
+        </SortableBlockGroup>
         {!isPreview && (
           <DropZoneStrip zoneId={`wave-${block.id}`} hasChildren={childBlocks.length > 0} emptyLabel="Drag blocks inside the wave layer" />
         )}

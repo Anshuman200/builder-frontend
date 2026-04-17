@@ -20,7 +20,6 @@ import { ActivePathContext } from "./blocks/shared";
 import { IconButton } from "../ui/IconButton";
 import AppToolTip from "../common/AppToolTip";
 
-
 // Viewport widths per mode
 const VIEWPORT_WIDTHS = {
   desktop: "100%",
@@ -148,7 +147,7 @@ const DropZone = memo(function DropZone({
   // Track which block is being hovered over
   const [dropInfo, setDropInfo] = useState<{
     overId: string | null;
-    position: "before" | "after" | "inside";
+    position: "before" | "after" | "inside" | "replace";
     isDraggingFromPalette: boolean;
   }>({ overId: null, position: "after", isDraggingFromPalette: false });
 
@@ -192,7 +191,7 @@ const DropZone = memo(function DropZone({
         return;
       }
 
-      let position: "before" | "after" | "inside" = "after";
+      let position: "before" | "after" | "inside" | "replace" = "after";
       const overRect = over.rect;
       const activeRect = active.rect.current?.translated;
 
@@ -205,6 +204,7 @@ const DropZone = memo(function DropZone({
         if (colMatch || childZoneMatch) {
           if (relativeY < 0.15) position = "before";
           else if (relativeY > 0.85) position = "after";
+          else if (relativeY > 0.3 && relativeY < 0.7) position = "replace";
           else position = "inside";
         } else if (relativeY < 0.20) {
           position = "before";
@@ -214,7 +214,12 @@ const DropZone = memo(function DropZone({
           if (isContainer && !isRootOnly) {
             position = "inside";
           } else {
-            position = relativeY < 0.5 ? "before" : "after";
+            // Provide a 40% center zone for swapping blocks
+            if (relativeY >= 0.3 && relativeY <= 0.7) {
+              position = "replace";
+            } else {
+              position = relativeY < 0.5 ? "before" : "after";
+            }
           }
         }
       }
@@ -340,7 +345,7 @@ const CanvasBlock = memo(function CanvasBlock({
   isFirst: boolean;
   isDraggingFromPalette: boolean;
   activeHeight: number;
-  dropPosition: "before" | "after" | "inside";
+  dropPosition: "before" | "after" | "inside" | "replace";
 }) {
   const { selectedBlockId, hoveredBlockId, selectBlock, hoverBlock, deleteBlock, duplicateBlock } =
     useEditorStore();
@@ -355,10 +360,12 @@ const CanvasBlock = memo(function CanvasBlock({
       data: { type: "canvas", blockType: block.type },
     });
 
-  const showDropHighlight = isDropTarget && isDraggingFromPalette;
+  // Enable visual drop indicator for ALL drags (from palette AND from canvas)
+  const showDropHighlight = isDropTarget;
   const isBefore = showDropHighlight && dropPosition === "before";
   const isAfter = showDropHighlight && dropPosition === "after";
   const isInside = showDropHighlight && dropPosition === "inside";
+  const isReplace = showDropHighlight && dropPosition === "replace";
 
   return (
     <>
@@ -377,10 +384,12 @@ const CanvasBlock = memo(function CanvasBlock({
           opacity: isDragging ? 0.25 : 1,
           boxShadow: isInside
             ? "inset 0 0 0 2px #6366f1, 0 0 15px rgba(99,102,241,0.2)"
-            : showDropHighlight
-              ? "inset 0 0 0 2px rgba(99,102,241,0.25)"
-              : undefined,
-          borderRadius: isInside ? 8 : 0,
+            : isReplace
+              ? "inset 0 0 0 3px #10b981, 0 0 15px rgba(16,185,129,0.3)"
+              : showDropHighlight
+                ? "inset 0 0 0 2px rgba(99,102,241,0.25)"
+                : undefined,
+          borderRadius: isInside || isReplace ? 8 : 0,
         }}
         onClick={(e) => { e.stopPropagation(); selectBlock(block.id); }}
         onMouseEnter={() => hoverBlock(block.id)}
@@ -399,6 +408,26 @@ const CanvasBlock = memo(function CanvasBlock({
             zIndex: 5,
             boxShadow: "0 0 8px rgba(99,102,241,0.5)",
           }} />
+        )}
+
+        {/* Swap visual indicator */}
+        {isReplace && (
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "rgba(16,185,129,0.1)",
+            zIndex: 99, pointerEvents: "none",
+            display: "flex", alignItems: "center", justifyContent: "center"
+          }}>
+            <div style={{
+              background: "#10b981", color: "#fff",
+              padding: "6px 16px", borderRadius: 99,
+              fontSize: 11, fontWeight: 700,
+              textTransform: "uppercase", letterSpacing: "0.05em",
+              boxShadow: "0 4px 12px rgba(16,185,129,0.3)",
+            }}>
+              Swap Blocks
+            </div>
+          </div>
         )}
 
         {/* Inner drop label for containers */}
