@@ -8,10 +8,12 @@ import type { Block } from "@/types";
 import React from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { TrashIcon, EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, EllipsisHorizontalIcon, ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
 import { useEditorStore } from "@/stores/editorStore";
+import { IconButton } from "@/components/ui/IconButton";
+import AppToolTip from "@/components/common/AppToolTip";
 
 // ─── Preview context ──────────────────────────────────────────────────────────
 
@@ -35,7 +37,7 @@ export function useActivePath() {
  */
 export function useLinkHandler() {
     const isPreview = React.useContext(PreviewContext);
-    
+
     return (url: string, e?: React.MouseEvent) => {
         if (!isPreview) {
             if (e) e.preventDefault();
@@ -202,29 +204,14 @@ export function ChildBlockWrapper({
                     border: "1px solid #e2e8f0",
                     boxShadow: "0 2px 12px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)",
                 }}>
-                    {/* <button
-                        {...attributes}
-                        {...listeners}
-                        title="Drag to move"
-                        style={{ width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "none", cursor: "grab", color: "#475569", borderRadius: 6 }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#f1f5f9"; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
-                    >
-                        <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor" style={{ color: "#64748b" }}>
-                            <circle cx="2.5" cy="2.5" r="1.4"/><circle cx="7.5" cy="2.5" r="1.4"/>
-                            <circle cx="2.5" cy="7" r="1.4"/><circle cx="7.5" cy="7" r="1.4"/>
-                            <circle cx="2.5" cy="11.5" r="1.4"/><circle cx="7.5" cy="11.5" r="1.4"/>
-                        </svg>
-                    </button> */}
-                    <button
-                        title="Delete block"
-                        onClick={(e) => { e.stopPropagation(); deleteBlock(block.id); }}
-                        style={{ width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "none", cursor: "pointer", color: "#ef4444", borderRadius: 6 }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#fef2f2"; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
-                    >
-                        <TrashIcon style={{ width: 13, height: 13 }} />
-                    </button>
+                    {/* Drag to reorder */}
+                    <AppToolTip title="Drag to reorder">
+                        <IconButton {...attributes} {...listeners} icon={<ArrowsPointingOutIcon style={{ width: 14, height: 14 }} />} />
+                    </AppToolTip>
+                    {/* Delete block */}
+                    <AppToolTip title="Delete block">
+                        <IconButton icon={<TrashIcon style={{ width: 13, height: 13 }} />} onClick={(e) => { e.stopPropagation(); deleteBlock(block.id); }} />
+                    </AppToolTip>
                 </div>
             )}
             {children || <BlockRendererRef block={block} />}
@@ -269,7 +256,7 @@ export function DropZoneStrip({
                 // Parse zoneId: "hero-id", "container-id", or "col-0-id"
                 const colMatch = zoneId.match(/^col-([01])-(.+)$/);
                 const childMatch = zoneId.match(/^(?:hero|container|wave|features)-(.+)$/);
-                
+
                 if (colMatch) {
                     openBlockPicker({ id: colMatch[2], position: "inside", childProp: `col${colMatch[1]}` }, "elements");
                 } else if (childMatch) {

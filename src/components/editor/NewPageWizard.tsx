@@ -194,7 +194,7 @@ const WIZARD_SECTIONS: SectionType[] = [
 interface NewPageWizardProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (title: string, slug: string, selectedSections: string[], visibility: 'PUBLIC' | 'PRIVATE', password?: string) => Promise<void>;
+  onSubmit: (title: string, slug: string, selectedSections: string[]) => Promise<void>;
   isSubmitting?: boolean;
   closable?: boolean;
   /** Skip straight to the section picker step */
@@ -240,15 +240,10 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [slugManual, setSlugManual] = useState(false);
-  const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE'>('PUBLIC');
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  // Default selection excludes header/footer if those are excluded
   const [selectedSections, setSelectedSections] = useState<string[]>(
     ["header", "hero", "footer"].filter(id => !excludeSections.includes(id))
   );
   const [titleError, setTitleError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
 
   const handleClose = useCallback(() => {
     if (!closable) return;
@@ -256,12 +251,8 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
     setTitle("");
     setSlug("");
     setSlugManual(false);
-    setVisibility('PUBLIC');
-    setPassword("");
-    setShowPassword(false);
     setSelectedSections(["header", "hero", "footer"].filter(id => !excludeSections.includes(id)));
     setTitleError("");
-    setPasswordError("");
     onClose();
   }, [closable, onClose, initialStep, excludeSections]);
 
@@ -298,14 +289,13 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
 
   const handleNext = () => {
     if (!title.trim()) { setTitleError("Page name is required"); return; }
-    if (visibility === 'PRIVATE' && !password.trim()) { setPasswordError("Password is required for private pages"); return; }
     setStep(2);
   };
 
   const handleFinish = async () => {
     // When starting at step 2, title/slug are not filled — use empty strings (caller handles naming)
     const finalSlug = slug || slugify(title) || `page-${Date.now().toString().slice(-4)}`;
-    await onSubmit(title.trim(), finalSlug, selectedSections, visibility, visibility === 'PRIVATE' ? password : undefined);
+    await onSubmit(title.trim(), finalSlug, selectedSections);
   };
 
 
@@ -404,61 +394,9 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
                   </div>
                 </div>
 
-                <div className="p-4 bg-white/3 rounded-2xl border border-white/5">
-                  <label className="block text-xs font-black text-white/50 uppercase tracking-widest mb-3">Visibility</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => setVisibility('PUBLIC')}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${visibility === 'PUBLIC' ? 'bg-indigo-500/10 border-indigo-500/50 text-white' : 'bg-white/3 border-white/5 text-white/40 hover:bg-white/5'}`}
-                    >
-                      <GlobeAltIcon className={`w-5 h-5 ${visibility === 'PUBLIC' ? 'text-indigo-400' : ''}`} />
-                      <div className="text-left">
-                        <p className="text-xs font-black uppercase tracking-wider leading-none">Public</p>
-                        <p className="text-[9px] font-medium opacity-50 mt-1">Open for everyone</p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => setVisibility('PRIVATE')}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${visibility === 'PRIVATE' ? 'bg-indigo-500/10 border-indigo-500/50 text-white' : 'bg-white/3 border-white/5 text-white/40 hover:bg-white/5'}`}
-                    >
-                      <LockClosedIcon className={`w-5 h-5 ${visibility === 'PRIVATE' ? 'text-indigo-400' : ''}`} />
-                      <div className="text-left">
-                        <p className="text-xs font-black uppercase tracking-wider leading-none">Private</p>
-                        <p className="text-[9px] font-medium opacity-50 mt-1">Password protected</p>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
-                {visibility === 'PRIVATE' && (
-                  <div className="p-4 bg-white/3 rounded-2xl border border-white/5" style={{ animation: "slide-left 0.2s ease" }}>
-                    <label className="block text-xs font-black text-white/50 uppercase tracking-widest mb-2">Set Password *</label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => { setPassword(e.target.value); setPasswordError(""); }}
-                        placeholder="Choose a strong password"
-                        className="w-full bg-transparent text-sm font-bold text-white placeholder:text-white/10 border-none outline-none pr-10"
-                      />
-                      <button
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/60 transition-colors"
-                      >
-                        {showPassword ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {passwordError && (
-                      <p className="text-red-400 text-[10px] font-bold uppercase tracking-widest mt-2">{passwordError}</p>
-                    )}
-                  </div>
-                )}
-
                 <div className="px-1">
                   <p className="text-white/25 text-[10px] font-medium leading-relaxed uppercase tracking-wider">
-                    {visibility === 'PUBLIC'
-                      ? "Anyone with the link can view your beautiful page."
-                      : "Only visitors with the correct password can access the content."}
+                    Build your page from ground up with premium components.
                   </p>
                 </div>
               </div>

@@ -5,6 +5,7 @@ import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { PreviewContext, BlockProps, useLinkHandler, useActivePath } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
+import Link from "next/link";
 
 export function HeaderBlock({ block }: BlockProps) {
     const p = block.props;
@@ -39,7 +40,7 @@ export function HeaderBlock({ block }: BlockProps) {
     const ctaText = (p.ctaText as string) || "Get Started";
     const ctaUrl = (p.ctaUrl as string) || "#";
     const ctaVariant = (p.ctaVariant as string) || "solid";
-    
+
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
     const defaultPrimary = theme.colors?.primary || "#6366f1";
     const defaultText = theme.colors?.buttonText || "#ffffff";
@@ -55,36 +56,37 @@ export function HeaderBlock({ block }: BlockProps) {
     const baseHeaderStyle: React.CSSProperties = { position: position as any, top: position !== "static" ? 0 : undefined, left: position !== "static" ? 0 : undefined, right: position !== "static" ? 0 : undefined, zIndex: 50, background, backdropFilter, borderBottom, color: textColor, width: "100%" };
     const ctaStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 20px", borderRadius: "9999px", fontWeight: 600, fontSize: "0.9rem", textDecoration: "none", cursor: isPreview ? "pointer" : "default", transition: "opacity 0.2s", background: ctaVariant === "solid" ? ctaBgColor : "transparent", color: ctaVariant === "solid" ? ctaTextColor : ctaBgColor, border: ctaVariant === "outline" ? `2px solid ${ctaBgColor}` : "none" };
 
+    // Logo Element
     const LogoElement = () => (
-        <a 
-            href="/" 
+        <Link
+            href="/"
             onClick={(e) => handleLink("/", e)}
-            style={{ 
-                fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em", 
+            style={{
+                fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em",
                 color: textColor, display: "flex", alignItems: "center",
                 textDecoration: "none", cursor: "pointer"
             }}
         >
             {logoType === "image" && logoImage ? (
                 <div style={{ width: logoWidth, height: "40px", position: "relative" }}>
-                    <Image 
-                        src={logoImage} 
-                        alt={logoText} 
-                        fill 
+                    <Image
+                        src={logoImage}
+                        alt={logoText}
+                        fill
                         style={{ objectFit: "contain", objectPosition: "left" }}
                         unoptimized={!logoImage.includes('unsplash.com') && !logoImage.includes('pexels.com') && !logoImage.includes('amazonaws.com') && !logoImage.includes('cloudfront.net')}
                         priority
                     />
                 </div>
             ) : (<span>{logoText}</span>)}
-        </a>
+        </Link>
     );
 
     const routes = useEditorStore((s) => s.page?.routes) || [];
     const dynamicLinks = routes
         .filter(r => r.showInHeader !== false)
         .map(r => ({ id: r.id, label: r.name, url: r.path }));
-    
+
     // Combine static links with dynamic ones, avoiding duplicates by path
     const mergedLinks = [...links];
     dynamicLinks.forEach(dl => {
@@ -94,11 +96,12 @@ export function HeaderBlock({ block }: BlockProps) {
     });
 
     // ── Nav style props (from Properties Panel) ──────────────────────────────
-    const navActiveStyle   = (p.navActiveStyle as string)  || "underline";
-    const navActiveColor   = (p.navActiveColor as string)  || ctaBgColor;
-    const navActiveWeight  = (p.navActiveWeight as string) || "700";
+    const navActiveStyle = (p.navActiveStyle as string) || "underline";
+    const navActiveColor = (p.navActiveColor as string) || ctaBgColor;
+    const navActiveWeight = (p.navActiveWeight as string) || "700";
     const navInactiveOpacity = parseFloat((p.navInactiveOpacity as string) || "0.75");
 
+    // Nav Links Element
     const NavLinksElement = ({ isMobileMenu = false }: { isMobileMenu?: boolean }) => (
         <nav style={{ display: "flex", alignItems: "center", flexDirection: isMobileMenu ? "column" : "row", gap: isMobileMenu ? "1.5rem" : "2rem" }}>
             {mergedLinks.map((link) => {
@@ -122,14 +125,14 @@ export function HeaderBlock({ block }: BlockProps) {
                 })();
 
                 // Pill background
-                const pillBg    = navActiveStyle === "pill" && isActive ? navActiveColor : "transparent";
+                const pillBg = navActiveStyle === "pill" && isActive ? navActiveColor : "transparent";
                 const pillColor = navActiveStyle === "pill" && isActive ? "#ffffff" : "inherit";
                 const pillRadius = "6px";
-                const pillPad    = navActiveStyle === "pill" ? (isMobileMenu ? "6px 16px" : "4px 14px") : undefined;
+                const pillPad = navActiveStyle === "pill" ? (isMobileMenu ? "6px 16px" : "4px 14px") : undefined;
 
                 return (
                     <span key={link.id} style={{ position: "relative", display: "inline-flex", flexDirection: "column", alignItems: "center" }}>
-                        <a
+                        <Link
                             href={link.url}
                             onClick={handleNavClick}
                             style={{
@@ -150,7 +153,7 @@ export function HeaderBlock({ block }: BlockProps) {
                             onMouseLeave={e => { e.currentTarget.style.opacity = isActive ? "1" : String(navInactiveOpacity); }}
                         >
                             {link.label}
-                        </a>
+                        </Link>
                         {/* Dot indicator */}
                         {navActiveStyle === "dot" && isActive && !isMobileMenu && (
                             <span style={{

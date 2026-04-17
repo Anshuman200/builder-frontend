@@ -77,6 +77,7 @@ export function HeaderPanel({ block }: { block: Block }) {
                 {p.logoType === "image" && (<>
                     <Field label="Logo Image"><MediaInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
                     <Field label="Image Width"><TextInput value={(p.logoWidth as string) || "120px"} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
+                    <Field label="Logo Shape"><SelectInput value={(p.logoShape as string) || "square"} onChange={(v) => up("logoShape", v)} options={[{ label: "Square", value: "square" }, { label: "Circle", value: "circle" }, { label: "Rounded", value: "rounded" }]} /></Field>
                 </>)}
             </Section>
             <Section title="Call to Action (CTA)">

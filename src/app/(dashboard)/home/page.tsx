@@ -140,9 +140,7 @@ export default function HomePage() {
   const filtered = pages.filter((p: Page) => {
     const matchesSearch = !search || p.title?.toLowerCase().includes(search.toLowerCase());
     const matchesTab = activeTab === "all" 
-      || (activeTab === "live" && p.isLive)
-      || (activeTab === "public" && p.visibility === "PUBLIC")
-      || (activeTab === "private" && p.visibility === "PRIVATE");
+      || (activeTab === "live" && p.isLive);
     return matchesSearch && matchesTab;
   });
 
@@ -183,8 +181,6 @@ export default function HomePage() {
           {[
             { id: "all", label: "All Projects" },
             { id: "live", label: "Live" },
-            { id: "public", label: "Public" },
-            { id: "private", label: "Private" },
           ].map((t) => (
             <button
               key={t.id}
@@ -231,33 +227,6 @@ export default function HomePage() {
                         { key: "capture", label: "Update Thumbnail", icon: <CameraIcon className="w-4 h-4" />, onClick: () => { setCaptureTarget(p); setShowCapturePicker(true); } },
                         !p.isLive && { key: "preview", label: "Preview", icon: <EyeIcon className="w-4 h-4" />, onClick: () => window.open(`/preview/${p._id}`, "_blank") },
                         !p.isLive && { key: "duplicate", label: "Duplicate", icon: <Squares2X2Icon className="w-4 h-4" />, onClick: () => duplicateMutation.mutate(p._id) },
-                        { type: 'divider' },
-                        !p.isLive && { key: "publish", label: p.isPublic ? "Make Private Template" : "Make Public Template", icon: <GlobeAltIcon className="w-4 h-4" />, onClick: () => handleTogglePublish(p) },
-                        { 
-                          key: "visibility", 
-                          label: <div className="flex items-center justify-between gap-8">
-                            <span>Visibility</span>
-                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${p.visibility === 'PRIVATE' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                              {p.visibility || 'PUBLIC'}
-                            </span>
-                          </div>,
-                          icon: p.visibility === "PRIVATE" ? <LockClosedIcon className="w-4 h-4 text-indigo-400" /> : <GlobeAltIcon className="w-4 h-4 text-emerald-400" />, 
-                          onClick: async () => {
-                            try {
-                              const newVisibility = p.visibility === "PRIVATE" ? "PUBLIC" : "PRIVATE";
-                              await updateMutation.mutateAsync({ id: p._id, visibility: newVisibility });
-                              success(`Project is now ${newVisibility.toLowerCase()}`);
-                            } catch {
-                              toastError("Failed to update visibility");
-                            }
-                          }
-                        },
-                        p.visibility === 'PRIVATE' && {
-                          key: "password",
-                          label: "Update Password",
-                          icon: <KeyIcon className="w-4 h-4 text-indigo-400" />,
-                          onClick: () => setPasswordModalId(p._id)
-                        },
                         { type: 'divider' },
                         !p.isLive && { key: "delete", label: <span className="text-red-400 font-bold">Delete</span>, icon: <TrashIcon className="text-red-400 w-4 h-4" />, onClick: () => handleDelete(p) },
                       ].filter(Boolean) as any,

@@ -129,7 +129,7 @@ interface EditorStore {
     updatePageData: (data: Partial<Pick<EditorPage, "isTemplate" | "isPublic" | "isLocked" | "category" | "visibility" | "password" | "thumbnail" | "thumbnails">>) => void;
     migrateThemeColors: () => void;
     pushHistory: () => void;
-    
+
     undo: () => void;
     redo: () => void;
     markClean: () => void;
@@ -145,7 +145,7 @@ function updateColProps(b: Block, id: string, updater: (b: Block) => Block): Blo
         const arr = p[key] as Block[] | undefined;
         if (arr) {
             const next = findAndUpdate(arr, id, updater);
-            if (next !== arr) { 
+            if (next !== arr) {
                 newProps[key] = next;
                 changed = true;
             }
@@ -304,9 +304,9 @@ function insertBlockDeep(
                         const slotIdx = items.findIndex(s => s.id === childProp);
                         if (slotIdx !== -1) {
                             const newItems = [...items];
-                            newItems[slotIdx] = { 
-                                ...newItems[slotIdx], 
-                                blocks: [...(newItems[slotIdx].blocks || []), insertBlock] 
+                            newItems[slotIdx] = {
+                                ...newItems[slotIdx],
+                                blocks: [...(newItems[slotIdx].blocks || []), insertBlock]
                             };
                             updated.props = { ...updated.props, items: newItems };
                             inserted = true;
@@ -360,38 +360,38 @@ function insertBlockDeep(
  * Ensures a page is strictly in light mode. Resets mode and base background/text colors if they were dark.
  */
 function forceLightModeMigration(page: EditorPage): boolean {
-  let changed = false;
-  
-  // Ensure theme exists
-  if (!page.theme) {
-    page.theme = JSON.parse(JSON.stringify(DEFAULT_THEME));
-    changed = true;
-  }
+    let changed = false;
 
-  if (page.theme.mode !== "light") {
-    page.theme.mode = "light";
-    changed = true;
-  }
+    // Ensure theme exists
+    if (!page.theme) {
+        page.theme = JSON.parse(JSON.stringify(DEFAULT_THEME));
+        changed = true;
+    }
 
-  const c = page.theme.colors;
-  const DARK_BGS = ["#020617", "#09090b", "#000000", "#111827", "#18181b"];
-  const LIGHT_TEXTS = ["#f8fafc", "#ffffff", "#f1f5f9", "#cbd5e1"];
-  const DARK_SURFACES = ["#0f172a", "#1e293b", "#1a1a1a", "#27272a"];
+    if (page.theme.mode !== "light") {
+        page.theme.mode = "light";
+        changed = true;
+    }
 
-  if (DARK_BGS.includes(c.background) || c.background === "var(--background)") {
-    c.background = "#ffffff";
-    changed = true;
-  }
-  if (LIGHT_TEXTS.includes(c.text) || c.text === "var(--text)") {
-    c.text = "#0f172a";
-    changed = true;
-  }
-  if (DARK_SURFACES.includes(c.surface) || c.surface === "var(--surface)") {
-    c.surface = "#f8fafc";
-    changed = true;
-  }
+    const c = page.theme.colors;
+    const DARK_BGS = ["#020617", "#09090b", "#000000", "#111827", "#18181b"];
+    const LIGHT_TEXTS = ["#f8fafc", "#ffffff", "#f1f5f9", "#cbd5e1"];
+    const DARK_SURFACES = ["#0f172a", "#1e293b", "#1a1a1a", "#27272a"];
 
-  return changed;
+    if (DARK_BGS.includes(c.background) || c.background === "var(--background)") {
+        c.background = "#ffffff";
+        changed = true;
+    }
+    if (LIGHT_TEXTS.includes(c.text) || c.text === "var(--text)") {
+        c.text = "#0f172a";
+        changed = true;
+    }
+    if (DARK_SURFACES.includes(c.surface) || c.surface === "var(--surface)") {
+        c.surface = "#f8fafc";
+        changed = true;
+    }
+
+    return changed;
 }
 
 /**
@@ -621,7 +621,7 @@ export const useEditorStore = create<EditorStore>()(
                     const header = page.content?.find(b => b.type === "header") || null;
                     const footer = page.content?.find(b => b.type === "footer") || null;
                     const middle = page.content?.filter(b => b.type !== "header" && b.type !== "footer") || [];
-                    
+
                     page.routes = [{
                         id: "home",
                         path: "/",
@@ -644,7 +644,7 @@ export const useEditorStore = create<EditorStore>()(
                 }
 
                 const fallbackRouteId = page.routes && page.routes.length > 0 ? page.routes[0].id : "home";
-                
+
                 state.page = page;
                 state.activeRouteId = fallbackRouteId;
                 state.isDirty = false;
@@ -653,7 +653,7 @@ export const useEditorStore = create<EditorStore>()(
                 const themeChanged = forceLightModeMigration(page);
                 const blocksMigratedArr = migrateBlockColors(page.routes[0]?.content || []); // Initial pass
                 // Note: full deep migration happens on setPage as well
-                
+
                 state.history = [JSON.parse(JSON.stringify(page))];
                 state.historyIndex = 0;
             }),
@@ -806,7 +806,7 @@ export const useEditorStore = create<EditorStore>()(
             const freshBlock = recursiveClone(block);
             set((s) => {
                 if (!s.page) return;
-                
+
                 // Initialize if empty
                 if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
                 if (!s.page.routes) s.page.routes = [];
@@ -857,10 +857,8 @@ export const useEditorStore = create<EditorStore>()(
             set((s) => {
                 if (!s.page) return;
                 const activeRoute = s.page.routes?.find(r => r.id === s.activeRouteId);
-                
-                // If it's a global block, we don't necessarily want to duplicate it as a global block
-                // (Header/Footer are usually singletons), but we'll allow it if it's on canvas.
-                // For now, focus on route content.
+
+                // Regular route content duplication
                 if (activeRoute) {
                     const { newBlocks, clonedId } = duplicateBlockDeep(activeRoute.content, id);
                     if (clonedId) {
@@ -892,14 +890,14 @@ export const useEditorStore = create<EditorStore>()(
         moveBlock: (activeId, overId, position = "after", childProp?) =>
             set((s) => {
                 if (!s.page || !s.activeRouteId) return;
-                
+
                 const activeRoute = s.page.routes?.find(r => r.id === s.activeRouteId);
                 if (!activeRoute) return;
 
                 // Flatten to a single array for findAndRemove / insert actions 
                 // However, we only allow reordering within activeRoute.content OR internal to header/footer.
                 // You cannot move header to route or route block to header at root level.
-                
+
                 // Construct a virtual flattened tree:
                 let roots = [
                     ...(s.page.globalBlocks?.header ? [s.page.globalBlocks.header] : []),
@@ -921,13 +919,13 @@ export const useEditorStore = create<EditorStore>()(
                     activeRoute.content.push(removed);
                 } else {
                     const { newBlocks: afterInsert, inserted } = insertBlockDeep(afterRemove, removed, overId, position, childProp);
-                    
+
                     if (inserted) {
                         // Extract back header/footer and assign route content
                         const newHeader = afterInsert.find(b => b.type === "header") || null;
                         const newFooter = afterInsert.find(b => b.type === "footer") || null;
                         const newContent = afterInsert.filter(b => b.type !== "header" && b.type !== "footer");
-                        
+
                         // We do NOT allow moving standard blocks into header/footer level as roots
                         // If they went into Header/Footer children, that's fine, the newHeader will contain them.
                         if (s.page.globalBlocks) {
@@ -942,7 +940,7 @@ export const useEditorStore = create<EditorStore>()(
             }),
 
         updateTheme: (theme, commit) => {
-            set((s:any) => {
+            set((s: any) => {
                 if (!s.page) return;
 
                 // Safety: Ensure theme object exists
@@ -963,7 +961,7 @@ export const useEditorStore = create<EditorStore>()(
 
                 // If background is missing or dark, ensure it's white
                 if (s.page.theme.colors.background === "#020617" || s.page.theme.colors.background === "#09090b") {
-                  s.page.theme.colors.background = "#ffffff";
+                    s.page.theme.colors.background = "#ffffff";
                 }
 
                 applyUpdaterDeep(s.page, s.activeRouteId, migrateBlockColors);
@@ -975,7 +973,7 @@ export const useEditorStore = create<EditorStore>()(
         forceLightMode: () => set((s) => {
             if (!s.page || !s.page.theme) return;
             if (s.page.theme.mode === "light") return;
-            
+
             s.page.theme.mode = "light";
             s.page.theme.colors = { ...s.page.theme.colors, ...LIGHT_COLORS };
             if (s.page.theme.colors.background === "#020617" || s.page.theme.colors.background === "#09090b") {

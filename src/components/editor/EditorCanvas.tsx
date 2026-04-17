@@ -12,11 +12,13 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { EllipsisHorizontalIcon, TrashIcon, Square2StackIcon, PlusIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+import { EllipsisHorizontalIcon, TrashIcon, Square2StackIcon, PlusIcon, Squares2X2Icon, ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { BlockRenderer } from "./blocks";
 import { ActivePathContext } from "./blocks/shared";
+import { IconButton } from "../ui/IconButton";
+import AppToolTip from "../common/AppToolTip";
 
 
 // Viewport widths per mode
@@ -449,64 +451,26 @@ const CanvasBlock = memo(function CanvasBlock({
 
         {/* Floating action bar — WHITE background for visibility on any block */}
         {showControls && (
-          <div style={{
-            position: "absolute", top: 8, right: 8,
-            display: "flex", gap: 2, padding: 3,
-            background: "#ffffff", borderRadius: 8, zIndex: 90,
-            border: "1px solid #e2e8f0",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)",
-          }}>
-            {/* Drag handle */}
-            <button
-              {...attributes}
-              {...listeners}
-              title="Drag to reorder"
-              style={{
-                width: 28, height: 28,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: "none", border: "none", cursor: "grab",
-                color: "#475569", borderRadius: 6,
-                fontSize: 16, lineHeight: 1,
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#f1f5f9"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
-            >
-              <svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor" style={{ color: "#64748b" }}>
-                <circle cx="3" cy="3" r="1.5" /><circle cx="9" cy="3" r="1.5" />
-                <circle cx="3" cy="8" r="1.5" /><circle cx="9" cy="8" r="1.5" />
-                <circle cx="3" cy="13" r="1.5" /><circle cx="9" cy="13" r="1.5" />
-              </svg>
-            </button>
-            {/* Duplicate */}
-            <button
-              title="Duplicate block"
-              onClick={(e) => { e.stopPropagation(); duplicateBlock(block.id); }}
-              style={{
-                width: 28, height: 28,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: "none", border: "none", cursor: "pointer",
-                color: "#475569", borderRadius: 6,
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#f1f5f9"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
-            >
-              <Square2StackIcon style={{ width: 14, height: 14 }} />
-            </button>
-            {/* Delete */}
-            <button
-              title="Delete block"
-              onClick={(e) => { e.stopPropagation(); deleteBlock(block.id); }}
-              style={{
-                width: 28, height: 28,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: "none", border: "none", cursor: "pointer",
-                color: "#ef4444", borderRadius: 6,
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#fef2f2"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "none"; }}
-            >
-              <TrashIcon style={{ width: 15, height: 15 }} />
-            </button>
+          <div className="absolute top-4 right-4 p-1 rounded-sm shadow-md bg-white z-100 space-x-1 ">
+            {/* Drag, Duplicate & Delete*/}
+            {(block.type !== "header" && block.type !== "footer") &&
+              <>
+                {/* Drag to reorder */}
+                <AppToolTip title="Drag to reorder">
+                  <IconButton {...attributes} {...listeners} icon={<ArrowsPointingOutIcon style={{ width: 14, height: 14 }} />} />
+                </AppToolTip>
+
+                {/* Duplicate block */}
+                <AppToolTip title="Duplicate block">
+                  <IconButton icon={<Square2StackIcon style={{ width: 14, height: 14 }} />} onClick={(e) => { e.stopPropagation(); duplicateBlock(block.id); }} />
+                </AppToolTip>
+              </>
+            }
+
+            {/* Delete block */}
+            <AppToolTip title="Delete block">
+              <IconButton className="bg-red-500/15" icon={<TrashIcon style={{ width: 14, height: 14 }} />} onClick={(e) => { e.stopPropagation(); deleteBlock(block.id); }} />
+            </AppToolTip>
           </div>
         )}
 
@@ -539,14 +503,7 @@ function EmptyState({ isOver }: { isOver: boolean }) {
         cursor: "pointer",
       }}
     >
-      <div style={{
-        width: 56, height: 56, borderRadius: "50%",
-        background: isOver ? "#6366f1" : "rgba(150,150,150,0.1)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        transition: "all 0.2s",
-      }}>
-        <PlusIcon style={{ width: 24, height: 24, color: isOver ? "#fff" : "#94a3b8" }} />
-      </div>
+      <IconButton className="bg-white/40 dark:bg-black/30 transition-all duration-200 ease-in-out hover:bg-white/60 dark:hover:bg-black/40" icon={<PlusIcon style={{ width: 24, height: 24, color: isOver ? "#fff" : "#94a3b8" }} />} />
       <div style={{ textAlign: "center" }}>
         <p style={{
           margin: 0, fontSize: 16,
@@ -584,15 +541,8 @@ function AddSectionInvitation({ isOver }: { isOver: boolean }) {
     hover:border-indigo-500 hover:bg-indigo-500/5
   `}
     >
-      <PlusIcon
-        className={`w-5 h-5 ${isOver ? "text-indigo-500" : "text-slate-400"
-          }`}
-      />
-
-      <span
-        className={`text-[13px] font-semibold tracking-[0.02em] ${isOver ? "text-indigo-500" : "text-slate-500"
-          }`}
-      >
+      <PlusIcon className={`w-5 h-5 ${isOver ? "text-indigo-500" : "text-slate-400"}`} />
+      <span className={`text-[13px] font-semibold tracking-[0.02em] ${isOver ? "text-indigo-500" : "text-slate-500"}`}>
         Add more sections
       </span>
     </div>

@@ -425,7 +425,7 @@ function resolveColor(raw: string, theme?: any): string {
     if (!raw || typeof window === "undefined") return raw || "#000000";
     if (!raw.startsWith("var(")) return raw;
     const varName = raw.slice(4, -1).split(",")[0].trim();
-    
+
     // First, try to resolve from the project theme object if provided
     if (theme?.colors) {
         const c = theme.colors;
@@ -678,7 +678,7 @@ export function InputFields({ p, up, prefix = "input" }: PropertyGroupProps) {
     const defaults = {
         bg: "#f8fafc",
         text: "#111827",
-        placeholder: "rgba(0,0,0,0.4)",
+        placeholder: "#e2e8f0",
         border: "#e2e8f0",
         label: "#374151"
     };

@@ -19,9 +19,9 @@ export const useDomains = (userId?: string) => {
 export const useCreateDomain = () => {
     const queryClient = useQueryClient();
     const { message } = App.useApp();
-    return useMutation<any, any, { domain: string, targetUrl: string, userId: string, pageId?: string }>({
+    return useMutation<any, any, { domain: string, targetUrl: string, userId: string, pageId?: string, visibility?: string, password?: string }>({
         mutationFn: (body) =>
-            domainApi.create(body.domain, body.targetUrl, body.userId, body.pageId),
+            domainApi.create(body.domain, body.targetUrl, body.userId, body.pageId, body.visibility, body.password),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["domains"] });
             message.success("Domain connected successfully!");
@@ -47,6 +47,21 @@ export const useVerifyDomain = () => {
     });
 };
 
+export const useUpdateDomainVisibility = () => {
+    const queryClient = useQueryClient();
+    const { message } = App.useApp();
+    return useMutation<any, any, { id: string, visibility: string, password?: string }>({
+        mutationFn: ({ id, visibility, password }) => domainApi.updateVisibility(id, visibility, password),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["domains"] });
+            message.success("Visibility updated");
+        },
+        onError: (err: any) => {
+            message.error(err.message || "Failed to update visibility");
+        }
+    });
+};
+
 export const useDeleteDomain = () => {
     const queryClient = useQueryClient();
     const { message } = App.useApp();
@@ -65,9 +80,9 @@ export const useDeleteDomain = () => {
 export const useCreateProxy = () => {
     const queryClient = useQueryClient();
     const { message } = App.useApp();
-    return useMutation<any, any, { pageId: string, originUrl: string }>({
-        mutationFn: ({ pageId, originUrl }) =>
-            proxyApi.create(pageId, originUrl),
+    return useMutation<any, any, { pageId: string, originUrl: string, visibility?: string, password?: string }>({
+        mutationFn: ({ pageId, originUrl, visibility, password }) =>
+            proxyApi.create(pageId, originUrl, visibility, password),
         onSuccess: (_, variables) => {
             const { pageId } = variables;
             queryClient.invalidateQueries({ queryKey: ["domains"] });

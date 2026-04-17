@@ -10,9 +10,11 @@ import {
     LoadingOutlined,
     CopyOutlined,
     ClockCircleOutlined,
-    SyncOutlined,
-    ArrowLeftOutlined
+    ArrowLeftOutlined,
+    LockOutlined,
+    GlobalOutlined as GlobalIcon
 } from '@ant-design/icons';
+import { LockClosedIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import { useCreateDomain, useVerifyDomain, useCreateProxy, useProxyStatus } from "@/lib/api/domainHooks";
 import { useAuth } from "@/hooks/useAuth";
 import { useGoLivePage, usePage, usePages } from "@/lib/api/queries";
@@ -91,6 +93,9 @@ function ConnectDomainContent() {
     const [validationSuccess, setValidationSuccess] = useState(false);
     const [isSkipped, setIsSkipped] = useState(false);
 
+    const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE'>('PUBLIC');
+    const [password, setPassword] = useState("");
+
     useEffect(() => {
         if (pageIdFromUrl) {
             const baseUrl = `https://build.solidappmaker.in`
@@ -144,7 +149,9 @@ function ConnectDomainContent() {
 
                     const result: any = await createProxyMutation.mutateAsync({
                         pageId,
-                        originUrl: targetUrl
+                        originUrl: targetUrl,
+                        visibility,
+                        password: visibility === 'PRIVATE' ? password : undefined
                     });
                     setWorkerResult(result.data || result);
                 }
@@ -183,7 +190,9 @@ function ConnectDomainContent() {
                 domain: customDomain,
                 targetUrl,
                 userId: user!._id,
-                pageId: pageIdToUse || undefined
+                pageId: pageIdToUse || undefined,
+                visibility,
+                password: visibility === 'PRIVATE' ? password : undefined
             });
             setDomainResult(data);
 
@@ -327,6 +336,10 @@ function ConnectDomainContent() {
                                     projectsLoading={allPagesLoading}
                                     pageData={pageData}
                                     currentDeployStep={currentDeployStep}
+                                    visibility={visibility}
+                                    setVisibility={setVisibility}
+                                    password={password}
+                                    setPassword={setPassword}
                                 />
                             )}
 
@@ -395,12 +408,17 @@ interface StepDeployWorkerProps {
     projectsLoading: boolean;
     pageData?: PageData;
     currentDeployStep: number;
+    visibility: 'PUBLIC' | 'PRIVATE';
+    setVisibility: (v: 'PUBLIC' | 'PRIVATE') => void;
+    password: string;
+    setPassword: (v: string) => void;
 }
 
 function StepDeployWorker({
     workerDeploying, deployProgress, workerError, workerResult,
     onNext, onSkip, isSkipping, onDeploy, handleCopy, isPreFilled, disabled,
-    projects, onProjectSelect, projectsLoading, pageData, currentDeployStep
+    projects, onProjectSelect, projectsLoading, pageData, currentDeployStep,
+    visibility, setVisibility, password, setPassword
 }: StepDeployWorkerProps) {
     return (
         <Space orientation="vertical" style={{ width: '100%' }} size="large">
@@ -474,6 +492,49 @@ function StepDeployWorker({
                             value: p._id
                         }))}
                     />
+                </div>
+            )}
+
+            {!workerResult && !workerDeploying && (
+                <div className="mt-2 animate-in fade-in duration-500">
+                    <label className="block mb-4 font-black text-white/40 uppercase tracking-[0.2em] text-[10px]">Visibility Settings</label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <button 
+                            onClick={() => setVisibility('PUBLIC')}
+                            className={`flex flex-col items-center gap-4 p-8 rounded-[2rem] border transition-all duration-300 ${visibility === 'PUBLIC' ? 'bg-indigo-500/10 border-indigo-500 shadow-[0_0_30px_-10px_rgba(99,102,241,0.3)] text-white' : 'bg-white/2 border-white/5 text-white/30 hover:bg-white/5'}`}
+                        >
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${visibility === 'PUBLIC' ? 'bg-indigo-500 text-white' : 'bg-white/5'}`}>
+                                <GlobeAltIcon className="w-6 h-6" />
+                            </div>
+                            <div className="text-center">
+                                <span className="block font-black uppercase tracking-widest text-xs">Public</span>
+                                <span className="block text-[10px] opacity-40 mt-1">Accessible by URL</span>
+                            </div>
+                        </button>
+                        <button 
+                            onClick={() => setVisibility('PRIVATE')}
+                            className={`flex flex-col items-center gap-4 p-8 rounded-[2rem] border transition-all duration-300 ${visibility === 'PRIVATE' ? 'bg-indigo-500/10 border-indigo-500 shadow-[0_0_30px_-10px_rgba(99,102,241,0.3)] text-white' : 'bg-white/2 border-white/5 text-white/30 hover:bg-white/5'}`}
+                        >
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${visibility === 'PRIVATE' ? 'bg-indigo-500 text-white' : 'bg-white/5'}`}>
+                                <LockClosedIcon className="w-6 h-6" />
+                            </div>
+                            <div className="text-center">
+                                <span className="block font-black uppercase tracking-widest text-xs">Private</span>
+                                <span className="block text-[10px] opacity-40 mt-1">Password protected</span>
+                            </div>
+                        </button>
+                    </div>
+                    {visibility === 'PRIVATE' && (
+                        <div className="mt-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                            <Input.Password 
+                                placeholder="Enter a secure password..." 
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                className="bg-white/5! border-white/10! text-white! h-14 rounded-2xl px-6! text-lg font-medium hover:border-white/20! focus:border-indigo-500! transition-all"
+                                prefix={<LockOutlined className="mr-2 opacity-40" />}
+                            />
+                        </div>
+                    )}
                 </div>
             )}
 

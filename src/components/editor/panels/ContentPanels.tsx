@@ -10,7 +10,6 @@ import {
 } from "./shared";
 import { IconPicker } from "../IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
-import { useAuth } from "@/hooks/useAuth";
 import { Dropdown } from "antd";
 import dynamic from "next/dynamic";
 
@@ -304,14 +303,12 @@ export function TeamPanel({ block }: { block: Block }) {
 
 export function PageSettingsPanel({ page }: { page: EditorPage }) {
     const { updateTheme, updatePageData, activeRouteId, setActiveRoute, addRoute, updateRoute, deleteRoute } = useEditorStore();
-    const { user } = useAuth();
     const theme = page.theme || DEFAULT_THEME;
     const l = theme.layout || DEFAULT_THEME.layout!;
     const f = theme.features || DEFAULT_THEME.features!;
     const c = theme.colors || DEFAULT_THEME.colors;
     const upL = (key: string, val: string) => updateTheme({ layout: { ...l, [key]: val } });
     const upF = (key: string, val: unknown) => updateTheme({ features: { ...f, [key]: val } });
-    const upP = (key: string, val: unknown) => updatePageData({ [key]: val });
 
     return (
         <aside style={{ width: 380, flexShrink: 0, background: "var(--bg-secondary)", borderLeft: "1px solid var(--border)", overflowY: "auto", display: "flex", flexDirection: "column" }}>
@@ -492,59 +489,6 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                 >
                     Sync all components now
                 </button>
-            </Section>
-            <Section title="Visibility & Access">
-                <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 12, lineHeight: 1.4 }}>Control who can view or use your page.</div>
-
-                <Field label="Page Visibility">
-                    <SelectInput
-                        value={page.visibility || "PUBLIC"}
-                        onChange={(v) => upP("visibility", v)}
-                        options={[
-                            { label: "Public (Everyone)", value: "PUBLIC" },
-                            { label: "Private (Password)", value: "PRIVATE" }
-                        ]}
-                    />
-                </Field>
-
-                {page.visibility === "PRIVATE" && (
-                    <Field label="Page Password">
-                        <TextInput
-                            value={page.password || ""}
-                            onChange={(v) => upP("password", v)}
-                            placeholder="Set access password"
-                            type="password"
-                        />
-                    </Field>
-                )}
-
-                <div style={{ margin: "16px 0", height: 1, background: "var(--border)" }} />
-
-                <ToggleInput
-                    value={!!page.isPublic}
-                    onChange={(v) => { upP("isPublic", v); if (v) upP("isTemplate", true); }}
-                    label="Public Template"
-                />
-                <div style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 4, paddingLeft: 28 }}>
-                    Allows others to clone this design as a template.
-                </div>
-
-                {page.isPublic && (
-                    <Field label="Template Category">
-                        <SelectInput
-                            value={page.category || "Other"}
-                            onChange={(v) => upP("category", v)}
-                            options={[{ label: "Portfolio", value: "Portfolio" }, { label: "Landing Page", value: "Landing Page" }, { label: "E-commerce", value: "E-commerce" }, { label: "Blog", value: "Blog" }, { label: "Other", value: "Other" }]}
-                        />
-                    </Field>
-                )}
-                {user?.role === "admin" && (
-                    <>
-                        <div style={{ margin: "12px 0", height: 1, background: "var(--border)" }} />
-                        <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}><span style={{ color: "var(--primary)", fontWeight: 600 }}>Admin Only:</span> Prevent others from editing this template directly.</div>
-                        <ToggleInput value={!!page.isLocked} onChange={(v) => upP("isLocked", v)} label="Lock Template" />
-                    </>
-                )}
             </Section>
             <Section title="Global Container">
                 <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Controls max-width & horizontal padding for top-level blocks.</div>

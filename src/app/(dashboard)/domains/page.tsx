@@ -22,11 +22,14 @@ import {
     ReloadOutlined,
     CopyOutlined,
     LinkOutlined,
+    LockOutlined
 } from '@ant-design/icons';
-import { useDomains, useVerifyDomain, useDeleteDomain } from "@/lib/api/domainHooks";
+import { LockClosedIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
+import { useDomains, useVerifyDomain, useDeleteDomain, useUpdateDomainVisibility } from "@/lib/api/domainHooks";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useDeleteToast } from "@/context/DeleteToastContext";
+import { Input } from "antd";
 
 const { Title, Text } = Typography;
 
@@ -37,6 +40,17 @@ export default function DomainPage() {
     const verifyMutation = useVerifyDomain();
     const deleteMutation = useDeleteDomain();
     const { startDelete } = useDeleteToast();
+    const updateVisibilityMutation = useUpdateDomainVisibility();
+    const [passwords, setPasswords] = useState<Record<string, string>>({});
+
+    const handleUpdateVisibility = async (id: string, visibility: 'PUBLIC' | 'PRIVATE', password?: string) => {
+        try {
+            await updateVisibilityMutation.mutateAsync({ id, visibility, password });
+            message.success(`Visibility updated to ${visibility.toLowerCase()}`);
+        } catch (err: any) {
+            message.error(err.message || "Failed to update visibility");
+        }
+    };
 
     const verifyDomain = async (id: string) => {
         await verifyMutation.mutateAsync(id);
@@ -247,6 +261,59 @@ export default function DomainPage() {
                                         />
                                     </Tooltip>
                                 </div>
+                            </div>
+
+                            {/* Visibility Settings */}
+                            <div className="mt-8 pt-8 border-t border-white/5">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex flex-col">
+                                        <Text className="text-white/40! text-[10px] font-black uppercase tracking-[0.2em] mb-1">Access Control</Text>
+                                        <Text className="text-white/20! text-[9px] font-medium lowercase">Control who can view your project</Text>
+                                    </div>
+                                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${d.visibility === 'PRIVATE' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                                        {d.visibility === 'PRIVATE' ? <LockClosedIcon className="w-3 h-3" /> : <GlobeAltIcon className="w-3 h-3" />}
+                                        {d.visibility || 'PUBLIC'}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <button
+                                        onClick={() => handleUpdateVisibility(d._id, 'PUBLIC')}
+                                        disabled={updateVisibilityMutation.isPending}
+                                        className={`flex items-center justify-center gap-3 h-12 rounded-2xl border transition-all duration-300 ${d.visibility !== 'PRIVATE' ? 'bg-indigo-500/10 border-indigo-500 text-white shadow-[0_0_20px_-5px_rgba(99,102,241,0.3)]' : 'bg-white/2 border-white/5 text-white/30 hover:bg-white/5'}`}
+                                    >
+                                        <GlobeAltIcon className="w-4 h-4" />
+                                        <span className="font-black text-[11px] uppercase tracking-widest">Public</span>
+                                    </button>
+                                    <button
+                                        onClick={() => handleUpdateVisibility(d._id, 'PRIVATE')}
+                                        disabled={updateVisibilityMutation.isPending}
+                                        className={`flex items-center justify-center gap-3 h-12 rounded-2xl border transition-all duration-300 ${d.visibility === 'PRIVATE' ? 'bg-indigo-500/10 border-indigo-500 text-white shadow-[0_0_20px_-5px_rgba(99,102,241,0.3)]' : 'bg-white/2 border-white/5 text-white/30 hover:bg-white/5'}`}
+                                    >
+                                        <LockClosedIcon className="w-4 h-4" />
+                                        <span className="font-black text-[11px] uppercase tracking-widest">Private</span>
+                                    </button>
+                                </div>
+
+                                {d.visibility === 'PRIVATE' && (
+                                    <div className="mt-4 flex gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <Input.Password
+                                            placeholder="Update password"
+                                            value={passwords[d._id] || ''}
+                                            onChange={e => setPasswords(prev => ({ ...prev, [d._id]: e.target.value }))}
+                                            className="bg-white/5! border-white/10! text-white! rounded-xl h-11 flex-1 px-4!"
+                                            prefix={<LockOutlined className="opacity-40" />}
+                                        />
+                                        <Button
+                                            type="primary"
+                                            onClick={() => handleUpdateVisibility(d._id, 'PRIVATE', passwords[d._id])}
+                                            loading={updateVisibilityMutation.isPending && updateVisibilityMutation.variables?.id === d._id}
+                                            className="h-11! px-6! bg-indigo-600! border-0! rounded-xl! font-bold! text-[11px]! uppercase! tracking-widest!"
+                                        >
+                                            Save
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Verification Records */}
