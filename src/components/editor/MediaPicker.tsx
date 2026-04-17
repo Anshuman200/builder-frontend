@@ -61,13 +61,13 @@ export default function MediaPicker({
                     initialType={type}
                     multiple={multiple}
                     onSelect={(urlOrUrls) => {
+                        onClose();
                         if (multiple) {
                             onSelect(Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls]);
                         } else {
                             const singleUrl = Array.isArray(urlOrUrls) ? urlOrUrls[0] : urlOrUrls;
                             onSelect([singleUrl]);
                         }
-                        onClose();
                     }}
                 />
             </div>

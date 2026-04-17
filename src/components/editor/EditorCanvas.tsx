@@ -16,7 +16,7 @@ import { EllipsisHorizontalIcon, TrashIcon, Square2StackIcon, PlusIcon, Squares2
 import { useEditorStore } from "@/stores/editorStore";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { BlockRenderer } from "./blocks";
-import { ActivePathContext } from "./blocks/shared";
+import { ActivePathContext, PreviewContext, getBlockMediaInfo } from "./blocks/shared";
 import { IconButton } from "../ui/IconButton";
 import AppToolTip from "../common/AppToolTip";
 
@@ -483,35 +483,20 @@ const CanvasBlock = memo(function CanvasBlock({
           <div className="absolute top-4 right-4 p-1 rounded-sm shadow-md bg-white z-100 space-x-1 flex items-center">
             {/* Quick Media Change */}
             {(() => {
-              const type = block.type;
-              const isImage = type === "image";
-              const isVideo = type === "video";
-              const isBG = ["hero", "container", "wave"].includes(type);
-              const isFeat = ["feature", "feature_card", "team_member"].includes(type); // simplified check
-
-              // Determine which prop to update
-              let targetProp = "";
-              if (isImage) targetProp = "src";
-              else if (isVideo) targetProp = "url";
-              else if (isBG) targetProp = "bgImage";
-              else if (type === "feature" || type === "feature_card") targetProp = "image";
-              
-              if (!targetProp) return null;
-
-              const MediaIcon = isVideo ? VideoCameraIcon : PhotoIcon;
-              const pickerType = isVideo ? "video" : "image";
+              const info = getBlockMediaInfo(block.type);
+              if (!info) return null;
 
               return (
-                <AppToolTip title={`Change ${isVideo ? "Video" : "Image"}`}>
+                <AppToolTip title={`Change ${info.label}`}>
                   <IconButton
-                    icon={<MediaIcon style={{ width: 14, height: 14 }} />}
+                    icon={<info.icon style={{ width: 14, height: 14 }} />}
                     onClick={(e) => {
                       e.stopPropagation();
                       useEditorStore.getState().showMediaPicker({
-                        type: pickerType,
-                        title: `Change ${pickerType === "video" ? "Video" : "Image"}`,
+                        type: info.mediaType,
+                        title: `Change ${info.label}`,
                         onSelect: (url) => {
-                          useEditorStore.getState().updateBlock(block.id, { [targetProp]: url }, true);
+                          useEditorStore.getState().updateBlock(block.id, { [info.prop]: url }, true);
                         }
                       });
                     }}

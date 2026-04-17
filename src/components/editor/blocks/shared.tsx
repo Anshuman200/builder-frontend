@@ -9,7 +9,7 @@ import React from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { TrashIcon, EllipsisHorizontalIcon, ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, EllipsisHorizontalIcon, ArrowsPointingOutIcon, PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
 import { useEditorStore } from "@/stores/editorStore";
@@ -38,9 +38,22 @@ export function useActivePath() {
  */
 export function useLinkHandler() {
     const isPreview = React.useContext(PreviewContext);
+    const { page, setActiveRoute } = useEditorStore();
 
     return (url: string, e?: React.MouseEvent) => {
+        // In the editor (not preview)
         if (!isPreview) {
+            // Handle internal page transitions within the editor
+            if (url.startsWith("/")) {
+                const targetRoute = page?.routes?.find(r => r.path === url);
+                if (targetRoute) {
+                    if (e) e.preventDefault();
+                    setActiveRoute(targetRoute.id);
+                    return;
+                }
+            }
+            
+            // Standard editor behavior: block the click so we don't navigate away
             if (e) e.preventDefault();
             return;
         }
@@ -62,6 +75,17 @@ export function useLinkHandler() {
 
         // External links or other manual URLs — let them follow default behavior in preview
     };
+}
+
+/**
+ * Helper to identify blocks with primary media and their property names.
+ */
+export function getBlockMediaInfo(type: string) {
+    if (type === "image") return { prop: "src", label: "Image", icon: PhotoIcon, mediaType: "image" as const };
+    if (type === "video") return { prop: "url", label: "Video", icon: VideoCameraIcon, mediaType: "video" as const };
+    if (["hero", "container", "wave", "header"].includes(type)) return { prop: "bgImage", label: "Background", icon: PhotoIcon, mediaType: "image" as const };
+    if (["feature", "feature_card"].includes(type)) return { prop: "image", label: "Image", icon: PhotoIcon, mediaType: "image" as const };
+    return null;
 }
 
 // ─── Shared types ─────────────────────────────────────────────────────────────
@@ -208,6 +232,30 @@ export function ChildBlockWrapper({
                     border: "1px solid #e2e8f0",
                     boxShadow: "0 2px 12px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)",
                 }}>
+                    {/* Quick Media Change */}
+                    {(() => {
+                        const info = getBlockMediaInfo(block.type);
+                        if (!info) return null;
+
+                        return (
+                            <AppToolTip title={`Change ${info.label}`}>
+                                <IconButton
+                                    icon={<info.icon style={{ width: 14, height: 14 }} />}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        useEditorStore.getState().showMediaPicker({
+                                            type: info.mediaType,
+                                            title: `Change ${info.label}`,
+                                            onSelect: (url) => {
+                                                useEditorStore.getState().updateBlock(block.id, { [info.prop]: url }, true);
+                                            }
+                                        });
+                                    }}
+                                />
+                            </AppToolTip>
+                        );
+                    })()}
+
                     {/* Drag to reorder */}
                     <AppToolTip title="Drag to reorder">
                         <IconButton {...attributes} {...listeners} icon={<ArrowsPointingOutIcon style={{ width: 14, height: 14 }} />} />
