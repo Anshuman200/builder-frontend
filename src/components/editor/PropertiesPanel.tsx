@@ -100,11 +100,30 @@ export default function PropertiesPanel() {
         return useEditorStore.subscribe((state) => {
             if (state.selectBlockTick !== prevTick) {
                 prevTick = state.selectBlockTick;
-                scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+                // If it's just a block selection with no sub-focus, scroll to top
+                if (!state.subItemFocus) {
+                    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+                }
                 setFlashKey(k => k + 1);
             }
         });
     }, []);
+
+    // Handle sub-item focal scrolling (e.g. clicking logo -> scroll to Brand section)
+    const subItemFocus = useEditorStore(s => s.subItemFocus);
+    useEffect(() => {
+        if (subItemFocus && typeof subItemFocus.index === "string") {
+            const sectionId = `section-${subItemFocus.index.replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
+            // Small delay to ensure the panel has rendered the new block's sections if we just switched blocks
+            const timer = setTimeout(() => {
+                const el = document.getElementById(sectionId);
+                if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+            }, 50);
+            return () => clearTimeout(timer);
+        }
+    }, [subItemFocus]);
 
     let rootSearchBlocks: Block[] = [];
     if (page) {

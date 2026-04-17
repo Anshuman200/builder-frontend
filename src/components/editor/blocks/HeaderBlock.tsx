@@ -15,6 +15,7 @@ export function HeaderBlock({ block }: BlockProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
     const handleLink = useLinkHandler();
     const activePath = useActivePath();
+    const focusSubItem = useEditorStore((s) => s.focusSubItem);
 
     const layout = (p.layout as string) || "standard";
     const position = (p.position as string) || "static";
@@ -60,7 +61,10 @@ export function HeaderBlock({ block }: BlockProps) {
     const LogoElement = () => (
         <Link
             href="/"
-            onClick={(e) => handleLink("/", e)}
+            onClick={(e) => {
+                handleLink("/", e);
+                if (!isPreview) focusSubItem(block.id, "Brand (Logo)");
+            }}
             style={{
                 fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em",
                 color: textColor, display: "flex", alignItems: "center",
@@ -107,6 +111,7 @@ export function HeaderBlock({ block }: BlockProps) {
             {mergedLinks.map((link) => {
                 const handleNavClick = (e: React.MouseEvent) => {
                     handleLink(link.url, e);
+                    if (!isPreview) focusSubItem(block.id, "Navigation Links");
                     if (isPreview && isMobileMenu) setMobileMenuOpen(false);
                 };
                 const isActive = link.url === activePath;
@@ -194,7 +199,10 @@ export function HeaderBlock({ block }: BlockProps) {
                         {!isMobile && showCta && (
                             <div className={isPreview ? `header-${block.id}-desktop-cta` : undefined} style={{ display: isMobile ? "none" : "block" }}>
                                 {showCta && ctaText && (
-                                    <a href={ctaUrl} onClick={(e) => handleLink(ctaUrl, e)} style={ctaStyle}
+                                    <a href={ctaUrl} onClick={(e) => {
+                                        handleLink(ctaUrl, e);
+                                        if (!isPreview) focusSubItem(block.id, "Call to Action (CTA)");
+                                    }} style={ctaStyle}
                                         onMouseEnter={e => { if (ctaVariant === "outline") { e.currentTarget.style.background = ctaBgColor; e.currentTarget.style.color = ctaTextColor; } else { e.currentTarget.style.opacity = "0.9"; } }}
                                         onMouseLeave={e => { if (ctaVariant === "outline") { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = ctaBgColor; } else { e.currentTarget.style.opacity = "1"; } }}
                                     >{ctaText}</a>

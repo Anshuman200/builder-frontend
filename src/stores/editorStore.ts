@@ -76,7 +76,7 @@ interface EditorStore {
         templateId?: string;
         blockId?: string;
     } | null;
-    subItemFocus: { blockId: string; index: number } | null;
+    subItemFocus: { blockId: string; index: number | string } | null;
     blockPicker: {
         open: boolean;
         target: {
@@ -729,7 +729,7 @@ export const useEditorStore = create<EditorStore>()(
 
         selectBlock: (id) => set((s) => { s.selectedBlockId = id; s.selectBlockTick = (s.selectBlockTick || 0) + 1; }),
         hoverBlock: (id) => set({ hoveredBlockId: id }),
-        focusSubItem: (blockId, index) => set({ subItemFocus: { blockId, index } }),
+        focusSubItem: (blockId, index: number | string) => set({ subItemFocus: { blockId, index } }),
         setViewMode: (mode) => set({ viewMode: mode }),
         setIsSaving: (v) => set({ isSaving: v }),
         setActiveDrag: (drag: EditorStore["activeDrag"]) => set({ activeDrag: drag }),

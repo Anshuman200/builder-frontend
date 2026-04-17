@@ -688,10 +688,28 @@ export function PaddingInput({ value, onChange, label, placeholder }: { value: s
 // ─── Section ──────────────────────────────────────────────────────────────────
 
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
+    const { subItemFocus, selectedBlockId } = useEditorStore();
+    const isFocused = subItemFocus?.blockId === selectedBlockId && subItemFocus?.index === title;
+    
+    // Generate a clean ID for scrolling
+    const sectionId = `section-${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
+
     return (
-        <div style={{ borderBottom: `1px solid ${PANEL_COLORS.border}`, padding: "12px 16px" }}>
+        <div 
+            id={sectionId}
+            style={{ 
+                borderBottom: `1px solid ${PANEL_COLORS.border}`, 
+                padding: "12px 16px",
+                transition: "background 0.5s ease",
+                background: isFocused ? "rgba(0, 153, 255, 0.08)" : "transparent",
+                position: "relative"
+            }}
+        >
+            {isFocused && (
+                <div style={{ position: "absolute", left: 0, top: 12, bottom: 12, width: 3, background: "var(--primary)", borderRadius: "0 4px 4px 0" }} />
+            )}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: PANEL_COLORS.text }}>{title}</p>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: isFocused ? "var(--primary)" : PANEL_COLORS.text, transition: "color 0.3s" }}>{title}</p>
                 <div style={{ color: PANEL_COLORS.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 16, height: 16 }}>
                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5 1V9M1 5H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

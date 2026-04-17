@@ -51,7 +51,8 @@ export function ButtonPanel({ block }: { block: Block }) {
 }
 
 export function HeaderPanel({ block }: { block: Block }) {
-    const { updateBlock } = useEditorStore();
+    const { updateBlock, page } = useEditorStore();
+    const routes = page?.routes || [];
     const p = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     const updateProps = (newProps: Record<string, unknown>) => updateBlock(block.id, newProps);
@@ -91,8 +92,22 @@ export function HeaderPanel({ block }: { block: Block }) {
                 </>)}
             </Section>
             <Section title="Navigation Links">
-                <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Add or remove links in the navigation bar.</div>
+                <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Dynamic links from your Pages and custom links.</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {/* Automatic Links from Routes */}
+                    {(routes || [])
+                        .filter(r => r.showInHeader !== false)
+                        .map(route => (
+                            <div key={route.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", background: "rgba(255,255,255,0.03)", border: "1px dashed var(--border)", borderRadius: 8, opacity: 0.9 }}>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text)" }}>{route.name}</div>
+                                    <div style={{ fontSize: 9, opacity: 0.5, overflow: "hidden", textOverflow: "ellipsis" }}>{route.path === "/" ? "Home" : route.path} (Auto Page)</div>
+                                </div>
+                                <div style={{ fontSize: 8, fontWeight: 800, color: "var(--primary)", background: "rgba(0, 153, 255, 0.1)", padding: "2px 6px", borderRadius: 4, letterSpacing: "0.05em" }}>NAV</div>
+                            </div>
+                        ))}
+
+                    {/* Custom Links */}
                     {((p.links as { id: string; label: string; url: string }[]) || []).map((link, idx) => (
                         <div key={link.id || idx} style={{ display: "flex", flexDirection: "column", gap: 4, padding: 8, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6 }}>
                             <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -164,7 +179,8 @@ export function HeaderPanel({ block }: { block: Block }) {
 }
 
 export function FooterPanel({ block }: { block: Block }) {
-    const { updateBlock } = useEditorStore();
+    const { updateBlock, page } = useEditorStore();
+    const routes = page?.routes || [];
     const p = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     const updateProps = (newProps: Record<string, unknown>) => updateBlock(block.id, newProps);
@@ -193,7 +209,22 @@ export function FooterPanel({ block }: { block: Block }) {
                 <Field label="Copyright"><TextInput value={(p.copyright as string) || ""} onChange={(v) => up("copyright", v)} placeholder="© 2026 Company" /></Field>
             </Section>
             <Section title="Footer Links">
+                <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)", marginBottom: 8 }}>Pages set to "Show in Footer" and custom links.</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {/* Automatic Links from Routes */}
+                    {(routes || [])
+                        .filter(r => !!r.showInFooter)
+                        .map(route => (
+                            <div key={route.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", background: "rgba(255,255,255,0.03)", border: "1px dashed var(--border)", borderRadius: 8, opacity: 0.9 }}>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text)" }}>{route.name}</div>
+                                    <div style={{ fontSize: 9, opacity: 0.5, overflow: "hidden", textOverflow: "ellipsis" }}>{route.path === "/" ? "Home" : route.path} (Auto Page)</div>
+                                </div>
+                                <div style={{ fontSize: 8, fontWeight: 800, color: "var(--primary)", background: "rgba(0, 153, 255, 0.1)", padding: "2px 6px", borderRadius: 4, letterSpacing: "0.05em" }}>NAV</div>
+                            </div>
+                        ))}
+
+                    {/* Custom Links */}
                     {((p.links as { id: string; label: string; url: string }[]) || []).map((link, idx) => (
                         <div key={link.id || idx} style={{ display: "flex", flexDirection: "column", gap: 4, padding: 8, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6 }}>
                             <div style={{ display: "flex", justifyContent: "space-between" }}>

@@ -10,6 +10,7 @@ export function FooterBlock({ block }: BlockProps) {
     const layoutObj = useEditorStore((s) => s.page?.theme?.layout) || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
     const isPreview = React.useContext(PreviewContext);
     const handleLink = useLinkHandler();
+    const focusSubItem = useEditorStore((s) => s.focusSubItem);
 
 
     const rawBg = (p.bgColor as string) || "#0f172a";
@@ -67,7 +68,10 @@ export function FooterBlock({ block }: BlockProps) {
     const Logo = () => (
         <a 
             href="/" 
-            onClick={(e) => handleLink("/", e)}
+            onClick={(e) => {
+                handleLink("/", e);
+                if (!isPreview) focusSubItem(block.id, "Brand & Content");
+            }}
             style={{ 
                 fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em",
                 color: "inherit", textDecoration: "none", cursor: "pointer",
