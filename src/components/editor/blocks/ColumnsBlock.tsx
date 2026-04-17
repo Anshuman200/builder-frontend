@@ -4,7 +4,7 @@ import React from "react";
 import { useDroppable } from "@dnd-kit/core";
 
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, ChildBlockWrapper, SortableBlockGroup } from "./shared";
+import { PreviewContext, BlockProps, ChildBlockWrapper, SortableBlockGroup, DropZoneStrip } from "./shared";
 
 function ColumnDropZone({ zoneId, blocks, label, flexBasis }: { zoneId: string; blocks: Block[]; label: string; flexBasis: string }) {
     const isPreview = React.useContext(PreviewContext);
@@ -33,8 +33,13 @@ function ColumnDropZone({ zoneId, blocks, label, flexBasis }: { zoneId: string; 
                     {blocks.map((child) => <ChildBlockWrapper key={child.id} block={child} />)}
                 </SortableBlockGroup>
             ) : !isPreview ? (
-                <div style={{ height: "100%", minHeight: 80, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: isOver ? "#6366f1" : "#94a3b8", fontWeight: 500, padding: 8, textAlign: "center" }}>
-                    {isOver ? "Drop here" : label}
+                <div style={{ padding: 12 }}>
+                    <DropZoneStrip
+                        zoneId={zoneId}
+                        childProp={zoneId.startsWith("col-0") ? "col0" : "col1"}
+                        hasChildren={false}
+                        emptyLabel={label}
+                    />
                 </div>
             ) : null}
         </div>

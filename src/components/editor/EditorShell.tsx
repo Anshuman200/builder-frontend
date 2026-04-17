@@ -164,7 +164,8 @@ export default function EditorShell() {
 
       // If it's not being dropped at the very end of the root canvas, move it to the precise target
       if (overId !== "canvas-root") {
-        moveBlock(newBlock.id, targetId, position, childProp);
+        const movePos = position === "replace" ? "after" : position;
+        moveBlock(newBlock.id, targetId, movePos, childProp);
       }
       selectBlock(newBlock.id);
     } else if (data?.type === "section" && data.templateId) {
@@ -176,7 +177,8 @@ export default function EditorShell() {
         addBlock(newSectionRoot);
 
         if (overId !== "canvas-root") {
-          moveBlock(newSectionRoot.id, targetId, position, childProp);
+          const movePos = position === "replace" ? "after" : position;
+          moveBlock(newSectionRoot.id, targetId, movePos, childProp);
         }
         selectBlock(newSectionRoot.id);
       }

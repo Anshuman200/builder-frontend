@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { Carousel as AntCarousel } from "antd";
 import type { Block } from "@/types";
-import { PreviewContext, ChildBlockWrapper, type BlockProps, SortableBlockGroup } from "./shared";
+import { PreviewContext, ChildBlockWrapper, type BlockProps, SortableBlockGroup, DropZoneStrip } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 
 export function CarouselBlock({ block }: BlockProps) {
@@ -146,41 +146,47 @@ export function CarouselBlock({ block }: BlockProps) {
         }
       `}</style>
       <div id={`carousel-${block.id}`} className="w-full relative" style={{ height: height, overflow: 'hidden' }}>
-        <AntCarousel {...carouselConfig}>
-          {isPreview ? (
-            childBlocks.map((slideBlock: Block, index: number) => (
-              <div key={slideBlock.id}>
-                <div
-                  className="w-full flex flex-col justify-center"
-                  style={{ height: height }}
-                >
-                  <ChildBlockWrapper block={slideBlock} />
-                </div>
-              </div>
-            ))
-          ) : (
-            <SortableBlockGroup blocks={childBlocks}>
-              {childBlocks.map((slideBlock: Block, index: number) => (
+        {!isPreview && childBlocks.length === 0 ? (
+          <div style={{ padding: 20 }}>
+            <DropZoneStrip zoneId={`carousel-${block.id}`} hasChildren={false} emptyLabel="Drag blocks to add slides" />
+          </div>
+        ) : (
+          <AntCarousel {...carouselConfig}>
+            {isPreview ? (
+              childBlocks.map((slideBlock: Block, index: number) => (
                 <div key={slideBlock.id}>
                   <div
-                    className={`w-full flex flex-col ${isBottomDots ? 'justify-end' : 'justify-center'} border border-dashed border-white/10 rounded-xl bg-white/5`}
-                    style={{
-                      padding: isBottomDots ? "10px 20px 60px" : "10px 20px 30px",
-                      height: height,
-                    }}
+                    className="w-full flex flex-col justify-center"
+                    style={{ height: height }}
                   >
-                    <div className="text-[10px] text-zinc-500 font-bold mb-4 uppercase tracking-wider text-center pt-3 pointer-events-none opacity-50">
-                      Slide {index + 1}
-                    </div>
-                    <div className={`flex flex-col justify-center ${isBottomDots ? '' : 'flex-1'}`}>
-                      <ChildBlockWrapper block={slideBlock} />
-                    </div>
+                    <ChildBlockWrapper block={slideBlock} />
                   </div>
                 </div>
-              ))}
-            </SortableBlockGroup>
-          )}
-        </AntCarousel>
+              ))
+            ) : (
+              <SortableBlockGroup blocks={childBlocks}>
+                {childBlocks.map((slideBlock: Block, index: number) => (
+                  <div key={slideBlock.id}>
+                    <div
+                      className={`w-full flex flex-col ${isBottomDots ? 'justify-end' : 'justify-center'} border border-dashed border-white/10 rounded-xl bg-white/5`}
+                      style={{
+                        padding: isBottomDots ? "10px 20px 60px" : "10px 20px 30px",
+                        height: height,
+                      }}
+                    >
+                      <div className="text-[10px] text-zinc-500 font-bold mb-4 uppercase tracking-wider text-center pt-3 pointer-events-none opacity-50">
+                        Slide {index + 1}
+                      </div>
+                      <div className={`flex flex-col justify-center ${isBottomDots ? '' : 'flex-1'}`}>
+                        <ChildBlockWrapper block={childBlocks[index]} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </SortableBlockGroup>
+            )}
+          </AntCarousel>
+        )}
       </div>
     </div>
   );

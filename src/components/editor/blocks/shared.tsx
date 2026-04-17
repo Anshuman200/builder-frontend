@@ -261,24 +261,22 @@ export function DropZoneStrip({
             onClick={(e) => {
                 e.stopPropagation();
 
-                // If explicit childProp is provided, use it. 
-                // Otherwise fallback to legacy parsing logic.
-                if (childProp) {
-                    openBlockPicker({ id: zoneId, position: "inside", childProp }, "elements");
-                    return;
-                }
-
-                // Parse zoneId: "hero-id", "container-id", or "col-0-id"
+                // 1. Determine the actual block ID (cleaning prefixes if necessary)
+                let targetId = zoneId;
                 const colMatch = zoneId.match(/^col-([01])-(.+)$/);
-                const childMatch = zoneId.match(/^(?:hero|container|wave|features)-(.+)$/);
+                const childMatch = zoneId.match(/^(?:hero|container|wave|features|carousel)-(.+)$/);
 
-                if (colMatch) {
-                    openBlockPicker({ id: colMatch[2], position: "inside", childProp: `col${colMatch[1]}` }, "elements");
-                } else if (childMatch) {
-                    openBlockPicker({ id: childMatch[1], position: "inside", childProp: "childBlocks" }, "elements");
-                } else {
-                    openBlockPicker({ id: zoneId, position: "inside", childProp: "childBlocks" }, "elements");
+                if (colMatch) targetId = colMatch[2];
+                else if (childMatch) targetId = childMatch[1];
+
+                // 2. Determine the child property
+                let effectiveChildProp = childProp;
+                if (!effectiveChildProp) {
+                    if (colMatch) effectiveChildProp = `col${colMatch[1]}`;
+                    else effectiveChildProp = "childBlocks";
                 }
+
+                openBlockPicker({ id: targetId, position: "inside", childProp: effectiveChildProp }, "elements");
             }}
             style={{
                 width: "100%",
