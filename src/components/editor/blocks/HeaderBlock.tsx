@@ -87,17 +87,26 @@ export function HeaderBlock({ block }: BlockProps) {
     );
 
     const routes = useEditorStore((s) => s.page?.routes) || [];
-    const dynamicLinks = routes
-        .filter(r => r.showInHeader !== false)
-        .map(r => ({ id: r.id, label: r.name, url: r.path }));
+    const autoRoutes = routes.filter(r => r.showInHeader !== false);
+    
+    // 1. Resolve explicitly ordered links from block props
+    const resolvedLinks = (links as any[]).map(l => {
+        if (l.isAuto) {
+            const route = autoRoutes.find(r => r.id === l.routeId);
+            if (!route) return null; // Filter out if no longer marked for header
+            return { id: route.id, label: route.name, url: route.path };
+        }
+        return l;
+    }).filter(Boolean) as { id: string, label: string, url: string }[];
 
-    // Combine static links with dynamic ones, avoiding duplicates by path
-    const mergedLinks = [...links];
-    dynamicLinks.forEach(dl => {
-        if (!mergedLinks.find(l => l.url === dl.url)) {
-            mergedLinks.push(dl);
+    // 2. Automatically append any visible routes that aren't in the sorted list yet
+    autoRoutes.forEach(r => {
+        if (!resolvedLinks.find(l => l.id === r.id)) {
+            resolvedLinks.push({ id: r.id, label: r.name, url: r.path });
         }
     });
+
+    const mergedLinks = resolvedLinks;
 
     // ── Nav style props (from Properties Panel) ──────────────────────────────
     const navActiveStyle = (p.navActiveStyle as string) || "underline";

@@ -48,17 +48,26 @@ export function FooterBlock({ block }: BlockProps) {
     const linkGroups = (p.linkGroups as { id: string; heading: string; links: { id: string; label: string; url: string }[] }[]) || [];
 
     const routes = useEditorStore((s) => s.page?.routes) || [];
-    const dynamicLinks = routes
-        .filter(r => !!r.showInFooter)
-        .map(r => ({ id: r.id, label: r.name, url: r.path }));
+    const autoRoutes = routes.filter(r => !!r.showInFooter);
     
-    // Combine static links with dynamic ones, avoiding duplicates by path
-    const mergedLinks = [...links];
-    dynamicLinks.forEach(dl => {
-        if (!mergedLinks.find(l => l.url === dl.url)) {
-            mergedLinks.push(dl);
+    // 1. Resolve explicitly ordered links from block props
+    const resolvedLinks = (links as any[]).map(l => {
+        if (l.isAuto) {
+            const route = autoRoutes.find(r => r.id === l.routeId);
+            if (!route) return null; // Filter out if no longer marked for footer
+            return { id: route.id, label: route.name, url: route.path };
+        }
+        return l;
+    }).filter(Boolean) as { id: string, label: string, url: string }[];
+
+    // 2. Automatically append any visible routes that aren't in the sorted list yet
+    autoRoutes.forEach(r => {
+        if (!resolvedLinks.find(l => l.id === r.id)) {
+            resolvedLinks.push({ id: r.id, label: r.name, url: r.path });
         }
     });
+
+    const mergedLinks = resolvedLinks;
 
     const NavLink = ({ link }: { link: { id: string; label: string; url: string } }) => {
         const handleNavClick = (e: React.MouseEvent) => { handleLink(link.url, e); };

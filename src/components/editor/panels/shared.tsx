@@ -16,6 +16,13 @@ import { ColorPicker, Dropdown, Popover, Switch, Tooltip } from "antd";
 import MediaPicker from "../MediaPicker";
 import PillSegmented from "../../ui/PillSegmented";
 
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Bars2Icon } from "@heroicons/react/20/solid";
+
+export { arrayMove };
+
 export type { Block, EditorPage };
 export { useEditorStore };
 
@@ -723,6 +730,89 @@ export function Section({ title, children }: { title: string; children: React.Re
     );
 }
 
+// ─── Reorderable List Primitives ───────────────────────────────────────────
+
+export function SortableList<T extends { id: string }>({ 
+    items, 
+    onReorder, 
+    onUpdate, 
+    onDelete, 
+    renderItemContent 
+}: { 
+    items: T[], 
+    onReorder: (activeId: string, overId: string) => void,
+    onUpdate?: (idx: number, data: Partial<T>) => void,
+    onDelete?: (idx: number) => void,
+    renderItemContent: (item: T, index: number) => React.ReactNode 
+}) {
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+    
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+            onReorder(active.id as string, over.id as string);
+        }
+    };
+
+    return (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={items.map(l => l.id)} strategy={verticalListSortingStrategy}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {items.map((item, idx) => (
+                        <SortableItem 
+                            key={item.id} 
+                            id={item.id} 
+                            index={idx}
+                            onDelete={onDelete ? () => onDelete(idx) : undefined}
+                        >
+                            {renderItemContent(item, idx)}
+                        </SortableItem>
+                    ))}
+                </div>
+            </SortableContext>
+        </DndContext>
+    );
+}
+
+function SortableItem({ id, index, children, onDelete }: { id: string, index: number, children: React.ReactNode, onDelete?: () => void }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+    const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 20 : 1, position: "relative" as any, opacity: isDragging ? 0.6 : 1 };
+
+    return (
+        <div ref={setNodeRef} style={{ 
+            ...style, 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: 4, 
+            padding: "10px 12px", 
+            background: "var(--surface)", 
+            border: "1px solid var(--border)", 
+            borderRadius: 8, 
+            boxShadow: isDragging ? "0 8px 20px rgba(0,0,0,0.15)" : "none",
+            transition: "all 0.2s ease"
+        }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div {...attributes} {...listeners} style={{ cursor: "grab", color: "var(--text-muted)", display: "flex", alignItems: "center", padding: "2px" }} title="Drag to reorder">
+                        <Bars2Icon style={{ width: 14, height: 14 }} />
+                    </div>
+                </div>
+                {onDelete && (
+                    <button 
+                        onClick={onDelete} 
+                        style={{ background: "transparent", border: "none", color: "var(--error, #ef4444)", cursor: "pointer", fontSize: 16, padding: "0 4px", opacity: 0.6, display: "flex", alignItems: "center" }} 
+                        onMouseEnter={e => e.currentTarget.style.opacity = "1"} 
+                        onMouseLeave={e => e.currentTarget.style.opacity = "0.6"}
+                    >
+                        &times;
+                    </button>
+                )}
+            </div>
+            {children}
+        </div>
+    );
+}
+
 // ─── Property Groups ─────────────────────────────────────────────────────────
 
 export interface PropertyGroupProps {
@@ -872,5 +962,5 @@ export function InputFields({ p, up, prefix = "input" }: PropertyGroupProps) {
     );
 }
 
-// ─── Export AnimationPanel ───────────────────────────────────────────────────
-export * from "./AnimationPanel";
+// ─── Export constants / types ──────────────────────────────────────────────────
+// AnimationPanel should be imported directly from ./AnimationPanel.tsx to avoid circular deps

@@ -2,13 +2,15 @@ import type { Block } from "@/types";
 // components/editor/blocks/AccordionBlock.tsx
 import React, { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { ChildBlockWrapper } from "./shared";
+import { ChildBlockWrapper, PreviewContext } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 
 export default function AccordionBlock({ block }: { block: Block }) {
     const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
+    const focusSubItem = useEditorStore((s) => s.focusSubItem);
+    const isPreview = React.useContext(PreviewContext);
 
     // Fallback to defaults if properties are missing
     const items = Array.isArray(block.props.items) ? block.props.items : [];
@@ -99,7 +101,9 @@ export default function AccordionBlock({ block }: { block: Block }) {
                 {items.map((item: any, index: number) => {
                     const isOpen = !!openItems[item.id];
                     return (
-                        <div key={item.id} style={getVariantStyles(index, items.length)}>
+                        <div key={item.id} style={getVariantStyles(index, items.length)}
+                            onClick={() => !isPreview && focusSubItem(block.id, index)}
+                        >
                             {/* Header (Clickable) */}
                             <div
                                 onClick={(e) => toggleItem(item.id, e)}

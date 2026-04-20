@@ -23,6 +23,7 @@ export { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, Bord
 import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPanel, VideoPanel, ColumnsPanel, WavePanel, CarouselPanel, GridPanel } from "./panels/BasicPanels";
 import { ButtonPanel, HeaderPanel, FooterPanel } from "./panels/LayoutPanels";
 import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel, AccordionPanel, StatsPanel, ChartPanel, LegalPanel, DeleteAccountPanel } from "./panels/ContentPanels";
+import { GalleryPanel } from "./panels/GalleryPanel";
 
 // ─── Friendly label map ──────────────────────────────────────────────────────
 const BLOCK_LABEL_MAP: Record<string, string> = {
@@ -211,6 +212,7 @@ export default function PropertiesPanel() {
             {selectedBlock.type === "wave" && <WavePanel block={selectedBlock} />}
             {selectedBlock.type === "carousel" && <CarouselPanel block={selectedBlock} />}
             {selectedBlock.type === "grid" && <GridPanel block={selectedBlock} />}
+            {selectedBlock.type === "masonry" && <GalleryPanel block={selectedBlock} />}
             {selectedBlock.type === "stats" && <StatsPanel block={selectedBlock} />}
             {selectedBlock.type === "chart" && <ChartPanel block={selectedBlock} />}
             {selectedBlock.type === "deleteAccount" && <DeleteAccountPanel block={selectedBlock} />}

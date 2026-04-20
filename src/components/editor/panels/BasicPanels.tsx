@@ -3,7 +3,8 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, AnimationPanel, ToggleSwitch, AlignmentInput, PaddingInput } from "./shared";
+import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, ToggleSwitch, AlignmentInput, PaddingInput } from "./shared";
+import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { Input as AntInput } from "antd";
 import { EDITOR_FEATURES } from "@/lib/config/features";

@@ -14,6 +14,7 @@ export function StatsBlock({ block }: BlockProps) {
   const isPreview = React.useContext(PreviewContext);
   const theme = useEditorStore((s) => s.page?.theme);
   const viewMode = useEditorStore((s) => s.viewMode);
+  const focusSubItem = useEditorStore((s) => s.focusSubItem);
 
   const layout = (p.layout as string) || "grid";
   const columns = Number(p.columns || 4);
@@ -68,6 +69,7 @@ export function StatsBlock({ block }: BlockProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
+              onClick={() => !isPreview && focusSubItem(block.id, idx)}
               className={cn(
                 "flex flex-col relative group transition-all duration-300",
                 layout === "kpi" ? "items-start text-left" : "items-center text-center",

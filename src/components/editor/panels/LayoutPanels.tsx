@@ -3,7 +3,8 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, AnimationPanel, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput } from "./shared";
+import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove, PaddingFields } from "./shared";
+import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
 
@@ -51,7 +52,7 @@ export function ButtonPanel({ block }: { block: Block }) {
 }
 
 export function HeaderPanel({ block }: { block: Block }) {
-    const { updateBlock, page } = useEditorStore();
+    const { updateBlock, page, updateRoute } = useEditorStore();
     const routes = page?.routes || [];
     const p = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
@@ -67,10 +68,8 @@ export function HeaderPanel({ block }: { block: Block }) {
                 <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
                 <Field label="Text/Link Color"><ColorInput value={(p.textColor as string) || "#0f172a"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
-            <Section title="Padding (Responsive)">
-                <PaddingInput label="Desktop" value={(p.padding as string) || ""} onChange={(v) => up("padding", v)} placeholder="16px 32px" />
-                <PaddingInput label="Tablet" value={(p.tabletPadding as string) || ""} onChange={(v) => up("tabletPadding", v)} placeholder="same as desktop" />
-                <PaddingInput label="Mobile" value={(p.mobilePadding as string) || ""} onChange={(v) => up("mobilePadding", v)} placeholder="same as tablet" />
+            <Section title="Section Padding (Responsive)">
+                <PaddingFields p={p} up={up} />
             </Section>
             <Section title="Brand (Logo)">
                 <Field label="Logo Type"><SelectInput value={(p.logoType as string) || "text"} onChange={(v) => up("logoType", v)} options={[{ label: "Text Only", value: "text" }, { label: "Image", value: "image" }]} /></Field>
@@ -92,33 +91,97 @@ export function HeaderPanel({ block }: { block: Block }) {
                 </>)}
             </Section>
             <Section title="Navigation Links">
-                <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Dynamic links from your Pages and custom links.</div>
+                <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Dynamic links from your Pages and custom links. Drag to reorder.</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {/* Automatic Links from Routes */}
-                    {(routes || [])
-                        .filter(r => r.showInHeader !== false)
-                        .map(route => (
-                            <div key={route.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", background: "rgba(255,255,255,0.03)", border: "1px dashed var(--border)", borderRadius: 8, opacity: 0.9 }}>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text)" }}>{route.name}</div>
-                                    <div style={{ fontSize: 9, opacity: 0.5, overflow: "hidden", textOverflow: "ellipsis" }}>{route.path === "/" ? "Home" : route.path} (Auto Page)</div>
-                                </div>
-                                <div style={{ fontSize: 8, fontWeight: 800, color: "var(--primary)", background: "rgba(0, 153, 255, 0.1)", padding: "2px 6px", borderRadius: 4, letterSpacing: "0.05em" }}>NAV</div>
-                            </div>
-                        ))}
+                    {(() => {
+                        const autoRoutes = (routes || []).filter(r => r.showInHeader !== false);
+                        const currentLinks = (p.links as any[]) || [];
+                        
+                        // Merge logic: ensure all visible routes are present in the list
+                        let unified = [...currentLinks];
+                        autoRoutes.forEach(r => {
+                            if (!unified.find(l => l.routeId === r.id)) {
+                                unified.push({ id: r.id, routeId: r.id, isAuto: true });
+                            }
+                        });
 
-                    {/* Custom Links */}
-                    {((p.links as { id: string; label: string; url: string }[]) || []).map((link, idx) => (
-                        <div key={link.id || idx} style={{ display: "flex", flexDirection: "column", gap: 4, padding: 8, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                <span style={{ fontSize: 10, fontWeight: 600 }}>Link {idx + 1}</span>
-                                <button onClick={() => { const nL = [...((p.links as any[]) || [])]; nL.splice(idx, 1); up("links", nL); }} style={{ background: "transparent", border: "none", color: "var(--error, red)", cursor: "pointer", fontSize: 12 }}>&times;</button>
-                            </div>
-                            <input value={link.label} onChange={(e) => { const nL = (p.links as any[]) || []; up("links", nL.map((l, i) => i === idx ? { ...l, label: e.target.value } : l)); }} placeholder="Label" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
-                            <LinkInput value={link.url} onChange={(v) => { const nL = (p.links as any[]) || []; up("links", nL.map((l, i) => i === idx ? { ...l, url: v } : l)); }} placeholder="URL (e.g. /about)" />
-                        </div>
-                    ))}
-                    <button onClick={() => { const nL = [...((p.links as any[]) || [])]; nL.push({ id: crypto.randomUUID(), label: "New Link", url: "#" }); up("links", nL); }} style={{ padding: "6px 0", background: "var(--primary-light)", color: "var(--primary)", border: "none", borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>+ Add Nav Link</button>
+                        // Filter to only show currently visible routes and all custom links
+                        const displayItems = unified.filter(l => {
+                            if (!l.isAuto) return true;
+                            return autoRoutes.some(r => r.id === l.routeId);
+                        });
+
+                        return (
+                            <SortableList
+                                items={displayItems}
+                                onReorder={(activeId, overId) => {
+                                    const oldIndex = displayItems.findIndex((l) => l.id === activeId);
+                                    const newIndex = displayItems.findIndex((l) => l.id === overId);
+                                    const next = arrayMove(displayItems, oldIndex, newIndex);
+                                    up("links", next, true);
+                                }}
+                                onDelete={(idx) => {
+                                    const item = displayItems[idx];
+                                    if (item.isAuto && item.routeId) {
+                                        updateRoute(item.routeId, { showInHeader: false });
+                                    }
+                                    const next = [...displayItems];
+                                    next.splice(idx, 1);
+                                    up("links", next, true);
+                                }}
+                                renderItemContent={(item, idx) => {
+                                    if (item.isAuto) {
+                                        const route = autoRoutes.find(r => r.id === item.routeId);
+                                        if (!route) return null;
+                                        return (
+                                            <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text)" }}>{route.name}</div>
+                                                    <div style={{ fontSize: 9, opacity: 0.5, overflow: "hidden", textOverflow: "ellipsis" }}>{route.path === "/" ? "Home" : route.path} (Auto Page)</div>
+                                                </div>
+                                                <div style={{ fontSize: 8, fontWeight: 800, color: "var(--primary)", background: "rgba(0, 153, 255, 0.1)", padding: "2px 6px", borderRadius: 4, letterSpacing: "0.05em" }}>NAV</div>
+                                            </div>
+                                        );
+                                    }
+                                    return (
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
+                                            <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.5, letterSpacing: "0.05em" }}>CUSTOM LINK</span>
+                                            <input 
+                                                value={item.label} 
+                                                onChange={(e) => {
+                                                    const next = [...displayItems];
+                                                    next[idx] = { ...next[idx], label: e.target.value };
+                                                    up("links", next);
+                                                }} 
+                                                placeholder="Label" 
+                                                style={{ fontSize: 11, fontWeight: 600, padding: "6px 8px", background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 6, outline: "none", color: "var(--text)" }} 
+                                            />
+                                            <LinkInput 
+                                                value={item.url} 
+                                                onChange={(v) => {
+                                                    const next = [...displayItems];
+                                                    next[idx] = { ...next[idx], url: v };
+                                                    up("links", next);
+                                                }} 
+                                                placeholder="URL (e.g. /about)" 
+                                            />
+                                        </div>
+                                    );
+                                }}
+                            />
+                        );
+                    })()}
+                    <button onClick={() => { 
+                        const autoRoutes = (routes || []).filter(r => r.showInHeader !== false);
+                        const currentLinks = (p.links as any[]) || [];
+                        let unified = [...currentLinks];
+                        autoRoutes.forEach(r => { if (!unified.find(l => l.routeId === r.id)) unified.push({ id: r.id, routeId: r.id, isAuto: true }); });
+                        const displayItems = unified.filter(l => !l.isAuto || autoRoutes.some(r => r.id === l.routeId));
+                        
+                        const next = [...displayItems];
+                        next.push({ id: crypto.randomUUID(), label: "New Link", url: "#" }); 
+                        up("links", next, true); 
+                    }} style={{ padding: "8px 0", background: "rgba(99,102,241,0.08)", color: "var(--primary)", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer", marginTop: 4, transition: "background 0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(99,102,241,0.12)"} onMouseLeave={e => e.currentTarget.style.background = "rgba(99,102,241,0.08)"}>+ Add Custom Link</button>
                 </div>
             </Section>
 
@@ -179,7 +242,7 @@ export function HeaderPanel({ block }: { block: Block }) {
 }
 
 export function FooterPanel({ block }: { block: Block }) {
-    const { updateBlock, page } = useEditorStore();
+    const { updateBlock, page, updateRoute } = useEditorStore();
     const routes = page?.routes || [];
     const p = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
@@ -193,10 +256,8 @@ export function FooterPanel({ block }: { block: Block }) {
                 <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#0f172a"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#f8fafc"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
-            <Section title="Padding (Responsive)">
-                <PaddingInput label="Desktop" value={(p.padding as string) || ""} onChange={(v) => up("padding", v)} placeholder="48px 32px" />
-                <PaddingInput label="Tablet" value={(p.tabletPadding as string) || ""} onChange={(v) => up("tabletPadding", v)} placeholder="32px 24px" />
-                <PaddingInput label="Mobile" value={(p.mobilePadding as string) || ""} onChange={(v) => up("mobilePadding", v)} placeholder="24px 16px" />
+            <Section title="Section Padding (Responsive)">
+                <PaddingFields p={p} up={up} />
             </Section>
             <Section title="Brand & Content">
                 <Field label="Logo Type"><SelectInput value={(p.logoType as string) || "text"} onChange={(v) => up("logoType", v)} options={[{ label: "Text Only", value: "text" }, { label: "Image", value: "image" }]} /></Field>
@@ -209,33 +270,97 @@ export function FooterPanel({ block }: { block: Block }) {
                 <Field label="Copyright"><TextInput value={(p.copyright as string) || ""} onChange={(v) => up("copyright", v)} placeholder="© 2026 Company" /></Field>
             </Section>
             <Section title="Footer Links">
-                <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)", marginBottom: 8 }}>Pages set to "Show in Footer" and custom links.</div>
+                <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)", marginBottom: 8 }}>Pages set to "Show in Footer" and custom links. Drag to reorder.</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {/* Automatic Links from Routes */}
-                    {(routes || [])
-                        .filter(r => !!r.showInFooter)
-                        .map(route => (
-                            <div key={route.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", background: "rgba(255,255,255,0.03)", border: "1px dashed var(--border)", borderRadius: 8, opacity: 0.9 }}>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text)" }}>{route.name}</div>
-                                    <div style={{ fontSize: 9, opacity: 0.5, overflow: "hidden", textOverflow: "ellipsis" }}>{route.path === "/" ? "Home" : route.path} (Auto Page)</div>
-                                </div>
-                                <div style={{ fontSize: 8, fontWeight: 800, color: "var(--primary)", background: "rgba(0, 153, 255, 0.1)", padding: "2px 6px", borderRadius: 4, letterSpacing: "0.05em" }}>NAV</div>
-                            </div>
-                        ))}
+                    {(() => {
+                        const autoRoutes = (routes || []).filter(r => !!r.showInFooter);
+                        const currentLinks = (p.links as any[]) || [];
+                        
+                        // Merge logic: ensure all visible routes are present in the list
+                        let unified = [...currentLinks];
+                        autoRoutes.forEach(r => {
+                            if (!unified.find(l => l.routeId === r.id)) {
+                                unified.push({ id: r.id, routeId: r.id, isAuto: true });
+                            }
+                        });
 
-                    {/* Custom Links */}
-                    {((p.links as { id: string; label: string; url: string }[]) || []).map((link, idx) => (
-                        <div key={link.id || idx} style={{ display: "flex", flexDirection: "column", gap: 4, padding: 8, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                <span style={{ fontSize: 10, fontWeight: 600 }}>Link {idx + 1}</span>
-                                <button onClick={() => { const nL = (p.links as any[]) || []; up("links", nL.filter((_, i) => i !== idx)); }} style={{ background: "transparent", border: "none", color: "var(--error, red)", cursor: "pointer", fontSize: 12 }}>&times;</button>
-                            </div>
-                            <input value={link.label} onChange={(e) => { const nL = (p.links as any[]) || []; up("links", nL.map((l, i) => i === idx ? { ...l, label: e.target.value } : l)); }} placeholder="Label" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
-                            <LinkInput value={link.url} onChange={(v) => { const nL = (p.links as any[]) || []; up("links", nL.map((l, i) => i === idx ? { ...l, url: v } : l)); }} placeholder="URL (e.g. #contact)" />
-                        </div>
-                    ))}
-                    <button onClick={() => { const nL = (p.links as any[]) || []; up("links", [...nL, { id: crypto.randomUUID(), label: "New Link", url: "#" }]); }} style={{ padding: "6px 0", background: "var(--primary-light)", color: "var(--primary)", border: "none", borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>+ Add Link</button>
+                        // Filter to only show currently visible routes and all custom links
+                        const displayItems = unified.filter(l => {
+                            if (!l.isAuto) return true;
+                            return autoRoutes.some(r => r.id === l.routeId);
+                        });
+
+                        return (
+                            <SortableList
+                                items={displayItems}
+                                onReorder={(activeId, overId) => {
+                                    const oldIndex = displayItems.findIndex((l) => l.id === activeId);
+                                    const newIndex = displayItems.findIndex((l) => l.id === overId);
+                                    const next = arrayMove(displayItems, oldIndex, newIndex);
+                                    up("links", next, true);
+                                }}
+                                onDelete={(idx) => {
+                                    const item = displayItems[idx];
+                                    if (item.isAuto && item.routeId) {
+                                        updateRoute(item.routeId, { showInFooter: false });
+                                    }
+                                    const next = [...displayItems];
+                                    next.splice(idx, 1);
+                                    up("links", next, true);
+                                }}
+                                renderItemContent={(item, idx) => {
+                                    if (item.isAuto) {
+                                        const route = autoRoutes.find(r => r.id === item.routeId);
+                                        if (!route) return null;
+                                        return (
+                                            <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text)" }}>{route.name}</div>
+                                                    <div style={{ fontSize: 9, opacity: 0.5, overflow: "hidden", textOverflow: "ellipsis" }}>{route.path === "/" ? "Home" : route.path} (Auto Page)</div>
+                                                </div>
+                                                <div style={{ fontSize: 8, fontWeight: 800, color: "var(--primary)", background: "rgba(0, 153, 255, 0.1)", padding: "2px 6px", borderRadius: 4, letterSpacing: "0.05em" }}>NAV</div>
+                                            </div>
+                                        );
+                                    }
+                                    return (
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
+                                            <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.5, letterSpacing: "0.05em" }}>CUSTOM LINK</span>
+                                            <input 
+                                                value={item.label} 
+                                                onChange={(e) => {
+                                                    const next = [...displayItems];
+                                                    next[idx] = { ...next[idx], label: e.target.value };
+                                                    up("links", next);
+                                                }} 
+                                                placeholder="Label" 
+                                                style={{ fontSize: 11, fontWeight: 600, padding: "6px 8px", background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 6, outline: "none", color: "var(--text)" }} 
+                                            />
+                                            <LinkInput 
+                                                value={item.url} 
+                                                onChange={(v) => {
+                                                    const next = [...displayItems];
+                                                    next[idx] = { ...next[idx], url: v };
+                                                    up("links", next);
+                                                }} 
+                                                placeholder="URL (e.g. #contact)" 
+                                            />
+                                        </div>
+                                    );
+                                }}
+                            />
+                        );
+                    })()}
+                    <button onClick={() => { 
+                        const autoRoutes = (routes || []).filter(r => !!r.showInFooter);
+                        const currentLinks = (p.links as any[]) || [];
+                        let unified = [...currentLinks];
+                        autoRoutes.forEach(r => { if (!unified.find(l => l.routeId === r.id)) unified.push({ id: r.id, routeId: r.id, isAuto: true }); });
+                        const displayItems = unified.filter(l => !l.isAuto || autoRoutes.some(r => r.id === l.routeId));
+                        
+                        const next = [...displayItems];
+                        next.push({ id: crypto.randomUUID(), label: "New Link", url: "#" }); 
+                        up("links", next, true); 
+                    }} style={{ padding: "8px 0", background: "rgba(99,102,241,0.08)", color: "var(--primary)", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer", marginTop: 4, transition: "background 0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(99,102,241,0.12)"} onMouseLeave={e => e.currentTarget.style.background = "rgba(99,102,241,0.08)"}>+ Add Custom Link</button>
                 </div>
             </Section>
 
