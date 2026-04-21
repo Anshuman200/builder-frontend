@@ -148,24 +148,27 @@ export function WaveBlock({ block }: BlockProps) {
     pointerEvents: "none"
   };
 
-  return (
-    <div style={style}>
-      <svg
-        viewBox="0 0 1440 320"
-        preserveAspectRatio="none"
-        style={svgStyle}
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          {useGradient && (
-            <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={fillColor} />
-              <stop offset="100%" stopColor={fillGradientEnd} />
-            </linearGradient>
-          )}
-        </defs>
-        <style>
-          {`
+    const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
+    const isSelected = selectedBlockId === block.id;
+
+    return (
+        <div style={style}>
+            <svg
+                viewBox="0 0 1440 320"
+                preserveAspectRatio="none"
+                style={svgStyle}
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <defs>
+                    {useGradient && (
+                        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor={fillColor} />
+                            <stop offset="100%" stopColor={fillGradientEnd} />
+                        </linearGradient>
+                    )}
+                </defs>
+                <style>
+                    {`
             @keyframes wave-pulse {
               0% { transform: scaleY(1) ${transform}; }
               100% { transform: scaleY(1.1) ${transform}; }
@@ -175,55 +178,55 @@ export function WaveBlock({ block }: BlockProps) {
               100% { transform: translateX(-50px); }
             }
           `}
-        </style>
-        {paths.map((d, i) => {
-          // Bottom-most layer = index 0, top-most = last index
-          const isTopLayer = i === paths.length - 1;
-          // Layers behind gradually fade
-          const opacity = isTopLayer ? 1 : Math.max(0.25, 0.4 + (i * 0.15));
+                </style>
+                {paths.map((d, i) => {
+                    // Bottom-most layer = index 0, top-most = last index
+                    const isTopLayer = i === paths.length - 1;
+                    // Layers behind gradually fade
+                    const opacity = isTopLayer ? 1 : Math.max(0.25, 0.4 + (i * 0.15));
 
-          // Color: top layer gets fill/gradient, back layers get secondary or a tinted version of primary
-          let currentFill: string;
-          if (isTopLayer) {
-            currentFill = useGradient ? `url(#${gradientId})` : fillColor;
-          } else {
-            currentFill = secondaryColor || fillColor;
-          }
+                    // Color: top layer gets fill/gradient, back layers get secondary or a tinted version of primary
+                    let currentFill: string;
+                    if (isTopLayer) {
+                        currentFill = useGradient ? `url(#${gradientId})` : fillColor;
+                    } else {
+                        currentFill = secondaryColor || fillColor;
+                    }
 
-          return (
-            <path
-              key={`${pattern}-${i}`}
-              fill={currentFill}
-              fillOpacity={opacity}
-              d={d}
-              style={{
-                animation: animated && !isTopLayer ? `wave-drift ${8 + i * 2}s linear infinite alternate` : "none",
-                transformOrigin: "bottom"
-              }}
-            />
-          );
-        })}
-      </svg>
+                    return (
+                        <path
+                            key={`${pattern}-${i}`}
+                            fill={currentFill}
+                            fillOpacity={opacity}
+                            d={d}
+                            style={{
+                                animation: animated && !isTopLayer ? `wave-drift ${8 + i * 2}s linear infinite alternate` : "none",
+                                transformOrigin: "bottom"
+                            }}
+                        />
+                    );
+                })}
+            </svg>
 
-      {/* Content Layer (Above the SVG contextually) */}
-      <div style={{
-        position: "relative",
-        zIndex: 1,
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-        gap: (props.contentGap as string) || "1rem"
-      }}>
-        <SortableBlockGroup blocks={childBlocks}>
-          {childBlocks.map((child: Block) => (
-            <ChildBlockWrapper key={child.id} block={child} />
-          ))}
-        </SortableBlockGroup>
-        {!isPreview && (
-          <DropZoneStrip zoneId={`wave-${block.id}`} hasChildren={childBlocks.length > 0} emptyLabel="Drag blocks inside the wave layer" />
-        )}
-      </div>
-    </div>
+            {/* Content Layer (Above the SVG contextually) */}
+            <div style={{
+                position: "relative",
+                zIndex: 1,
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                flex: 1,
+                gap: (props.contentGap as string) || "1rem"
+            }}>
+                <SortableBlockGroup blocks={childBlocks}>
+                    {childBlocks.map((child: Block) => (
+                        <ChildBlockWrapper key={child.id} block={child} />
+                    ))}
+                </SortableBlockGroup>
+                {!isPreview && (isSelected || childBlocks.length === 0) && (
+                    <DropZoneStrip zoneId={`wave-${block.id}`} hasChildren={childBlocks.length > 0} emptyLabel="Drag blocks inside the wave layer" />
+                )}
+            </div>
+        </div>
   );
 }

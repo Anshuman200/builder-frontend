@@ -19,6 +19,8 @@ export function HeroBlock({ block }: BlockProps) {
     const childBlocks = (p.childBlocks as any[]) ?? [];
 
     const viewMode = useEditorStore((s) => s.viewMode);
+    const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
+    const isSelected = selectedBlockId === block.id;
     const layoutObj = useEditorStore((s) => s.page?.theme?.layout) || { maxWidth: "100dvw", paddingX: "32px", tabletPaddingX: "24px", mobilePaddingX: "16px" };
     const isPreview = React.useContext(PreviewContext);
 
@@ -107,7 +109,9 @@ export function HeroBlock({ block }: BlockProps) {
                             <ChildBlockWrapper key={child.id} block={child} outlineColor="rgba(255,255,255,0.9)" outlineColorHover="rgba(255,255,255,0.5)" />
                         ))}
                     </SortableBlockGroup>
-                    <DropZoneStrip zoneId={`hero-${block.id}`} hasChildren={childBlocks.length > 0} stripColor="#ffffff" emptyLabel="Drag blocks here to build your Hero" />
+                    {!isPreview && (isSelected || childBlocks.length === 0) && (
+                        <DropZoneStrip zoneId={`hero-${block.id}`} hasChildren={childBlocks.length > 0} stripColor="#ffffff" emptyLabel="Drag blocks here to build your Hero" />
+                    )}
                 </div>
             </section>
         </>

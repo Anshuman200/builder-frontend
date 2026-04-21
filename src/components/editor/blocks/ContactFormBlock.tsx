@@ -240,7 +240,7 @@ export function ContactFormBlock({ block }: BlockProps) {
                     width: "100%",
                 }}
             >
-                <div onClick={(e) => { e.stopPropagation(); selectBlock(block.id); focusSubItem(block.id, "Card Style"); }}>
+                <div onClick={(e) => { e.stopPropagation(); selectBlock(block.id); focusSubItem(block.id, "Inside Text (Optional)"); }}>
                     {titleText && (
                         <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.8rem", fontWeight: 800, color: titleColor }}>{titleText}</h2>
                     )}
@@ -423,6 +423,9 @@ export function ContactFormBlock({ block }: BlockProps) {
                 #block-${block.id} textarea::placeholder { 
                     color: ${inputPlaceholderColor}; 
                     opacity: 1;
+                }
+                #block-${block.id} .ant-form-item-explain-error {
+                    text-align: left !important;
                 }
             `}</style>
         </>

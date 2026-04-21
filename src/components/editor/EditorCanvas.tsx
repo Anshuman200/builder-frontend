@@ -263,12 +263,25 @@ const DropZone = memo(function DropZone({
 
             {blocks.map((block, index) => {
               const isFooter = block.id === footerId;
+              const isHeader = block.id === headerId;
               const isLast = index === blocks.length - 1;
+
+              // Invitation logic:
+              // 1. If route is empty and we just rendered the header, show invitation
+              const showInviteEmptyRoute = isHeader && routeBlocksLength === 0;
+
+              // 2. If route has content and we're at the bottom (before footer or at very end)
               const showInviteBeforeFooter = isFooter && routeBlocksLength > 0;
               const showInviteAtBottom = isLast && !footerId && routeBlocksLength > 0;
 
               return (
                 <React.Fragment key={block.id}>
+                  {showInviteEmptyRoute && (
+                    <div style={{ padding: "40px 0" }}>
+                      <AddSectionInvitation isOver={isOver && dropInfo.overId === "canvas-root"} isFirst />
+                    </div>
+                  )}
+
                   {showInviteBeforeFooter && (
                     <AddSectionInvitation isOver={isOver && dropInfo.overId === "canvas-root"} />
                   )}
@@ -284,11 +297,6 @@ const DropZone = memo(function DropZone({
 
                   {showInviteAtBottom && (
                     <AddSectionInvitation isOver={isOver && dropInfo.overId === "canvas-root"} />
-                  )}
-
-                  {/* Empty state after header if no content */}
-                  {(block.id === headerId && routeBlocksLength === 0) && (
-                    <EmptyState isOver={isOver} />
                   )}
                 </React.Fragment>
               );
@@ -577,7 +585,7 @@ function EmptyState({ isOver }: { isOver: boolean }) {
   );
 }
 
-function AddSectionInvitation({ isOver }: { isOver: boolean }) {
+function AddSectionInvitation({ isOver, isFirst }: { isOver: boolean, isFirst?: boolean }) {
   const openBlockPicker = useEditorStore(s => s.openBlockPicker);
   return (
     <div
@@ -585,22 +593,22 @@ function AddSectionInvitation({ isOver }: { isOver: boolean }) {
         openBlockPicker({ id: "canvas-root", position: "after" }, "sections")
       }
       className={`
-    mx-6 mt-10 mb-20 p-6
+    mx-6 ${isFirst ? 'mt-4' : 'mt-10'} mb-10 p-6
     flex flex-col items-center justify-center gap-2
     rounded-xl border-2 border-dashed cursor-pointer
     transition-all duration-200
 
     ${isOver
-          ? "border-indigo-500 bg-indigo-500/5"
+          ? "border-indigo-500 bg-indigo-500/5 rotate-0 scale-[1.02]"
           : "border-[rgba(150,150,150,0.2)] bg-transparent"
         }
 
-    hover:border-indigo-500 hover:bg-indigo-500/5
+    hover:border-indigo-500 hover:bg-indigo-500/5 hover:scale-[1.01]
   `}
     >
       <PlusIcon className={`w-5 h-5 ${isOver ? "text-indigo-500" : "text-slate-400"}`} />
       <span className={`text-[13px] font-semibold tracking-[0.02em] ${isOver ? "text-indigo-500" : "text-slate-500"}`}>
-        Add more sections
+        {isFirst ? "Add your first section" : "Add more sections"}
       </span>
     </div>
   );

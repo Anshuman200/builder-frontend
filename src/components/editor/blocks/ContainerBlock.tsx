@@ -11,7 +11,10 @@ export function ContainerBlock({ block }: BlockProps) {
     const bgImage = p.bgImage as string;
 
     const viewMode = useEditorStore((s) => s.viewMode);
+    const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
+    const isSelected = selectedBlockId === block.id;
     const isPreview = React.useContext(PreviewContext);
+
     const background = bgImage
         ? (bgImage.startsWith("linear-gradient") || bgImage.startsWith("radial-gradient")
             ? bgImage
@@ -71,7 +74,9 @@ export function ContainerBlock({ block }: BlockProps) {
                 <SortableBlockGroup blocks={childBlocks}>
                     {childBlocks.map((child) => (<ChildBlockWrapper key={child.id} block={child} />))}
                 </SortableBlockGroup>
-                <DropZoneStrip zoneId={`container-${block.id}`} hasChildren={childBlocks.length > 0} emptyLabel="Drag blocks into this container" />
+                {!isPreview && (isSelected || childBlocks.length === 0) && (
+                    <DropZoneStrip zoneId={`container-${block.id}`} hasChildren={childBlocks.length > 0} emptyLabel="Drag blocks into this container" />
+                )}
             </div>
         </>
     );
