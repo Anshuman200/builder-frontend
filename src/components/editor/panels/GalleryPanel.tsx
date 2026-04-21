@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, SelectInput, ColorInput, MediaInput, ToggleSwitch, PaddingFields, SortableList, arrayMove, TextInputWithUnit } from "./shared";
+import { Section, Field, TextInput, SelectInput, ColorInput, MediaInput, ToggleSwitch, PaddingFields, SortableList, arrayMove, TextInputWithUnit, rectSortingStrategy } from "./shared";
 import { AnimationPanel } from "./AnimationPanel";
 
 export function GalleryPanel({ block }: { block: Block }) {
@@ -13,6 +13,12 @@ export function GalleryPanel({ block }: { block: Block }) {
 
     return (
         <>
+            <Section title="Columns">
+                <Field label="Desktop"><SelectInput value={String(p.columns || "5")} onChange={(v) => up("columns", v, true)} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }, { label: "5 Columns", value: "5" }, { label: "6 Columns", value: "6" }]} /></Field>
+                <Field label="Tablet"><SelectInput value={String(p.columnsTablet || "3")} onChange={(v) => up("columnsTablet", v, true)} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>
+                <Field label="Mobile"><SelectInput value={String(p.columnsMobile || "1")} onChange={(v) => up("columnsMobile", v, true)} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }]} /></Field>
+            </Section>
+
             <Section title="Spacing">
                 <Field label="Item Spacing (Gap)">
                     <TextInputWithUnit value={String(p.gap ?? "")} onChange={(v) => up("gap", v, true)} placeholder="8" />
@@ -21,67 +27,70 @@ export function GalleryPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Gallery Images">
-                <div className="grid grid-cols-2">
-                    {(() => {
-                        const childBlocks = (p.childBlocks as Block[]) || [];
-                        const mediaItems = childBlocks.filter(b => b.type !== 'media-picker');
-                        const pickerItems = childBlocks.filter(b => b.type === 'media-picker');
+                {(() => {
+                    const childBlocks = (p.childBlocks as Block[]) || [];
+                    const mediaItems = childBlocks.filter(b => b.type !== 'media-picker');
+                    const pickerItems = childBlocks.filter(b => b.type === 'media-picker');
 
-                        return (
-                            <>
-                                <SortableList
-                                    items={mediaItems}
-                                    onReorder={(activeId, overId) => {
-                                        const oldIndex = mediaItems.findIndex((img) => img.id === activeId);
-                                        const newIndex = mediaItems.findIndex((img) => img.id === overId);
-                                        const reorderedMedia = arrayMove(mediaItems, oldIndex, newIndex);
-                                        up("childBlocks", [...reorderedMedia, ...pickerItems], true);
-                                    }}
-                                    onDelete={(idx) => {
-                                        const itemToDelete = mediaItems[idx];
-                                        const nC = childBlocks.filter(b => b.id !== itemToDelete.id);
-                                        up("childBlocks", nC, true);
-                                    }}
-                                    renderItemContent={(child, idx) => {
-                                        const cp = child.props as any;
-                                        const url = cp.src || cp.url || "";
+                    return (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                            <SortableList
+                                items={mediaItems}
+                                containerClassName="grid grid-cols-2 gap-2"
+                                strategy={rectSortingStrategy}
+                                onReorder={(activeId, overId) => {
+                                    const oldIndex = mediaItems.findIndex((img) => img.id === activeId);
+                                    const newIndex = mediaItems.findIndex((img) => img.id === overId);
+                                    const reorderedMedia = arrayMove(mediaItems, oldIndex, newIndex);
+                                    up("childBlocks", [...reorderedMedia, ...pickerItems], true);
+                                }}
+                                onDelete={(idx) => {
+                                    const itemToDelete = mediaItems[idx];
+                                    const nC = childBlocks.filter(b => b.id !== itemToDelete.id);
+                                    up("childBlocks", nC, true);
+                                }}
+                                renderItemContent={(child, idx) => {
+                                    const cp = child.props as any;
+                                    const url = cp.src || cp.url || "";
 
-                                        return (
-                                            <div className="">
-                                                <MediaInput
-                                                    value={url}
-                                                    onChange={(v) => {
-                                                        const nC = childBlocks.map(b => b.id === child.id ? { ...b, props: { ...b.props, src: v } } : b);
-                                                        up("childBlocks", nC);
-                                                    }}
-                                                />
-                                            </div>
-                                        );
-                                    }}
-                                />
-                                <button
-                                    onClick={() => {
-                                        const newImageBlock: Block = {
-                                            id: crypto.randomUUID(),
-                                            type: "image",
-                                            props: {
-                                                src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&q=80&w=800",
-                                                caption: "",
-                                                width: "100%",
-                                                borderRadius: "12px",
-                                                objectFit: "cover"
-                                            }
-                                        };
-                                        up("childBlocks", [...mediaItems, newImageBlock, ...pickerItems], true);
-                                    }}
-                                    style={{ padding: "8px 0", background: "rgba(99,102,241,0.08)", color: "var(--primary)", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer", marginTop: 4 }}
-                                >
-                                    + Add Image
-                                </button>
-                            </>
-                        );
-                    })()}
-                </div>
+                                    return (
+                                        <div style={{ position: "relative" }}>
+                                            <MediaInput
+                                                value={url}
+                                                variant="compact"
+                                                onChange={(v) => {
+                                                    const nC = childBlocks.map(b => b.id === child.id ? { ...b, props: { ...b.props, src: v } } : b);
+                                                    up("childBlocks", nC);
+                                                }}
+                                            />
+                                        </div>
+                                    );
+                                }}
+                            />
+
+                            {/* Add Image Button (Full Width) */}
+                            <button
+                                onClick={() => {
+                                    const newImageBlock: Block = {
+                                        id: crypto.randomUUID(),
+                                        type: "image",
+                                        props: {
+                                            src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&q=80&w=800",
+                                            caption: "",
+                                            width: "100%",
+                                            borderRadius: "12px",
+                                            objectFit: "cover"
+                                        }
+                                    };
+                                    up("childBlocks", [...mediaItems, newImageBlock, ...pickerItems], true);
+                                }}
+                                style={{ padding: "8px 0", background: "rgba(99,102,241,0.08)", color: "#6366f1", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer" }}
+                            >
+                                + Add Image
+                            </button>
+                        </div>
+                    );
+                })()}
             </Section>
 
             <Section title="Styling">

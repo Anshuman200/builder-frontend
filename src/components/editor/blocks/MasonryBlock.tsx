@@ -20,6 +20,9 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
         padding = "24px",
         bgColor = "transparent",
         childBlocks = [],
+        columns,
+        columnsTablet,
+        columnsMobile,
     } = block.props as any;
 
     const gap = typeof rawGap === "number" ? `${rawGap}px` : rawGap;
@@ -30,8 +33,13 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
     const mediaItems = items.filter((item: Block) => item.type !== "media-picker");
     const pickerItems = items.filter((item: Block) => item.type === "media-picker");
 
-    // Responsive column count — more columns = smaller images
-    const colCount = viewMode === "mobile" ? 3 : viewMode === "tablet" ? 4 : 5;
+    // Responsive column counts
+    const cols = Number(columns) || 5;
+    const colsTablet = Number(columnsTablet) || 3;
+    const colsMobile = Number(columnsMobile) || 1;
+
+    // Active column count for live view based on viewMode
+    const colCount = viewMode === "mobile" ? colsMobile : viewMode === "tablet" ? colsTablet : cols;
 
     return (
         <div
@@ -57,20 +65,20 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
                         {isPreview && (
                             <style>{`
                                 .masonry-preview-grid {
-                                    column-count: 5;
+                                    column-count: ${cols};
                                     column-gap: ${gap};
                                 }
                                 @media (max-width: 1280px) {
-                                    .masonry-preview-grid { column-count: 4; }
+                                    .masonry-preview-grid { column-count: ${cols}; }
                                 }
                                 @media (max-width: 1024px) {
-                                    .masonry-preview-grid { column-count: 3; }
+                                    .masonry-preview-grid { column-count: ${colsTablet}; }
                                 }
                                 @media (max-width: 768px) {
-                                    .masonry-preview-grid { column-count: 2; }
+                                    .masonry-preview-grid { column-count: ${colsTablet}; }
                                 }
                                 @media (max-width: 480px) {
-                                    .masonry-preview-grid { column-count: 1; }
+                                    .masonry-preview-grid { column-count: ${colsMobile}; }
                                 }
                             `}</style>
                         )}

@@ -17,12 +17,12 @@ import MediaPicker from "../MediaPicker";
 import PillSegmented from "../../ui/PillSegmented";
 
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
+import { SortableContext, verticalListSortingStrategy, rectSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Bars2Icon } from "@heroicons/react/20/solid";
 import { IconPicker } from "../IconPicker";
 
-export { arrayMove };
+export { arrayMove, rectSortingStrategy };
 
 export type { Block, EditorPage };
 export { useEditorStore };
@@ -77,7 +77,7 @@ export const PANEL_COLORS = {
 
 // ─── MediaInput ───────────────────────────────────────────────────────────────
 
-export function MediaInput({ value, onChange, placeholder, type = "image" }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: "image" | "video" }) {
+export function MediaInput({ value, onChange, placeholder, type = "image", variant = "default" }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: "image" | "video"; variant?: "default" | "compact" }) {
     const [pickerOpen, setPickerOpen] = React.useState(false);
 
     const isVideo = type === "video" || (value && (value?.endsWith(".mp4") || value?.includes("youtube.com") || value?.includes("vimeo.com")));
@@ -112,16 +112,16 @@ export function MediaInput({ value, onChange, placeholder, type = "image" }: { v
                 <div style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 12,
-                    padding: 10,
+                    gap: variant === "compact" ? 8 : 12,
+                    padding: variant === "compact" ? 6 : 10,
                     background: PANEL_COLORS.inputBg,
                     border: `1px solid ${PANEL_COLORS.inputBorder}`,
                     borderRadius: 10,
                     overflow: "hidden"
                 }}>
                     <div style={{
-                        width: 48,
-                        height: 48,
+                        width: variant === "compact" ? 32 : 48,
+                        height: variant === "compact" ? 32 : 48,
                         borderRadius: 6,
                         background: "#121212",
                         display: "flex",
@@ -132,26 +132,53 @@ export function MediaInput({ value, onChange, placeholder, type = "image" }: { v
                         border: "1px solid rgba(255,255,255,0.05)"
                     }}>
                         {isVideo ? (
-                            <VideoCameraIcon style={{ width: 20, height: 20, color: PANEL_COLORS.primary }} />
+                            <VideoCameraIcon style={{ width: variant === "compact" ? 14 : 20, height: variant === "compact" ? 14 : 20, color: PANEL_COLORS.primary }} />
                         ) : (
                             <img src={value} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { (e.target as any).src = "https://placehold.co/100x100?text=Error"; }} />
                         )}
                     </div>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="flex flex-col gap-1">
-                            <button
-                                onClick={() => setPickerOpen(true)}
-                                style={{ background: "none", border: "none", padding: 0, color: PANEL_COLORS.primary, fontSize: 11, cursor: "pointer", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
-                            >
-                                <ArrowPathIcon style={{ width: 12, height: 12 }} /> Change
-                            </button>
-                            <button
-                                onClick={() => onChange("")}
-                                style={{ background: "none", border: "none", padding: 0, color: "#ef4444", fontSize: 11, cursor: "pointer", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
-                            >
-                                <TrashIcon style={{ width: 12, height: 12 }} /> Remove
-                            </button>
+                        <div className="flex flex-col gap-1 items-start">
+                            {variant === "compact" ? (
+                                <div className="flex gap-2">
+                                    <Tooltip title="Change">
+                                        <button
+                                            onClick={() => setPickerOpen(true)}
+                                            style={{ background: "none", border: "none", padding: 4, color: PANEL_COLORS.primary, cursor: "pointer", display: "flex", alignItems: "center", borderRadius: 4 }}
+                                            onMouseEnter={e => e.currentTarget.style.background = "rgba(0,153,255,0.1)"}
+                                            onMouseLeave={e => e.currentTarget.style.background = "none"}
+                                        >
+                                            <ArrowPathIcon style={{ width: 14, height: 14 }} />
+                                        </button>
+                                    </Tooltip>
+                                    <Tooltip title="Remove">
+                                        <button
+                                            onClick={() => onChange("")}
+                                            style={{ background: "none", border: "none", padding: 4, color: "#ef4444", cursor: "pointer", display: "flex", alignItems: "center", borderRadius: 4 }}
+                                            onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.1)"}
+                                            onMouseLeave={e => e.currentTarget.style.background = "none"}
+                                        >
+                                            <TrashIcon style={{ width: 14, height: 14 }} />
+                                        </button>
+                                    </Tooltip>
+                                </div>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => setPickerOpen(true)}
+                                        style={{ background: "none", border: "none", padding: 0, color: PANEL_COLORS.primary, fontSize: 11, cursor: "pointer", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
+                                    >
+                                        <ArrowPathIcon style={{ width: 12, height: 12 }} /> Change
+                                    </button>
+                                    <button
+                                        onClick={() => onChange("")}
+                                        style={{ background: "none", border: "none", padding: 0, color: "#ef4444", fontSize: 11, cursor: "pointer", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
+                                    >
+                                        <TrashIcon style={{ width: 12, height: 12 }} /> Remove
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -953,13 +980,17 @@ export function SortableList<T extends { id: string }>({
     onReorder,
     onUpdate,
     onDelete,
-    renderItemContent
+    renderItemContent,
+    containerClassName = "",
+    strategy = verticalListSortingStrategy
 }: {
     items: T[],
     onReorder: (activeId: string, overId: string) => void,
     onUpdate?: (idx: number, data: Partial<T>) => void,
     onDelete?: (idx: number) => void,
-    renderItemContent: (item: T, index: number) => React.ReactNode
+    renderItemContent: (item: T, index: number) => React.ReactNode,
+    containerClassName?: string,
+    strategy?: any
 }) {
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -972,8 +1003,15 @@ export function SortableList<T extends { id: string }>({
 
     return (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={items.map(l => l.id)} strategy={verticalListSortingStrategy}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <SortableContext items={items.map(l => l.id)} strategy={strategy}>
+                <div
+                    className={containerClassName}
+                    style={{
+                        display: !containerClassName ? "flex" : undefined,
+                        flexDirection: !containerClassName ? "column" : undefined,
+                        gap: !containerClassName ? 8 : undefined
+                    }}
+                >
                     {items.map((item, idx) => (
                         <SortableItem
                             key={item.id}
