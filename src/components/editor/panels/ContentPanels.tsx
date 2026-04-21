@@ -8,8 +8,9 @@ import {
     TypographyFields, LayoutFields, CardFields, ButtonFields, ImageFields, PaddingFields,
     InputFields,
     ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove,
-    TextInputWithUnit, useSubItemFocus
+    TextInputWithUnit, useSubItemFocus, PrefixInput
 } from "./shared";
+import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, PlusIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "../IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
@@ -75,29 +76,34 @@ export function FeaturesPanel({ block }: { block: Block }) {
                             <div
                                 ref={(el) => { itemRefs.current[idx] = el; }}
                                 className={flashIdx === idx ? "subitem-highlight" : undefined}
-                                style={{ display: "flex", flexDirection: "column", gap: 4, transition: "background 0.2s" }}
+                                style={{ background: "#222", borderRadius: 6, overflow: "hidden", border: "1px solid #333", transition: "all 0.3s" }}
                             >
-                                <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.5, letterSpacing: "0.05em", marginBottom: 2 }}>FEATURE {idx + 1}</span>
-                                <input value={feature.title} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], title: e.target.value }; up("features", nF); }} placeholder="Feature Title" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
-                                <textarea value={feature.description} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], description: e.target.value }; up("features", nF); }} placeholder="Feature Description" rows={2} style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)", resize: "vertical" }} />
-                                <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-                                    <div style={{ flex: 1 }}>
-                                        <SelectInput
-                                            value={feature.iconType || "icon"}
-                                            onChange={(v) => {
-                                                const nF = [...((p.features as any[]) || [])];
-                                                nF[idx] = { ...nF[idx], iconType: v };
-                                                up("features", nF);
-                                            }}
-                                            options={[{ label: "Icon", value: "icon" }, { label: "Image", value: "image" }]}
-                                        />
-                                    </div>
-                                    <div style={{ flex: 2 }}>
-                                        {feature.iconType === "image" ? (
-                                            <MediaInput value={feature.image || ""} onChange={(v) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], image: v }; up("features", nF); }} placeholder="Image URL" />
-                                        ) : (
-                                            <IconPicker value={feature.icon || "Star"} onChange={(v) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], icon: v }; up("features", nF); }} />
-                                        )}
+                                <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "6px 8px", background: "#282828", borderBottom: "1px solid #333" }}>
+                                    <span style={{ fontSize: 9, fontWeight: 700, color: "var(--primary)", opacity: 0.8 }}>FEATURE {idx + 1}</span>
+                                    <span style={{ fontSize: 10, fontWeight: 700, color: "#fff", marginLeft: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{feature.title || "New Feature"}</span>
+                                </div>
+                                <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
+                                    <input value={feature.title} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], title: e.target.value }; up("features", nF); }} placeholder="Feature Title" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
+                                    <textarea value={feature.description} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], description: e.target.value }; up("features", nF); }} placeholder="Feature Description" rows={2} style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)", resize: "vertical" }} />
+                                    <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                                        <div style={{ flex: 1 }}>
+                                            <SelectInput
+                                                value={feature.iconType || "icon"}
+                                                onChange={(v) => {
+                                                    const nF = [...((p.features as any[]) || [])];
+                                                    nF[idx] = { ...nF[idx], iconType: v };
+                                                    up("features", nF);
+                                                }}
+                                                options={[{ label: "Icon", value: "icon" }, { label: "Image", value: "image" }]}
+                                            />
+                                        </div>
+                                        <div style={{ flex: 2 }}>
+                                            {feature.iconType === "image" ? (
+                                                <MediaInput value={feature.image || ""} onChange={(v) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], image: v }; up("features", nF); }} placeholder="Image URL" />
+                                            ) : (
+                                                <IconPicker value={feature.icon || "Star"} onChange={(v) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], icon: v }; up("features", nF); }} />
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -111,12 +117,40 @@ export function FeaturesPanel({ block }: { block: Block }) {
     );
 }
 
+const SOCIAL_PLATFORMS = [
+    { label: "LinkedIn", value: "linkedin" },
+    { label: "Twitter / X", value: "x" },
+    { label: "GitHub", value: "github" },
+    { label: "Instagram", value: "instagram" },
+    { label: "Facebook", value: "facebook" },
+    { label: "Dribbble", value: "dribbble" },
+    { label: "YouTube", value: "youtube" },
+    { label: "TikTok", value: "tiktok" },
+    { label: "Email", value: "email" },
+    { label: "Website", value: "website" },
+    { label: "Custom", value: "custom" }
+];
+
+const DEFAULT_SOCIAL_URLS: Record<string, string> = {
+    linkedin: "https://www.linkedin.com/in/",
+    x: "https://x.com/",
+    github: "https://github.com/",
+    instagram: "https://www.instagram.com/",
+    facebook: "https://www.facebook.com/",
+    dribbble: "https://dribbble.com/",
+    youtube: "https://www.youtube.com/",
+    tiktok: "https://www.tiktok.com/@",
+    email: "mailto:",
+    website: "https://",
+    twitter: "https://x.com/"
+};
+
 export function TeamPanel({ block }: { block: Block }) {
-    const { updateBlock } = useEditorStore();
+    const { updateBlock, focusSubItem } = useEditorStore();
     const p = block.props as any;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
-    const { flashIdx, itemRefs } = useSubItemFocus(block.id);
+    const { flashIdx, itemRefs, focusedIdx } = useSubItemFocus(block.id);
 
     return (
         <>
@@ -168,8 +202,17 @@ export function TeamPanel({ block }: { block: Block }) {
                         renderItemContent={(member, idx) => (
                             <div
                                 ref={(el) => { itemRefs.current[idx] = el; }}
-                                className={flashIdx === idx ? "subitem-highlight" : undefined}
-                                style={{ background: "#222", borderRadius: 6, overflow: "hidden", border: "1px solid #333", transition: "all 0.3s" }}
+                                onClick={() => focusSubItem(block.id, idx)}
+                                className={flashIdx === idx ? "subitem-highlight" : ""}
+                                style={{ 
+                                    background: "#222", 
+                                    borderRadius: 6, 
+                                    overflow: "hidden", 
+                                    border: focusedIdx === idx ? "1px solid #0099ff" : "1px solid #333",
+                                    boxShadow: focusedIdx === idx ? "0 0 10px rgba(0,153,255,0.1)" : "none",
+                                    transition: "all 0.3s",
+                                    cursor: "pointer"
+                                }}
                             >
                                 <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "6px 8px", background: "#282828", borderBottom: "1px solid #333" }}>
                                     {member.image ? (
@@ -185,6 +228,122 @@ export function TeamPanel({ block }: { block: Block }) {
                                     <TextInput value={member.role} onChange={(v) => up("members", p.members.map((m: any, i: number) => i === idx ? { ...m, role: v } : m))} placeholder="Role" />
                                     <TextareaInput value={member.description} onChange={(v) => up("members", p.members.map((m: any, i: number) => i === idx ? { ...m, description: v } : m))} placeholder="Bio" rows={2} />
                                     <MediaInput value={member.image} onChange={(v) => up("members", p.members.map((m: any, i: number) => i === idx ? { ...m, image: v } : m))} />
+
+                                    <div style={{ marginTop: 4, paddingTop: 8, borderTop: "1px solid #333" }}>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                                            <span style={{ fontSize: 9, fontWeight: 700, color: "#666", textTransform: "uppercase" }}>Social Links</span>
+                                            <Dropdown
+                                                menu={{
+                                                    items: SOCIAL_PLATFORMS
+                                                        .filter(plat => plat.value === "custom" || !Object.keys(member.socials || {}).some(k => k.split("-")[0] === plat.value))
+                                                        .map(platform => ({
+                                                            key: platform.value,
+                                                            label: platform.label,
+                                                            onClick: () => {
+                                                                const nM = [...((p.members as any[]) || [])];
+                                                                const m = { ...nM[idx] };
+                                                                const currentSocials = { ...(m.socials || {}) };
+                                                                const key = platform.value === "custom" ? `custom-${Date.now()}` : `${platform.value}-${Date.now()}`;
+                                                                currentSocials[key] = platform.value === "custom" 
+                                                                    ? { url: "", icon: "Globe" } 
+                                                                    : (DEFAULT_SOCIAL_URLS[platform.value] || "");
+                                                                m.socials = currentSocials;
+                                                                nM[idx] = m;
+                                                                up("members", nM, true);
+                                                            }
+                                                        })),
+                                                    style: { background: "#1e1e1e", border: "1px solid #333" }
+                                                }}
+                                                trigger={["click"]}
+                                            >
+                                                <button style={{ padding: "2px 6px", background: "rgba(0,153,255,0.1)", color: "#0099ff", border: "none", borderRadius: 4, fontSize: 9, fontWeight: 700, cursor: "pointer" }}>+ Add</button>
+                                            </Dropdown>
+                                        </div>
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                            {Object.entries((member.socials as Record<string, any>) || {}).map(([key, val]) => {
+                                                const isCustom = key.startsWith("custom-") || (typeof val === "object" && val.icon);
+                                                const baseKey = key.includes("-") ? key.split("-")[0] : key;
+                                                const platform = SOCIAL_PLATFORMS.find(p => p.value === baseKey) || (isCustom ? SOCIAL_PLATFORMS.find(p => p.value === "custom") : null);
+                                                const href = typeof val === "string" ? val : val?.url || "";
+                                                const prefix = DEFAULT_SOCIAL_URLS[baseKey] || "";
+                                                
+                                                // Strip prefix for display
+                                                const username = (href && prefix && href.startsWith(prefix)) ? href.replace(prefix, "") : href;
+
+                                                return (
+                                                    <div key={key} style={{ display: "flex", flexDirection: "column", gap: 4, padding: 6, background: "#1a1a1a", borderRadius: 4, border: "1px solid #2a2a2a" }}>
+                                                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                                            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                                                <span style={{ fontSize: 10, fontWeight: 600, color: "#888" }}>{platform?.label || (baseKey.charAt(0).toUpperCase() + baseKey.slice(1))}</span>
+                                                                {isCustom && (
+                                                                    <IconPicker
+                                                                        value={typeof val === "object" ? val.icon : "Globe"}
+                                                                        onChange={(v) => {
+                                                                            const nM = [...((p.members as any[]) || [])];
+                                                                            nM[idx] = { ...nM[idx], socials: { ...nM[idx].socials, [key]: { url: href, icon: v } } };
+                                                                            up("members", nM);
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                            <button
+                                                                onClick={() => {
+                                                                    const nM = [...((p.members as any[]) || [])];
+                                                                    const m = { ...nM[idx] };
+                                                                    const s = { ...m.socials };
+                                                                    delete s[key];
+                                                                    m.socials = s;
+                                                                    nM[idx] = m;
+                                                                    up("members", nM, true);
+                                                                }}
+                                                                style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", padding: 0, display: "flex", alignItems: "center" }}
+                                                            >
+                                                                <TrashIcon style={{ width: 12, height: 12 }} />
+                                                            </button>
+                                                        </div>
+                                                        {prefix ? (
+                                                            <PrefixInput
+                                                                prefix={prefix.replace("https://", "").replace("www.", "")}
+                                                                value={username}
+                                                                onChange={(v) => {
+                                                                    const nM = [...((p.members as any[]) || [])];
+                                                                    // If value starts with http, assume full URL paste, otherwise prepend prefix
+                                                                    const fullUrl = v.startsWith("http") ? v : `${prefix}${v}`;
+                                                                    nM[idx] = {
+                                                                        ...nM[idx],
+                                                                        socials: {
+                                                                            ...nM[idx].socials,
+                                                                            [key]: typeof val === "object" ? { ...val, url: fullUrl } : fullUrl
+                                                                        }
+                                                                    };
+                                                                    up("members", nM);
+                                                                }}
+                                                                placeholder="username"
+                                                                style={{ fontSize: 10, height: 22 }}
+                                                            />
+                                                        ) : (
+                                                            <TextInput
+                                                                value={href}
+                                                                onChange={(v) => {
+                                                                    const nM = [...((p.members as any[]) || [])];
+                                                                    nM[idx] = {
+                                                                        ...nM[idx],
+                                                                        socials: {
+                                                                            ...nM[idx].socials,
+                                                                            [key]: typeof val === "object" ? { ...val, url: v } : v
+                                                                        }
+                                                                    };
+                                                                    up("members", nM);
+                                                                }}
+                                                                placeholder="https://..."
+                                                                style={{ fontSize: 10, height: 22 }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -485,11 +644,16 @@ export function AccordionPanel({ block }: { block: Block }) {
                             <div
                                 ref={(el) => { itemRefs.current[idx] = el; }}
                                 className={flashIdx === idx ? "subitem-highlight" : undefined}
-                                style={{ display: "flex", flexDirection: "column", gap: 4, transition: "background 0.2s" }}
+                                style={{ background: "#222", borderRadius: 6, overflow: "hidden", border: "1px solid #333", transition: "all 0.3s" }}
                             >
-                                <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.5, letterSpacing: "0.05em", marginBottom: 2 }}>ITEM {idx + 1}</span>
-                                <input value={item.title} onChange={(e) => { const nT = [...((p.items as any[]) || [])]; nT[idx] = { ...nT[idx], title: e.target.value }; up("items", nT); }} placeholder="Question / Title" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
-                                <textarea value={item.content} onChange={(e) => { const nT = [...((p.items as any[]) || [])]; nT[idx] = { ...nT[idx], content: e.target.value }; up("items", nT); }} placeholder="Answer / Content" rows={3} style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)", resize: "vertical" }} />
+                                <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "6px 8px", background: "#282828", borderBottom: "1px solid #333" }}>
+                                    <span style={{ fontSize: 9, fontWeight: 700, color: "var(--primary)", opacity: 0.8 }}>ITEM {idx + 1}</span>
+                                    <span style={{ fontSize: 10, fontWeight: 700, color: "#fff", marginLeft: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title || "New Item"}</span>
+                                </div>
+                                <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
+                                    <input value={item.title} onChange={(e) => { const nT = [...((p.items as any[]) || [])]; nT[idx] = { ...nT[idx], title: e.target.value }; up("items", nT); }} placeholder="Question / Title" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
+                                    <textarea value={item.content} onChange={(e) => { const nT = [...((p.items as any[]) || [])]; nT[idx] = { ...nT[idx], content: e.target.value }; up("items", nT); }} placeholder="Answer / Content" rows={3} style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)", resize: "vertical" }} />
+                                </div>
                             </div>
                         )}
                     />
@@ -584,15 +748,20 @@ export function StatsPanel({ block }: { block: Block }) {
                             <div
                                 ref={(el) => { itemRefs.current[idx] = el; }}
                                 className={flashIdx === idx ? "subitem-highlight" : undefined}
-                                style={{ display: "flex", flexDirection: "column", gap: 4, transition: "background 0.2s" }}
+                                style={{ background: "#222", borderRadius: 6, overflow: "hidden", border: "1px solid #333", transition: "all 0.3s" }}
                             >
-                                <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", marginBottom: 2 }}>METRIC {idx + 1}</span>
-                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 4 }}>
-                                    <TextInput value={item.value} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], value: v }; up("items", nI); }} placeholder="Value" />
-                                    <TextInput value={item.unit} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], unit: v }; up("items", nI); }} placeholder="Unit" />
+                                <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "6px 8px", background: "#282828", borderBottom: "1px solid #333" }}>
+                                    <span style={{ fontSize: 9, fontWeight: 700, color: "var(--primary)", opacity: 0.8 }}>METRIC {idx + 1}</span>
+                                    <span style={{ fontSize: 10, fontWeight: 700, color: "#fff", marginLeft: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label || "New Metric"}</span>
                                 </div>
-                                <TextInput value={item.label} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], label: v }; up("items", nI); }} placeholder="Label" style={{ marginBottom: 4 }} />
-                                <IconPicker value={item.icon || "Zap"} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], icon: v }; up("items", nI); }} />
+                                <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                                        <TextInput value={item.value} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], value: v }; up("items", nI); }} placeholder="Value" />
+                                        <TextInput value={item.unit} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], unit: v }; up("items", nI); }} placeholder="Unit" />
+                                    </div>
+                                    <TextInput value={item.label} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], label: v }; up("items", nI); }} placeholder="Label" />
+                                    <IconPicker value={item.icon || "Zap"} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], icon: v }; up("items", nI); }} />
+                                </div>
                             </div>
                         )}
                     />

@@ -35,6 +35,9 @@ export { useEditorStore };
 export function useSubItemFocus(blockId: string) {
     const itemRefs = React.useRef<(HTMLDivElement | null)[]>([]);
     const [flashIdx, setFlashIdx] = React.useState<number | null>(null);
+    const subItemFocus = useEditorStore(s => s.subItemFocus);
+
+    const focusedIdx = (subItemFocus?.blockId === blockId) ? subItemFocus.index : null;
 
     React.useEffect(() => {
         let prev = useEditorStore.getState().subItemFocus;
@@ -44,11 +47,9 @@ export function useSubItemFocus(blockId: string) {
                 prev = f;
                 const el = itemRefs.current[f.index];
                 if (el) {
-                    // Small delay to ensure the DOM is ready if we just switched blocks
                     setTimeout(() => {
                         el.scrollIntoView({ behavior: "smooth", block: "center" });
                         setFlashIdx(f.index);
-                        // Clear flash after animation duration (sync with globals.css)
                         setTimeout(() => setFlashIdx(null), 2500);
                     }, 50);
                 }
@@ -56,7 +57,7 @@ export function useSubItemFocus(blockId: string) {
         });
     }, [blockId]);
 
-    return { flashIdx, itemRefs };
+    return { flashIdx, itemRefs, focusedIdx };
 }
 
 // ─── Theme constants ──────────────────────────────────────────────────────────
@@ -217,11 +218,10 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
     const currentUnit = units.find(u => u.value === unitValue) ? unitValue : "px";
 
     const handleNumChange = (v: string) => {
-        if (v === "") {
-            onChange("");
-            return;
+        const reg = /^-?\d*(\.\d*)?$/;
+        if (reg.test(v) || v === '' || v === '-') {
+            onChange(`${v}${currentUnit}`);
         }
-        onChange(`${v}${currentUnit}`);
     };
 
     const handleUnitChange = (u: string) => {
@@ -248,6 +248,23 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
                 dropdownStyle={{ background: PANEL_COLORS.sectionBg, border: `1px solid ${PANEL_COLORS.border}` }}
                 options={units}
                 suffixIcon={<ChevronDownIcon style={{ width: 10, height: 10 }} />}
+            />
+        </Space.Compact>
+    );
+}
+
+// ─── PrefixInput ────────────────────────────────────────────────────────────────
+export function PrefixInput({ prefix, value, onChange, placeholder, style }: { prefix: string; value: string; onChange: (v: string) => void; placeholder?: string; style?: React.CSSProperties }) {
+    return (
+        <Space.Compact>
+            {prefix}
+            <Input
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                size="small"
+                style={{ fontSize: 11, background: PANEL_COLORS.inputBg, color: PANEL_COLORS.text, ...style }}
+                className="prefix-input-custom"
             />
         </Space.Compact>
     );
@@ -723,7 +740,7 @@ export function AlignmentInput({ value, onChange, label, type = "horizontal", op
 
     const items = (options || defaultOptions).map(opt => ({
         label: (
-            <Tooltip title={opt.label}>
+            <Tooltip styles={{ container: { backgroundColor: "#222" } }} title={opt.label}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", padding: "2px 0" }}>
                     {ALIGN_ICONS[opt.value] || opt.label}
                 </div>

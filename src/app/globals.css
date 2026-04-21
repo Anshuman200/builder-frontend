@@ -19,8 +19,9 @@
   --theme-switcher-bg: #ffffff;
   --theme-switcher-color: #0f172a;
 
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
+  --primary: #0099ff;
+  --primary-hover: #0077cc;
+
   --primary-light: #eef2ff;
   --primary-foreground: #ffffff;
 
@@ -84,6 +85,28 @@
   --sidebar-accent-foreground: hsl(240 5.9% 10%);
   --sidebar-border: hsl(220 13% 91%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+/* Ant Design PrefixInput Overrides */
+.prefix-input-custom .ant-input-group-addon {
+  background: #1a1a1a !important;
+  color: #666 !important;
+  border-color: #333 !important;
+  font-size: 10px !important;
+  padding: 0 6px !important;
+  font-weight: 600;
+}
+
+.prefix-input-custom .ant-input {
+  background: #222 !important;
+  color: #fff !important;
+  border-color: #333 !important;
+  font-size: 11px !important;
+}
+
+.prefix-input-custom .ant-input:focus {
+  border-color: #0099ff !important;
+  box-shadow: none !important;
 }
 
 /* ─── Dark Mode ──────────────────────────────────────────────────────────────── */

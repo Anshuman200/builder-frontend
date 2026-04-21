@@ -43,7 +43,7 @@ function SocialLinks({ socials, color, justify }: { socials: Record<string, Soci
                     >
                         {customIcon
                             ? <img src={customIcon} alt={key} style={{ width: 18, height: 18, borderRadius: 2, objectFit: "contain" }} />
-                            : (BRAND_ICONS[key] || BRAND_ICONS.website)}
+                            : (BRAND_ICONS[key.includes("-") ? key.split("-")[0] : key] || BRAND_ICONS.website)}
                     </a>
                 );
             })}
@@ -55,6 +55,7 @@ export function TeamBlock({ block }: BlockProps) {
     const p = block.props;
     const viewMode = useEditorStore((s) => s.viewMode);
     const focusSubItem = useEditorStore((s) => s.focusSubItem);
+    const subItemFocus = useEditorStore((s) => s.subItemFocus);
     const isPreview = React.useContext(PreviewContext);
     const LIGHT_BGS = ["#ffffff", "#fff", "#f8fafc", "#f1f5f9"];
     const LIGHT_TEXTS = ["#1e293b", "#0f172a", "#111111", "#000", "#000000"];
@@ -193,29 +194,29 @@ export function TeamBlock({ block }: BlockProps) {
                     {layout === "compact" && (
                         <div className={`team-grid-container-${block.id}`}>
                             {members.map((member: any, idx: number) => {
-                                const baseStyle: React.CSSProperties = { 
-                                    display: "flex", 
-                                    alignItems: "center", 
-                                    gap: "1rem", 
-                                    padding: "1rem 1.25rem", 
-                                    boxSizing: "border-box", 
+                                const baseStyle: React.CSSProperties = {
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "1rem",
+                                    padding: "1rem 1.25rem",
+                                    boxSizing: "border-box",
                                     flexWrap: "wrap",
                                     borderRadius: cardStyle !== 'none' ? cardRadius : 0,
                                     background: cardStyle !== 'none' ? cardBg : 'transparent',
                                 };
-                                const raisedStyle = cardStyle === 'raised' ? { boxShadow: cardShadow } : {};
-                                const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid #e2e8f0` } : {};
+                                const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+                                const focusedStyle = isFocused ? { border: "2px solid #0099ff", boxShadow: "0 0 15px rgba(0,153,255,0.3)", zIndex: 10 } : {};
 
                                 return (
-                                    <div key={`mc-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle }}
+                                    <div key={`mc-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle, ...focusedStyle }}
                                         onClick={() => !isPreview && focusSubItem(block.id, idx)}
                                     >
                                         {member.image && (
                                             <div style={{ width: 56, height: 56, borderRadius: "50%", overflow: "hidden", position: "relative", flexShrink: 0 }}>
-                                                <Image 
-                                                    src={member.image} 
-                                                    alt={member.name} 
-                                                    fill 
+                                                <Image
+                                                    src={member.image}
+                                                    alt={member.name}
+                                                    fill
                                                     style={{ objectFit: "cover" }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
@@ -237,31 +238,36 @@ export function TeamBlock({ block }: BlockProps) {
                     {/* ── Large Cards (Alternating) ─────────────────────────────── */}
                     {layout === "large" && (
                         <div style={{ display: "flex", flexDirection: "column", gap, marginTop: title || subtitle ? "3rem" : 0 }}>
-                            {members.map((member: any, idx: number) => (
-                                <div key={`ml-${idx}`} className={idx % 2 !== 0 ? `team-large-card-reverse-${block.id}` : `team-large-card-${block.id}`}
-                                    onClick={() => !isPreview && focusSubItem(block.id, idx)}
-                                >
-                                    {member.image && (
-                                        <div style={{ width: 160, height: 160, borderRadius: imageRadius, overflow: "hidden", position: "relative", flexShrink: 0 }}>
-                                            <Image 
-                                                src={member.image} 
-                                                alt={member.name} 
-                                                fill 
-                                                style={{ objectFit: "cover" }}
-                                                unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
-                                            />
-                                        </div>
-                                    )}
-                                    <div style={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", alignItems: "inherit" }}>
-                                        <h3 style={{ fontSize: "1.5rem", fontWeight: 800, margin: "0 0 0.25rem", color: nameColor }}>{member.name}</h3>
-                                        <p style={{ margin: "0 0 1rem", fontWeight: 600, fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "0.05em", color: roleColor }}>{member.role}</p>
-                                        {member.description && <p style={{ margin: "0 0 1rem", color: descColor, lineHeight: 1.7, fontSize: "0.95rem" }}>{member.description}</p>}
-                                        {member.socials && (
-                                            <SocialLinks socials={member.socials as Record<string, SocialValue>} color={socialColor} justify="inherit" />
+                            {members.map((member: any, idx: number) => {
+                                const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+                                return (
+                                    <div key={`ml-${idx}`}
+                                        className={idx % 2 !== 0 ? `team-large-card-reverse-${block.id}` : `team-large-card-${block.id}`}
+                                        style={isFocused ? { outline: "3px solid #0099ff", boxShadow: "0 0 20px rgba(0,153,255,0.4)", zIndex: 10 } : {}}
+                                        onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                    >
+                                        {member.image && (
+                                            <div style={{ width: 160, height: 160, borderRadius: imageRadius, overflow: "hidden", position: "relative", flexShrink: 0 }}>
+                                                <Image
+                                                    src={member.image}
+                                                    alt={member.name}
+                                                    fill
+                                                    style={{ objectFit: "cover" }}
+                                                    unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
+                                                />
+                                            </div>
                                         )}
+                                        <div style={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", alignItems: "inherit" }}>
+                                            <h3 style={{ fontSize: "1.5rem", fontWeight: 800, margin: "0 0 0.25rem", color: nameColor }}>{member.name}</h3>
+                                            <p style={{ margin: "0 0 1rem", fontWeight: 600, fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "0.05em", color: roleColor }}>{member.role}</p>
+                                            {member.description && <p style={{ margin: "0 0 1rem", color: descColor, lineHeight: 1.7, fontSize: "0.95rem" }}>{member.description}</p>}
+                                            {member.socials && (
+                                                <SocialLinks socials={member.socials as Record<string, SocialValue>} color={socialColor} justify="inherit" />
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     )}
 
@@ -269,28 +275,28 @@ export function TeamBlock({ block }: BlockProps) {
                     {layout === "spotlight" && (
                         <div className={`team-grid-container-${block.id}`}>
                             {members.map((member: any, idx: number) => {
-                                const baseStyle: React.CSSProperties = { 
-                                    display: "flex", 
-                                    flexDirection: "column", 
-                                    alignItems: "center", 
+                                const baseStyle: React.CSSProperties = {
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
                                     textAlign: "center",
                                     padding: cardStyle !== 'none' ? "2rem" : "0",
                                     background: cardStyle !== 'none' ? cardBg : 'transparent',
                                     borderRadius: cardStyle !== 'none' ? cardRadius : 0,
                                 };
-                                const raisedStyle = cardStyle === 'raised' ? { boxShadow: cardShadow } : {};
-                                const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid #e2e8f0` } : {};
+                                const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+                                const focusedStyle = isFocused ? { border: "2px solid #0099ff", boxShadow: "0 0 15px rgba(0,153,255,0.3)", zIndex: 10 } : {};
 
                                 return (
-                                    <div key={`ms-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle }}
+                                    <div key={`ms-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle, ...focusedStyle }}
                                         onClick={() => !isPreview && focusSubItem(block.id, idx)}
                                     >
                                         <div style={{ width: 140, height: 140, borderRadius: "50%", overflow: "hidden", border: `4px solid #e2e8f0`, marginBottom: "1rem", position: "relative" }}>
                                             {member.image ? (
-                                                <Image 
-                                                    src={member.image} 
-                                                    alt={member.name} 
-                                                    fill 
+                                                <Image
+                                                    src={member.image}
+                                                    alt={member.name}
+                                                    fill
                                                     style={{ objectFit: "cover" }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
@@ -324,10 +330,10 @@ export function TeamBlock({ block }: BlockProps) {
                                     if (isFloat) {
                                         return (
                                             <div style={{ width: imageSize, height: imageSize, borderRadius: imageRadius, overflow: "hidden", position: "absolute", top: `calc(-${imageSize} / 2)`, left: align === "center" ? "50%" : align === "right" ? "auto" : "1.75rem", right: align === "right" ? "1.75rem" : "auto", transform: align === "center" ? "translateX(-50%)" : "none", zIndex: 2, boxShadow: "0 8px 32px #0000002a, 0 2px 8px #0000001a" }}>
-                                                <Image 
-                                                    src={member.image} 
-                                                    alt={member.name} 
-                                                    fill 
+                                                <Image
+                                                    src={member.image}
+                                                    alt={member.name}
+                                                    fill
                                                     style={{ objectFit: "cover", objectPosition: iPosition }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
@@ -337,10 +343,10 @@ export function TeamBlock({ block }: BlockProps) {
                                     if (isCover) {
                                         return (
                                             <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "hidden", zIndex: 0 }}>
-                                                <Image 
-                                                    src={member.image} 
-                                                    alt={member.name} 
-                                                    fill 
+                                                <Image
+                                                    src={member.image}
+                                                    alt={member.name}
+                                                    fill
                                                     style={{ objectFit: "cover", objectPosition: iPosition }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
@@ -350,10 +356,10 @@ export function TeamBlock({ block }: BlockProps) {
                                     }
                                     return (
                                         <div style={{ width: imageStyle === "square" ? "100%" : imageSize, height: imageStyle === "square" ? iHeight : imageSize, borderRadius: imageRadius, flexShrink: 0, marginBottom: layout === "list" ? 0 : "1.25rem", overflow: "hidden", position: "relative" }}>
-                                            <Image 
-                                                src={member.image} 
-                                                alt={member.name} 
-                                                fill 
+                                            <Image
+                                                src={member.image}
+                                                alt={member.name}
+                                                fill
                                                 style={{ objectFit: "cover", objectPosition: iPosition }}
                                                 unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
                                             />
@@ -378,16 +384,25 @@ export function TeamBlock({ block }: BlockProps) {
 
                                 const resolvedCardStyle = { ...getCardStyle(), height: cHeight, flexDirection: (layout === "list" && isEvenList && viewMode !== "mobile" ? "row-reverse" : getCardStyle().flexDirection) as React.CSSProperties["flexDirection"] };
 
+                                const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+                                const focusedStyle = isFocused ? {
+                                    border: "2px solid #0099ff",
+                                    boxShadow: "0 0 20px rgba(0,153,255,0.3)",
+                                    zIndex: 10,
+                                    transform: "scale(1.02)",
+                                    transition: "all 0.3s ease"
+                                } : { transition: "all 0.3s ease" };
+
                                 if (isFloat) {
                                     return (
                                         <div key={`member-${idx}`} style={{ paddingTop: `calc(${imageSize} / 2)`, display: "flex", flexDirection: "column" }}
                                             onClick={() => !isPreview && focusSubItem(block.id, idx)}
                                         >
-                                            <div style={{ ...resolvedCardStyle, flex: 1 }}>{imageEl}{contentEl}</div>
+                                            <div style={{ ...resolvedCardStyle, ...focusedStyle, flex: 1 }}>{imageEl}{contentEl}</div>
                                         </div>
                                     );
                                 }
-                                return (<div key={`member-${idx}`} style={resolvedCardStyle}
+                                return (<div key={`member-${idx}`} style={{ ...resolvedCardStyle, ...focusedStyle }}
                                     onClick={() => !isPreview && focusSubItem(block.id, idx)}
                                 >{imageEl}{contentEl}</div>);
                             })}
