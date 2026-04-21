@@ -924,7 +924,7 @@ export function Section({ title, children }: { title: string; children: React.Re
                 borderBottom: `1px solid ${PANEL_COLORS.border}`,
                 padding: "12px 16px",
                 transition: "background 0.5s ease",
-                background: isFocused ? "rgba(0, 153, 255, 0.08)" : "transparent",
+                background: isFocused ? "rgba(0, 153, 255, 0.03)" : "transparent",
                 position: "relative"
             }}
         >

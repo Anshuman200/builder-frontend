@@ -102,9 +102,9 @@ export default function AccordionBlock({ block }: { block: Block }) {
                 {items.map((item: any, index: number) => {
                     const isOpen = !!openItems[item.id];
                     const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === index;
-                    const focusedStyle = isFocused ? { 
-                        boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)", 
-                        zIndex: 10, 
+                    const focusedStyle = isFocused ? {
+                        boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)",
+                        zIndex: 10,
                         transform: "scale(1.01)",
                         background: 'rgba(0,153,255,0.03)'
                     } : {};
