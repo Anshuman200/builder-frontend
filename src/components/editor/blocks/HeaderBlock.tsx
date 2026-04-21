@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, useLinkHandler, useActivePath } from "./shared";
+import { PreviewContext, BlockProps, useLinkHandler, useActivePath, CommonButton } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 import Link from "next/link";
 
@@ -221,13 +221,13 @@ export function HeaderBlock({ block }: BlockProps) {
                         {!isMobile && showCta && (
                             <div className={isPreview ? `header-${block.id}-desktop-cta` : undefined} style={{ display: isMobile ? "none" : "block" }}>
                                 {showCta && ctaText && (
-                                    <a href={ctaUrl} onClick={(e) => {
-                                        handleLink(ctaUrl, e);
-                                        if (!isPreview) focusSubItem(block.id, "Call to Action (CTA)");
-                                    }} style={ctaStyle}
-                                        onMouseEnter={e => { if (ctaVariant === "outline") { e.currentTarget.style.background = ctaBgColor; e.currentTarget.style.color = ctaTextColor; } else { e.currentTarget.style.opacity = "0.9"; } }}
-                                        onMouseLeave={e => { if (ctaVariant === "outline") { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = ctaBgColor; } else { e.currentTarget.style.opacity = "1"; } }}
-                                    >{ctaText}</a>
+                                    <CommonButton
+                                        props={p}
+                                        prefix="cta"
+                                        onClick={() => {
+                                            if (!isPreview) focusSubItem(block.id, "Call to Action (CTA)");
+                                        }}
+                                    />
                                 )}
                             </div>
                         )}
@@ -239,7 +239,13 @@ export function HeaderBlock({ block }: BlockProps) {
                 <div className={isPreview ? `header-${block.id}-mobile-menu ${mobileMenuOpen ? 'open' : ''}` : undefined} style={{ position: "absolute", top: "100%", left: 0, right: 0, background: style === "transparent" ? "#ffffff" : background, color: textColor, zIndex: 40, display: "flex", flexDirection: "column", borderTop: "1px solid rgba(150,150,150,0.1)", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)", padding: "1.5rem 24px 2rem", transform: mobileMenuOpen ? "translateY(0)" : "translateY(-150%)", opacity: mobileMenuOpen ? 1 : 0, visibility: mobileMenuOpen ? "visible" : "hidden", transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, visibility 0.4s", pointerEvents: mobileMenuOpen ? "auto" : "none" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2rem" }}>
                         <NavLinksElement isMobileMenu={true} />
-                        {showCta && (<a href={ctaUrl} onClick={(e) => handleLink(ctaUrl, e)} style={{ ...ctaStyle, width: "100%", marginTop: "1rem", padding: "12px 20px" }}>{ctaText}</a>)}
+                        {showCta && (
+                            <CommonButton
+                                props={p}
+                                prefix="cta"
+                                className="mt-4"
+                            />
+                        )}
                     </div>
                 </div>
             </header>

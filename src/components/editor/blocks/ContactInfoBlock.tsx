@@ -1,9 +1,8 @@
 "use client";
 import React from "react";
 import { getIcon } from "@/lib/utils/icons";
-import type { BlockProps } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles } from "./shared";
 
 interface ContactItem {
     id: string;
@@ -61,35 +60,51 @@ export function ContactInfoBlock({ block }: BlockProps) {
                     gap,
                 }}
             >
-                {items.map((item) => {
+                {items.map((item, idx) => {
                     const Icon = getIcon(item.icon);
+                    const baseStyle = getCardStyles({
+                        props: {
+                            ...p,
+                            cardStyle: p.cardStyle || (p.itemBg ? "filled" : "none"),
+                            cardBg: p.itemBg,
+                            cardRadius: p.itemRadius,
+                            cardShadow: p.itemShadow,
+                            cardPadding: p.itemPadding,
+                        },
+                        isFocused: false, // Contact items aren't sub-item focusable in the same way yet, but we'll use base
+                    });
+
                     return (
                         <div
-                            key={item.id}
+                            key={item.id || idx}
                             style={{
+                                ...baseStyle,
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "1.25rem",
-                                padding: itemPadding,
-                                background: itemBg,
-                                borderRadius: itemRadius,
-                                border: "1px solid rgba(255,255,255,0.1)",
-                                backdropFilter: "blur(10px)",
-                                transition: "all 0.3s ease",
-                                transform: "translateZ(0)",
                             }}
-                            onMouseEnter={e => {
-                                e.currentTarget.style.transform = "translateY(-2px)";
-                                e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-                                e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-                                e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.15)";
-                            }}
-                            onMouseLeave={e => {
-                                e.currentTarget.style.transform = "translateY(0)";
-                                e.currentTarget.style.background = itemBg;
-                                e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
-                                e.currentTarget.style.boxShadow = "none";
-                            }}
+                            onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, {
+                                ...getCardStyles({
+                                    props: {
+                                        ...p,
+                                        cardStyle: p.cardStyle || (p.itemBg ? "filled" : "none"),
+                                        cardBg: p.itemBg,
+                                        cardRadius: p.itemRadius,
+                                        cardShadow: p.itemShadow,
+                                        cardPadding: p.itemPadding,
+                                    },
+                                    isHovered: true
+                                }),
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "1.25rem",
+                            })}
+                            onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, {
+                                ...baseStyle,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "1.25rem",
+                            })}
                         >
                             {showIcons && Icon && (
                                 <div

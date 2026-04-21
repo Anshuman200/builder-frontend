@@ -4,7 +4,7 @@ import Image from "next/image";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles } from "./shared";
 import { DEFAULT_THEME, hexToRgb } from "@/lib/utils/theme";
 
 export function FeaturesBlock({ block }: BlockProps) {
@@ -54,12 +54,24 @@ export function FeaturesBlock({ block }: BlockProps) {
     const editorPadding = viewMode === "mobile" ? mobilePadding : viewMode === "tablet" ? tabletPadding : desktopPadding;
     const editorCols = viewMode === "mobile" ? 1 : viewMode === "tablet" ? Math.min(2, columns) : columns;
 
-    const getCardSty = (): React.CSSProperties => {
-        const base: React.CSSProperties = { display: "flex", flexDirection: "column", alignItems: align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start", textAlign: align as any, padding: cardStyle !== "none" ? "2rem 1.75rem" : "0.5rem", borderRadius: cardStyle !== "none" ? cardRadius : 0, transition: "transform 0.2s ease, box-shadow 0.2s ease" };
-        if (cardStyle === "raised") return { ...base, background: cardBg, boxShadow: cardShadow };
-        if (cardStyle === "outlined") return { ...base, background: cardBg, border: `1.5px solid #e2e8f0` };
-        if (cardStyle === "filled") return { ...base, background: `rgba(${primaryRgb}, 0.06)` };
-        return base;
+    const getBaseCardStyle = (idx: number, isHovered?: boolean): React.CSSProperties => {
+        const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+        
+        const base = getCardStyles({
+            props: p,
+            isFocused,
+            isHovered,
+            primaryRgb,
+        });
+
+        const layoutStyle: React.CSSProperties = {
+            ...base,
+            alignItems: align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start",
+            textAlign: align as any,
+            // Ensure bento wide items are handled if called from bento
+        };
+
+        return layoutStyle;
     };
 
     const IconWrapper = ({ feature }: { feature: any }) => {
@@ -91,43 +103,21 @@ export function FeaturesBlock({ block }: BlockProps) {
     const renderGrid = () => (
         <>
             <SectionHeader />
-            {isPreview ? (
-                <div className={`features-grid-${block.id}`}>
-                    {features.map((feat, idx) => (
-                        <div key={feat.id || idx} className={`features-card-${block.id}`} style={{ display: "flex", flexDirection: "column", alignItems: align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start", textAlign: align as any }}>
+            <div style={{ display: "grid", gridTemplateColumns: `repeat(${editorCols}, 1fr)`, gap: editorCols === 1 ? "1.25rem" : gap }}>
+                {features.map((feat, idx) => {
+                    return (
+                        <div key={feat.id || idx} style={getBaseCardStyle(idx)}
+                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                            onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx, true))}
+                            onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx))}
+                        >
                             <div style={{ marginBottom: "1.25rem" }}><IconWrapper feature={feat} /></div>
                             <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.5rem 0" }}>{feat.title}</h3>
                             <p style={{ fontSize: cardDescSize, opacity: 0.65, margin: 0, lineHeight: 1.65 }}>{feat.description}</p>
                         </div>
-                    ))}
-                </div>
-            ) : (
-                <div style={{ display: "grid", gridTemplateColumns: `repeat(${editorCols}, 1fr)`, gap: editorCols === 1 ? "1.25rem" : gap }}>
-                    {features.map((feat, idx) => {
-                        const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
-                        const focusedStyle: React.CSSProperties = isFocused ? { 
-                            boxShadow: "0 0 0 3px #0099ff, 0 0 20px rgba(0,153,255,0.4)", 
-                            zIndex: 10, 
-                            transform: "scale(1.02)",
-                            ...(cardStyle === 'none' ? {
-                                background: 'rgba(0,153,255,0.03)',
-                                padding: '2.5rem 2rem',
-                                margin: '-0.5rem -0.25rem',
-                            } : {})
-                        } : {};
-
-                        return (
-                            <div key={feat.id || idx} style={{ ...getCardSty(), ...focusedStyle }}
-                                onClick={() => !isPreview && focusSubItem(block.id, idx)}
-                            >
-                                <div style={{ marginBottom: "1.25rem" }}><IconWrapper feature={feat} /></div>
-                                <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.5rem 0" }}>{feat.title}</h3>
-                                <p style={{ fontSize: cardDescSize, opacity: 0.65, margin: 0, lineHeight: 1.65 }}>{feat.description}</p>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+                    );
+                })}
+            </div>
         </>
     );
 
@@ -137,28 +127,22 @@ export function FeaturesBlock({ block }: BlockProps) {
             <div style={{ display: "flex", flexDirection: "column", gap }}>
                 {features.map((feat, idx) => {
                     const even = idx % 2 === 0;
-                    const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
-                    const focusedStyle = isFocused ? { 
-                        boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)", 
-                        zIndex: 10, 
-                        borderRadius: cardRadius,
-                        background: 'rgba(0,153,255,0.03)'
-                    } : {};
+                    const baseStyle = getBaseCardStyle(idx);
 
                     return (
                         <div key={feat.id || idx}
                             style={{
+                                ...baseStyle,
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "3rem",
                                 flexDirection: even ? "row" : "row-reverse",
                                 padding: "2rem 1.5rem",
-                                borderBottom: isFocused ? "none" : `1px solid rgba(0,0,0,0.06)`,
-                                margin: "0 -1.5rem",
-                                borderRadius: cardRadius,
+                                margin: 0,
                                 cursor: isPreview ? "default" : "pointer",
-                                ...focusedStyle
                             }}
+                            onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, { ...getBaseCardStyle(idx, true), flexDirection: even ? "row" : "row-reverse" })}
+                            onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, { ...getBaseCardStyle(idx), flexDirection: even ? "row" : "row-reverse" })}
                             onClick={() => !isPreview && focusSubItem(block.id, idx)}
                         >
                             <div style={{ flexShrink: 0 }}>
@@ -182,35 +166,20 @@ export function FeaturesBlock({ block }: BlockProps) {
             <SectionHeader />
             <div style={{ display: "flex", gap, overflowX: "auto", paddingBottom: "0.5rem" }}>
                 {features.map((feat, idx) => {
-                    const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
-                    const focusedStyle = isFocused ? { 
-                        boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)", 
-                        zIndex: 10, 
-                        transform: "scale(1.02)",
-                        background: 'rgba(0,153,255,0.03)',
-                        border: 'none'
-                    } : { border: `1px solid #e2e8f0` };
-
                     return (
                         <div key={feat.id || idx}
                             style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "flex-start",
-                                gap: "0.75rem",
-                                minWidth: 200,
+                                ...getBaseCardStyle(idx),
                                 flex: 1,
-                                padding: "1.5rem",
-                                background: "rgba(0,0,0,0.02)",
-                                borderRadius: cardRadius,
-                                cursor: isPreview ? "default" : "pointer",
-                                transition: "all 0.2s ease",
-                                ...focusedStyle
+                                minWidth: 200,
+                                alignItems: "flex-start",
                             }}
+                            onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx, true))}
+                            onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx))}
                             onClick={() => !isPreview && focusSubItem(block.id, idx)}
                         >
                             <IconWrapper feature={feat} />
-                            <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: 0 }}>{feat.title}</h3>
+                            <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "1rem 0 0.5rem 0" }}>{feat.title}</h3>
                             <p style={{ fontSize: cardDescSize, opacity: 0.6, margin: 0, lineHeight: 1.6 }}>{feat.description}</p>
                         </div>
                     );
@@ -223,41 +192,27 @@ export function FeaturesBlock({ block }: BlockProps) {
         <>
             <SectionHeader />
             <div style={{ display: "grid", gridTemplateColumns: `repeat(${editorCols}, 1fr)`, gap }}>
-                {features.map((feat, idx) => {
-                    const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
-                    const focusedStyle = isFocused ? { 
-                        boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)", 
-                        zIndex: 10, 
-                        transform: "scale(1.02)",
-                        background: 'rgba(0,153,255,0.03)',
-                        border: 'none'
-                    } : { border: `1px solid #e2e8f0` };
-
-                    return (
-                        <div key={feat.id || idx}
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "1rem",
-                                padding: "1.25rem 1.5rem",
-                                background: "rgba(0,0,0,0.02)",
-                                borderRadius: cardRadius,
-                                cursor: isPreview ? "default" : "pointer",
-                                transition: "all 0.2s ease",
-                                ...focusedStyle
-                            }}
-                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
-                        >
-                            <div style={{ flexShrink: 0, width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", color: iconColor }}>
-                                {(() => { const C = getIcon(feat.icon); return C ? <C width={iconSize} height={iconSize} /> : <Square2StackIcon width={iconSize} height={iconSize} />; })()}
-                            </div>
-                            <div>
-                                <p style={{ fontWeight: 700, margin: "0 0 2px 0", fontSize: "0.95rem" }}>{feat.title}</p>
-                                <p style={{ fontSize: "0.82rem", opacity: 0.55, margin: 0 }}>{feat.description}</p>
-                            </div>
+                {features.map((feat, idx) => (
+                    <div key={feat.id || idx}
+                        style={{
+                            ...getBaseCardStyle(idx),
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: "1rem",
+                        }}
+                        onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, { ...getBaseCardStyle(idx, true), flexDirection: "row" })}
+                        onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, { ...getBaseCardStyle(idx), flexDirection: "row" })}
+                        onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                    >
+                        <div style={{ flexShrink: 0, width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", color: iconColor }}>
+                            {(() => { const C = getIcon(feat.icon); return C ? <C width={iconSize} height={iconSize} /> : <Square2StackIcon width={iconSize} height={iconSize} />; })()}
                         </div>
-                    );
-                })}
+                        <div>
+                            <p style={{ fontWeight: 700, margin: "0 0 2px 0", fontSize: "0.95rem" }}>{feat.title}</p>
+                            <p style={{ fontSize: "0.82rem", opacity: 0.55, margin: 0 }}>{feat.description}</p>
+                        </div>
+                    </div>
+                ))}
             </div>
         </>
     );
@@ -268,32 +223,20 @@ export function FeaturesBlock({ block }: BlockProps) {
             <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.max(2, editorCols)}, 1fr)`, gridAutoRows: "200px", gap }}>
                 {features.map((feat, idx) => {
                     const wide = idx === 0 || idx === features.length - 1;
-                    const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
-                    const focusedStyle = isFocused ? { 
-                        boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)", 
-                        zIndex: 10, 
-                        transform: "scale(1.01)",
-                        background: 'rgba(0,153,255,0.05)',
-                        border: 'none'
-                    } : { border: `1px solid rgba(0,0,0,0.05)` };
+                    const baseStyle = getBaseCardStyle(idx);
 
                     return (
                         <div key={feat.id || idx}
                             style={{
+                                ...baseStyle,
                                 gridColumn: wide ? "span 2" : "span 1",
                                 gridRow: wide ? "span 1" : "span 1",
-                                background: `rgba(${primaryRgb}, 0.06)`,
-                                borderRadius: cardRadius,
-                                padding: "2rem",
-                                display: "flex",
-                                flexDirection: "column",
+                                background: baseStyle.background || `rgba(${primaryRgb}, 0.06)`,
                                 justifyContent: "flex-end",
-                                position: "relative",
                                 overflow: "hidden",
-                                cursor: isPreview ? "default" : "pointer",
-                                transition: "all 0.2s ease",
-                                ...focusedStyle
                             }}
+                            onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx, true))}
+                            onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx))}
                             onClick={() => !isPreview && focusSubItem(block.id, idx)}
                         >
                             <div style={{ position: "absolute", top: "1.5rem", left: "1.5rem" }}><IconWrapper feature={feat} /></div>
@@ -321,11 +264,8 @@ export function FeaturesBlock({ block }: BlockProps) {
             {isPreview && (
                 <style>{`
           .features-${block.id} { padding: ${desktopPadding}; background: ${bgColor}; color: ${textColor}; }
-          .features-grid-${block.id} { display: grid; grid-template-columns: repeat(${columns}, 1fr); gap: ${gap}; }
-          .features-card-${block.id} { ${cardStyle === "raised" ? `background:${cardBg};box-shadow:${cardShadow};` : ""}${cardStyle === "outlined" ? `background:${cardBg};border:1.5px solid #e2e8f0;` : ""}${cardStyle === "filled" ? `background:rgba(${primaryRgb},0.06);` : ""}${cardStyle !== "none" ? `padding:2rem 1.75rem;border-radius:${cardRadius};` : ""}transition:transform 0.2s ease,box-shadow 0.2s ease; }
-          ${cardStyle === "raised" ? `.features-card-${block.id}:hover { transform:translateY(-4px);box-shadow:${cardShadowHover}; }` : ""}
-          @media (max-width: 1024px) { .features-${block.id} { padding: ${tabletPadding}; } .features-grid-${block.id} { grid-template-columns: repeat(${Math.min(2, columns)}, 1fr); gap: 1.5rem; } }
-          @media (max-width: 768px) { .features-${block.id} { padding: ${mobilePadding}; } .features-grid-${block.id} { grid-template-columns: 1fr; gap: 1.25rem; } }
+          @media (max-width: 1024px) { .features-${block.id} { padding: ${tabletPadding}; } }
+          @media (max-width: 768px) { .features-${block.id} { padding: ${mobilePadding}; } }
         `}</style>
             )}
             <section id={(p.sectionId as string) || `block-${block.id}`} className={isPreview ? `features-${block.id}` : undefined} style={isPreview ? {} : { padding: editorPadding, background: bgColor, color: textColor, width: "100%", boxSizing: "border-box" }}>

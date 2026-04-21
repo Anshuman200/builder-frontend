@@ -84,13 +84,12 @@ export function HeaderPanel({ block }: { block: Block }) {
             </Section>
             <Section title="Call to Action (CTA)">
                 <ToggleSwitch value={p.showCta !== false} onChange={(v) => up("showCta", v)} label="Show CTA Button" />
-                {p.showCta !== false && (<>
-                    <Field label="Button Text"><TextInput value={(p.ctaText as string) || "Get Started"} onChange={(v) => up("ctaText", v)} placeholder="Get Started" /></Field>
-                    <Field label="Button URL"><LinkInput value={(p.ctaUrl as string) || "#"} onChange={(v) => up("ctaUrl", v)} placeholder="https://..." /></Field>
-                    <Field label="Design Style"><SelectInput value={(p.ctaVariant as string) || "solid"} onChange={(v) => up("ctaVariant", v)} options={[{ label: "Solid Filled", value: "solid" }, { label: "Outline", value: "outline" }]} /></Field>
-                    <Field label="Base Color"><ColorInput value={(p.ctaBgColor as string) || "#6366f1"} onChange={(v) => up("ctaBgColor", v)} onBlur={(v) => up("ctaBgColor", v, true)} /></Field>
-                    {p.ctaVariant === "solid" && (<Field label="Text Color"><ColorInput value={(p.ctaTextColor as string) || "#ffffff"} onChange={(v) => up("ctaTextColor", v)} onBlur={(v) => up("ctaTextColor", v, true)} /></Field>)}
-                </>)}
+                {p.showCta !== false && (
+                    <>
+                        <ButtonFields p={p} up={up} prefix="cta" textKey="ctaText" />
+                        <Field label="Button URL"><LinkInput value={(p.ctaUrl as string) || "#"} onChange={(v) => up("ctaUrl", v)} placeholder="https://..." /></Field>
+                    </>
+                )}
             </Section>
             <Section title="Navigation Links">
                 <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Dynamic links from your Pages and custom links. Drag to reorder.</div>

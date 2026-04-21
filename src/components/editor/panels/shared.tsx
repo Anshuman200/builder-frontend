@@ -20,6 +20,7 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEn
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Bars2Icon } from "@heroicons/react/20/solid";
+import { IconPicker } from "../IconPicker";
 
 export { arrayMove };
 
@@ -192,22 +193,22 @@ export function TextInput({ value, onChange, placeholder, type = "text", style }
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             spellCheck={false}
-            style={{ 
-                width: "100%", height: 30, padding: "0 10px", fontSize: 11, 
-                background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, 
-                borderRadius: 6, color: PANEL_COLORS.text, outline: "none", 
-                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)", ...style 
+            style={{
+                width: "100%", height: 30, padding: "0 10px", fontSize: 11,
+                background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                borderRadius: 6, color: PANEL_COLORS.text, outline: "none",
+                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)", ...style
             }}
             onMouseEnter={(e) => { if (document.activeElement !== e.currentTarget) { e.currentTarget.style.borderColor = "#52525b"; e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; } }}
             onMouseLeave={(e) => { if (document.activeElement !== e.currentTarget) { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; e.currentTarget.style.background = PANEL_COLORS.inputBg; } }}
-            onFocus={(e) => { 
-                e.currentTarget.style.background = "#09090b"; 
-                e.currentTarget.style.borderColor = PANEL_COLORS.primary; 
+            onFocus={(e) => {
+                e.currentTarget.style.background = "#09090b";
+                e.currentTarget.style.borderColor = PANEL_COLORS.primary;
                 e.currentTarget.style.boxShadow = `0 0 0 2px rgba(0, 153, 255, 0.15)`;
             }}
-            onBlur={(e) => { 
-                e.currentTarget.style.background = PANEL_COLORS.inputBg; 
-                e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; 
+            onBlur={(e) => {
+                e.currentTarget.style.background = PANEL_COLORS.inputBg;
+                e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder;
                 e.currentTarget.style.boxShadow = "none";
             }}
         />
@@ -226,7 +227,7 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
     // Robust parsing: extract leading number and whatever follows as unit
     const lastUnit = React.useRef("px");
     const match = String(value || "").match(/^([+-]?\d*\.?\d+)(.*)$/);
-    
+
     let numValue = "";
     let unitValue = lastUnit.current;
 
@@ -282,10 +283,10 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
             <Input
                 value={numValue}
                 placeholder={placeholder}
-                style={{ 
-                    height: 30, fontSize: 11, background: PANEL_COLORS.inputBg, 
-                    color: PANEL_COLORS.text, border: `1px solid ${PANEL_COLORS.inputBorder}`, 
-                    borderRight: "none", borderRadius: "6px 0 0 6px", ...style 
+                style={{
+                    height: 30, fontSize: 11, background: PANEL_COLORS.inputBg,
+                    color: PANEL_COLORS.text, border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                    borderRight: "none", borderRadius: "6px 0 0 6px", ...style
                 }}
                 className="w-full"
                 onChange={(e) => handleNumChange(e.target.value)}
@@ -310,10 +311,10 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
 export function PrefixInput({ prefix, value, onChange, placeholder, style }: { prefix: string; value: string; onChange: (v: string) => void; placeholder?: string; style?: React.CSSProperties }) {
     return (
         <Space.Compact style={{ height: 30, width: "100%" }}>
-            <div style={{ 
-                height: 30, padding: "0 8px", background: "#111", border: `1px solid ${PANEL_COLORS.inputBorder}`, 
-                borderRight: "none", borderRadius: "6px 0 0 6px", color: PANEL_COLORS.muted, 
-                fontSize: 10, fontWeight: 600, display: "flex", alignItems: "center" 
+            <div className="!h-7" style={{
+                padding: "0 8px", background: "#111", border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                borderRight: "none", borderRadius: "6px 0 0 6px", color: PANEL_COLORS.muted,
+                fontSize: 10, fontWeight: 600, display: "flex", alignItems: "center"
             }}>
                 {prefix}
             </div>
@@ -321,10 +322,11 @@ export function PrefixInput({ prefix, value, onChange, placeholder, style }: { p
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                style={{ 
-                    height: 30, fontSize: 11, background: PANEL_COLORS.inputBg, 
-                    color: PANEL_COLORS.text, border: `1px solid ${PANEL_COLORS.inputBorder}`, 
-                    borderRadius: "0 6px 6px 0", ...style 
+                className="!h-7"
+                style={{
+                    fontSize: 11, background: PANEL_COLORS.inputBg,
+                    color: PANEL_COLORS.text, border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                    borderRadius: "0 6px 6px 0", ...style
                 }}
                 onFocus={(e) => { e.target.style.borderColor = PANEL_COLORS.primary; e.target.style.background = "#09090b"; }}
                 onBlur={(e) => { e.target.style.borderColor = PANEL_COLORS.inputBorder; e.target.style.background = PANEL_COLORS.inputBg; }}
@@ -343,19 +345,19 @@ export function TextareaInput({ value, onChange, rows = 3, placeholder }: { valu
             rows={rows}
             placeholder={placeholder}
             spellCheck={false}
-            style={{ 
-                width: "100%", padding: "8px 10px", fontSize: 11, 
-                background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, 
-                borderRadius: 6, color: PANEL_COLORS.text, outline: "none", resize: "vertical", 
+            style={{
+                width: "100%", padding: "8px 10px", fontSize: 11,
+                background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                borderRadius: 6, color: PANEL_COLORS.text, outline: "none", resize: "vertical",
                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)", lineHeight: 1.5
             }}
-            onFocus={(e) => { 
-                e.currentTarget.style.borderColor = PANEL_COLORS.primary; 
+            onFocus={(e) => {
+                e.currentTarget.style.borderColor = PANEL_COLORS.primary;
                 e.currentTarget.style.background = "#09090b";
                 e.currentTarget.style.boxShadow = `0 0 0 2px rgba(0, 153, 255, 0.15)`;
             }}
-            onBlur={(e) => { 
-                e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; 
+            onBlur={(e) => {
+                e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder;
                 e.currentTarget.style.background = PANEL_COLORS.inputBg;
                 e.currentTarget.style.boxShadow = "none";
             }}
@@ -390,10 +392,10 @@ export function SelectInput({ value, onChange, options, placeholder }: { value: 
             getPopupContainer={() => document.body}
         >
             <button
-                style={{ 
-                    display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", height: 30, 
-                    padding: "0 10px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, 
-                    borderRadius: 6, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", transition: "all 0.2s" 
+                style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", height: 30,
+                    padding: "0 10px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                    borderRadius: 6, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", transition: "all 0.2s"
                 }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = "#52525b"; e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; e.currentTarget.style.background = PANEL_COLORS.inputBg; }}
@@ -573,9 +575,9 @@ export function BorderRadiusInput({ value, onChange, placeholder }: { value: str
         <div style={{ display: "flex", flexDirection: "column", gap: 5, width: "100%" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
                 {corners.map(({ key, val }) => (
-                    <div key={key} style={{ 
-                        display: "flex", alignItems: "center", gap: 6, background: PANEL_COLORS.inputBg, 
-                        border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 6, padding: "2px 8px" 
+                    <div key={key} style={{
+                        display: "flex", alignItems: "center", gap: 6, background: PANEL_COLORS.inputBg,
+                        border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 6, padding: "2px 8px"
                     }}>
                         <span style={{ color: PANEL_COLORS.muted, flexShrink: 0, display: "flex", lineHeight: 0 }}>
                             <CornerIcon corner={key} />
@@ -583,14 +585,14 @@ export function BorderRadiusInput({ value, onChange, placeholder }: { value: str
                         <input
                             value={val}
                             onChange={(e) => setCorner(key, e.target.value)}
-                            onFocus={(e) => { 
-                                e.currentTarget.style.color = "#ffffff"; 
-                                e.currentTarget.parentElement!.style.borderColor = PANEL_COLORS.primary; 
+                            onFocus={(e) => {
+                                e.currentTarget.style.color = "#ffffff";
+                                e.currentTarget.parentElement!.style.borderColor = PANEL_COLORS.primary;
                                 e.currentTarget.parentElement!.style.background = "#09090b";
                             }}
-                            onBlur={(e) => { 
-                                e.currentTarget.style.color = PANEL_COLORS.text; 
-                                e.currentTarget.parentElement!.style.borderColor = PANEL_COLORS.inputBorder; 
+                            onBlur={(e) => {
+                                e.currentTarget.style.color = PANEL_COLORS.text;
+                                e.currentTarget.parentElement!.style.borderColor = PANEL_COLORS.inputBorder;
                                 e.currentTarget.parentElement!.style.background = PANEL_COLORS.inputBg;
                             }}
                             style={{ flex: 1, minWidth: 0, height: 20, fontSize: 10, fontFamily: "inherit", background: "transparent", border: "none", color: PANEL_COLORS.text, outline: "none", textAlign: "right", width: 40 }}
@@ -693,12 +695,12 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff" }:
                 ]}
             >
                 <button
-                    style={{ 
-                        display: "flex", gap: 10, alignItems: "center", flex: 1, height: 30, 
-                        padding: "0 10px", fontSize: 11, background: PANEL_COLORS.inputBg, 
-                        border: `1px solid ${isVariable ? PANEL_COLORS.primary : PANEL_COLORS.inputBorder}`, 
-                        borderRadius: 6, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", 
-                        transition: "all 0.2s" 
+                    style={{
+                        display: "flex", gap: 10, alignItems: "center", flex: 1, height: 30,
+                        padding: "0 10px", fontSize: 11, background: PANEL_COLORS.inputBg,
+                        border: `1px solid ${isVariable ? PANEL_COLORS.primary : PANEL_COLORS.inputBorder}`,
+                        borderRadius: 6, color: PANEL_COLORS.text, outline: "none", cursor: "pointer",
+                        transition: "all 0.2s"
                     }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = "#52525b"; e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = isVariable ? PANEL_COLORS.primary : PANEL_COLORS.inputBorder; e.currentTarget.style.background = PANEL_COLORS.inputBg; }}
@@ -719,11 +721,11 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff" }:
                                 onChange("var(--primary)");
                             }
                         }}
-                        style={{ 
-                            width: 30, height: 30, display: "flex", alignItems: "center", 
-                            justifyContent: "center", background: PANEL_COLORS.inputBg, 
-                            border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 6, 
-                            cursor: "pointer", color: PANEL_COLORS.muted, transition: "all 0.2s" 
+                        style={{
+                            width: 30, height: 30, display: "flex", alignItems: "center",
+                            justifyContent: "center", background: PANEL_COLORS.inputBg,
+                            border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 6,
+                            cursor: "pointer", color: PANEL_COLORS.muted, transition: "all 0.2s"
                         }}
                         onMouseEnter={e => { e.currentTarget.style.borderColor = "#52525b"; e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; }}
                         onMouseLeave={e => { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; e.currentTarget.style.background = PANEL_COLORS.inputBg; }}
@@ -1064,23 +1066,65 @@ export function CardFields({ p, up, prefix = "card" }: PropertyGroupProps) {
     const bgKey = `${prefix}Bg`;
     const radiusKey = `${prefix}Radius`;
     const shadowKey = `${prefix}Shadow`;
-    const hoverShadowKey = `${prefix}ShadowHover`;
+    const borderColorKey = `${prefix}BorderColor`;
+    const paddingKey = `${prefix}Padding`;
+    const hoverEffectKey = `${prefix}HoverEffect`;
+
+    const cardStyle = (p[styleKey] as string) || "raised";
 
     return (
         <>
-            <Field label="Style"><SelectInput value={p[styleKey] || "raised"} onChange={(v) => up(styleKey, v)} options={[{ label: "None", value: "none" }, { label: "Raised Shadow", value: "raised" }, { label: "Outlined", value: "outlined" }, { label: "Filled", value: "filled" }]} /></Field>
-            {p[styleKey] !== "none" && (
+            <Field label="Card Style">
+                <SelectInput 
+                    value={cardStyle} 
+                    onChange={(v) => up(styleKey, v)} 
+                    options={[
+                        { label: "Raised (Shadow)", value: "raised" },
+                        { label: "Outlined", value: "outlined" },
+                        { label: "Filled", value: "filled" },
+                        { label: "Glassmorphism", value: "glass" },
+                        { label: "None (Clean)", value: "none" },
+                    ]} 
+                />
+            </Field>
+            {cardStyle !== "none" && (
                 <>
-                    <Field label="Background"><ColorInput value={p[bgKey] || "var(--background)"} onChange={(v) => up(bgKey, v)} onBlur={(v) => up(bgKey, v, true)} /></Field>
-                    <Field label="Radius"><BorderRadiusInput value={p[radiusKey] || "12px"} onChange={(v) => up(radiusKey, v)} /></Field>
-                    {p[styleKey] === "raised" && (
-                        <>
-                            <Field label="Shadow"><ShadowInput value={p[shadowKey] || "none"} onChange={(v) => up(shadowKey, v)} /></Field>
-                            <Field label="Hover Shadow"><ShadowInput value={p[hoverShadowKey] || "none"} onChange={(v) => up(hoverShadowKey, v)} /></Field>
-                        </>
+                    <Field label="Card Background"><ColorInput value={p[bgKey] || "var(--surface)"} onChange={(v) => up(bgKey, v)} onBlur={(v) => up(bgKey, v, true)} /></Field>
+                    <Field label="Border Radius"><BorderRadiusInput value={p[radiusKey] || "16px"} onChange={(v) => up(radiusKey, v)} /></Field>
+                    {cardStyle === "raised" && (
+                        <Field label="Shadow">
+                            <SelectInput 
+                                value={p[shadowKey] || "md"} 
+                                onChange={(v) => up(shadowKey, v)} 
+                                options={[
+                                    { label: "Small", value: "sm" },
+                                    { label: "Medium", value: "md" },
+                                    { label: "Large", value: "lg" },
+                                    { label: "Extra Large", value: "xl" },
+                                    { label: "Action Glow", value: "glow" },
+                                    { label: "None", value: "none" },
+                                ]} 
+                            />
+                        </Field>
+                    )}
+                    {cardStyle === "outlined" && (
+                        <Field label="Border Color"><ColorInput value={p[borderColorKey] || "var(--border)"} onChange={(v) => up(borderColorKey, v)} /></Field>
                     )}
                 </>
             )}
+            <Field label="Card Padding"><TextInputWithUnit value={p[paddingKey] || ""} onChange={(v) => up(paddingKey, v)} placeholder="2rem 1.75rem" /></Field>
+            <Field label="Hover Effect">
+                <SelectInput 
+                    value={p[hoverEffectKey] || (cardStyle === "raised" ? "up" : "none")} 
+                    onChange={(v) => up(hoverEffectKey, v)} 
+                    options={[
+                        { label: "Lift Up", value: "up" },
+                        { label: "Scale Up", value: "scale" },
+                        { label: "Accent Glow", value: "glow" },
+                        { label: "None", value: "none" },
+                    ]} 
+                />
+            </Field>
         </>
     );
 }
@@ -1092,20 +1136,65 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
     const radiusKey = `${prefix}BorderRadius`;
     const variantKey = `${prefix}Variant`;
 
+
     const variantOptions = [
         { label: "Solid", value: "solid" },
         { label: "Outline", value: "outline" },
         { label: "Ghost", value: "ghost" },
         { label: "Soft", value: "soft" },
+        { label: "Gradient", value: "gradient" },
+        { label: "Link", value: "link" },
     ];
+
+    const sizeOptions = [
+        { label: "Small", value: "sm" },
+        { label: "Medium", value: "md" },
+        { label: "Large", value: "lg" },
+        { label: "Extra Large", value: "xl" },
+    ];
+
+    const variant = p[variantKey] || "solid";
+
+    // Helper to get the correct key for a property
+    const getK = (suffix: string) => {
+        const prefixed = `${prefix}${suffix.charAt(0).toUpperCase()}${suffix.slice(1)}`;
+        if (p[prefixed] !== undefined) return prefixed;
+        if (p[suffix] !== undefined) return suffix;
+        return prefix === "button" ? suffix : prefixed;
+    };
 
     return (
         <>
-            {!hideLabel && <Field label="Text"><TextInput value={p[textKey] || "Click Me"} onChange={(v) => up(textKey, v)} /></Field>}
-            <Field label="Variant"><SelectInput value={p[variantKey] || "solid"} onChange={(v) => up(variantKey, v)} options={variantOptions} /></Field>
-            <Field label="Background"><ColorInput value={p[bgKey] || "var(--primary)"} onChange={(v) => up(bgKey, v)} onBlur={(v) => up(bgKey, v, true)} /></Field>
-            <Field label="Text Color"><ColorInput value={p[colorKey] || "var(--button-text)"} onChange={(v) => up(colorKey, v)} onBlur={(v) => up(colorKey, v, true)} /></Field>
+            {!hideLabel && <Field label="Action Text"><TextInput value={p[textKey] || ""} onChange={(v) => up(textKey, v)} placeholder="Click Me" /></Field>}
+            <Field label="Variant"><SelectInput value={variant} onChange={(v) => up(variantKey, v)} options={variantOptions} /></Field>
+            
+            <Field label="Button Size">
+                <SelectInput 
+                    value={p[getK("size")] || "md"} 
+                    onChange={(v) => up(getK("size"), v)} 
+                    options={sizeOptions} 
+                />
+            </Field>
+
+            <Field label="Base Color"><ColorInput value={p[bgKey] || (prefix === "button" ? "var(--primary)" : "")} onChange={(v) => up(bgKey, v)} onBlur={(v) => up(bgKey, v, true)} /></Field>
+            <Field label="Text Color"><ColorInput value={p[colorKey] || (prefix === "button" ? "var(--button-text)" : "")} onChange={(v) => up(colorKey, v)} onBlur={(v) => up(colorKey, v, true)} /></Field>
+
+            {variant === "gradient" && (
+                <>
+                    <Field label="Gradient From"><ColorInput value={p[getK("gradientFrom")] || ""} onChange={(v) => up(getK("gradientFrom"), v)} onBlur={(v) => up(getK("gradientFrom"), v, true)} /></Field>
+                    <Field label="Gradient To"><ColorInput value={p[getK("gradientTo")] || ""} onChange={(v) => up(getK("gradientTo"), v)} onBlur={(v) => up(getK("gradientTo"), v, true)} /></Field>
+                    <Field label="Direction"><SelectInput value={p[getK("gradientDir")] || "to right"} onChange={(v) => up(getK("gradientDir"), v)} options={[{ label: "→ Right", value: "to right" }, { label: "← Left", value: "to left" }, { label: "↓ Bottom", value: "to bottom" }, { label: "↗ Top Right", value: "to top right" }, { label: "↘ Bottom Right", value: "to bottom right" }]} /></Field>
+                </>
+            )}
+
             <Field label="Radius"><BorderRadiusInput value={p[radiusKey] || "8px"} onChange={(v) => up(radiusKey, v)} /></Field>
+            <Field label="Shadow"><ShadowInput value={p[getK("shadow")] || "none"} onChange={(v) => up(getK("shadow"), v)} /></Field>
+
+            <div style={{ padding: "4px 0", display: "flex", flexDirection: "column", gap: 8 }}>
+                <p style={{ margin: 0, fontSize: 10, fontWeight: 700, opacity: 0.5, letterSpacing: "0.05em", color: "var(--text)" }}>ICONS</p>
+                <Field label="Left Icon"><IconPicker value={p[getK("iconLeft")] || ""} onChange={(v) => up(getK("iconLeft"), v)} /></Field>
+                <Field label="Right Icon"><IconPicker value={p[getK("iconRight")] || ""} onChange={(v) => up(getK("iconRight"), v)} /></Field>
+            </div>
         </>
     );
 }

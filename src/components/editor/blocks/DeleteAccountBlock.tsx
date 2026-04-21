@@ -6,7 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import type { BlockProps } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext } from "./shared";
+import { PreviewContext, CommonButton } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 const { Option } = Select;
@@ -283,26 +283,19 @@ export function DeleteAccountBlock({ block }: BlockProps) {
                             )}
 
                             <Form.Item style={{ marginTop: "2rem", marginBottom: 0 }}>
-                                <Button
-                                    type="primary"
-                                    htmlType="submit"
-                                    size="large"
-                                    loading={mutation.isPending}
-                                    block
-                                    style={{
-                                        height: "50px",
-                                        background: p.buttonVariant === "ghost" ? "transparent" : p.buttonVariant === "outline" ? "transparent" : buttonBg,
-                                        borderColor: p.buttonVariant === "ghost" ? "transparent" : buttonBg,
-                                        borderWidth: p.buttonVariant === "outline" ? "2px" : "1px",
-                                        color: p.buttonVariant === "solid" ? buttonTextColor : buttonBg,
-                                        fontWeight: 700,
-                                        fontSize: "1.1rem",
-                                        borderRadius: buttonBorderRadius,
-                                        boxShadow: p.buttonVariant === "solid" ? `0 8px 24px ${buttonBg}55` : "none",
+                                <CommonButton
+                                    type="submit"
+                                    props={{
+                                        ...p,
+                                        submitLabel: submitLabel,
+                                        buttonBg: buttonBg,
+                                        buttonTextColor: buttonTextColor,
+                                        buttonBorderRadius: buttonBorderRadius,
+                                        buttonFullWidth: true
                                     }}
-                                >
-                                    {submitLabel}
-                                </Button>
+                                    isLoading={mutation.isPending}
+                                    disabled={!isPreview}
+                                />
                             </Form.Item>
                         </Form>
                     </div>

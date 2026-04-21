@@ -3,7 +3,7 @@ import React from "react";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles } from "./shared";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
@@ -21,6 +21,7 @@ export function StatsBlock({ block }: BlockProps) {
   const columns = Number(p.columns || 4);
   const items = (p.items as any[]) || [];
   const cardStyle = (p.cardStyle as string) || "none";
+  const isGlass = cardStyle === "glass";
 
   const desktopPadding = (p.padding as string) || "4rem 1.5rem";
   const bgColor = (p.bgColor as string) || "transparent";
@@ -62,19 +63,13 @@ export function StatsBlock({ block }: BlockProps) {
       )}>
         {items.map((item, idx) => {
           const IconCmp = getIcon(item.icon);
-          const isGlass = cardStyle === "glass";
           const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
-          const focusedStyle: React.CSSProperties = isFocused ? { 
-            boxShadow: `0 0 0 3px #0099ff, 0 0 20px rgba(0,153,255,0.4)`, 
-            zIndex: 10, 
-            transform: "scale(1.02)",
-            ...(cardStyle === 'none' ? {
-                background: 'rgba(0,153,255,0.03)',
-                padding: '1.5rem 1rem',
-                margin: '-1.5rem -1rem',
-            } : {})
-          } : {};
           
+          const cardBase = getCardStyles({
+            props: p,
+            isFocused,
+          });
+
           return (
             <motion.div
               key={item.id || idx}
@@ -86,24 +81,10 @@ export function StatsBlock({ block }: BlockProps) {
               className={cn(
                 "flex flex-col relative group transition-all duration-300",
                 layout === "kpi" ? "items-start text-left" : "items-center text-center",
-                cardStyle === "card" && "p-6 lg:p-8 shadow-soft hover:shadow-lg",
-                isGlass && "p-6 lg:p-8 glass shadow-xl",
-                cardStyle === "flat" && "p-6 lg:p-8 border border-transparent hover:border-border",
                 // If layout is KPI but no card style, add a very subtle bottom border or spacing
                 layout === "kpi" && cardStyle === "none" && "pb-4 border-b border-border/50 lg:border-none"
               )}
-              style={{
-                backgroundColor: (() => {
-                  if (cardStyle !== "card" && cardStyle !== "flat") return undefined;
-                  const bg = (p.cardBg as string) || "var(--surface)";
-                  // Resilience: If theme is dark but card color is white/light, force theme surface
-                  return bg;
-                })(),
-                borderRadius: p.cardRadius as string || "1.5rem",
-                border: (cardStyle === "card" && !isFocused) ? "1px solid var(--border)" : undefined,
-                cursor: isPreview ? "default" : "pointer",
-                ...focusedStyle
-              }}
+              style={cardBase}
             >
               {/* Decorative Glow for Glassmorphism */}
               {isGlass && (

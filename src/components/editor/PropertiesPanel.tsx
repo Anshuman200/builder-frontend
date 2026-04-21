@@ -23,7 +23,7 @@ export { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, Bord
 // ─── Per-panel imports ────────────────────────────────────────────────────────
 import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPanel, VideoPanel, ColumnsPanel, WavePanel, CarouselPanel, GridPanel } from "./panels/BasicPanels";
 import { ButtonPanel, HeaderPanel, FooterPanel } from "./panels/LayoutPanels";
-import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel, AccordionPanel, StatsPanel, ChartPanel, LegalPanel, DeleteAccountPanel } from "./panels/ContentPanels";
+import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel, ContactInfoPanel, AccordionPanel, StatsPanel, ChartPanel, LegalPanel, DeleteAccountPanel } from "./panels/ContentPanels";
 import { GalleryPanel } from "./panels/GalleryPanel";
 
 // ─── Friendly label map ──────────────────────────────────────────────────────
@@ -41,6 +41,7 @@ const BLOCK_LABEL_MAP: Record<string, string> = {
     team: "Team Block",
     footer: "Footer Block",
     contactForm: "Contact Form Block",
+    contactInfo: "Contact Details Block",
     deleteAccount: "Delete Account Block",
     accordion: "FAQ / Accordion Block",
     columns: "Columns Block",
@@ -233,6 +234,7 @@ export default function PropertiesPanel() {
                 {selectedBlock.type === "columns" && <ColumnsPanel block={selectedBlock} />}
                 {selectedBlock.type === "footer" && <FooterPanel block={selectedBlock} />}
                 {selectedBlock.type === "contactForm" && <ContactFormPanel block={selectedBlock} />}
+                {selectedBlock.type === "contactInfo" && <ContactInfoPanel block={selectedBlock} />}
                 {selectedBlock.type === "accordion" && <AccordionPanel block={selectedBlock} />}
                 {selectedBlock.type === "wave" && <WavePanel block={selectedBlock} />}
                 {selectedBlock.type === "carousel" && <CarouselPanel block={selectedBlock} />}

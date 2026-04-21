@@ -4,7 +4,7 @@ import { Form, Input, Radio, ConfigProvider, Space } from "antd";
 import { useSubmitForm } from "@/lib/api/queries";
 import type { BlockProps } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext } from "./shared";
+import { PreviewContext, CommonButton, getCardStyles } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 // ─── Toast Component ──────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ function Toast({ message, type, visible }: ToastProps) {
 
 export function ContactFormBlock({ block }: BlockProps) {
     const isPreview = React.useContext(PreviewContext);
-    const { updateBlock } = useEditorStore();
+    const { updateBlock, focusSubItem } = useEditorStore();
     const p = block.props;
     const layout = (p.layout as string) || "centered";
 
@@ -79,12 +79,13 @@ export function ContactFormBlock({ block }: BlockProps) {
     const submitLabel = (p.submitLabel as string) || "Send Message →";
     const successMessage = (p.successMessage as string) || "Thanks! We'll get back to you shortly.";
     const errorMessage = (p.errorMessage as string) || "Something went wrong. Please try again.";
-    const bgColor = (p.bgColor as string) || "#ffffff";
-    const padding = (p.padding as string) || "3rem 2rem";
-    const borderRadius = (p.borderRadius as string) || "20px";
+    const cardStyle = (p.cardStyle as string) || "raised";
+    const cardBg = (p.cardBg as string) || "#ffffff";
+    const cardPadding = (p.cardPadding as string) || "3rem 2rem";
+    const cardRadius = (p.cardRadius as string) || "20px";
     const inputBg = (p.inputBg as string) || "#f8fafc";
     const inputBorderColor = (p.inputBorderColor as string) || "#e2e8f0";
-    
+
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
     const defaultPrimary = theme.colors?.primary || "#6366f1";
     const defaultText = theme.colors?.buttonText || "#ffffff";
@@ -133,7 +134,7 @@ export function ContactFormBlock({ block }: BlockProps) {
         try {
             if (mode === "api") {
                 if (!apiUrl) throw new Error("API URL is not configured");
-                
+
                 const payload: Record<string, any> = {
                     [firstNameKey]: values.firstName,
                     [emailKey]: values.email,
@@ -196,6 +197,8 @@ export function ContactFormBlock({ block }: BlockProps) {
         }
     };
 
+    const isSelected = !isPreview && useEditorStore.getState().selectedBlockId === block.id;
+
     // ── UI Components ────────────────────────────────────────────────────────
     const formNode = (
         <ConfigProvider
@@ -226,9 +229,7 @@ export function ContactFormBlock({ block }: BlockProps) {
             <div
                 onClick={handleWrapperClick}
                 style={{
-                    background: bgColor,
-                    padding,
-                    borderRadius,
+                    ...getCardStyles({ props: p, isFocused: isSelected }),
                     boxSizing: "border-box",
                     width: "100%",
                 }}
@@ -239,7 +240,7 @@ export function ContactFormBlock({ block }: BlockProps) {
                 {subtitleText && (
                     <p style={{ margin: "0 0 1.75rem", fontSize: "0.95rem", color: subtitleColor, lineHeight: 1.6 }}>{subtitleText}</p>
                 )}
-                
+
                 <Form
                     form={form}
                     layout="vertical"
@@ -309,64 +310,21 @@ export function ContactFormBlock({ block }: BlockProps) {
                         <Input.TextArea rows={5} placeholder="Write your message here..." style={{ resize: 'vertical' }} />
                     </Form.Item>
 
-                    <div style={{ display: "flex", justifyContent: buttonAlign === "left" ? "flex-start" : buttonAlign === "center" ? "center" : "flex-end" }}>
-                        <button
+                    <div onClick={() => { focusSubItem(block.id, "Submit Button") }} style={{ display: "flex", justifyContent: buttonAlign === "left" ? "flex-start" : buttonAlign === "center" ? "center" : "flex-end" }}>
+                        <CommonButton
                             type="submit"
-                            disabled={isSubmitting}
-                            style={{
-                                width: buttonFullWidth ? "100%" : "auto",
-                                padding: "0.85rem 2rem",
-                                background: isSubmitting ? `${buttonBg}99` : (p.buttonVariant === "ghost" || p.buttonVariant === "outline") ? "transparent" : buttonBg,
-                                color: (p.buttonVariant === "ghost" || p.buttonVariant === "outline") ? buttonBg : buttonTextColor,
-                                border: p.buttonVariant === "outline" ? `2px solid ${buttonBg}` : p.buttonVariant === "ghost" ? "none" : "none",
-                                borderRadius: buttonBorderRadius,
-                                fontSize: "0.95rem",
-                                fontWeight: 700,
-                                cursor: isSubmitting ? "not-allowed" : "pointer",
-                                transition: "all 0.25s ease",
-                                letterSpacing: "0.02em",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: "0.5rem",
-                                fontFamily: "inherit",
-                                boxShadow: p.buttonVariant === "solid" ? `0 4px 20px ${buttonBg}55` : "none",
-                            }}
-                            onMouseEnter={e => {
-                                if (!isSubmitting) {
-                                    (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)";
-                                    (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 8px 28px ${buttonBg}77`;
-                                }
-                            }}
-                            onMouseLeave={e => {
-                                (e.currentTarget as HTMLButtonElement).style.transform = "none";
-                                (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 4px 20px ${buttonBg}55`;
-                            }}
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <span style={{
-                                        width: 16, height: 16,
-                                        border: `2px solid ${buttonTextColor}44`,
-                                        borderTopColor: buttonTextColor,
-                                        borderRadius: "50%",
-                                        animation: "cfb-spin 0.7s linear infinite",
-                                        display: "inline-block",
-                                    }} />
-                                    Sending…
-                                </>
-                            ) : submitLabel}
-                        </button>
+                            props={p}
+                            isLoading={isSubmitting}
+                            disabled={!isPreview}
+                        />
                     </div>
                 </Form>
             </div>
         </ConfigProvider>
     );
 
-
-    // ── Contact info panel for split layout ──────────────────────────────────
     const infoPanel = (
-        <div style={{ flex: "0 0 300px", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "2rem", background: "rgba(0,0,0,0.02)", borderRadius, border: `1px solid #e2e8f0` }}>
+        <div style={{ flex: "0 0 300px", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "2rem", background: "rgba(0,0,0,0.02)", borderRadius: cardRadius, border: `1px solid #e2e8f0` }}>
             <h3 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 800, color: (p.titleColor as string) || "#0f172a" }}>Get in Touch</h3>
             <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.65, lineHeight: 1.7 }}>We'd love to hear from you. Fill out the form and we'll respond as soon as possible.</p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
@@ -380,9 +338,8 @@ export function ContactFormBlock({ block }: BlockProps) {
         </div>
     );
 
-
-    const sectionBg = (p.sectionBg as string) || "#ffffff";
-    const sectionPadding = (p.sectionPadding as string) || "5rem 2rem";
+    const sectionBg = (p.sectionBg as string) || "transparent";
+    const sectionPadding = (p.sectionPadding as string) || "4rem 1rem";
 
     const wrapLayout = () => {
         switch (layout) {
@@ -404,7 +361,7 @@ export function ContactFormBlock({ block }: BlockProps) {
             case "card":
                 return (
                     <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: sectionBg, padding: sectionPadding, display: "flex", justifyContent: "center", width: "100%", boxSizing: "border-box" }}>
-                        <div style={{ width: "100%", maxWidth: 580, boxShadow: "0 20px 60px rgba(0,0,0,0.15)", borderRadius }}>
+                        <div style={{ width: "100%", maxWidth: 580, boxShadow: "0 20px 60px rgba(0,0,0,0.15)", borderRadius: cardRadius }}>
                             {formNode}
                         </div>
                     </section>

@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles } from "./shared";
 
 // ─── Inline brand SVG icons ───────────────────────────────────────────────────
 const BRAND_ICONS: Record<string, React.ReactNode> = {
@@ -94,32 +94,41 @@ export function TeamBlock({ block }: BlockProps) {
     const descColor = rawDescColor;
     const socialColor = rawSocialColor;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const members = (p.members as any[]) || [];
 
     const desktopPadding = (p.padding as string) || "64px 24px";
     const tabletPadding = (p.tabletPadding as string) || "48px 16px";
     const mobilePadding = (p.mobilePadding as string) || "32px 16px";
-    const cardPadding = (p.cardPadding as string) || (cardStyle !== "none" ? "2rem 1.75rem" : "0.5rem");
 
-    const getCardStyle = (): React.CSSProperties => {
+    const getBaseCardStyle = (idx: number): React.CSSProperties => {
+        const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
         const isFloat = imageStyle === "float";
-        const floatPad = cardStyle !== "none" ? "4rem 1.75rem 2rem" : "3rem 0.5rem 0.5rem";
-        const base: React.CSSProperties = {
-            display: "flex", flexDirection: layout === "list" ? "row" : "column",
+        
+        const base = getCardStyles({
+            props: p,
+            isFocused,
+        });
+
+        // Add layout-specific adjustments
+        const layoutStyle: React.CSSProperties = {
+            ...base,
+            display: "flex",
+            flexDirection: layout === "list" ? "row" : "column",
             alignItems: layout === "list" ? "center" : (align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start"),
             textAlign: (layout === "list" ? "left" : align) as React.CSSProperties["textAlign"],
-            padding: isFloat ? floatPad : cardPadding,
-            borderRadius: cardStyle !== "none" ? cardRadius : 0,
             gap: layout === "list" ? "1.5rem" : 0,
-            position: "relative",
             overflow: imageStyle === "cover" ? "hidden" : "visible",
+            // Handle float padding override if needed
+            ...(isFloat ? { padding: (p.cardStyle !== "none" ? "4rem 1.75rem 2rem" : "3rem 0.5rem 0.5rem") } : {})
         };
-        if (layout === "list" && viewMode === "mobile") { base.flexDirection = "column"; base.alignItems = align === "center" ? "center" : "flex-start"; base.textAlign = align as React.CSSProperties["textAlign"]; }
-        if (cardStyle === "raised") return { ...base, background: cardBg, boxShadow: cardShadow };
-        if (cardStyle === "outlined") return { ...base, background: cardBg, border: `1.5px solid #e2e8f0` };
-        if (cardStyle === "filled") return { ...base, background: p.cardBg ? cardBg : "rgba(var(--primary-rgb), 0.08)" };
-        return base;
+
+        if (layout === "list" && viewMode === "mobile") {
+            layoutStyle.flexDirection = "column";
+            layoutStyle.alignItems = align === "center" ? "center" : "flex-start";
+            layoutStyle.textAlign = align as React.CSSProperties["textAlign"];
+        }
+
+        return layoutStyle;
     };
 
     const socialJustify = layout === "list" ? "flex-start" : align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start";
@@ -194,25 +203,13 @@ export function TeamBlock({ block }: BlockProps) {
                     {layout === "compact" && (
                         <div className={`team-grid-container-${block.id}`}>
                             {members.map((member: any, idx: number) => {
-                                const baseStyle: React.CSSProperties = {
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "1rem",
-                                    padding: "1rem 1.25rem",
-                                    boxSizing: "border-box",
-                                    flexWrap: "wrap",
-                                    borderRadius: cardStyle !== 'none' ? cardRadius : 0,
-                                    background: cardStyle !== 'none' ? cardBg : 'transparent',
-                                };
-                                const raisedStyle = cardStyle === 'raised' ? { boxShadow: cardShadow } : {};
-                                const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid #e2e8f0` } : {};
-                                const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
-                                const focusedStyle = isFocused ? { border: "2px solid #0099ff", boxShadow: "0 0 15px rgba(0,153,255,0.3)", zIndex: 10 } : {};
-
-                                return (
-                                    <div key={`mc-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle, ...focusedStyle, cursor: "pointer" }}
-                                        onClick={() => !isPreview && focusSubItem(block.id, idx)}
-                                    >
+                                 const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+                                 const baseStyle = getBaseCardStyle(idx);
+                                 
+                                 return (
+                                     <div key={`mc-${idx}`} style={{ ...baseStyle, display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", cursor: "pointer" }}
+                                         onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                     >
                                         {member.image && (
                                             <div style={{ width: 56, height: 56, borderRadius: "50%", overflow: "hidden", position: "relative", flexShrink: 0 }}>
                                                 <Image
@@ -241,11 +238,14 @@ export function TeamBlock({ block }: BlockProps) {
                     {layout === "large" && (
                         <div style={{ display: "flex", flexDirection: "column", gap, marginTop: title || subtitle ? "3rem" : 0 }}>
                             {members.map((member: any, idx: number) => {
-                                const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
                                 return (
                                     <div key={`ml-${idx}`}
-                                        className={idx % 2 !== 0 ? `team-large-card-reverse-${block.id}` : `team-large-card-${block.id}`}
-                                        style={isFocused ? { boxShadow: "0 0 0 3px #0099ff, 0 0 20px rgba(0,153,255,0.4)", zIndex: 10, transform: "scale(1.01)" } : {}}
+                                        style={{
+                                            ...getBaseCardStyle(idx),
+                                            flexDirection: idx % 2 !== 0 ? "row-reverse" : "row",
+                                            gap: "3rem",
+                                            alignItems: "center", 
+                                        }}
                                         onClick={() => !isPreview && focusSubItem(block.id, idx)}
                                     >
                                         {member.image && (
@@ -277,27 +277,11 @@ export function TeamBlock({ block }: BlockProps) {
                     {layout === "spotlight" && (
                         <div className={`team-grid-container-${block.id}`}>
                             {members.map((member: any, idx: number) => {
-                                const baseStyle: React.CSSProperties = {
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    textAlign: "center",
-                                    padding: cardStyle !== 'none' ? "2rem" : "0",
-                                    background: cardStyle !== 'none' ? cardBg : 'transparent',
-                                    borderRadius: cardStyle !== 'none' ? cardRadius : 0,
-                                };
-                                const raisedStyle = cardStyle === 'raised' ? { boxShadow: cardShadow } : {};
-                                const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid #e2e8f0` } : {};
-                                const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
-                                const focusedStyle = isFocused ? {
-                                    boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)",
-                                    zIndex: 10,
-                                    transform: "scale(1.02)",
-                                    background: cardStyle === 'none' ? 'rgba(0,153,255,0.03)' : undefined,
-                                } : {};
+                                const baseStyle = getBaseCardStyle(idx);
 
                                 return (
-                                    <div key={`ms-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle, ...focusedStyle }}
+                                    <div key={`ms-${idx}`}
+                                        style={{ ...baseStyle, alignItems: "center", textAlign: "center" }}
                                         onClick={() => !isPreview && focusSubItem(block.id, idx)}
                                     >
                                         <div style={{ width: 140, height: 140, borderRadius: "50%", overflow: "hidden", border: `4px solid #e2e8f0`, marginBottom: "1rem", position: "relative" }}>
@@ -332,6 +316,14 @@ export function TeamBlock({ block }: BlockProps) {
                                 const isCover = imageStyle === "cover";
                                 const isEvenList = layout === "list" && idx % 2 !== 0;
                                 const cHeight = (p.cardHeight as string) && (p.cardHeight as string) !== "auto" ? (p.cardHeight as string) : "100%";
+                                
+                                const baseStyle = getBaseCardStyle(idx);
+                                const resolvedCardStyle = { 
+                                    ...baseStyle, 
+                                    height: cHeight, 
+                                    flexDirection: (layout === "list" && isEvenList && viewMode !== "mobile" ? "row-reverse" : baseStyle.flexDirection) as React.CSSProperties["flexDirection"] 
+                                };
+
                                 const iHeight = (p.imageHeight as string) || "240px";
                                 const iPosition = (p.imagePosition as string) || "center";
 
@@ -391,27 +383,16 @@ export function TeamBlock({ block }: BlockProps) {
                                     </div>
                                 );
 
-                                const resolvedCardStyle = { ...getCardStyle(), height: cHeight, flexDirection: (layout === "list" && isEvenList && viewMode !== "mobile" ? "row-reverse" : getCardStyle().flexDirection) as React.CSSProperties["flexDirection"] };
-
-                                const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
-                                const focusedStyle: React.CSSProperties = isFocused ? {
-                                    boxShadow: "0 0 0 3px #0099ff, 0 0 20px rgba(0,153,255,0.4)",
-                                    zIndex: 10,
-                                    transform: "scale(1.02)",
-                                    ...(cardStyle === 'none' ? { background: 'rgba(0,153,255,0.03)' } : {}),
-                                    transition: "all 0.3s ease"
-                                } : { transition: "all 0.3s ease" };
-
                                 if (isFloat) {
                                     return (
                                         <div key={`member-${idx}`} style={{ paddingTop: `calc(${imageSize} / 2)`, display: "flex", flexDirection: "column" }}
                                             onClick={() => !isPreview && focusSubItem(block.id, idx)}
                                         >
-                                            <div style={{ ...resolvedCardStyle, ...focusedStyle, flex: 1 }}>{imageEl}{contentEl}</div>
+                                            <div style={{ ...resolvedCardStyle, flex: 1 }}>{imageEl}{contentEl}</div>
                                         </div>
                                     );
                                 }
-                                return (<div key={`member-${idx}`} style={{ ...resolvedCardStyle, ...focusedStyle }}
+                                return (<div key={`member-${idx}`} style={resolvedCardStyle}
                                     onClick={() => !isPreview && focusSubItem(block.id, idx)}
                                 >{imageEl}{contentEl}</div>);
                             })}

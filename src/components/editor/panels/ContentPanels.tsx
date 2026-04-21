@@ -368,6 +368,77 @@ export function TeamPanel({ block }: { block: Block }) {
     );
 }
 
+export function ContactInfoPanel({ block }: { block: Block }) {
+    const { updateBlock } = useEditorStore();
+    const p = block.props as any;
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
+
+    return (
+        <>
+            <Section title="Layout & Grid">
+                <LayoutFields p={p} up={up} options={{
+                    layouts: [{ label: "List", value: "list" }, { label: "Grid", value: "grid" }]
+                }} />
+                <Field label="Gap"><TextInputWithUnit value={(p.gap as string) ?? ""} onChange={(v) => up("gap", v)} placeholder="1.5rem" /></Field>
+            </Section>
+
+            <Section title="Card Styling">
+                <CardFields p={p} up={up} />
+            </Section>
+
+            <Section title="Icon Styling">
+                <ToggleSwitch value={p.showIcons !== false} onChange={(v) => up("showIcons", v)} label="Show Icons" />
+                {p.showIcons !== false && (
+                    <>
+                        <Field label="Icon Size"><TextInputWithUnit value={String(p.iconSize ?? "")} onChange={(v) => up("iconSize", v)} placeholder="24" /></Field>
+                        <Field label="Icon Color"><ColorInput value={(p.iconColor as string) || "var(--primary)"} onChange={(v) => up("iconColor", v)} /></Field>
+                    </>
+                )}
+            </Section>
+
+            <Section title="Items">
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <SortableList
+                        items={(p.items as any[]) || []}
+                        onReorder={(activeId, overId) => {
+                            const oldIndex = (p.items as any[]).findIndex((i) => i.id === activeId);
+                            const newIndex = (p.items as any[]).findIndex((i) => i.id === overId);
+                            up("items", arrayMove(p.items as any[], oldIndex, newIndex), true);
+                        }}
+                        onDelete={(idx) => {
+                            const nI = [...((p.items as any[]) || [])];
+                            nI.splice(idx, 1);
+                            up("items", nI, true);
+                        }}
+                        renderItemContent={(item, idx) => (
+                            <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", gap: 6, background: "#222", borderRadius: 6, border: "1px solid #333" }}>
+                                <div style={{ display: "flex", gap: 8 }}>
+                                    <IconPicker value={item.icon} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], icon: v }; up("items", nI); }} />
+                                    <TextInput value={item.title} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], title: v }; up("items", nI); }} placeholder="Title" />
+                                </div>
+                                <TextInput value={item.content} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], content: v }; up("items", nI); }} placeholder="Content" />
+                            </div>
+                        )}
+                    />
+                    <button onClick={() => { const nI = [...((p.items as any[]) || [])]; nI.push({ id: crypto.randomUUID(), title: "Email", content: "hello@example.com", icon: "Envelope", color: "var(--primary)" }); up("items", nI, true); }} style={{ padding: "8px 0", background: "rgba(99,102,241,0.08)", color: "var(--primary)", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer", marginTop: 4 }}>+ Add Item</button>
+                </div>
+            </Section>
+
+            <Section title="Typography">
+                <Field label="Title Size"><TextInputWithUnit value={(p.titleSize as string) ?? ""} onChange={(v) => up("titleSize", v)} placeholder="0.9rem" /></Field>
+                <Field label="Content Size"><TextInputWithUnit value={(p.contentSize as string) ?? ""} onChange={(v) => up("contentSize", v)} placeholder="1rem" /></Field>
+                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "var(--text)"} onChange={(v) => up("textColor", v)} /></Field>
+            </Section>
+
+            <Section title="Padding">
+                <PaddingFields p={p} up={up} />
+            </Section>
+
+            <AnimationPanel block={block} />
+        </>
+    );
+}
+
 export function PageSettingsPanel({ page }: { page: EditorPage }) {
     const { updateTheme, updatePageData, activeRouteId, setActiveRoute, addRoute, updateRoute, deleteRoute } = useEditorStore();
     const theme = page.theme || DEFAULT_THEME;
@@ -561,9 +632,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Card Style">
-                <Field label="Card Background"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} /></Field>
-                <PaddingInput label="Card Padding" value={(p.padding as string) || "3rem 2rem"} onChange={(v) => up("padding", v)} placeholder="3rem 2rem" />
-                <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "20px"} onChange={(v) => up("borderRadius", v)} /></Field>
+                <CardFields p={p} up={up} />
             </Section>
 
             <Section title="Input Style">
@@ -739,13 +808,7 @@ export function StatsPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Card Styling">
-                <Field label="Style"><SelectInput value={(p.cardStyle as string) || "none"} onChange={(v) => up("cardStyle", v)} options={[{ label: "None", value: "none" }, { label: "Solid Card", value: "card" }, { label: "Glassmorphism", value: "glass" }, { label: "Flat / Ghost", value: "flat" }]} /></Field>
-                {p.cardStyle !== "none" && (
-                    <>
-                        <Field label="Card Background"><ColorInput value={(p.cardBg as string) || "var(--surface)"} onChange={(v) => up("cardBg", v)} /></Field>
-                        <Field label="Corner Radius"><BorderRadiusInput value={(p.cardRadius as string) || "1.5rem"} onChange={(v) => up("cardRadius", v)} /></Field>
-                    </>
-                )}
+                <CardFields p={p} up={up} />
             </Section>
 
             <Section title="Metric Items">
@@ -1076,11 +1139,8 @@ export function DeleteAccountPanel({ block }: { block: Block }) {
                 </Section>
             )}
 
-            <Section title="Delete Button">
-                <ButtonFields p={p} up={up} prefix="button" hideLabel={true} />
-                <Field label="Label">
-                    <TextInput value={(p.submitLabel as string) || "Delete Account"} onChange={(v) => up("submitLabel", v)} />
-                </Field>
+            <Section title="Submit Button">
+                <ButtonFields p={p} up={up} prefix="button" textKey="submitLabel" />
             </Section>
 
             <Section title="Style & Background">

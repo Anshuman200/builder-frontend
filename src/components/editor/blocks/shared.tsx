@@ -15,6 +15,8 @@ import { motion } from "framer-motion";
 import { useEditorStore } from "@/stores/editorStore";
 import { IconButton } from "@/components/ui/IconButton";
 import AppToolTip from "@/components/common/AppToolTip";
+import { getIcon } from "@/lib/utils/icons";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 // ─── Preview context ──────────────────────────────────────────────────────────
 
@@ -52,7 +54,7 @@ export function useLinkHandler() {
                     return;
                 }
             }
-            
+
             // Standard editor behavior: block the click so we don't navigate away
             if (e) e.preventDefault();
             return;
@@ -346,4 +348,244 @@ export function DropZoneStrip({
             </span>
         </div>
     );
+}
+
+// ─── CommonButton ────────────────────────────────────────────────────────────
+
+export const BTN_SIZES: Record<string, { padding: string; fontSize: string; iconSize: number }> = {
+    sm: { padding: "8px 18px", fontSize: "0.8rem", iconSize: 14 },
+    md: { padding: "11px 26px", fontSize: "0.95rem", iconSize: 16 },
+    lg: { padding: "14px 34px", fontSize: "1.05rem", iconSize: 18 },
+    xl: { padding: "18px 44px", fontSize: "1.2rem", iconSize: 20 },
+};
+
+export const BTN_SHADOWS: Record<string, string> = {
+    none: "none",
+    sm: "0 1px 4px rgba(0,0,0,0.15)",
+    md: "0 4px 12px rgba(0,0,0,0.18)",
+    lg: "0 8px 24px rgba(0,0,0,0.22)",
+    glow: "0 0 20px 4px rgba(99,102,241,0.35)",
+};
+
+interface CommonButtonProps {
+    props: Record<string, any>;
+    id?: string;
+    onClick?: (e: React.MouseEvent) => void;
+    isLoading?: boolean;
+    disabled?: boolean;
+    className?: string;
+    type?: "button" | "submit";
+    prefix?: string;
+}
+
+export function CommonButton({ props: p, id, onClick, isLoading, disabled, className, type = "button", prefix = "button" }: CommonButtonProps) {
+    const isPreview = React.useContext(PreviewContext);
+    const handleLink = useLinkHandler();
+
+    // Standardize variant/size/align
+    const variant = (p[`${prefix}Variant`] as string) || (p.buttonVariant as string) || (p.variant as string) || "solid";
+    const size = (p[`${prefix}Size`] as string) || (p.size as string) || "md";
+    const sizeStyle = BTN_SIZES[size] || BTN_SIZES.md;
+    const shadow = BTN_SHADOWS[(p[`${prefix}Shadow`] as string) || (p.shadow as string) || "none"] || "none";
+    const radius = (p[`${prefix}BorderRadius`] as string) || (p.buttonBorderRadius as string) || (p.borderRadius as string) || "8px";
+    const bWidth = (p[`${prefix}BorderWidth`] as string) || (p.borderWidth as string) || "1px";
+
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const defaultPrimary = theme.colors?.primary || "#6366f1";
+    const defaultSecondary = theme.colors?.secondary || "#8b5cf6";
+    const defaultText = theme.colors?.buttonText || "#ffffff";
+
+    let background = defaultPrimary, color = defaultText, border = "none";
+    const finalBg = (p[`${prefix}Bg`] as string) || (p[`${prefix}BgColor`] as string) || (p.buttonBg as string) || (p.bgColor as string);
+    const finalText = (p[`${prefix}TextColor`] as string) || (p.buttonTextColor as string) || (p.textColor as string);
+
+    switch (variant) {
+        case "solid":
+            background = finalBg || defaultPrimary;
+            color = finalText || defaultText;
+            break;
+        case "outline":
+            background = "transparent";
+            color = finalText || finalBg || defaultPrimary;
+            border = `${bWidth} solid ${(p[`${prefix}BorderColor`] as string) || (p.borderColor as string) || finalBg || defaultPrimary}`;
+            break;
+        case "ghost":
+            background = finalBg ? `${finalBg}18` : "rgba(99,102,241,0.08)";
+            color = finalText || finalBg || defaultPrimary;
+            break;
+        case "soft":
+            background = finalBg ? `${finalBg}22` : "rgba(99,102,241,0.13)";
+            color = finalText || finalBg || defaultPrimary;
+            border = `${bWidth} solid ${(p[`${prefix}BorderColor`] as string) || (p.borderColor as string) || (finalBg ? `${finalBg}55` : "rgba(99,102,241,0.3)")}`;
+            break;
+        case "gradient":
+            background = `linear-gradient(${(p[`${prefix}GradientDir`] as string) || (p.gradientDir as string) || "to right"}, ${(p[`${prefix}GradientFrom`] as string) || (p.gradientFrom as string) || defaultPrimary}, ${(p[`${prefix}GradientTo`] as string) || (p.gradientTo as string) || defaultSecondary})`;
+            color = finalText || defaultText;
+            break;
+        case "link":
+            background = "transparent";
+            color = finalText || finalBg || defaultPrimary;
+            break;
+    }
+
+    const IconLeft = (p[`${prefix}IconLeft`] as string) || (p.iconLeft as string) ? getIcon((p[`${prefix}IconLeft`] as string) || (p.iconLeft as string)) : null;
+    const IconRight = (p[`${prefix}IconRight`] as string) || (p.iconRight as string) ? getIcon((p[`${prefix}IconRight`] as string) || (p.iconRight as string)) : null;
+
+    const btnStyle: React.CSSProperties = {
+        position: "relative",
+        display: (p[`${prefix}FullWidth`] !== false && p.buttonFullWidth !== false && p.fullWidth !== false) ? "flex" : "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "0.5em",
+        width: (p[`${prefix}FullWidth`] === true || p.buttonFullWidth === true || p.fullWidth === true) ? "100%" : undefined,
+        textDecoration: variant === "link" ? "underline" : "none",
+        borderRadius: radius,
+        fontWeight: (p[`${prefix}FontWeight`] as string) || (p.fontWeight as string) || "600",
+        fontSize: (p[`${prefix}FontSize`] as string) || (p.fontSize as string) || sizeStyle.fontSize,
+        letterSpacing: (p[`${prefix}LetterSpacing`] as string) || (p.letterSpacing as string) || "0.01em",
+        cursor: (isPreview && !disabled && !isLoading) ? "pointer" : (isLoading || disabled ? "not-allowed" : "default"),
+        shadow: shadow === "none" ? undefined : shadow,
+        boxShadow: shadow,
+        transition: "all 0.2s ease",
+        background,
+        color,
+        border,
+        padding: variant === "link" ? "0" : sizeStyle.padding,
+        opacity: (disabled || isLoading) ? 0.7 : 1,
+        userSelect: "none",
+        outline: "none",
+    };
+
+    const label = (p.buttonText as string) || (p.submitLabel as string) || (p.ctaText as string) || (p.label as string) || "Button";
+
+    const content = (
+        <>
+            {isLoading && (
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            )}
+            {!isLoading && IconLeft && <IconLeft style={{ width: sizeStyle.iconSize, height: sizeStyle.iconSize }} />}
+            <span>{label}</span>
+            {!isLoading && IconRight && <IconRight style={{ width: sizeStyle.iconSize, height: sizeStyle.iconSize }} />}
+        </>
+    );
+
+    if (type === "submit") {
+        return (
+            <button
+                id={id}
+                type="submit"
+                disabled={disabled || isLoading}
+                style={btnStyle}
+                className={className}
+                onClick={onClick}
+            >
+                {content}
+            </button>
+        );
+    }
+
+    return (
+        <a
+            id={id}
+            href={isPreview ? (p.href as string || p.ctaUrl as string || "#") : undefined}
+            onClick={(e) => {
+                if (onClick) onClick(e);
+                handleLink((p.href as string || p.ctaUrl as string || "#"), e);
+            }}
+            style={btnStyle}
+            className={className}
+        >
+            {content}
+        </a>
+    );
+}
+// ─── Card Standardization ───────────────────────────────────────────────────
+
+export const CARD_SHADOWS: Record<string, string> = {
+    none: "none",
+    sm: "0 2px 8px rgba(0,0,0,0.06)",
+    md: "0 4px 20px rgba(0,0,0,0.1)",
+    lg: "0 10px 40px rgba(0,0,0,0.12)",
+    xl: "0 20px 60px rgba(0,0,0,0.18)",
+    glow: "0 0 25px rgba(var(--primary-rgb), 0.3)",
+};
+
+interface GetCardStylesOptions {
+    props: Record<string, any>;
+    isFocused?: boolean;
+    isHovered?: boolean;
+    primaryColor?: string;
+    primaryRgb?: string;
+}
+
+export function getCardStyles({ props: p, isFocused, isHovered, primaryColor = "#6366f1", primaryRgb = "99, 102, 241" }: GetCardStylesOptions): React.CSSProperties {
+    const cardStyle = (p.cardStyle as string) || "raised";
+    const cardBg = (p.cardBg as string) || "var(--surface)";
+    const cardRadius = (p.cardRadius as string) || "16px";
+    const shadowKey = (p.cardShadow as string) || (cardStyle === "raised" ? "md" : "none");
+    const cardShadow = CARD_SHADOWS[shadowKey] || shadowKey;
+    const padding = (p.cardPadding as string) || (cardStyle !== "none" ? "2rem 1.75rem" : "0.5rem");
+
+    let baseStyle: React.CSSProperties = {
+        display: "flex",
+        flexDirection: "column",
+        padding,
+        borderRadius: cardStyle !== "none" ? cardRadius : 0,
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        position: "relative",
+    };
+
+    // Apply specific style variants
+    switch (cardStyle) {
+        case "raised":
+            baseStyle.background = cardBg;
+            baseStyle.boxShadow = cardShadow;
+            break;
+        case "outlined":
+            baseStyle.background = cardBg;
+            baseStyle.border = `1.5px solid ${p.cardBorderColor || "var(--border)"}`;
+            break;
+        case "filled":
+            baseStyle.background = cardBg !== "var(--surface)" ? cardBg : `rgba(${primaryRgb}, 0.06)`;
+            break;
+        case "glass":
+            baseStyle.background = "rgba(255, 255, 255, 0.7)";
+            baseStyle.backdropFilter = "blur(12px)";
+            baseStyle.border = "1px solid rgba(255, 255, 255, 0.3)";
+            baseStyle.boxShadow = "0 8px 32px 0 rgba(31, 38, 135, 0.07)";
+            break;
+        case "none":
+            baseStyle.background = "transparent";
+            break;
+    }
+
+    // Apply hover effects
+    if (isHovered && !isFocused) {
+        const hoverEffect = (p.cardHoverEffect as string) || (cardStyle === "raised" ? "up" : "none");
+        switch (hoverEffect) {
+            case "up":
+                baseStyle.transform = "translateY(-6px)";
+                if (cardStyle === "raised") baseStyle.boxShadow = CARD_SHADOWS.lg;
+                break;
+            case "scale":
+                baseStyle.transform = "scale(1.02)";
+                break;
+            case "glow":
+                baseStyle.boxShadow = `0 0 20px 2px rgba(${primaryRgb}, 0.25)`;
+                break;
+        }
+    }
+
+    // Apply editor focus state
+    if (isFocused) {
+        baseStyle.boxShadow = "0 0 0 3px #0099ff, 0 0 20px rgba(0,153,255,0.4)";
+        baseStyle.zIndex = 10;
+        baseStyle.transform = "scale(1.02)";
+        baseStyle.cursor = "pointer";
+    }
+
+    return baseStyle;
 }
