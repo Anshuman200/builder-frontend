@@ -44,6 +44,8 @@ import BlockPalette from "./BlockPalette";
 import MediaPicker from "@/components/editor/MediaPicker";
 import { DEFAULT_THEME } from "@/stores/editorStore";
 import NewPageWizard from "@/components/editor/NewPageWizard";
+import { ConfigProvider, theme as antdTheme } from "antd";
+import { PANEL_COLORS } from "./panels/shared";
 
 
 export default function EditorToolbar() {
@@ -321,18 +323,33 @@ export default function EditorToolbar() {
   ];
 
   return (
-    <header style={{
-      height: 52,
-      flexShrink: 0,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      padding: "0 16px",
-      gap: 12,
-      background: "var(--bg-secondary)",
-      borderBottom: "1px solid var(--border)",
-      zIndex: 50,
-    }}>
+    <ConfigProvider
+      theme={{
+        algorithm: antdTheme.darkAlgorithm,
+        token: {
+          colorPrimary: PANEL_COLORS.primary,
+          colorBgContainer: PANEL_COLORS.inputBg,
+          colorBorder: PANEL_COLORS.border,
+          colorText: PANEL_COLORS.text,
+          colorTextDescription: PANEL_COLORS.muted,
+          colorBgElevated: PANEL_COLORS.sectionBg,
+          borderRadius: 8,
+        },
+      }}
+    >
+      <header style={{
+        height: 52,
+        flexShrink: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 16px",
+        gap: 12,
+        background: PANEL_COLORS.bg,
+        borderBottom: `1px solid ${PANEL_COLORS.border}`,
+        zIndex: 50,
+      }}>
+        {/* ... existing header content ... */}
 
       {/* Left — logo + title */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
@@ -1031,6 +1048,7 @@ export default function EditorToolbar() {
         </div>
       </Drawer>
     </header>
+    </ConfigProvider>
   );
 }
 

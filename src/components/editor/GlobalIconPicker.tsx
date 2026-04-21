@@ -69,6 +69,7 @@ export function GlobalIconPicker() {
             {/* The Picker itself */}
             <div
                 ref={pickerRef}
+                className="dark"
                 style={{
                     position: "fixed",
                     top, left,
@@ -82,7 +83,8 @@ export function GlobalIconPicker() {
                     flexDirection: "column",
                     overflow: "hidden",
                     zIndex: 99999,
-                    animation: "pickerIn 0.15s ease-out"
+                    animation: "pickerIn 0.15s ease-out",
+                    color: "#ededed"
                 }}
                 onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
             >

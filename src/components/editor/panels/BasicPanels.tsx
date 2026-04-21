@@ -331,8 +331,7 @@ export function ContainerPanel({ block }: { block: Block }) {
                 </Field>
 
                 {/* Min Height */}
-                <Field label="Min Height"><TextInputWithUnit value={(p.minHeight as string) || ""} onChange={(v) => up("minHeight", v)} placeholder="auto / 50vh / 400px" /></Field>
-
+                <Field label="Min Height"><TextInputWithUnit value={(p.minHeight as string) || ""} onChange={(v) => up("minHeight", v)} placeholder="500" /></Field>
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "0px"} onChange={(v) => up("borderRadius", v)} /></Field>
             </Section>
 

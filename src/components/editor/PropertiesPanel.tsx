@@ -14,7 +14,8 @@ import type { Block } from "@/types";
 import React, { useRef, useEffect, useState } from "react";
 
 import { useEditorStore } from "@/stores/editorStore";
-import { Section, Field, TextInput } from "./panels/shared";
+import { Section, Field, TextInput, PANEL_COLORS } from "./panels/shared";
+import { ConfigProvider, theme as antdTheme } from "antd";
 
 // ─── Shared panel primitives re-export ───────────────────────────────────────
 export { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, PANEL_COLORS } from "./panels/shared";
@@ -146,91 +147,116 @@ export default function PropertiesPanel() {
     }
 
     return (
-        <aside
-            ref={scrollRef}
-            style={{
-                width: 380, flexShrink: 0,
-                background: "var(--bg-secondary)",
-                borderLeft: "1px solid var(--border)",
-                overflowY: "auto",
-                display: "flex", flexDirection: "column",
+        <ConfigProvider
+            theme={{
+                algorithm: antdTheme.darkAlgorithm,
+                token: {
+                    colorPrimary: PANEL_COLORS.primary,
+                    colorBgContainer: PANEL_COLORS.inputBg,
+                    colorBorder: PANEL_COLORS.border,
+                    colorText: PANEL_COLORS.text,
+                    colorTextDescription: PANEL_COLORS.muted,
+                    colorBgElevated: PANEL_COLORS.sectionBg,
+                    borderRadius: 4,
+                },
+                components: {
+                    Select: {
+                        controlHeight: 26,
+                        fontSize: 11,
+                    },
+                    Input: {
+                        controlHeight: 26,
+                        fontSize: 11,
+                    }
+                }
             }}
         >
-            {/* WhatsApp-style flash animation */}
-            <style>{`
-                @keyframes props-flash {
-                    0%   { background: rgba(99,102,241,0.9); box-shadow: inset 3px 0 0 rgba(99,102,241,0.8); }
-                    40%  { background: rgba(99,102,241,0.5); box-shadow: inset 3px 0 0 rgba(99,102,241,0.5); }
-                    60%  { background: rgba(99,102,241,0.2); box-shadow: inset 3px 0 0 rgba(99,102,241,0.2); }
-                    100% { background: transparent; box-shadow: inset 3px 0 0 transparent; }
-                }
-                .props-header-flash {
-                    animation: props-flash 10.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-                }
-            `}</style>
-
-            {/* Panel Header — re-keyed so animation replays on each block switch */}
-            <div
-                key={`flash-${flashKey}`}
-                className="props-header-flash"
+            <aside
+                ref={scrollRef}
                 style={{
-                    padding: "12px 14px",
-                    borderBottom: "1px solid var(--border)",
+                    width: 380, flexShrink: 0,
+                    background: PANEL_COLORS.bg,
+                    borderLeft: `1px solid ${PANEL_COLORS.border}`,
+                    overflowY: "auto",
+                    display: "flex", flexDirection: "column",
                 }}
             >
-                <p style={{
-                    margin: 0, fontSize: 10, fontWeight: 700,
-                    letterSpacing: "0.1em", textTransform: "uppercase",
-                    color: "var(--text-muted)",
-                }}>
-                    Properties
-                </p>
-                <p style={{
-                    margin: "2px 0 0", fontSize: 12,
-                    color: "var(--text)", fontWeight: 600, textTransform: "capitalize",
-                }}>
-                    {blockLabel(selectedBlock.type)}
-                </p>
-            </div>
+                {/* WhatsApp-style flash animation */}
+                <style>{`
+                    @keyframes props-flash {
+                        0%   { background: rgba(99,102,241,0.9); box-shadow: inset 3px 0 0 rgba(99,102,241,0.8); }
+                        40%  { background: rgba(99,102,241,0.5); box-shadow: inset 3px 0 0 rgba(99,102,241,0.5); }
+                        60%  { background: rgba(99,102,241,0.2); box-shadow: inset 3px 0 0 rgba(99,102,241,0.2); }
+                        100% { background: transparent; box-shadow: inset 3px 0 0 transparent; }
+                    }
+                    .props-header-flash {
+                        animation: props-flash 10.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+                    }
+                `}</style>
 
-            {/* Type-specific editors */}
-            {selectedBlock.type === "header" && <HeaderPanel block={selectedBlock} />}
-            {selectedBlock.type === "hero" && <HeroPanel block={selectedBlock} />}
-            {selectedBlock.type === "container" && <ContainerPanel block={selectedBlock} />}
-            {selectedBlock.type === "text" && <TextPanel block={selectedBlock} />}
-            {selectedBlock.type === "image" && <ImagePanel block={selectedBlock} />}
-            {selectedBlock.type === "video" && <VideoPanel block={selectedBlock} />}
-            {selectedBlock.type === "icon" && <IconPanel block={selectedBlock} />}
-            {selectedBlock.type === "button" && <ButtonPanel block={selectedBlock} />}
-            {selectedBlock.type === "divider" && <DividerPanel block={selectedBlock} />}
-            {selectedBlock.type === "features" && <FeaturesPanel block={selectedBlock} />}
-            {selectedBlock.type === "team" && <TeamPanel block={selectedBlock} />}
-            {selectedBlock.type === "columns" && <ColumnsPanel block={selectedBlock} />}
-            {selectedBlock.type === "footer" && <FooterPanel block={selectedBlock} />}
-            {selectedBlock.type === "contactForm" && <ContactFormPanel block={selectedBlock} />}
-            {selectedBlock.type === "accordion" && <AccordionPanel block={selectedBlock} />}
-            {selectedBlock.type === "wave" && <WavePanel block={selectedBlock} />}
-            {selectedBlock.type === "carousel" && <CarouselPanel block={selectedBlock} />}
-            {selectedBlock.type === "grid" && <GridPanel block={selectedBlock} />}
-            {selectedBlock.type === "masonry" && <GalleryPanel block={selectedBlock} />}
-            {selectedBlock.type === "stats" && <StatsPanel block={selectedBlock} />}
-            {selectedBlock.type === "chart" && <ChartPanel block={selectedBlock} />}
-            {selectedBlock.type === "deleteAccount" && <DeleteAccountPanel block={selectedBlock} />}
-            {(selectedBlock.type === "tos" || selectedBlock.type === "privacy" || selectedBlock.type === "about") && <LegalPanel block={selectedBlock} />}
-
-            {/* Generic Section ID field for all blocks */}
-            <Section title="Advanced">
-                <Field label="Section ID (Anchor)">
-                    <TextInput
-                        placeholder="e.g. pricing"
-                        value={(selectedBlock.props.sectionId as string) || ""}
-                        onChange={(v: string) => updateBlock(selectedBlock.id, { sectionId: v })}
-                    />
-                </Field>
-                <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: "4px" }}>
-                    Assign an ID to link directly here via Header/Footer navigation (e.g. link URL as #pricing).
+                {/* Panel Header — re-keyed so animation replays on each block switch */}
+                <div
+                    key={`flash-${flashKey}`}
+                    className="props-header-flash"
+                    style={{
+                        padding: "12px 14px",
+                        borderBottom: `1px solid ${PANEL_COLORS.border}`,
+                    }}
+                >
+                    <p style={{
+                        margin: 0, fontSize: 10, fontWeight: 700,
+                        letterSpacing: "0.1em", textTransform: "uppercase",
+                        color: PANEL_COLORS.muted,
+                    }}>
+                        Properties
+                    </p>
+                    <p style={{
+                        margin: "2px 0 0", fontSize: 12,
+                        color: PANEL_COLORS.text, fontWeight: 600, textTransform: "capitalize",
+                    }}>
+                        {blockLabel(selectedBlock.type)}
+                    </p>
                 </div>
-            </Section>
-        </aside>
+
+                {/* Type-specific editors */}
+                {selectedBlock.type === "header" && <HeaderPanel block={selectedBlock} />}
+                {selectedBlock.type === "hero" && <HeroPanel block={selectedBlock} />}
+                {selectedBlock.type === "container" && <ContainerPanel block={selectedBlock} />}
+                {selectedBlock.type === "text" && <TextPanel block={selectedBlock} />}
+                {selectedBlock.type === "image" && <ImagePanel block={selectedBlock} />}
+                {selectedBlock.type === "video" && <VideoPanel block={selectedBlock} />}
+                {selectedBlock.type === "icon" && <IconPanel block={selectedBlock} />}
+                {selectedBlock.type === "button" && <ButtonPanel block={selectedBlock} />}
+                {selectedBlock.type === "divider" && <DividerPanel block={selectedBlock} />}
+                {selectedBlock.type === "features" && <FeaturesPanel block={selectedBlock} />}
+                {selectedBlock.type === "team" && <TeamPanel block={selectedBlock} />}
+                {selectedBlock.type === "columns" && <ColumnsPanel block={selectedBlock} />}
+                {selectedBlock.type === "footer" && <FooterPanel block={selectedBlock} />}
+                {selectedBlock.type === "contactForm" && <ContactFormPanel block={selectedBlock} />}
+                {selectedBlock.type === "accordion" && <AccordionPanel block={selectedBlock} />}
+                {selectedBlock.type === "wave" && <WavePanel block={selectedBlock} />}
+                {selectedBlock.type === "carousel" && <CarouselPanel block={selectedBlock} />}
+                {selectedBlock.type === "grid" && <GridPanel block={selectedBlock} />}
+                {selectedBlock.type === "masonry" && <GalleryPanel block={selectedBlock} />}
+                {selectedBlock.type === "stats" && <StatsPanel block={selectedBlock} />}
+                {selectedBlock.type === "chart" && <ChartPanel block={selectedBlock} />}
+                {selectedBlock.type === "deleteAccount" && <DeleteAccountPanel block={selectedBlock} />}
+                {(selectedBlock.type === "tos" || selectedBlock.type === "privacy" || selectedBlock.type === "about") && <LegalPanel block={selectedBlock} />}
+
+                {/* Generic Section ID field for all blocks */}
+                <Section title="Advanced">
+                    <Field label="Section ID (Anchor)">
+                        <TextInput
+                            placeholder="e.g. pricing"
+                            value={(selectedBlock.props.sectionId as string) || ""}
+                            onChange={(v: string) => updateBlock(selectedBlock.id, { sectionId: v })}
+                        />
+                    </Field>
+                    <div style={{ fontSize: 10, color: PANEL_COLORS.muted, marginTop: "4px" }}>
+                        Assign an ID to link directly here via Header/Footer navigation (e.g. link URL as #pricing).
+                    </div>
+                </Section>
+            </aside>
+        </ConfigProvider>
     );
 }

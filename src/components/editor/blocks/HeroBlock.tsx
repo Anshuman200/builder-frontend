@@ -4,6 +4,7 @@ import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
+import NextImage from "next/image";
 
 export function HeroBlock({ block }: BlockProps) {
     const p = block.props;
@@ -25,6 +26,8 @@ export function HeroBlock({ block }: BlockProps) {
     const tabletPadding = (p.tabletPadding as string) || desktopPadding;
     const mobilePadding = (p.mobilePadding as string) || tabletPadding;
     const editorPadding = viewMode === "mobile" ? mobilePadding : viewMode === "tablet" ? tabletPadding : desktopPadding;
+
+    const isSimpleImage = bgImage && !bgImage.startsWith("linear-gradient") && !bgImage.startsWith("radial-gradient");
 
     let background: string;
     if (bgImage) {
@@ -52,11 +55,52 @@ export function HeroBlock({ block }: BlockProps) {
             <section
                 id={(p.sectionId as string) || `block-${block.id}`}
                 className={isPreview ? `hero-${block.id}` : undefined}
-                style={{ minHeight: sectionMinHeight, background, borderRadius: (p.borderRadius as string) || "0px", overflow: "hidden", color: (p.textColor as string) || "#ffffff", display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "center", padding: isPreview ? undefined : editorPadding, paddingLeft: isPreview ? undefined : 0, paddingRight: isPreview ? undefined : 0, textAlign: align as React.CSSProperties["textAlign"], position: "relative" }}
+                style={{ 
+                    minHeight: sectionMinHeight, 
+                    background: isSimpleImage ? bgColor : background, 
+                    borderRadius: (p.borderRadius as string) || "0px", 
+                    overflow: "hidden", 
+                    color: (p.textColor as string) || "#ffffff", 
+                    display: "flex", 
+                    flexDirection: "column", 
+                    alignItems: "stretch", 
+                    justifyContent: "center", 
+                    padding: isPreview ? undefined : editorPadding, 
+                    paddingLeft: isPreview ? undefined : 0, 
+                    paddingRight: isPreview ? undefined : 0, 
+                    textAlign: align as React.CSSProperties["textAlign"], 
+                    position: "relative" 
+                }}
             >
+                {isSimpleImage && (
+                    <>
+                        <NextImage 
+                            src={bgImage} 
+                            alt="" 
+                            fill 
+                            priority 
+                            className="pointer-events-none"
+                            style={{ objectFit: "cover", zIndex: 0 }} 
+                        />
+                        <div style={{ position: "absolute", inset: 0, background: bgOverlay, zIndex: 1 }} />
+                    </>
+                )}
                 <div
                     className={isPreview ? `hero-inner-${block.id}` : undefined}
-                    style={{ maxWidth: innerMaxWidth, margin: "0 auto", width: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column", alignItems: "stretch", gap: 4, paddingLeft: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), paddingRight: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX) }}
+                    style={{ 
+                        position: "relative",
+                        zIndex: 2,
+                        maxWidth: innerMaxWidth, 
+                        margin: "0 auto", 
+                        width: "100%", 
+                        boxSizing: "border-box", 
+                        display: "flex", 
+                        flexDirection: "column", 
+                        alignItems: "stretch", 
+                        gap: 4, 
+                        paddingLeft: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), 
+                        paddingRight: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX) 
+                    }}
                 >
                     <SortableBlockGroup blocks={childBlocks}>
                         {childBlocks.map((child) => (

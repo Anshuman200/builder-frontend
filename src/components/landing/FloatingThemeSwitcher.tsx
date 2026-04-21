@@ -27,9 +27,9 @@ export function FloatingThemeSwitcher() {
             {open && (
                 <div style={{
                     position: "absolute", bottom: "calc(100% + 0.75rem)", right: 0,
-                    background: "rgba(18,18,21,0.95)",
+                    background: "var(--surface)",
                     backdropFilter: "blur(20px)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    border: "1px solid var(--border)",
                     borderRadius: "var(--radius-lg)",
                     padding: "0.5rem",
                     display: "flex",
@@ -61,9 +61,9 @@ export function FloatingThemeSwitcher() {
                             }}
                             onMouseEnter={e => {
                                 if (theme !== value) {
-                                    (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
-                                    (e.currentTarget as HTMLElement).style.color = "var(--text)";
-                                }
+                    (e.currentTarget as HTMLElement).style.background = "var(--surface-hover)";
+                    (e.currentTarget as HTMLElement).style.color = "var(--text)";
+                }
                             }}
                             onMouseLeave={e => {
                                 if (theme !== value) {

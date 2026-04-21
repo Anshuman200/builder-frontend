@@ -8,7 +8,7 @@ import {
     TypographyFields, LayoutFields, CardFields, ButtonFields, ImageFields, PaddingFields,
     InputFields,
     ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove,
-    TextInputWithUnit
+    TextInputWithUnit, useSubItemFocus
 } from "./shared";
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "../IconPicker";
@@ -23,24 +23,7 @@ export function FeaturesPanel({ block }: { block: Block }) {
     const p = block.props as any;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
-    // Scroll-to + flash when a feature card is clicked on canvas
-    const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-    const [flashIdx, setFlashIdx] = React.useState<number | null>(null);
-    useEffect(() => {
-        let prev = useEditorStore.getState().subItemFocus;
-        return useEditorStore.subscribe((state) => {
-            const f = state.subItemFocus as any;
-            if (f && f.blockId === block.id && f !== prev) {
-                prev = f;
-                const el = itemRefs.current[f.index];
-                if (el) {
-                    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                    setFlashIdx(f.index);
-                    setTimeout(() => setFlashIdx(null), 2000);
-                }
-            }
-        });
-    }, [block.id]);
+    const { flashIdx, itemRefs } = useSubItemFocus(block.id);
 
     return (
         <>
@@ -74,15 +57,6 @@ export function FeaturesPanel({ block }: { block: Block }) {
                 <PaddingFields p={p} up={up} />
             </Section>
             <Section title="Feature Items">
-                <style>{`
-                    @keyframes subitem-flash {
-                       0%   { background: rgba(99,102,241,0.9); box-shadow: inset 3px 0 0 rgba(99,102,241,0.8); }
-                        40%  { background: rgba(99,102,241,0.5); box-shadow: inset 3px 0 0 rgba(99,102,241,0.5); }
-                        60%  { background: rgba(99,102,241,0.2); box-shadow: inset 3px 0 0 rgba(99,102,241,0.2); }
-                        100% { background: transparent; box-shadow: inset 3px 0 0 transparent; }
-                    }
-                    .subitem-flash { animation: subitem-flash 1s cubic-bezier(0.22,1,0.36,1) forwards; }
-                `}</style>
                 <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Add or remove feature items below.</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     <SortableList
@@ -100,7 +74,7 @@ export function FeaturesPanel({ block }: { block: Block }) {
                         renderItemContent={(feature, idx) => (
                             <div
                                 ref={(el) => { itemRefs.current[idx] = el; }}
-                                className={flashIdx === idx ? "subitem-flash" : undefined}
+                                className={flashIdx === idx ? "subitem-highlight" : undefined}
                                 style={{ display: "flex", flexDirection: "column", gap: 4, transition: "background 0.2s" }}
                             >
                                 <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.5, letterSpacing: "0.05em", marginBottom: 2 }}>FEATURE {idx + 1}</span>
@@ -142,24 +116,7 @@ export function TeamPanel({ block }: { block: Block }) {
     const p = block.props as any;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
-    // Scroll-to + flash when a member card is clicked on canvas
-    const memberRefs = useRef<(HTMLDivElement | null)[]>([]);
-    const [flashIdx, setFlashIdx] = React.useState<number | null>(null);
-    useEffect(() => {
-        let prev = useEditorStore.getState().subItemFocus;
-        return useEditorStore.subscribe((state) => {
-            const f = state.subItemFocus as any;
-            if (f && f.blockId === block.id && f !== prev) {
-                prev = f;
-                const el = memberRefs.current[f.index];
-                if (el) {
-                    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                    setFlashIdx(f.index);
-                    setTimeout(() => setFlashIdx(null), 2000);
-                }
-            }
-        });
-    }, [block.id]);
+    const { flashIdx, itemRefs } = useSubItemFocus(block.id);
 
     return (
         <>
@@ -210,9 +167,9 @@ export function TeamPanel({ block }: { block: Block }) {
                         }}
                         renderItemContent={(member, idx) => (
                             <div
-                                ref={(el) => { memberRefs.current[idx] = el; }}
-                                className={flashIdx === idx ? "subitem-flash" : undefined}
-                                style={{ background: "#222", borderRadius: 6, overflow: "hidden", border: "1px solid #333" }}
+                                ref={(el) => { itemRefs.current[idx] = el; }}
+                                className={flashIdx === idx ? "subitem-highlight" : undefined}
+                                style={{ background: "#222", borderRadius: 6, overflow: "hidden", border: "1px solid #333", transition: "all 0.3s" }}
                             >
                                 <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "6px 8px", background: "#282828", borderBottom: "1px solid #333" }}>
                                     {member.image ? (
@@ -505,23 +462,7 @@ export function AccordionPanel({ block }: { block: Block }) {
     const p: any = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
-    const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-    const [flashIdx, setFlashIdx] = React.useState<number | null>(null);
-    useEffect(() => {
-        let prev = useEditorStore.getState().subItemFocus;
-        return useEditorStore.subscribe((state) => {
-            const f = state.subItemFocus as any;
-            if (f && f.blockId === block.id && f !== prev) {
-                prev = f;
-                const el = itemRefs.current[f.index];
-                if (el) {
-                    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                    setFlashIdx(f.index);
-                    setTimeout(() => setFlashIdx(null), 2000);
-                }
-            }
-        });
-    }, [block.id]);
+    const { flashIdx, itemRefs } = useSubItemFocus(block.id);
 
     return (
         <>
@@ -543,7 +484,7 @@ export function AccordionPanel({ block }: { block: Block }) {
                         renderItemContent={(item, idx) => (
                             <div
                                 ref={(el) => { itemRefs.current[idx] = el; }}
-                                className={flashIdx === idx ? "subitem-flash" : undefined}
+                                className={flashIdx === idx ? "subitem-highlight" : undefined}
                                 style={{ display: "flex", flexDirection: "column", gap: 4, transition: "background 0.2s" }}
                             >
                                 <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.5, letterSpacing: "0.05em", marginBottom: 2 }}>ITEM {idx + 1}</span>
@@ -602,23 +543,7 @@ export function StatsPanel({ block }: { block: Block }) {
     const p: any = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
-    const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-    const [flashIdx, setFlashIdx] = React.useState<number | null>(null);
-    useEffect(() => {
-        let prev = useEditorStore.getState().subItemFocus;
-        return useEditorStore.subscribe((state) => {
-            const f = state.subItemFocus as any;
-            if (f && f.blockId === block.id && f !== prev) {
-                prev = f;
-                const el = itemRefs.current[f.index];
-                if (el) {
-                    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                    setFlashIdx(f.index);
-                    setTimeout(() => setFlashIdx(null), 2000);
-                }
-            }
-        });
-    }, [block.id]);
+    const { flashIdx, itemRefs } = useSubItemFocus(block.id);
 
     return (
         <>
@@ -658,7 +583,7 @@ export function StatsPanel({ block }: { block: Block }) {
                         renderItemContent={(item, idx) => (
                             <div
                                 ref={(el) => { itemRefs.current[idx] = el; }}
-                                className={flashIdx === idx ? "subitem-flash" : undefined}
+                                className={flashIdx === idx ? "subitem-highlight" : undefined}
                                 style={{ display: "flex", flexDirection: "column", gap: 4, transition: "background 0.2s" }}
                             >
                                 <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", marginBottom: 2 }}>METRIC {idx + 1}</span>

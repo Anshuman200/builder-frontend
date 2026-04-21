@@ -44,7 +44,7 @@ export default function PublicLayout({
     }
 
     return (
-        <Layout className="min-h-screen bg-[#080808] relative overflow-x-hidden font-sans">
+        <Layout className="min-h-screen bg-transparent relative overflow-x-hidden font-sans">
             {/* 
                Premium Background Effects - Centralized in Layout
                These will be visible across ALL public pages (Landing, Templates, etc.)

@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider, useTheme } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -9,6 +9,55 @@ import { ToastContainer } from "@/components/ui/ToastContainer";
 import { ConfigProvider, theme, App } from "antd";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { usePathname } from "next/navigation";
+
+/**
+ * AntdThemeProvider: A sub-component that reacts to theme changes
+ * from next-themes and updates the Ant Design ConfigProvider.
+ */
+function AntdThemeProvider({ children }: { children: React.ReactNode }) {
+    const { resolvedTheme } = useTheme();
+    const isDark = resolvedTheme === "dark";
+
+    return (
+        <ConfigProvider
+            theme={{
+                algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
+                token: {
+                    colorPrimary: '#6366f1', // Indigo 500
+                    borderRadius: 8,
+                    fontFamily: 'inherit',
+                    zIndexPopupBase: 10000,
+                    // If dark mode, use custom refined dark tokens; 
+                    // if light mode, let defaultAlgorithm handle it or specify light tokens.
+                    ...(isDark ? {
+                        colorBgBase: '#000000',
+                        colorBgContainer: '#0a0a0a',
+                        colorBgElevated: '#171717',
+                        colorBorder: '#262626',
+                    } : {
+                        colorBgBase: '#ffffff',
+                        colorBgContainer: '#ffffff',
+                        colorBgElevated: '#ffffff',
+                        colorBorder: '#e2e8f0',
+                    }),
+                },
+                components: {
+                    Card: {
+                        colorBgContainer: isDark ? '#0a0a0a' : '#ffffff',
+                    },
+                    Layout: {
+                        colorBgBody: "transparent", // Let the global CSS handle body background
+                        colorBgHeader: "transparent",
+                    }
+                }
+            }}
+        >
+            <App className="min-h-screen">
+                {children}
+            </App>
+        </ConfigProvider>
+    );
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
     const [authOpen, setAuthOpen] = useState(false);
@@ -43,46 +92,25 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <QueryClientProvider client={queryClient}>
             <ThemeProvider
                 attribute="class"
-                defaultTheme="dark"
-                enableSystem={false}
+                defaultTheme="light"
+                enableSystem={true}
                 disableTransitionOnChange={false}
                 storageKey="pagecraft-theme"
             >
-                <ConfigProvider
-                    theme={{
-                        algorithm: theme.darkAlgorithm,
-                        token: {
-                            colorPrimary: '#6366f1', // Indigo 500
-                            colorBgBase: '#000000',
-                            colorBgContainer: '#0a0a0a',
-                            colorBgElevated: '#171717',
-                            colorBorder: '#262626',
-                            borderRadius: 8,
-                            fontFamily: 'inherit',
-                            zIndexPopupBase: 10000, // Ensure AntD popups (toasts) are above everything
-                        },
-                        components: {
-                            Card: {
-                                colorBgContainer: '#0a0a0a',
-                            },
-                        }
-                    }}
-                >
-                    <App>
-                        <ToastProvider>
-                            <AuthProvider>
-                                {children}
-                                <ToastContainer />
-                                <AuthModal 
-                                    open={authOpen} 
-                                    onClose={() => { setAuthOpen(false); setAuthForced(false); }} 
-                                    redirectOnSuccess={isLandingPage} 
-                                    forced={authForced}
-                                />
-                            </AuthProvider>
-                        </ToastProvider>
-                    </App>
-                </ConfigProvider>
+                <AntdThemeProvider>
+                    <ToastProvider>
+                        <AuthProvider>
+                            {children}
+                            <ToastContainer />
+                            <AuthModal 
+                                open={authOpen} 
+                                onClose={() => { setAuthOpen(false); setAuthForced(false); }} 
+                                redirectOnSuccess={isLandingPage} 
+                                forced={authForced}
+                            />
+                        </AuthProvider>
+                    </ToastProvider>
+                </AntdThemeProvider>
             </ThemeProvider>
         </QueryClientProvider>
     );

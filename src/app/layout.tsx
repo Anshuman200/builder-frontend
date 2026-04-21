@@ -1,10 +1,18 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { Inter } from "next/font/google"; // Optimized font
 import "./globals.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { Providers } from "@/components/Providers";
 
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: {
     default: "PageCraft — Build & Publish Stunning Pages",
     template: "%s | PageCraft",
@@ -20,6 +28,20 @@ export const metadata: Metadata = {
     description: "Drag, drop, publish. Zero code required.",
   },
   twitter: { card: "summary_large_image" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default function RootLayout({
@@ -29,7 +51,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased">
+      <body className={`${inter.className} antialiased`}>
         <Suspense fallback={null}>
           <AntdRegistry>
             <Providers>{children}</Providers>

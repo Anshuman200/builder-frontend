@@ -100,7 +100,7 @@ export default function DashboardLayout({
 
   if (!mounted || authLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-neutral-950 text-white/20">
+      <div className="h-screen flex items-center justify-center bg-[var(--bg)] text-[var(--text)]/20">
         <ArrowPathIcon className="w-10 h-10 animate-spin" />
       </div>
     );
@@ -108,7 +108,7 @@ export default function DashboardLayout({
 
   return (
     <DeleteToastProvider>
-      <div className="min-h-screen bg-neutral-950 text-white selection:bg-indigo-500/30">
+      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] selection:bg-indigo-500/30">
         <DashboardHeader onCreatePage={handleCreate} />
 
         <main className="relative">

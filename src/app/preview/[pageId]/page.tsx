@@ -38,6 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const { pageId } = await params;
+  const initialData = await getPageData(pageId);
   
-  return <PreviewClient pageId={pageId} initialPath="/" />;
+  return <PreviewClient pageId={pageId} initialData={initialData} initialPath="/" />;
 }

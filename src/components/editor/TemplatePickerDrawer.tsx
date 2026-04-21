@@ -82,6 +82,7 @@ export function TemplatePickerDrawer() {
 
   return (
     <div
+      className="dark"
       style={{
         position: "fixed",
         inset: 0,
@@ -138,7 +139,8 @@ export function TemplatePickerDrawer() {
           animation: `${isOpening ? "slideUp" : "slideDown"} 0.4s cubic-bezier(0.1, 0.9, 0.2, 1) forwards`,
           backdropFilter: "blur(60px) saturate(200%)",
           WebkitBackdropFilter: "blur(60px) saturate(200%)",
-          pointerEvents: "auto"
+          pointerEvents: "auto",
+          color: "#ededed"
         }}
       >
         {/* Header */}

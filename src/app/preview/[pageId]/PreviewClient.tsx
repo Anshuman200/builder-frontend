@@ -13,9 +13,14 @@ import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { useLiveHead } from "@/hooks/useLiveHead";
 import React from "react";
 
-export default function PreviewClient({ pageId, initialPath = "/" }: { pageId: string, initialPath?: string }) {
+export default function PreviewClient({ pageId, initialData, initialPath = "/" }: { pageId: string, initialData?: any, initialPath?: string }) {
     const { page, setPage } = useEditorStore();
-    const [loading, setLoading] = useState(!page);
+    const [loading, setLoading] = useState(!page && !initialData);
+
+    // Hydrate store from server data if not already present
+    if (initialData && !page) {
+        setPage(initialData);
+    }
     const mainRef = React.useRef<HTMLDivElement>(null);
     const [currentPath, setCurrentPath] = useState(initialPath);
 

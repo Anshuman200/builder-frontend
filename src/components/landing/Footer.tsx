@@ -35,8 +35,8 @@ export function Footer() {
   return (
     <footer style={{
       position: "relative",
-      background: "linear-gradient(180deg, transparent 0%, rgba(6,6,14,0.98) 8%, #06060e 100%)",
-      borderTop: "1px solid rgba(255,255,255,0.05)",
+      background: "transparent",
+      borderTop: "1px solid var(--border)",
       overflow: "hidden",
     }}
     >
@@ -72,7 +72,7 @@ export function Footer() {
                   PageCraft
                 </span>
               </Link>
-              <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.85rem", lineHeight: 1.7, maxWidth: 220, marginBottom: "1.5rem" }}>
+              <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", lineHeight: 1.7, maxWidth: 220, marginBottom: "1.5rem" }}>
                 The no-code page builder for creators who care about design and performance.
               </p>
               <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -88,14 +88,14 @@ export function Footer() {
                     transition: "all 0.2s",
                   }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.background = "rgba(99,102,241,0.15)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(99,102,241,0.3)";
-                      (e.currentTarget as HTMLElement).style.color = "#818cf8";
+                      (e.currentTarget as HTMLElement).style.background = "var(--surface-hover)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "var(--primary)";
+                      (e.currentTarget as HTMLElement).style.color = "var(--primary)";
                     }}
                     onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
-                      (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.4)";
+                      (e.currentTarget as HTMLElement).style.background = "var(--surface)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
+                      (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
                     }}
                   >
                     <Icon style={{ width: 14, height: 14 }} />
@@ -107,7 +107,7 @@ export function Footer() {
             {/* Link columns */}
             {Object.entries(FOOTER_LINKS).map(([section, links]) => (
               <div key={section}>
-                <h4 style={{ fontSize: "0.75rem", fontWeight: 700, color: "rgba(255,255,255,0.5)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem" }}>
+                <h4 style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--text-subtle)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem" }}>
                   {section}
                 </h4>
                 <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
@@ -119,8 +119,8 @@ export function Footer() {
                         fontSize: "0.875rem",
                         transition: "color 0.15s",
                       }}
-                        onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.8)")}
-                        onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.38)")}
+                        onMouseEnter={e => (e.currentTarget.style.color = "var(--text)")}
+                        onMouseLeave={e => (e.currentTarget.style.color = "var(--text-muted)")}
                       >
                         {label}
                       </Link>
@@ -133,7 +133,7 @@ export function Footer() {
 
           {/* ── Bottom bar ── */}
           <div style={{
-            borderTop: "1px solid rgba(255,255,255,0.05)",
+            borderTop: "1px solid var(--border)",
             paddingTop: "1.5rem",
             paddingBottom: "2rem",
             display: "flex",

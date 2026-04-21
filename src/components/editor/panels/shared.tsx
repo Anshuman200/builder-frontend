@@ -26,6 +26,39 @@ export { arrayMove };
 export type { Block, EditorPage };
 export { useEditorStore };
 
+// ─── Focus & Highlighting Hooks ──────────────────────────────────────────────
+/**
+ * useSubItemFocus
+ * Reusable hook to handle focal scrolling and highlighting of sub-items
+ * (e.g., specific members in a Team block, features in a Features block).
+ */
+export function useSubItemFocus(blockId: string) {
+    const itemRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+    const [flashIdx, setFlashIdx] = React.useState<number | null>(null);
+
+    React.useEffect(() => {
+        let prev = useEditorStore.getState().subItemFocus;
+        return useEditorStore.subscribe((state) => {
+            const f = state.subItemFocus as any;
+            if (f && f.blockId === blockId && f !== prev) {
+                prev = f;
+                const el = itemRefs.current[f.index];
+                if (el) {
+                    // Small delay to ensure the DOM is ready if we just switched blocks
+                    setTimeout(() => {
+                        el.scrollIntoView({ behavior: "smooth", block: "center" });
+                        setFlashIdx(f.index);
+                        // Clear flash after animation duration (sync with globals.css)
+                        setTimeout(() => setFlashIdx(null), 2500);
+                    }, 50);
+                }
+            }
+        });
+    }, [blockId]);
+
+    return { flashIdx, itemRefs };
+}
+
 // ─── Theme constants ──────────────────────────────────────────────────────────
 
 export const PANEL_COLORS = {

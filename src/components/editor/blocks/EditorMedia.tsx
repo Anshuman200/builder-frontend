@@ -213,10 +213,19 @@ export function EditorMedia({
 
     // ── Image: optimizable domains ──────────────────────────────────────────
     const optimizableDomains = [
-        "unsplash.com", "pexels.com", "amazonaws.com",
-        "cloudfront.net", "imgix.net", "cdn.",
+        "unsplash.com", 
+        "pexels.com", 
+        "amazonaws.com",
+        "cloudfront.net", 
+        "imgix.net",
+        "cdn.sanity.io",
+        "images.ctfassets.net",
+        "res.cloudinary.com",
+        "cdn.shopify.com",
+        "static.wixstatic.com",
+        "lh3.googleusercontent.com"
     ];
-    const isOptimizable = optimizableDomains.some(d => src.includes(d));
+    const isOptimizable = src.startsWith("/") || optimizableDomains.some(d => src.includes(d));
 
     // ── Image: fill mode (aspectRatio or explicit height) ───────────────────
     if (fillMode) {
@@ -236,7 +245,7 @@ export function EditorMedia({
                     onError={() => { setLoading(false); setError(true); }}
                     unoptimized={!isOptimizable}
                     priority={priority}
-                    sizes={`${width === "100%" ? "100vw" : width}`}
+                    sizes={width === "100%" ? "100vw" : `${width}`}
                 />
             </div>
         );

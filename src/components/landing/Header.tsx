@@ -58,7 +58,7 @@ export function Header({ onLoginClick }: HeaderProps) {
                 className={
                     "w-full max-w-5xl flex items-center justify-between gap-4 px-6 h-14 md:h-16 rounded-2xl md:rounded-full transition-all duration-500 ease-in-out border " +
                     (scrolled || mobileOpen
-                        ? "bg-[#09090b]/80 backdrop-blur-2xl border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+                        ? "bg-[var(--bg)]/80 backdrop-blur-2xl border-[var(--border)] shadow-[var(--shadow-lg)]"
                         : "bg-transparent border-transparent")
                 }
             >
@@ -76,24 +76,24 @@ export function Header({ onLoginClick }: HeaderProps) {
                     >
                         <BoltIcon style={{ width: 16, height: 16, color: "white" }} />
                     </div>
-                    <span className="text-lg font-bold tracking-tight text-white hidden sm:block">
+                    <span className="text-lg font-bold tracking-tight text-[var(--text)] hidden sm:block">
                         PageCraft
                     </span>
                 </Link>
 
                 {/* Centre Nav Links */}
                 <nav className="hidden md:flex items-center gap-1">
-                    <Link href="/explore" className="px-4 py-2 text-sm font-semibold text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all no-underline">
+                    <Link href="/explore" className="px-4 py-2 text-sm font-semibold text-[var(--text)]/50 hover:text-[var(--text)] hover:bg-[var(--text)]/5 rounded-xl transition-all no-underline">
                         Templates
                     </Link>
-                    <Link href="/explore/media" className="px-4 py-2 text-sm font-semibold text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all no-underline">
+                    <Link href="/explore/media" className="px-4 py-2 text-sm font-semibold text-[var(--text)]/50 hover:text-[var(--text)] hover:bg-[var(--text)]/5 rounded-xl transition-all no-underline">
                         Media
                     </Link>
                 </nav>
 
                 {/* Right Section: Auth */}
                 <div className="flex items-center gap-2 md:gap-4">
-                    <Button type="text" onClick={onLoginClick} className="hidden sm:inline-flex text-white/60 hover:text-white">Log in</Button>
+                    <Button type="text" onClick={onLoginClick} className="hidden sm:inline-flex text-[var(--text)]/60 hover:text-[var(--text)]">Log in</Button>
                     <Button
                         type="primary"
                         shape="round"
@@ -117,18 +117,18 @@ export function Header({ onLoginClick }: HeaderProps) {
                         onOpenChange={setMobileOpen}
                         trigger={['click']}
                         popupRender={() => (
-                            <div className="bg-[#09090b] border border-white/10 rounded-3xl p-4 flex flex-col gap-2 shadow-2xl mt-4 w-64 backdrop-blur-xl">
-                                <Link href="/explore" className="py-3 px-4 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-all no-underline">📐 Templates</Link>
-                                <Link href="/explore/media" className="py-3 px-4 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-all no-underline">🖼️ Media</Link>
-                                <div className="h-px bg-white/5 my-1" />
+                            <div className="bg-[var(--bg)] border border-[var(--border)] rounded-3xl p-4 flex flex-col gap-2 shadow-2xl mt-4 w-64 backdrop-blur-xl">
+                                <Link href="/explore" className="py-3 px-4 rounded-xl text-[var(--text)]/70 hover:text-[var(--text)] hover:bg-[var(--text)]/5 transition-all no-underline">📐 Templates</Link>
+                                <Link href="/explore/media" className="py-3 px-4 rounded-xl text-[var(--text)]/70 hover:text-[var(--text)] hover:bg-[var(--text)]/5 transition-all no-underline">🖼️ Media</Link>
+                                <div className="h-px bg-[var(--text)]/5 my-1" />
                                 {!user ? (
                                     <>
-                                        <Button block onClick={() => { onLoginClick?.(); setMobileOpen(false); }} className="bg-white/5 text-white border-white/10">Log in</Button>
+                                        <Button block onClick={() => { onLoginClick?.(); setMobileOpen(false); }} className="bg-[var(--text)]/5 text-[var(--text)] border-[var(--border)]">Log in</Button>
                                         <Button block type="primary" href="/editor" style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', border: 'none' }}>Start Free</Button>
                                     </>
                                 ) : (
                                     <>
-                                        <Button block href={(user as any).role === 'admin' ? "/admin" : "/home"} className="bg-white/5 text-white border-white/10">Dashboard</Button>
+                                        <Button block href={(user as any).role === 'admin' ? "/admin" : "/home"} className="bg-[var(--text)]/5 text-[var(--text)] border-[var(--border)]">Dashboard</Button>
                                         <Button block type="primary" onClick={() => logout()} danger>Log out</Button>
                                     </>
                                 )}
@@ -138,8 +138,9 @@ export function Header({ onLoginClick }: HeaderProps) {
                     >
                         <Button
                             type="text"
+                            aria-label={mobileOpen ? "Close menu" : "Open menu"}
                             icon={mobileOpen ? <XMarkIcon className="w-5 h-5" /> : <Bars3Icon className="w-5 h-5" />}
-                            className="flex text-white/70 hover:text-white bg-white/5"
+                            className="flex text-[var(--text)]/70 hover:text-[var(--text)] bg-[var(--text)]/5"
                         />
                     </Dropdown>
                 </div>
