@@ -204,6 +204,8 @@ export function TeamBlock({ block }: BlockProps) {
                                     borderRadius: cardStyle !== 'none' ? cardRadius : 0,
                                     background: cardStyle !== 'none' ? cardBg : 'transparent',
                                 };
+                                const raisedStyle = cardStyle === 'raised' ? { boxShadow: cardShadow } : {};
+                                const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid #e2e8f0` } : {};
                                 const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
                                 const focusedStyle = isFocused ? { border: "2px solid #0099ff", boxShadow: "0 0 15px rgba(0,153,255,0.3)", zIndex: 10 } : {};
 
@@ -284,6 +286,8 @@ export function TeamBlock({ block }: BlockProps) {
                                     background: cardStyle !== 'none' ? cardBg : 'transparent',
                                     borderRadius: cardStyle !== 'none' ? cardRadius : 0,
                                 };
+                                const raisedStyle = cardStyle === 'raised' ? { boxShadow: cardShadow } : {};
+                                const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid #e2e8f0` } : {};
                                 const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
                                 const focusedStyle = isFocused ? { border: "2px solid #0099ff", boxShadow: "0 0 15px rgba(0,153,255,0.3)", zIndex: 10 } : {};
 
