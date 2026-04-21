@@ -190,14 +190,13 @@ export function TextPanel({ block }: { block: Block }) {
                 <AlignmentInput value={(p.align as string) || "left"} onChange={(v) => up("align", v)} />
                 <Field label="Color"><ColorInput value={(p.color as string) || "#0f172a"} onChange={(v) => up("color", v)} onBlur={(v) => up("color", v, true)} /></Field>
                 <Field label="Font Weight"><SelectInput value={(p.fontWeight as string) || "400"} onChange={(v) => up("fontWeight", v)} options={[{ label: "Thin (100)", value: "100" }, { label: "Light (300)", value: "300" }, { label: "Regular (400)", value: "400" }, { label: "Medium (500)", value: "500" }, { label: "Semibold (600)", value: "600" }, { label: "Bold (700)", value: "700" }, { label: "Extrabold (800)", value: "800" }, { label: "Black (900)", value: "900" }]} /></Field>
-                <div className="w-full flex justify-between">
-                    <div className="w-32" style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 5 }}>Style</div>
+                <Field label="Font Style">
                     <div className="w-full" style={{ display: "flex", gap: 6 }}>
                         {[["B", "bold", "Bold"], ["I", "italic", "Italic"], ["U", "underline", "Underline"], ["S", "strikethrough", "Strikethrough"]].map(([label, key, title]) => (
                             <button key={key} title={title} onClick={() => up(key, !p[key])} style={{ flex: 1, padding: "5px 0", fontSize: 13, fontWeight: label === "B" ? 800 : 400, fontStyle: label === "I" ? "italic" : "normal", textDecoration: label === "U" ? "underline" : label === "S" ? "line-through" : "none", background: p[key] ? "#ff0000" : "#2a2a2a", color: p[key] ? "#fff" : "#aaa", border: "none", borderRadius: 4, cursor: "pointer", transition: "all 0.15s" }}>{label}</button>
                         ))}
                     </div>
-                </div>
+                </Field>
                 <Field label="Line Height"><TextInputWithUnit value={(p.lineHeight as string) ?? ""} onChange={(v) => up("lineHeight", v)} placeholder="1.6" /></Field>
                 <Field label="Letter Spacing"><TextInputWithUnit value={(p.letterSpacing as string) ?? ""} onChange={(v) => up("letterSpacing", v)} placeholder="0em" /></Field>
             </Section>
