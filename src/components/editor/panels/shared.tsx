@@ -67,10 +67,10 @@ export const PANEL_COLORS = {
     sectionBg: "#1a1a1a",
     border: "#2a2a2a",
     text: "#ededed",
-    muted: "#888888",
-    inputBg: "#222222",
-    inputBorder: "transparent",
-    inputHoverBg: "#2a2a2a",
+    muted: "#a1a1aa", // Brighter muted color for better label visibility
+    inputBg: "#18181b", // Slightly deeper background for better contrast with label
+    inputBorder: "#3f3f46", // Solid visible border
+    inputHoverBg: "#27272a",
     primary: "#0099ff",
 };
 
@@ -88,40 +88,40 @@ export function MediaInput({ value, onChange, placeholder, type = "image" }: { v
                     onClick={() => setPickerOpen(true)}
                     style={{
                         width: "100%",
-                        height: 60,
+                        height: 70, // Slightly taller
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
                         justifyContent: "center",
-                        gap: 4,
+                        gap: 8,
                         background: PANEL_COLORS.inputBg,
-                        border: `1px dashed ${PANEL_COLORS.inputBorder}`,
-                        borderRadius: 8,
+                        border: `2px dashed ${PANEL_COLORS.inputBorder}`, // Thicker dashed border
+                        borderRadius: 10,
                         color: PANEL_COLORS.muted,
                         cursor: "pointer",
-                        transition: "all 0.15s",
+                        transition: "all 0.2s",
                     }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--primary)"; e.currentTarget.style.color = "var(--text)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; e.currentTarget.style.color = PANEL_COLORS.muted; }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.primary; e.currentTarget.style.color = PANEL_COLORS.text; e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; e.currentTarget.style.color = PANEL_COLORS.muted; e.currentTarget.style.background = PANEL_COLORS.inputBg; }}
                 >
-                    {type === "video" ? <VideoCameraIcon style={{ width: 18, height: 18 }} /> : <PhotoIcon style={{ width: 18, height: 18 }} />}
-                    <span style={{ fontSize: 10, fontWeight: 500 }}>Select {type === "video" ? "Video" : "Image"}</span>
+                    {type === "video" ? <VideoCameraIcon style={{ width: 22, height: 22 }} /> : <PhotoIcon style={{ width: 22, height: 22 }} />}
+                    <span style={{ fontSize: 11, fontWeight: 600 }}>Select {type === "video" ? "Video" : "Image"}</span>
                 </button>
             ) : (
                 <div style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 10,
-                    padding: 8,
+                    gap: 12,
+                    padding: 10,
                     background: PANEL_COLORS.inputBg,
                     border: `1px solid ${PANEL_COLORS.inputBorder}`,
-                    borderRadius: 8,
+                    borderRadius: 10,
                     overflow: "hidden"
                 }}>
                     <div style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 4,
+                        width: 48,
+                        height: 48,
+                        borderRadius: 6,
                         background: "#121212",
                         display: "flex",
                         alignItems: "center",
@@ -131,25 +131,25 @@ export function MediaInput({ value, onChange, placeholder, type = "image" }: { v
                         border: "1px solid rgba(255,255,255,0.05)"
                     }}>
                         {isVideo ? (
-                            <VideoCameraIcon style={{ width: 16, height: 16, color: "var(--primary)" }} />
+                            <VideoCameraIcon style={{ width: 20, height: 20, color: PANEL_COLORS.primary }} />
                         ) : (
                             <img src={value} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { (e.target as any).src = "https://placehold.co/100x100?text=Error"; }} />
                         )}
                     </div>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col gap-1">
                             <button
                                 onClick={() => setPickerOpen(true)}
-                                style={{ background: "none", border: "none", padding: 0, color: "var(--primary)", fontSize: 10, cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}
+                                style={{ background: "none", border: "none", padding: 0, color: PANEL_COLORS.primary, fontSize: 11, cursor: "pointer", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
                             >
-                                <ArrowPathIcon style={{ width: 10, height: 10 }} /> Change
+                                <ArrowPathIcon style={{ width: 12, height: 12 }} /> Change
                             </button>
                             <button
                                 onClick={() => onChange("")}
-                                style={{ background: "none", border: "none", padding: 0, color: "#ef4444", fontSize: 10, cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}
+                                style={{ background: "none", border: "none", padding: 0, color: "#ef4444", fontSize: 11, cursor: "pointer", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
                             >
-                                <TrashIcon style={{ width: 10, height: 10 }} /> Remove
+                                <TrashIcon style={{ width: 12, height: 12 }} /> Remove
                             </button>
                         </div>
                     </div>
@@ -172,8 +172,8 @@ export function MediaInput({ value, onChange, placeholder, type = "image" }: { v
 
 export function Field({ label, children }: { label: string; children: React.ReactNode }) {
     return (
-        <div style={{ display: "grid", gridTemplateColumns: "80px 1fr", alignItems: "center", gap: 12, minHeight: 28 }}>
-            <label style={{ fontSize: 11, fontWeight: 500, color: PANEL_COLORS.muted, userSelect: "none", lineHeight: 1 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", alignItems: "center", gap: 12, minHeight: 32 }}>
+            <label style={{ fontSize: 11, fontWeight: 500, color: PANEL_COLORS.muted, userSelect: "none", lineHeight: 1.2 }}>
                 {label}
             </label>
             <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%" }}>
@@ -192,21 +192,29 @@ export function TextInput({ value, onChange, placeholder, type = "text", style }
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             spellCheck={false}
-            style={{ width: "100%", height: 26, padding: "0 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", transition: "all 0.15s", ...style }}
-            onMouseEnter={(e) => { if (document.activeElement !== e.currentTarget) e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; }}
-            onMouseLeave={(e) => { if (document.activeElement !== e.currentTarget) e.currentTarget.style.background = PANEL_COLORS.inputBg; }}
-            onFocus={(e) => { e.currentTarget.style.background = PANEL_COLORS.sectionBg; e.currentTarget.style.borderColor = PANEL_COLORS.primary; }}
-            onBlur={(e) => { e.currentTarget.style.background = PANEL_COLORS.inputBg; e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; }}
+            style={{ 
+                width: "100%", height: 30, padding: "0 10px", fontSize: 11, 
+                background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, 
+                borderRadius: 6, color: PANEL_COLORS.text, outline: "none", 
+                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)", ...style 
+            }}
+            onMouseEnter={(e) => { if (document.activeElement !== e.currentTarget) { e.currentTarget.style.borderColor = "#52525b"; e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; } }}
+            onMouseLeave={(e) => { if (document.activeElement !== e.currentTarget) { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; e.currentTarget.style.background = PANEL_COLORS.inputBg; } }}
+            onFocus={(e) => { 
+                e.currentTarget.style.background = "#09090b"; 
+                e.currentTarget.style.borderColor = PANEL_COLORS.primary; 
+                e.currentTarget.style.boxShadow = `0 0 0 2px rgba(0, 153, 255, 0.15)`;
+            }}
+            onBlur={(e) => { 
+                e.currentTarget.style.background = PANEL_COLORS.inputBg; 
+                e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; 
+                e.currentTarget.style.boxShadow = "none";
+            }}
         />
     );
 }
 // ─── TextInput With Unit Suffix ────────────────────────────────────────────────────────────────
 export function TextInputWithUnit({ value = "", onChange, placeholder, style }: { value: string; onChange: (v: string) => void; placeholder?: string; style?: React.CSSProperties }) {
-    // Robust parsing: extract leading number and whatever follows as unit
-    const match = String(value || "").match(/^([+-]?\d*\.?\d+)(.*)$/);
-    const numValue = match ? match[1] : (value || "");
-    const unitValue = (match && match[2]) || "px";
-
     const units = [
         { label: "px", value: "px" },
         { label: "rem", value: "rem" },
@@ -215,12 +223,53 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
         { label: "vw", value: "vw" },
     ];
 
-    const currentUnit = units.find(u => u.value === unitValue) ? unitValue : "px";
+    // Robust parsing: extract leading number and whatever follows as unit
+    const lastUnit = React.useRef("px");
+    const match = String(value || "").match(/^([+-]?\d*\.?\d+)(.*)$/);
+    
+    let numValue = "";
+    let unitValue = lastUnit.current;
+
+    if (match) {
+        numValue = match[1];
+        unitValue = match[2] || lastUnit.current;
+    } else if (value && units.some(u => u.value === value)) {
+        // Value is just the unit (e.g. "px")
+        numValue = "";
+        unitValue = value;
+    } else {
+        numValue = value || "";
+    }
+
+    // Sync unit to ref for preservation when empty
+    React.useEffect(() => {
+        if (unitValue && units.some(u => u.value === unitValue)) {
+            lastUnit.current = unitValue;
+        }
+    }, [unitValue]);
+
+    const currentUnit = units.find(u => u.value === unitValue) ? unitValue : lastUnit.current;
 
     const handleNumChange = (v: string) => {
         const reg = /^-?\d*(\.\d*)?$/;
         if (reg.test(v) || v === '' || v === '-') {
-            onChange(`${v}${currentUnit}`);
+            // Allow clearing the input fully
+            if (v === "") {
+                onChange("");
+            } else {
+                onChange(`${v}${currentUnit}`);
+            }
+        }
+    };
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        e.target.style.borderColor = PANEL_COLORS.border;
+        if (numValue === "") {
+            // Default to placeholder or 52 on blur if empty
+            const fallbackStr = placeholder || "52";
+            const fallbackMatch = fallbackStr.match(/^([+-]?\d*\.?\d+)/);
+            const fallbackNum = fallbackMatch ? fallbackMatch[1] : "52";
+            onChange(`${fallbackNum}${currentUnit}`);
         }
     };
 
@@ -229,23 +278,27 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
     };
 
     return (
-        <Space.Compact className="w-full" style={{ height: 26 }}>
+        <Space.Compact className="w-full" style={{ height: 30 }}>
             <Input
                 value={numValue}
                 placeholder={placeholder}
-                style={{ height: 26, fontSize: 11, background: PANEL_COLORS.inputBg, color: PANEL_COLORS.text, border: `1px solid ${PANEL_COLORS.border}`, borderRight: "none", ...style }}
-                className="w-full rounded-none"
+                style={{ 
+                    height: 30, fontSize: 11, background: PANEL_COLORS.inputBg, 
+                    color: PANEL_COLORS.text, border: `1px solid ${PANEL_COLORS.inputBorder}`, 
+                    borderRight: "none", borderRadius: "6px 0 0 6px", ...style 
+                }}
+                className="w-full"
                 onChange={(e) => handleNumChange(e.target.value)}
-                onFocus={(e) => e.target.style.borderColor = PANEL_COLORS.primary}
-                onBlur={(e) => e.target.style.borderColor = PANEL_COLORS.border}
+                onFocus={(e) => { e.target.style.borderColor = PANEL_COLORS.primary; e.target.style.background = "#09090b"; }}
+                onBlur={(e) => { e.target.style.borderColor = PANEL_COLORS.inputBorder; e.target.style.background = PANEL_COLORS.inputBg; }}
             />
             <Select
                 value={currentUnit}
                 className="min-w-20"
                 size="small"
                 onChange={handleUnitChange}
-                style={{ height: 26 }}
-                dropdownStyle={{ background: PANEL_COLORS.sectionBg, border: `1px solid ${PANEL_COLORS.border}` }}
+                style={{ height: 30 }}
+                dropdownStyle={{ background: "#18181b", border: `1px solid ${PANEL_COLORS.inputBorder}` }}
                 options={units}
                 suffixIcon={<ChevronDownIcon style={{ width: 10, height: 10 }} />}
             />
@@ -256,15 +309,25 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
 // ─── PrefixInput ────────────────────────────────────────────────────────────────
 export function PrefixInput({ prefix, value, onChange, placeholder, style }: { prefix: string; value: string; onChange: (v: string) => void; placeholder?: string; style?: React.CSSProperties }) {
     return (
-        <Space.Compact>
-            {prefix}
+        <Space.Compact style={{ height: 30, width: "100%" }}>
+            <div style={{ 
+                height: 30, padding: "0 8px", background: "#111", border: `1px solid ${PANEL_COLORS.inputBorder}`, 
+                borderRight: "none", borderRadius: "6px 0 0 6px", color: PANEL_COLORS.muted, 
+                fontSize: 10, fontWeight: 600, display: "flex", alignItems: "center" 
+            }}>
+                {prefix}
+            </div>
             <Input
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                size="small"
-                style={{ fontSize: 11, background: PANEL_COLORS.inputBg, color: PANEL_COLORS.text, ...style }}
-                className="prefix-input-custom"
+                style={{ 
+                    height: 30, fontSize: 11, background: PANEL_COLORS.inputBg, 
+                    color: PANEL_COLORS.text, border: `1px solid ${PANEL_COLORS.inputBorder}`, 
+                    borderRadius: "0 6px 6px 0", ...style 
+                }}
+                onFocus={(e) => { e.target.style.borderColor = PANEL_COLORS.primary; e.target.style.background = "#09090b"; }}
+                onBlur={(e) => { e.target.style.borderColor = PANEL_COLORS.inputBorder; e.target.style.background = PANEL_COLORS.inputBg; }}
             />
         </Space.Compact>
     );
@@ -280,9 +343,22 @@ export function TextareaInput({ value, onChange, rows = 3, placeholder }: { valu
             rows={rows}
             placeholder={placeholder}
             spellCheck={false}
-            style={{ width: "100%", padding: "6px 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", resize: "vertical", transition: "all 0.15s" }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.primary; }}
-            onBlur={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; }}
+            style={{ 
+                width: "100%", padding: "8px 10px", fontSize: 11, 
+                background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, 
+                borderRadius: 6, color: PANEL_COLORS.text, outline: "none", resize: "vertical", 
+                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)", lineHeight: 1.5
+            }}
+            onFocus={(e) => { 
+                e.currentTarget.style.borderColor = PANEL_COLORS.primary; 
+                e.currentTarget.style.background = "#09090b";
+                e.currentTarget.style.boxShadow = `0 0 0 2px rgba(0, 153, 255, 0.15)`;
+            }}
+            onBlur={(e) => { 
+                e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; 
+                e.currentTarget.style.background = PANEL_COLORS.inputBg;
+                e.currentTarget.style.boxShadow = "none";
+            }}
         />
     );
 }
@@ -302,7 +378,7 @@ export function SelectInput({ value, onChange, options, placeholder }: { value: 
         ),
         onClick: () => onChange(o.value),
         style: {
-            padding: "4px 8px", fontSize: 11, color: PANEL_COLORS.text, borderRadius: 4, background: o.value === value ? "#0099ff33" : "transparent"
+            padding: "6px 10px", fontSize: 11, color: PANEL_COLORS.text, borderRadius: 4, background: o.value === value ? "rgba(0,153,255,0.1)" : "transparent"
         }
     }));
 
@@ -310,13 +386,17 @@ export function SelectInput({ value, onChange, options, placeholder }: { value: 
         <Dropdown
             trigger={['click']}
             placement="bottomLeft"
-            menu={{ items: menuItems, style: { background: "#1e1e1e", border: `1px solid ${PANEL_COLORS.border}`, borderRadius: 6, padding: 4, boxShadow: "0 4px 12px rgba(0,0,0,0.4)" } }}
+            menu={{ items: menuItems, style: { background: "#18181b", border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 8, padding: 6, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)" } }}
             getPopupContainer={() => document.body}
         >
             <button
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", height: 26, padding: "0 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", transition: "background 0.15s" }}
-                onMouseEnter={e => e.currentTarget.style.background = PANEL_COLORS.inputHoverBg}
-                onMouseLeave={e => e.currentTarget.style.background = PANEL_COLORS.inputBg}
+                style={{ 
+                    display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", height: 30, 
+                    padding: "0 10px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, 
+                    borderRadius: 6, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", transition: "all 0.2s" 
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#52525b"; e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; e.currentTarget.style.background = PANEL_COLORS.inputBg; }}
             >
                 <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedOption?.label}</span>
                 <ChevronDownIcon style={{ width: 12, height: 12, opacity: 0.5, flexShrink: 0 }} />
@@ -493,16 +573,27 @@ export function BorderRadiusInput({ value, onChange, placeholder }: { value: str
         <div style={{ display: "flex", flexDirection: "column", gap: 5, width: "100%" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
                 {corners.map(({ key, val }) => (
-                    <div key={key} style={{ display: "flex", alignItems: "center", gap: 3, background: "#181818", border: "1px solid #2a2a2a", borderRadius: 4, padding: "2px 5px" }}>
-                        <span style={{ color: "#7a8a9e", flexShrink: 0, display: "flex", lineHeight: 0 }}>
+                    <div key={key} style={{ 
+                        display: "flex", alignItems: "center", gap: 6, background: PANEL_COLORS.inputBg, 
+                        border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 6, padding: "2px 8px" 
+                    }}>
+                        <span style={{ color: PANEL_COLORS.muted, flexShrink: 0, display: "flex", lineHeight: 0 }}>
                             <CornerIcon corner={key} />
                         </span>
                         <input
                             value={val}
                             onChange={(e) => setCorner(key, e.target.value)}
-                            onFocus={(e) => { e.currentTarget.style.color = "#ffffff"; e.currentTarget.parentElement!.style.borderColor = "#0099ff66"; }}
-                            onBlur={(e) => { e.currentTarget.style.color = "#e2e8f0"; e.currentTarget.parentElement!.style.borderColor = "#2a2a2a"; }}
-                            style={{ flex: 1, minWidth: 0, height: 18, fontSize: 10, fontFamily: "inherit", background: "transparent", border: "none", color: "#e2e8f0", outline: "none", textAlign: "right", width: 40 }}
+                            onFocus={(e) => { 
+                                e.currentTarget.style.color = "#ffffff"; 
+                                e.currentTarget.parentElement!.style.borderColor = PANEL_COLORS.primary; 
+                                e.currentTarget.parentElement!.style.background = "#09090b";
+                            }}
+                            onBlur={(e) => { 
+                                e.currentTarget.style.color = PANEL_COLORS.text; 
+                                e.currentTarget.parentElement!.style.borderColor = PANEL_COLORS.inputBorder; 
+                                e.currentTarget.parentElement!.style.background = PANEL_COLORS.inputBg;
+                            }}
+                            style={{ flex: 1, minWidth: 0, height: 20, fontSize: 10, fontFamily: "inherit", background: "transparent", border: "none", color: PANEL_COLORS.text, outline: "none", textAlign: "right", width: 40 }}
                         />
                     </div>
                 ))}
@@ -511,7 +602,7 @@ export function BorderRadiusInput({ value, onChange, placeholder }: { value: str
                 <button
                     title={linked ? "Click to set corners independently" : "Click to link all corners"}
                     onClick={() => { const next = !linked; setLinked(next); if (next) onChange(tl); }}
-                    style={{ height: 22, padding: "0 7px", display: "flex", alignItems: "center", gap: 3, background: linked ? "#0099ff1a" : "#1a1a1a", border: `1px solid ${linked ? "#0099ff44" : "#2a2a2a"}`, borderRadius: 4, cursor: "pointer", color: linked ? "#4db8ff" : "#555", fontSize: 9, flexShrink: 0, transition: "all 0.15s" }}
+                    style={{ height: 24, padding: "0 8px", display: "flex", alignItems: "center", gap: 4, background: linked ? "rgba(0,153,255,0.15)" : "#18181b", border: `1px solid ${linked ? "rgba(0,153,255,0.4)" : PANEL_COLORS.inputBorder}`, borderRadius: 4, cursor: "pointer", color: linked ? "#60a5fa" : PANEL_COLORS.muted, fontSize: 9, flexShrink: 0, transition: "all 0.15s" }}
                 >
                     <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
                         {linked ? (<><path d="M3 5.5h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /><rect x="0.75" y="3.25" width="3" height="4.5" rx="1.5" stroke="currentColor" strokeWidth="1.2" /><rect x="7.25" y="3.25" width="3" height="4.5" rx="1.5" stroke="currentColor" strokeWidth="1.2" /></>) : (<><rect x="0.75" y="3.25" width="3" height="4.5" rx="1.5" stroke="currentColor" strokeWidth="1.2" /><rect x="7.25" y="3.25" width="3" height="4.5" rx="1.5" stroke="currentColor" strokeWidth="1.2" /><path d="M4 5.5h1M6 5.5h1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeDasharray="1 1" /></>)}
@@ -520,7 +611,7 @@ export function BorderRadiusInput({ value, onChange, placeholder }: { value: str
                 </button>
                 {presets.map((v, i) => (
                     <button key={v} onClick={() => { onChange(v); setLinked(true); }} title={v}
-                        style={{ flex: 1, height: 22, fontSize: 9, padding: 0, background: value === v ? "#0099ff1a" : "#1a1a1a", border: `1px solid ${value === v ? "#0099ff44" : "#2a2a2a"}`, borderRadius: 4, cursor: "pointer", color: value === v ? "#4db8ff" : "#555", transition: "all 0.15s" }}
+                        style={{ flex: 1, height: 24, fontSize: 9, padding: 0, background: value === v ? "rgba(0,153,255,0.15)" : "#18181b", border: `1px solid ${value === v ? "rgba(0,153,255,0.4)" : PANEL_COLORS.inputBorder}`, borderRadius: 4, cursor: "pointer", color: value === v ? "#60a5fa" : PANEL_COLORS.muted, transition: "all 0.15s" }}
                     >{presetLabels[i]}</button>
                 ))}
             </div>
@@ -602,11 +693,17 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff" }:
                 ]}
             >
                 <button
-                    style={{ display: "flex", gap: 8, alignItems: "center", flex: 1, height: 26, padding: "0 8px", fontSize: 11, background: PANEL_COLORS.inputBg, border: `1px solid ${isVariable ? "var(--primary)" : PANEL_COLORS.inputBorder}`, borderRadius: 4, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", transition: "background 0.15s" }}
-                    onMouseEnter={e => e.currentTarget.style.background = PANEL_COLORS.inputHoverBg}
-                    onMouseLeave={e => e.currentTarget.style.background = PANEL_COLORS.inputBg}
+                    style={{ 
+                        display: "flex", gap: 10, alignItems: "center", flex: 1, height: 30, 
+                        padding: "0 10px", fontSize: 11, background: PANEL_COLORS.inputBg, 
+                        border: `1px solid ${isVariable ? PANEL_COLORS.primary : PANEL_COLORS.inputBorder}`, 
+                        borderRadius: 6, color: PANEL_COLORS.text, outline: "none", cursor: "pointer", 
+                        transition: "all 0.2s" 
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#52525b"; e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = isVariable ? PANEL_COLORS.primary : PANEL_COLORS.inputBorder; e.currentTarget.style.background = PANEL_COLORS.inputBg; }}
                 >
-                    <div style={{ width: 14, height: 14, borderRadius: 3, background: resolvedDisplayValue, border: "1px solid rgba(255,255,255,0.15)" }} />
+                    <div style={{ width: 16, height: 16, borderRadius: 4, background: resolvedDisplayValue, border: "1px solid rgba(255,255,255,0.15)", flexShrink: 0 }} />
                     <span style={{ flex: 1, textAlign: "left", fontFamily: "monospace", fontSize: 11, opacity: 0.9, overflow: "hidden", textOverflow: "ellipsis" }}>{isVariable ? `${toHex(value, theme)} (Theme)` : toHex(value, theme)}</span>
                 </button>
             </ColorPicker>
@@ -622,9 +719,16 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff" }:
                                 onChange("var(--primary)");
                             }
                         }}
-                        style={{ width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center", background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 4, cursor: "pointer", color: PANEL_COLORS.muted }}
+                        style={{ 
+                            width: 30, height: 30, display: "flex", alignItems: "center", 
+                            justifyContent: "center", background: PANEL_COLORS.inputBg, 
+                            border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 6, 
+                            cursor: "pointer", color: PANEL_COLORS.muted, transition: "all 0.2s" 
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = "#52525b"; e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; e.currentTarget.style.background = PANEL_COLORS.inputBg; }}
                     >
-                        <ArrowPathIcon style={{ width: 14, height: 14 }} />
+                        <ArrowPathIcon style={{ width: 16, height: 16 }} />
                     </button>
                 </Tooltip>
             )}

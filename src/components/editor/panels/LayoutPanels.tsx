@@ -34,13 +34,13 @@ export function ButtonPanel({ block }: { block: Block }) {
             )}
             <Section title="Shape & Shadow">
                 <Field label="Shadow"><SelectInput value={(p.shadow as string) || "none"} onChange={(v) => up("shadow", v)} options={[{ label: "None", value: "none" }, { label: "Small", value: "sm" }, { label: "Medium", value: "md" }, { label: "Large", value: "lg" }, { label: "Glow", value: "glow" }]} /></Field>
-                <Field label="Border Width"><TextInputWithUnit value={(p.borderWidth as string) || "2px"} onChange={(v) => up("borderWidth", v)} placeholder="2px" /></Field>
+                <Field label="Border Width"><TextInputWithUnit value={(p.borderWidth as string) ?? ""} onChange={(v) => up("borderWidth", v)} placeholder="2px" /></Field>
                 <Field label="Border Color"><ColorInput value={(p.borderColor as string) || ""} onChange={(v) => up("borderColor", v)} onBlur={(v) => up("borderColor", v, true)} /></Field>
             </Section>
             <Section title="Typography">
-                <Field label="Font Size override"><TextInputWithUnit value={(p.fontSize as string) || ""} onChange={(v) => up("fontSize", v)} placeholder="auto" /></Field>
+                <Field label="Font Size override"><TextInputWithUnit value={(p.fontSize as string) ?? ""} onChange={(v) => up("fontSize", v)} placeholder="auto" /></Field>
                 <Field label="Font Weight"><SelectInput value={(p.fontWeight as string) || "700"} onChange={(v) => up("fontWeight", v)} options={[{ label: "Normal (400)", value: "400" }, { label: "Medium (500)", value: "500" }, { label: "Semibold (600)", value: "600" }, { label: "Bold (700)", value: "700" }, { label: "Black (900)", value: "900" }]} /></Field>
-                <Field label="Letter Spacing"><TextInputWithUnit value={(p.letterSpacing as string) || "0.02em"} onChange={(v) => up("letterSpacing", v)} placeholder="0.02em" /></Field>
+                <Field label="Letter Spacing"><TextInputWithUnit value={(p.letterSpacing as string) ?? ""} onChange={(v) => up("letterSpacing", v)} placeholder="0.02em" /></Field>
             </Section>
             <Section title="Icons">
                 <Field label="Left Icon"><IconPicker value={(p.iconLeft as string) || ""} onChange={(v) => up("iconLeft", v)} /></Field>
@@ -76,8 +76,8 @@ export function HeaderPanel({ block }: { block: Block }) {
                 <Field label="Logo Text"><TextInput value={(p.logoText as string) || "PageCraft"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
                 {p.logoType === "image" && (<>
                     <Field label="Logo Image"><MediaInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
-                    <Field label="Image Width"><TextInputWithUnit value={(p.logoWidth as string) || "120px"} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
-                    <Field label="Image Height"><TextInputWithUnit value={(p.logoHeight as string) || "40px"} onChange={(v) => up("logoHeight", v)} placeholder="40px" /></Field>
+                    <Field label="Image Width"><TextInputWithUnit value={(p.logoWidth as string) ?? ""} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
+                    <Field label="Image Height"><TextInputWithUnit value={(p.logoHeight as string) ?? ""} onChange={(v) => up("logoHeight", v)} placeholder="40px" /></Field>
                     <Field label="Object Fit"><SelectInput value={(p.logoObjectFit as string) || "cover"} onChange={(v) => up("logoObjectFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
                     <Field label="Logo Shape"><SelectInput value={(p.logoShape as string) || "square"} onChange={(v) => up("logoShape", v)} options={[{ label: "Square", value: "square" }, { label: "Circle", value: "circle" }, { label: "Rounded", value: "rounded" }]} /></Field>
                 </>)}
@@ -268,8 +268,8 @@ export function FooterPanel({ block }: { block: Block }) {
                 <Field label="Logo Text"><TextInput value={(p.logoText as string) || "PageCraft"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
                 {p.logoType === "image" && (<>
                     <Field label="Logo Image"><MediaInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
-                    <Field label="Image Width"><TextInputWithUnit value={(p.logoWidth as string) || "120px"} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
-                    <Field label="Image Height"><TextInputWithUnit value={(p.logoHeight as string) || "40px"} onChange={(v) => up("logoHeight", v)} placeholder="40px" /></Field>
+                    <Field label="Image Width"><TextInputWithUnit value={(p.logoWidth as string) ?? ""} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
+                    <Field label="Image Height"><TextInputWithUnit value={(p.logoHeight as string) ?? ""} onChange={(v) => up("logoHeight", v)} placeholder="40px" /></Field>
                     <Field label="Object Fit"><SelectInput value={(p.logoObjectFit as string) || "cover"} onChange={(v) => up("logoObjectFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
                 </>)}
                 <Field label="Description"><TextareaInput value={(p.description as string) || ""} onChange={(v) => up("description", v)} rows={3} placeholder="Brief company description..." /></Field>

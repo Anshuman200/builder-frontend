@@ -23,7 +23,7 @@ export function HeroPanel({ block }: { block: Block }) {
             <Section title="Style">
                 <Field label="Section Layout"><SelectInput value={(p.layout as string) || "centered"} onChange={(v) => up("layout", v)} options={[{ label: "Fluid / Edge-to-Edge", value: "fluid" }, { label: "Centered (Container)", value: "centered" }, { label: "Narrow Content (800px)", value: "narrow" }, { label: "Full Screen (100vh)", value: "fullscreen" }]} /></Field>
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#ffffff"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
-                <Field label="Min Height"><TextInputWithUnit value={(p.minHeight as string) || "480px"} onChange={(v) => up("minHeight", v)} placeholder="480px" /></Field>
+                <Field label="Min Height"><TextInputWithUnit value={(p.minHeight as string) ?? ""} onChange={(v) => up("minHeight", v)} placeholder="480px" /></Field>
                 <AlignmentInput label="Content Alignment" value={(p.align as string) || "center"} onChange={(v) => up("align", v)} />
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "0px"} onChange={(v) => up("borderRadius", v)} /></Field>
             </Section>
@@ -198,18 +198,18 @@ export function TextPanel({ block }: { block: Block }) {
                         ))}
                     </div>
                 </div>
-                <Field label="Line Height"><TextInputWithUnit value={(p.lineHeight as string) || "1.6"} onChange={(v) => up("lineHeight", v)} placeholder="1.6" /></Field>
-                <Field label="Letter Spacing"><TextInputWithUnit value={(p.letterSpacing as string) || ""} onChange={(v) => up("letterSpacing", v)} placeholder="0em" /></Field>
+                <Field label="Line Height"><TextInputWithUnit value={(p.lineHeight as string) ?? ""} onChange={(v) => up("lineHeight", v)} placeholder="1.6" /></Field>
+                <Field label="Letter Spacing"><TextInputWithUnit value={(p.letterSpacing as string) ?? ""} onChange={(v) => up("letterSpacing", v)} placeholder="0em" /></Field>
             </Section>
             <Section title="Font Size (Responsive)">
-                <Field label="Desktop"><TextInputWithUnit value={(p.fontSize as string) || ""} onChange={(v) => up("fontSize", v)} placeholder="1rem" /></Field>
-                <Field label="Tablet ≤ 768px"><TextInputWithUnit value={(p.tabletFontSize as string) || ""} onChange={(v) => up("tabletFontSize", v)} placeholder="same as desktop" /></Field>
-                <Field label="Mobile ≤ 390px"><TextInputWithUnit value={(p.mobileFontSize as string) || ""} onChange={(v) => up("mobileFontSize", v)} placeholder="same as tablet" /></Field>
+                <Field label="Desktop"><TextInputWithUnit value={(p.fontSize as string) ?? ""} onChange={(v) => up("fontSize", v)} placeholder="1rem" /></Field>
+                <Field label="Tablet ≤ 768px"><TextInputWithUnit value={(p.tabletFontSize as string) ?? ""} onChange={(v) => up("tabletFontSize", v)} placeholder="same as desktop" /></Field>
+                <Field label="Mobile ≤ 390px"><TextInputWithUnit value={(p.mobileFontSize as string) ?? ""} onChange={(v) => up("mobileFontSize", v)} placeholder="same as tablet" /></Field>
             </Section>
             <Section title="Spacing">
                 <PaddingInput value={(p.padding as string) || "12px 24px"} onChange={(v) => up("padding", v)} placeholder="12px 24px" />
-                <Field label="Margin Top"><TextInputWithUnit value={(p.marginTop as string) || ""} onChange={(v) => up("marginTop", v)} placeholder="0" /></Field>
-                <Field label="Margin Bottom"><TextInputWithUnit value={(p.marginBottom as string) || ""} onChange={(v) => up("marginBottom", v)} placeholder="0" /></Field>
+                <Field label="Margin Top"><TextInputWithUnit value={(p.marginTop as string) ?? ""} onChange={(v) => up("marginTop", v)} placeholder="0" /></Field>
+                <Field label="Margin Bottom"><TextInputWithUnit value={(p.marginBottom as string) ?? ""} onChange={(v) => up("marginBottom", v)} placeholder="0" /></Field>
             </Section>
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
         </>
@@ -229,8 +229,8 @@ export function ImagePanel({ block }: { block: Block }) {
                 <Field label="Link (clickable)"><TextInput value={(p.link as string) || ""} onChange={(v) => up("link", v)} placeholder="https://..." /></Field>
             </Section>
             <Section title="Dimensions">
-                <Field label="Width"><TextInputWithUnit value={(p.width as string) || "100%"} onChange={(v) => up("width", v)} placeholder="100%" /></Field>
-                <Field label="Height"><TextInputWithUnit value={(p.height as string) || "auto"} onChange={(v) => up("height", v)} placeholder="auto or 300px" /></Field>
+                <Field label="Width"><TextInputWithUnit value={(p.width as string) ?? ""} onChange={(v) => up("width", v)} placeholder="100%" /></Field>
+                <Field label="Height"><TextInputWithUnit value={(p.height as string) ?? ""} onChange={(v) => up("height", v)} placeholder="auto or 300px" /></Field>
                 <Field label="Aspect Ratio"><SelectInput value={(p.aspectRatio as string) || "auto"} onChange={(v) => up("aspectRatio", v)} options={[{ label: "Auto", value: "auto" }, { label: "16:9", value: "16/9" }, { label: "4:3", value: "4/3" }, { label: "1:1 (Square)", value: "1/1" }, { label: "3:2", value: "3/2" }, { label: "21:9", value: "21/9" }]} /></Field>
             </Section>
             <Section title="Style">
@@ -252,8 +252,8 @@ export function DividerPanel({ block }: { block: Block }) {
             <Section title="Style">
                 <Field label="Line Style"><SelectInput value={(p.style as string) || "solid"} onChange={(v) => up("style", v)} options={[{ label: "Solid", value: "solid" }, { label: "Dashed", value: "dashed" }, { label: "Dotted", value: "dotted" }]} /></Field>
                 <Field label="Color"><ColorInput value={(p.color as string) || "#e2e8f0"} onChange={(v) => up("color", v)} onBlur={(v) => up("color", v, true)} /></Field>
-                <Field label="Thickness"><TextInputWithUnit value={(p.thickness as string) || "1px"} onChange={(v) => up("thickness", v)} placeholder="1px" /></Field>
-                <Field label="Vertical Margin"><TextInputWithUnit value={(p.marginY as string) || "1rem"} onChange={(v) => up("marginY", v)} placeholder="1rem" /></Field>
+                <Field label="Thickness"><TextInputWithUnit value={(p.thickness as string) ?? ""} onChange={(v) => up("thickness", v)} placeholder="1px" /></Field>
+                <Field label="Vertical Margin"><TextInputWithUnit value={(p.marginY as string) ?? ""} onChange={(v) => up("marginY", v)} placeholder="1rem" /></Field>
             </Section>
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
         </>
@@ -331,7 +331,7 @@ export function ContainerPanel({ block }: { block: Block }) {
                 </Field>
 
                 {/* Min Height */}
-                <Field label="Min Height"><TextInputWithUnit value={(p.minHeight as string) || ""} onChange={(v) => up("minHeight", v)} placeholder="500" /></Field>
+                <Field label="Min Height"><TextInputWithUnit value={(p.minHeight as string) ?? ""} onChange={(v) => up("minHeight", v)} placeholder="500" /></Field>
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "0px"} onChange={(v) => up("borderRadius", v)} /></Field>
             </Section>
 
@@ -352,7 +352,7 @@ export function IconPanel({ block }: { block: Block }) {
         <>
             <Section title="Icon settings">
                 <Field label="Icon"><IconPicker value={(p.iconName as string) || "Star"} onChange={(v) => up("iconName", v)} /></Field>
-                <Field label="Size"><TextInputWithUnit value={(p.size as string) || "24px"} onChange={(v) => up("size", v)} placeholder="24px" /></Field>
+                <Field label="Size"><TextInputWithUnit value={(p.size as string) ?? ""} onChange={(v) => up("size", v)} placeholder="24px" /></Field>
                 <Field label="Color"><ColorInput value={(p.color as string) || "var(--primary)"} onChange={(v) => up("color", v)} onBlur={(v) => up("color", v, true)} /></Field>
             </Section>
             <Section title="Layout & Spacing">
@@ -381,7 +381,7 @@ export function VideoPanel({ block }: { block: Block }) {
                 <ToggleSwitch label="Show Controls" value={!!(p.controls) === true} onChange={(v: boolean) => up("controls", v)} />
             </Section>
             <Section title="Dimensions & Style">
-                <Field label="Width"><TextInputWithUnit value={(p.width as string) || "100%"} onChange={(v) => up("width", v)} placeholder="100%" /></Field>
+                <Field label="Width"><TextInputWithUnit value={(p.width as string) ?? ""} onChange={(v) => up("width", v)} placeholder="100%" /></Field>
                 <Field label="Aspect Ratio"><SelectInput value={(p.aspectRatio as string) || "16/9"} onChange={(v) => up("aspectRatio", v)} options={[{ label: "16:9", value: "16/9" }, { label: "4:3", value: "4/3" }, { label: "1:1", value: "1/1" }, { label: "21:9", value: "21/9" }, { label: "9:16 (Vertical)", value: "9/16" }]} /></Field>
                 <PaddingInput value={(p.padding as string) || "16px"} onChange={(v) => up("padding", v)} placeholder="16px" />
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "8px"} onChange={(v) => up("borderRadius", v)} /></Field>
@@ -403,7 +403,7 @@ export function ColumnsPanel({ block }: { block: Block }) {
                     <input type="range" min={20} max={80} step={5} value={Number(p.leftWidth || 50)} onChange={(e) => up("leftWidth", e.target.value)} style={{ width: "100%", accentColor: "var(--primary)" }} />
                     <span style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center" }}>{String(p.leftWidth ?? 50)}% / {String(100 - Number(p.leftWidth ?? 50))}%</span>
                 </Field>
-                <Field label="Gap"><TextInputWithUnit value={(p.gap as string) || "1.5rem"} onChange={(v) => up("gap", v)} placeholder="1.5rem" /></Field>
+                <Field label="Gap"><TextInputWithUnit value={(p.gap as string) ?? ""} onChange={(v) => up("gap", v)} placeholder="1.5rem" /></Field>
                 <Field label="Vertical Alignment"><SelectInput value={(p.alignItems as string) || "stretch"} onChange={(v) => up("alignItems", v)} options={[{ label: "Stretch (fill height)", value: "stretch" }, { label: "Top", value: "flex-start" }, { label: "Center", value: "center" }, { label: "Bottom", value: "flex-end" }]} /></Field>
             </Section>
             <Section title="Padding (Responsive)">
@@ -448,9 +448,9 @@ export function WavePanel({ block }: { block: Block }) {
                 <Field label="Primary Color"><ColorInput value={(p.fillColor as string) || "var(--primary)"} onChange={(v) => up("fillColor", v)} onBlur={(v) => up("fillColor", v, true)} /></Field>
                 <Field label="Gradient End Color"><ColorInput value={(p.fillGradientEnd as string) || ""} onChange={(v) => up("fillGradientEnd", v)} onBlur={(v) => up("fillGradientEnd", v, true)} /></Field>
                 <Field label="Secondary Color (Layers)"><ColorInput value={(p.secondaryColor as string) || ""} onChange={(v) => up("secondaryColor", v)} onBlur={(v) => up("secondaryColor", v, true)} /></Field>
-                <Field label="Height"><TextInputWithUnit value={(p.height as string) || "150px"} onChange={(v) => up("height", v)} placeholder="150px or 15vw" /></Field>
+                <Field label="Height"><TextInputWithUnit value={(p.height as string) ?? ""} onChange={(v) => up("height", v)} placeholder="150px or 15vw" /></Field>
                 <Field label="Background Context Color"><ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
-                <Field label="Content Gap"><TextInputWithUnit value={(p.contentGap as string) || "1rem"} onChange={(v) => up("contentGap", v)} placeholder="1rem" /></Field>
+                <Field label="Content Gap"><TextInputWithUnit value={(p.contentGap as string) ?? ""} onChange={(v) => up("contentGap", v)} placeholder="1rem" /></Field>
             </Section>
             <Section title="Orientation & Animation">
                 <PaddingInput label="Padding Top" value={(p.paddingTop as string) || ""} onChange={(v) => up("paddingTop", v)} placeholder="e.g., 5rem" />
@@ -540,9 +540,9 @@ export function CarouselPanel({ block }: { block: Block }) {
                 <ToggleSwitch label="Fade Transition" value={!!p.fade} onChange={(v: boolean) => up("fade", v)} />
             </Section>
             <Section title="Visuals">
-                <Field label="Height"><TextInputWithUnit value={(p.height as string) || "500px"} onChange={(v) => up("height", v)} placeholder="500px" /></Field>
+                <Field label="Height"><TextInputWithUnit value={(p.height as string) ?? ""} onChange={(v) => up("height", v)} placeholder="500px" /></Field>
                 <Field label="Arrow Color"><ColorInput value={(p.arrowColor as string) || "var(--primary)"} onChange={(v) => up("arrowColor", v)} onBlur={(v) => up("arrowColor", v, true)} /></Field>
-                <Field label="Arrow Size"><TextInputWithUnit value={(p.arrowSize as string) || "24px"} onChange={(v) => up("arrowSize", v)} placeholder="24px" /></Field>
+                <Field label="Arrow Size"><TextInputWithUnit value={(p.arrowSize as string) ?? ""} onChange={(v) => up("arrowSize", v)} placeholder="24px" /></Field>
                 <Field label="Arrow Position"><SelectInput value={(p.arrowPosition as string) || "middle"} onChange={(v) => up("arrowPosition", v)} options={[{ label: "Top", value: "top" }, { label: "Middle", value: "middle" }, { label: "Bottom", value: "bottom" }, { label: "Bottom (Aside Dots)", value: "bottom-dots" }]} /></Field>
                 <Field label="Dot Color"><ColorInput value={(p.dotColor as string) || "rgba(255,255,255,0.2)"} onChange={(v) => up("dotColor", v)} onBlur={(v) => up("dotColor", v, true)} /></Field>
                 <Field label="Active Dot Color"><ColorInput value={(p.activeDotColor as string) || "var(--primary)"} onChange={(v) => up("activeDotColor", v)} onBlur={(v) => up("activeDotColor", v, true)} /></Field>
@@ -597,7 +597,7 @@ export function GridPanel({ block }: { block: Block }) {
                 <div style={{ fontSize: 10, color: "var(--text-subtle)", marginTop: 4, padding: "0 8px" }}>
                     Centers or justifies the entire group of cards when they don't fill a full row.
                 </div>
-                <Field label="Gap"><TextInputWithUnit value={(p.gap as string) || "1.5rem"} onChange={(v) => up("gap", v)} placeholder="1.5rem" /></Field>
+                <Field label="Gap"><TextInputWithUnit value={(p.gap as string) ?? ""} onChange={(v) => up("gap", v)} placeholder="1.5rem" /></Field>
             </Section>
 
             <Section title="Item Alignment (Inner)">
@@ -644,9 +644,9 @@ export function GridPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Padding (Responsive)">
-                <Field label="Desktop"><TextInputWithUnit value={(p.padding as string) || ""} onChange={(v) => up("padding", v)} placeholder="24px" /></Field>
-                <Field label="Tablet"><TextInputWithUnit value={(p.tabletPadding as string) || ""} onChange={(v) => up("tabletPadding", v)} placeholder="same as desktop" /></Field>
-                <Field label="Mobile"><TextInputWithUnit value={(p.mobilePadding as string) || ""} onChange={(v) => up("mobilePadding", v)} placeholder="same as tablet" /></Field>
+                <Field label="Desktop"><TextInputWithUnit value={(p.padding as string) ?? ""} onChange={(v) => up("padding", v)} placeholder="24px" /></Field>
+                <Field label="Tablet"><TextInputWithUnit value={(p.tabletPadding as string) ?? ""} onChange={(v) => up("tabletPadding", v)} placeholder="same as desktop" /></Field>
+                <Field label="Mobile"><TextInputWithUnit value={(p.mobilePadding as string) ?? ""} onChange={(v) => up("mobilePadding", v)} placeholder="same as tablet" /></Field>
             </Section>
 
             <AnimationPanel block={block} />

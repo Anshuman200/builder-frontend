@@ -10,6 +10,7 @@ import { DEFAULT_THEME } from "@/lib/utils/theme";
 export default function AccordionBlock({ block }: { block: Block }) {
     const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
     const focusSubItem = useEditorStore((s) => s.focusSubItem);
+    const subItemFocus = useEditorStore((s) => s.subItemFocus);
     const isPreview = React.useContext(PreviewContext);
 
     // Fallback to defaults if properties are missing
@@ -100,8 +101,16 @@ export default function AccordionBlock({ block }: { block: Block }) {
             <div style={{ width, maxWidth }}>
                 {items.map((item: any, index: number) => {
                     const isOpen = !!openItems[item.id];
+                    const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === index;
+                    const focusedStyle = isFocused ? { 
+                        boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)", 
+                        zIndex: 10, 
+                        transform: "scale(1.01)",
+                        background: 'rgba(0,153,255,0.03)'
+                    } : {};
+
                     return (
-                        <div key={item.id} style={getVariantStyles(index, items.length)}
+                        <div key={item.id} style={{ ...getVariantStyles(index, items.length), ...focusedStyle }}
                             onClick={() => !isPreview && focusSubItem(block.id, index)}
                         >
                             {/* Header (Clickable) */}

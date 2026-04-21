@@ -15,6 +15,7 @@ export function StatsBlock({ block }: BlockProps) {
   const theme = useEditorStore((s) => s.page?.theme);
   const viewMode = useEditorStore((s) => s.viewMode);
   const focusSubItem = useEditorStore((s) => s.focusSubItem);
+  const subItemFocus = useEditorStore((s) => s.subItemFocus);
 
   const layout = (p.layout as string) || "grid";
   const columns = Number(p.columns || 4);
@@ -62,6 +63,18 @@ export function StatsBlock({ block }: BlockProps) {
         {items.map((item, idx) => {
           const IconCmp = getIcon(item.icon);
           const isGlass = cardStyle === "glass";
+          const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+          const focusedStyle: React.CSSProperties = isFocused ? { 
+            boxShadow: `0 0 0 3px #0099ff, 0 0 20px rgba(0,153,255,0.4)`, 
+            zIndex: 10, 
+            transform: "scale(1.02)",
+            ...(cardStyle === 'none' ? {
+                background: 'rgba(0,153,255,0.03)',
+                padding: '1.5rem 1rem',
+                margin: '-1.5rem -1rem',
+            } : {})
+          } : {};
+          
           return (
             <motion.div
               key={item.id || idx}
@@ -87,7 +100,9 @@ export function StatsBlock({ block }: BlockProps) {
                   return bg;
                 })(),
                 borderRadius: p.cardRadius as string || "1.5rem",
-                border: cardStyle === "card" ? "1px solid var(--border)" : undefined
+                border: (cardStyle === "card" && !isFocused) ? "1px solid var(--border)" : undefined,
+                cursor: isPreview ? "default" : "pointer",
+                ...focusedStyle
               }}
             >
               {/* Decorative Glow for Glassmorphism */}

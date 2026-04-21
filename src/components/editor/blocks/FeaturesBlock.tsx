@@ -12,6 +12,7 @@ export function FeaturesBlock({ block }: BlockProps) {
     const viewMode = useEditorStore((s) => s.viewMode);
     const focusSubItem = useEditorStore((s) => s.focusSubItem);
     const isPreview = React.useContext(PreviewContext);
+    const subItemFocus = useEditorStore((s) => s.subItemFocus);
 
     const bgColor = (p.bgColor as string) || "var(--background)";
     const textColor = (p.textColor as string) || "var(--text)";
@@ -81,7 +82,7 @@ export function FeaturesBlock({ block }: BlockProps) {
     };
 
     const SectionHeader = () => (
-        <div style={{ textAlign: align as any, marginBottom: "3rem" }}>
+        <div onClick={() => !isPreview && focusSubItem(block.id, "Content")} style={{ textAlign: align as any, marginBottom: "3rem" }}>
             {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor }}>{title}</h2>}
             {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor }}>{subtitle}</p>}
         </div>
@@ -102,15 +103,29 @@ export function FeaturesBlock({ block }: BlockProps) {
                 </div>
             ) : (
                 <div style={{ display: "grid", gridTemplateColumns: `repeat(${editorCols}, 1fr)`, gap: editorCols === 1 ? "1.25rem" : gap }}>
-                    {features.map((feat, idx) => (
-                        <div key={feat.id || idx} style={{ ...getCardSty() }}
-                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
-                        >
-                            <div style={{ marginBottom: "1.25rem" }}><IconWrapper feature={feat} /></div>
-                            <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.5rem 0" }}>{feat.title}</h3>
-                            <p style={{ fontSize: cardDescSize, opacity: 0.65, margin: 0, lineHeight: 1.65 }}>{feat.description}</p>
-                        </div>
-                    ))}
+                    {features.map((feat, idx) => {
+                        const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+                        const focusedStyle: React.CSSProperties = isFocused ? { 
+                            boxShadow: "0 0 0 3px #0099ff, 0 0 20px rgba(0,153,255,0.4)", 
+                            zIndex: 10, 
+                            transform: "scale(1.02)",
+                            ...(cardStyle === 'none' ? {
+                                background: 'rgba(0,153,255,0.03)',
+                                padding: '2.5rem 2rem',
+                                margin: '-0.5rem -0.25rem',
+                            } : {})
+                        } : {};
+
+                        return (
+                            <div key={feat.id || idx} style={{ ...getCardSty(), ...focusedStyle }}
+                                onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                            >
+                                <div style={{ marginBottom: "1.25rem" }}><IconWrapper feature={feat} /></div>
+                                <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.5rem 0" }}>{feat.title}</h3>
+                                <p style={{ fontSize: cardDescSize, opacity: 0.65, margin: 0, lineHeight: 1.65 }}>{feat.description}</p>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </>
@@ -122,8 +137,30 @@ export function FeaturesBlock({ block }: BlockProps) {
             <div style={{ display: "flex", flexDirection: "column", gap }}>
                 {features.map((feat, idx) => {
                     const even = idx % 2 === 0;
+                    const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+                    const focusedStyle = isFocused ? { 
+                        boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)", 
+                        zIndex: 10, 
+                        borderRadius: cardRadius,
+                        background: 'rgba(0,153,255,0.03)'
+                    } : {};
+
                     return (
-                        <div key={feat.id || idx} style={{ display: "flex", alignItems: "center", gap: "3rem", flexDirection: even ? "row" : "row-reverse", padding: "2rem 0", borderBottom: `1px solid rgba(0,0,0,0.06)` }}>
+                        <div key={feat.id || idx}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "3rem",
+                                flexDirection: even ? "row" : "row-reverse",
+                                padding: "2rem 1.5rem",
+                                borderBottom: isFocused ? "none" : `1px solid rgba(0,0,0,0.06)`,
+                                margin: "0 -1.5rem",
+                                borderRadius: cardRadius,
+                                cursor: isPreview ? "default" : "pointer",
+                                ...focusedStyle
+                            }}
+                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                        >
                             <div style={{ flexShrink: 0 }}>
                                 <div style={{ width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, color: iconColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                     <IconWrapper feature={feat} />
@@ -144,13 +181,40 @@ export function FeaturesBlock({ block }: BlockProps) {
         <>
             <SectionHeader />
             <div style={{ display: "flex", gap, overflowX: "auto", paddingBottom: "0.5rem" }}>
-                {features.map((feat, idx) => (
-                    <div key={feat.id || idx} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.75rem", minWidth: 200, flex: 1, padding: "1.5rem", background: "rgba(0,0,0,0.02)", borderRadius: cardRadius, border: `1px solid #e2e8f0` }}>
-                        <IconWrapper feature={feat} />
-                        <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: 0 }}>{feat.title}</h3>
-                        <p style={{ fontSize: cardDescSize, opacity: 0.6, margin: 0, lineHeight: 1.6 }}>{feat.description}</p>
-                    </div>
-                ))}
+                {features.map((feat, idx) => {
+                    const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+                    const focusedStyle = isFocused ? { 
+                        boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)", 
+                        zIndex: 10, 
+                        transform: "scale(1.02)",
+                        background: 'rgba(0,153,255,0.03)',
+                        border: 'none'
+                    } : { border: `1px solid #e2e8f0` };
+
+                    return (
+                        <div key={feat.id || idx}
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "flex-start",
+                                gap: "0.75rem",
+                                minWidth: 200,
+                                flex: 1,
+                                padding: "1.5rem",
+                                background: "rgba(0,0,0,0.02)",
+                                borderRadius: cardRadius,
+                                cursor: isPreview ? "default" : "pointer",
+                                transition: "all 0.2s ease",
+                                ...focusedStyle
+                            }}
+                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                        >
+                            <IconWrapper feature={feat} />
+                            <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: 0 }}>{feat.title}</h3>
+                            <p style={{ fontSize: cardDescSize, opacity: 0.6, margin: 0, lineHeight: 1.6 }}>{feat.description}</p>
+                        </div>
+                    );
+                })}
             </div>
         </>
     );
@@ -159,17 +223,41 @@ export function FeaturesBlock({ block }: BlockProps) {
         <>
             <SectionHeader />
             <div style={{ display: "grid", gridTemplateColumns: `repeat(${editorCols}, 1fr)`, gap }}>
-                {features.map((feat, idx) => (
-                    <div key={feat.id || idx} style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1.25rem 1.5rem", background: "rgba(0,0,0,0.02)", borderRadius: cardRadius, border: `1px solid #e2e8f0` }}>
-                        <div style={{ flexShrink: 0, width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", color: iconColor }}>
-                            {(() => { const C = getIcon(feat.icon); return C ? <C width={iconSize} height={iconSize} /> : <Square2StackIcon width={iconSize} height={iconSize} />; })()}
+                {features.map((feat, idx) => {
+                    const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+                    const focusedStyle = isFocused ? { 
+                        boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)", 
+                        zIndex: 10, 
+                        transform: "scale(1.02)",
+                        background: 'rgba(0,153,255,0.03)',
+                        border: 'none'
+                    } : { border: `1px solid #e2e8f0` };
+
+                    return (
+                        <div key={feat.id || idx}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "1rem",
+                                padding: "1.25rem 1.5rem",
+                                background: "rgba(0,0,0,0.02)",
+                                borderRadius: cardRadius,
+                                cursor: isPreview ? "default" : "pointer",
+                                transition: "all 0.2s ease",
+                                ...focusedStyle
+                            }}
+                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                        >
+                            <div style={{ flexShrink: 0, width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", color: iconColor }}>
+                                {(() => { const C = getIcon(feat.icon); return C ? <C width={iconSize} height={iconSize} /> : <Square2StackIcon width={iconSize} height={iconSize} />; })()}
+                            </div>
+                            <div>
+                                <p style={{ fontWeight: 700, margin: "0 0 2px 0", fontSize: "0.95rem" }}>{feat.title}</p>
+                                <p style={{ fontSize: "0.82rem", opacity: 0.55, margin: 0 }}>{feat.description}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p style={{ fontWeight: 700, margin: "0 0 2px 0", fontSize: "0.95rem" }}>{feat.title}</p>
-                            <p style={{ fontSize: "0.82rem", opacity: 0.55, margin: 0 }}>{feat.description}</p>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </>
     );
@@ -180,8 +268,34 @@ export function FeaturesBlock({ block }: BlockProps) {
             <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.max(2, editorCols)}, 1fr)`, gridAutoRows: "200px", gap }}>
                 {features.map((feat, idx) => {
                     const wide = idx === 0 || idx === features.length - 1;
+                    const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+                    const focusedStyle = isFocused ? { 
+                        boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)", 
+                        zIndex: 10, 
+                        transform: "scale(1.01)",
+                        background: 'rgba(0,153,255,0.05)',
+                        border: 'none'
+                    } : { border: `1px solid rgba(0,0,0,0.05)` };
+
                     return (
-                        <div key={feat.id || idx} style={{ gridColumn: wide ? "span 2" : "span 1", gridRow: wide ? "span 1" : "span 1", background: `rgba(${primaryRgb}, 0.06)`, borderRadius: cardRadius, padding: "2rem", display: "flex", flexDirection: "column", justifyContent: "flex-end", position: "relative", overflow: "hidden", border: `1px solid rgba(0,0,0,0.05)` }}>
+                        <div key={feat.id || idx}
+                            style={{
+                                gridColumn: wide ? "span 2" : "span 1",
+                                gridRow: wide ? "span 1" : "span 1",
+                                background: `rgba(${primaryRgb}, 0.06)`,
+                                borderRadius: cardRadius,
+                                padding: "2rem",
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "flex-end",
+                                position: "relative",
+                                overflow: "hidden",
+                                cursor: isPreview ? "default" : "pointer",
+                                transition: "all 0.2s ease",
+                                ...focusedStyle
+                            }}
+                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                        >
                             <div style={{ position: "absolute", top: "1.5rem", left: "1.5rem" }}><IconWrapper feature={feat} /></div>
                             <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.4rem 0" }}>{feat.title}</h3>
                             <p style={{ fontSize: cardDescSize, opacity: 0.6, margin: 0, lineHeight: 1.6 }}>{feat.description}</p>

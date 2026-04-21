@@ -186,7 +186,7 @@ export function TeamBlock({ block }: BlockProps) {
             `}</style>
             <section id={(p.sectionId as string) || `block-${block.id}`} className={`team-section-${block.id}`}>
                 <div style={{ boxSizing: "border-box", width: "100%" }}>
-                    <div style={{ textAlign: align as React.CSSProperties["textAlign"] }}>
+                    <div onClick={() => !isPreview && focusSubItem(block.id, "Content")} style={{ textAlign: align as React.CSSProperties["textAlign"], cursor: "pointer" }}>
                         {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor }}>{title}</h2>}
                         {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor }}>{subtitle}</p>}
                     </div>
@@ -210,7 +210,7 @@ export function TeamBlock({ block }: BlockProps) {
                                 const focusedStyle = isFocused ? { border: "2px solid #0099ff", boxShadow: "0 0 15px rgba(0,153,255,0.3)", zIndex: 10 } : {};
 
                                 return (
-                                    <div key={`mc-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle, ...focusedStyle }}
+                                    <div key={`mc-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle, ...focusedStyle, cursor: "pointer" }}
                                         onClick={() => !isPreview && focusSubItem(block.id, idx)}
                                     >
                                         {member.image && (
@@ -245,7 +245,7 @@ export function TeamBlock({ block }: BlockProps) {
                                 return (
                                     <div key={`ml-${idx}`}
                                         className={idx % 2 !== 0 ? `team-large-card-reverse-${block.id}` : `team-large-card-${block.id}`}
-                                        style={isFocused ? { outline: "3px solid #0099ff", boxShadow: "0 0 20px rgba(0,153,255,0.4)", zIndex: 10 } : {}}
+                                        style={isFocused ? { boxShadow: "0 0 0 3px #0099ff, 0 0 20px rgba(0,153,255,0.4)", zIndex: 10, transform: "scale(1.01)" } : {}}
                                         onClick={() => !isPreview && focusSubItem(block.id, idx)}
                                     >
                                         {member.image && (
@@ -289,7 +289,12 @@ export function TeamBlock({ block }: BlockProps) {
                                 const raisedStyle = cardStyle === 'raised' ? { boxShadow: cardShadow } : {};
                                 const outlinedStyle = cardStyle === 'outlined' ? { border: `1.5px solid #e2e8f0` } : {};
                                 const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
-                                const focusedStyle = isFocused ? { border: "2px solid #0099ff", boxShadow: "0 0 15px rgba(0,153,255,0.3)", zIndex: 10 } : {};
+                                const focusedStyle = isFocused ? {
+                                    boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)",
+                                    zIndex: 10,
+                                    transform: "scale(1.02)",
+                                    background: cardStyle === 'none' ? 'rgba(0,153,255,0.03)' : undefined,
+                                } : {};
 
                                 return (
                                     <div key={`ms-${idx}`} style={{ ...baseStyle, ...raisedStyle, ...outlinedStyle, ...focusedStyle }}
@@ -389,11 +394,11 @@ export function TeamBlock({ block }: BlockProps) {
                                 const resolvedCardStyle = { ...getCardStyle(), height: cHeight, flexDirection: (layout === "list" && isEvenList && viewMode !== "mobile" ? "row-reverse" : getCardStyle().flexDirection) as React.CSSProperties["flexDirection"] };
 
                                 const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
-                                const focusedStyle = isFocused ? {
-                                    border: "2px solid #0099ff",
-                                    boxShadow: "0 0 20px rgba(0,153,255,0.3)",
+                                const focusedStyle: React.CSSProperties = isFocused ? {
+                                    boxShadow: "0 0 0 3px #0099ff, 0 0 20px rgba(0,153,255,0.4)",
                                     zIndex: 10,
                                     transform: "scale(1.02)",
+                                    ...(cardStyle === 'none' ? { background: 'rgba(0,153,255,0.03)' } : {}),
                                     transition: "all 0.3s ease"
                                 } : { transition: "all 0.3s ease" };
 
