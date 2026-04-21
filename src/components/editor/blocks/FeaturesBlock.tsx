@@ -34,8 +34,8 @@ export function FeaturesBlock({ block }: BlockProps) {
     const subtitleSize = (p.subtitleSize as string) || "1.125rem";
     const cardTitleSize = (p.cardTitleSize as string) || "1.2rem";
     const cardDescSize = (p.cardDescSize as string) || "0.95rem";
-    const iconSize = Number(p.iconSize) || 24;
-    const iconWrapperSize = Number(p.iconWrapperSize) || 52;
+    const iconSize: any = p.iconSize || "24px";
+    const iconWrapperSize: any = p.iconWrapperSize || "52px";
     const iconRadius = (p.iconRadius as string) || "14px";
 
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
@@ -43,7 +43,7 @@ export function FeaturesBlock({ block }: BlockProps) {
     const primaryRgb = hexToRgb(defaultPrimary) || "99, 102, 241";
     const iconColor = (p.iconColor as string) || defaultPrimary;
     const iconBg = (p.iconBg as string) || `rgba(${primaryRgb}, 0.15)`;
-    
+
     const titleColor = (p.titleColor as string) || textColor;
     const subtitleColor = (p.subtitleColor as string) || textColor;
 
@@ -66,15 +66,15 @@ export function FeaturesBlock({ block }: BlockProps) {
         return (
             <div style={{ width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, color: iconColor, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden", position: "relative" }}>
                 {feature.iconType === "image" && feature.image ? (
-                    <Image 
-                        src={feature.image} 
-                        alt={feature.title} 
-                        fill 
-                        style={{ objectFit: "cover" }} 
+                    <Image
+                        src={feature.image}
+                        alt={feature.title}
+                        fill
+                        style={{ objectFit: "cover" }}
                         unoptimized={!feature.image.includes('unsplash.com') && !feature.image.includes('pexels.com') && !feature.image.includes('amazonaws.com') && !feature.image.includes('cloudfront.net')}
                     />
                 ) : (
-                    IconCmp ? <IconCmp style={{ width: iconSize, height: iconSize, color: iconColor }} /> : <Square2StackIcon style={{ width: iconSize, height: iconSize }} />
+                    IconCmp ? <IconCmp style={{ color: iconColor, width: iconSize, height: iconSize }} /> : <Square2StackIcon style={{ color: iconColor, width: iconSize, height: iconSize }} />
                 )}
             </div>
         );
@@ -125,7 +125,7 @@ export function FeaturesBlock({ block }: BlockProps) {
                     return (
                         <div key={feat.id || idx} style={{ display: "flex", alignItems: "center", gap: "3rem", flexDirection: even ? "row" : "row-reverse", padding: "2rem 0", borderBottom: `1px solid rgba(0,0,0,0.06)` }}>
                             <div style={{ flexShrink: 0 }}>
-                                <div style={{ width: 80, height: 80, borderRadius: iconRadius, background: iconBg, color: iconColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <div style={{ width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, color: iconColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                     <IconWrapper feature={feat} />
                                 </div>
                             </div>
@@ -161,8 +161,8 @@ export function FeaturesBlock({ block }: BlockProps) {
             <div style={{ display: "grid", gridTemplateColumns: `repeat(${editorCols}, 1fr)`, gap }}>
                 {features.map((feat, idx) => (
                     <div key={feat.id || idx} style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1.25rem 1.5rem", background: "rgba(0,0,0,0.02)", borderRadius: cardRadius, border: `1px solid #e2e8f0` }}>
-                        <div style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 10, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", color: iconColor }}>
-                            {(() => { const C = getIcon(feat.icon); return C ? <C style={{ width: 20, height: 20 }} /> : <Square2StackIcon style={{ width: 20, height: 20 }} />; })()}
+                        <div style={{ flexShrink: 0, width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", color: iconColor }}>
+                            {(() => { const C = getIcon(feat.icon); return C ? <C width={iconSize} height={iconSize} /> : <Square2StackIcon width={iconSize} height={iconSize} />; })()}
                         </div>
                         <div>
                             <p style={{ fontWeight: 700, margin: "0 0 2px 0", fontSize: "0.95rem" }}>{feat.title}</p>

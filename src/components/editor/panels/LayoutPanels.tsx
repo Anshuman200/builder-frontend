@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove, PaddingFields } from "./shared";
+import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove, PaddingFields, TextInputWithUnit } from "./shared";
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
@@ -34,13 +34,13 @@ export function ButtonPanel({ block }: { block: Block }) {
             )}
             <Section title="Shape & Shadow">
                 <Field label="Shadow"><SelectInput value={(p.shadow as string) || "none"} onChange={(v) => up("shadow", v)} options={[{ label: "None", value: "none" }, { label: "Small", value: "sm" }, { label: "Medium", value: "md" }, { label: "Large", value: "lg" }, { label: "Glow", value: "glow" }]} /></Field>
-                <Field label="Border Width"><TextInput value={(p.borderWidth as string) || "2px"} onChange={(v) => up("borderWidth", v)} placeholder="2px" /></Field>
+                <Field label="Border Width"><TextInputWithUnit value={(p.borderWidth as string) || "2px"} onChange={(v) => up("borderWidth", v)} placeholder="2px" /></Field>
                 <Field label="Border Color"><ColorInput value={(p.borderColor as string) || ""} onChange={(v) => up("borderColor", v)} onBlur={(v) => up("borderColor", v, true)} /></Field>
             </Section>
             <Section title="Typography">
-                <Field label="Font Size override"><TextInput value={(p.fontSize as string) || ""} onChange={(v) => up("fontSize", v)} placeholder="auto" /></Field>
+                <Field label="Font Size override"><TextInputWithUnit value={(p.fontSize as string) || ""} onChange={(v) => up("fontSize", v)} placeholder="auto" /></Field>
                 <Field label="Font Weight"><SelectInput value={(p.fontWeight as string) || "700"} onChange={(v) => up("fontWeight", v)} options={[{ label: "Normal (400)", value: "400" }, { label: "Medium (500)", value: "500" }, { label: "Semibold (600)", value: "600" }, { label: "Bold (700)", value: "700" }, { label: "Black (900)", value: "900" }]} /></Field>
-                <Field label="Letter Spacing"><TextInput value={(p.letterSpacing as string) || "0.02em"} onChange={(v) => up("letterSpacing", v)} placeholder="0.02em" /></Field>
+                <Field label="Letter Spacing"><TextInputWithUnit value={(p.letterSpacing as string) || "0.02em"} onChange={(v) => up("letterSpacing", v)} placeholder="0.02em" /></Field>
             </Section>
             <Section title="Icons">
                 <Field label="Left Icon"><IconPicker value={(p.iconLeft as string) || ""} onChange={(v) => up("iconLeft", v)} /></Field>
@@ -76,7 +76,9 @@ export function HeaderPanel({ block }: { block: Block }) {
                 <Field label="Logo Text"><TextInput value={(p.logoText as string) || "PageCraft"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
                 {p.logoType === "image" && (<>
                     <Field label="Logo Image"><MediaInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
-                    <Field label="Image Width"><TextInput value={(p.logoWidth as string) || "120px"} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
+                    <Field label="Image Width"><TextInputWithUnit value={(p.logoWidth as string) || "120px"} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
+                    <Field label="Image Height"><TextInputWithUnit value={(p.logoHeight as string) || "40px"} onChange={(v) => up("logoHeight", v)} placeholder="40px" /></Field>
+                    <Field label="Object Fit"><SelectInput value={(p.logoObjectFit as string) || "cover"} onChange={(v) => up("logoObjectFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
                     <Field label="Logo Shape"><SelectInput value={(p.logoShape as string) || "square"} onChange={(v) => up("logoShape", v)} options={[{ label: "Square", value: "square" }, { label: "Circle", value: "circle" }, { label: "Rounded", value: "rounded" }]} /></Field>
                 </>)}
             </Section>
@@ -96,7 +98,7 @@ export function HeaderPanel({ block }: { block: Block }) {
                     {(() => {
                         const autoRoutes = (routes || []).filter(r => r.showInHeader !== false);
                         const currentLinks = (p.links as any[]) || [];
-                        
+
                         // Merge logic: ensure all visible routes are present in the list
                         let unified = [...currentLinks];
                         autoRoutes.forEach(r => {
@@ -146,24 +148,24 @@ export function HeaderPanel({ block }: { block: Block }) {
                                     return (
                                         <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
                                             <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.5, letterSpacing: "0.05em" }}>CUSTOM LINK</span>
-                                            <input 
-                                                value={item.label} 
+                                            <input
+                                                value={item.label}
                                                 onChange={(e) => {
                                                     const next = [...displayItems];
                                                     next[idx] = { ...next[idx], label: e.target.value };
                                                     up("links", next);
-                                                }} 
-                                                placeholder="Label" 
-                                                style={{ fontSize: 11, fontWeight: 600, padding: "6px 8px", background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 6, outline: "none", color: "var(--text)" }} 
+                                                }}
+                                                placeholder="Label"
+                                                style={{ fontSize: 11, fontWeight: 600, padding: "6px 8px", background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 6, outline: "none", color: "var(--text)" }}
                                             />
-                                            <LinkInput 
-                                                value={item.url} 
+                                            <LinkInput
+                                                value={item.url}
                                                 onChange={(v) => {
                                                     const next = [...displayItems];
                                                     next[idx] = { ...next[idx], url: v };
                                                     up("links", next);
-                                                }} 
-                                                placeholder="URL (e.g. /about)" 
+                                                }}
+                                                placeholder="URL (e.g. /about)"
                                             />
                                         </div>
                                     );
@@ -171,16 +173,16 @@ export function HeaderPanel({ block }: { block: Block }) {
                             />
                         );
                     })()}
-                    <button onClick={() => { 
+                    <button onClick={() => {
                         const autoRoutes = (routes || []).filter(r => r.showInHeader !== false);
                         const currentLinks = (p.links as any[]) || [];
                         let unified = [...currentLinks];
                         autoRoutes.forEach(r => { if (!unified.find(l => l.routeId === r.id)) unified.push({ id: r.id, routeId: r.id, isAuto: true }); });
                         const displayItems = unified.filter(l => !l.isAuto || autoRoutes.some(r => r.id === l.routeId));
-                        
+
                         const next = [...displayItems];
-                        next.push({ id: crypto.randomUUID(), label: "New Link", url: "#" }); 
-                        up("links", next, true); 
+                        next.push({ id: crypto.randomUUID(), label: "New Link", url: "#" });
+                        up("links", next, true);
                     }} style={{ padding: "8px 0", background: "rgba(99,102,241,0.08)", color: "var(--primary)", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer", marginTop: 4, transition: "background 0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(99,102,241,0.12)"} onMouseLeave={e => e.currentTarget.style.background = "rgba(99,102,241,0.08)"}>+ Add Custom Link</button>
                 </div>
             </Section>
@@ -216,6 +218,7 @@ export function HeaderPanel({ block }: { block: Block }) {
                             { label: "Medium (500)", value: "500" },
                             { label: "Semibold (600)", value: "600" },
                             { label: "Bold (700)", value: "700" },
+                            { label: "Extra Bold (800)", value: "800" },
                         ]}
                     />
                 </Field>
@@ -224,6 +227,7 @@ export function HeaderPanel({ block }: { block: Block }) {
                         value={(p.navInactiveOpacity as string) || "0.75"}
                         onChange={(v) => up("navInactiveOpacity", v)}
                         options={[
+                            { label: "40%", value: "0.4" },
                             { label: "50%", value: "0.5" },
                             { label: "60%", value: "0.6" },
                             { label: "70%", value: "0.7" },
@@ -264,9 +268,13 @@ export function FooterPanel({ block }: { block: Block }) {
                 <Field label="Logo Text"><TextInput value={(p.logoText as string) || "PageCraft"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
                 {p.logoType === "image" && (<>
                     <Field label="Logo Image"><MediaInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
-                    <Field label="Image Width"><TextInput value={(p.logoWidth as string) || "120px"} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
+                    <Field label="Image Width"><TextInputWithUnit value={(p.logoWidth as string) || "120px"} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
+                    <Field label="Image Height"><TextInputWithUnit value={(p.logoHeight as string) || "40px"} onChange={(v) => up("logoHeight", v)} placeholder="40px" /></Field>
+                    <Field label="Object Fit"><SelectInput value={(p.logoObjectFit as string) || "cover"} onChange={(v) => up("logoObjectFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
                 </>)}
                 <Field label="Description"><TextareaInput value={(p.description as string) || ""} onChange={(v) => up("description", v)} rows={3} placeholder="Brief company description..." /></Field>
+            </Section>
+            <Section title="Copyright">
                 <Field label="Copyright"><TextInput value={(p.copyright as string) || ""} onChange={(v) => up("copyright", v)} placeholder="© 2026 Company" /></Field>
             </Section>
             <Section title="Footer Links">
@@ -275,7 +283,7 @@ export function FooterPanel({ block }: { block: Block }) {
                     {(() => {
                         const autoRoutes = (routes || []).filter(r => !!r.showInFooter);
                         const currentLinks = (p.links as any[]) || [];
-                        
+
                         // Merge logic: ensure all visible routes are present in the list
                         let unified = [...currentLinks];
                         autoRoutes.forEach(r => {
@@ -325,24 +333,24 @@ export function FooterPanel({ block }: { block: Block }) {
                                     return (
                                         <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
                                             <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.5, letterSpacing: "0.05em" }}>CUSTOM LINK</span>
-                                            <input 
-                                                value={item.label} 
+                                            <input
+                                                value={item.label}
                                                 onChange={(e) => {
                                                     const next = [...displayItems];
                                                     next[idx] = { ...next[idx], label: e.target.value };
                                                     up("links", next);
-                                                }} 
-                                                placeholder="Label" 
-                                                style={{ fontSize: 11, fontWeight: 600, padding: "6px 8px", background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 6, outline: "none", color: "var(--text)" }} 
+                                                }}
+                                                placeholder="Label"
+                                                style={{ fontSize: 11, fontWeight: 600, padding: "6px 8px", background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 6, outline: "none", color: "var(--text)" }}
                                             />
-                                            <LinkInput 
-                                                value={item.url} 
+                                            <LinkInput
+                                                value={item.url}
                                                 onChange={(v) => {
                                                     const next = [...displayItems];
                                                     next[idx] = { ...next[idx], url: v };
                                                     up("links", next);
-                                                }} 
-                                                placeholder="URL (e.g. #contact)" 
+                                                }}
+                                                placeholder="URL (e.g. #contact)"
                                             />
                                         </div>
                                     );
@@ -350,16 +358,16 @@ export function FooterPanel({ block }: { block: Block }) {
                             />
                         );
                     })()}
-                    <button onClick={() => { 
+                    <button onClick={() => {
                         const autoRoutes = (routes || []).filter(r => !!r.showInFooter);
                         const currentLinks = (p.links as any[]) || [];
                         let unified = [...currentLinks];
                         autoRoutes.forEach(r => { if (!unified.find(l => l.routeId === r.id)) unified.push({ id: r.id, routeId: r.id, isAuto: true }); });
                         const displayItems = unified.filter(l => !l.isAuto || autoRoutes.some(r => r.id === l.routeId));
-                        
+
                         const next = [...displayItems];
-                        next.push({ id: crypto.randomUUID(), label: "New Link", url: "#" }); 
-                        up("links", next, true); 
+                        next.push({ id: crypto.randomUUID(), label: "New Link", url: "#" });
+                        up("links", next, true);
                     }} style={{ padding: "8px 0", background: "rgba(99,102,241,0.08)", color: "var(--primary)", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer", marginTop: 4, transition: "background 0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(99,102,241,0.12)"} onMouseLeave={e => e.currentTarget.style.background = "rgba(99,102,241,0.08)"}>+ Add Custom Link</button>
                 </div>
             </Section>

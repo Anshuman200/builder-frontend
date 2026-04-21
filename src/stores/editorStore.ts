@@ -17,19 +17,6 @@ export const LIGHT_COLORS = {
     overlay: "rgba(0,0,0,0.25)",
 };
 
-export const DARK_COLORS = {
-    primary: "#818cf8",
-    secondary: "#a78bfa",
-    background: "#020617",
-    surface: "#0f172a",
-    text: "#f8fafc",
-    textMuted: "#94a3b8",
-    border: "#1e293b",
-    accent: "#fbbf24",
-    buttonText: "#ffffff",
-    overlay: "rgba(0,0,0,0.45)",
-};
-
 export const DEFAULT_THEME: ThemeConfig = {
     mode: "light",
     colors: LIGHT_COLORS,
@@ -136,7 +123,7 @@ interface EditorStore {
     updateMeta: (meta: Partial<MetaConfig>) => void;
     updateSlug: (slug: string) => void;
     updateTitle: (title: string) => void;
-    updatePageData: (data: Partial<Pick<EditorPage, "isTemplate" | "isPublic" | "isLocked" | "category" | "visibility" | "password" | "thumbnail" | "thumbnails" | "routes">>, commit?: boolean) => void;
+    updatePageData: (data: Partial<Pick<EditorPage, "isTemplate" | "isPublic" | "isLocked" | "category" | "thumbnail" | "thumbnails" | "routes">>, commit?: boolean) => void;
     migrateThemeColors: () => void;
     pushHistory: () => void;
 
@@ -1075,20 +1062,16 @@ export const useEditorStore = create<EditorStore>()(
                     s.page.theme = JSON.parse(JSON.stringify(DEFAULT_THEME));
                 }
 
-                const oldMode = s.page.theme.mode;
-                const newMode = theme.mode || oldMode;
-
-                // Pivot colors if mode is changing
-                if (theme.mode && theme.mode !== oldMode) {
-                    const newColors = theme.mode === "dark" ? DARK_COLORS : LIGHT_COLORS;
-                    s.page.theme.colors = { ...s.page.theme.colors, ...newColors };
-                }
-                const newTheme = { ...theme, mode: "light" }; // Hard enforce light mode
+                // Hard enforce light mode
+                const newTheme = { ...theme, mode: "light" as const };
                 s.page.theme = { ...s.page.theme, ...newTheme };
 
-                // If background is missing or dark, ensure it's white
+                // Ensure base colors are light-compatible
                 if (s.page.theme.colors.background === "#020617" || s.page.theme.colors.background === "#09090b") {
                     s.page.theme.colors.background = "#ffffff";
+                }
+                if (s.page.theme.colors.text === "#f8fafc" || s.page.theme.colors.text === "#ffffff") {
+                    s.page.theme.colors.text = "#0f172a";
                 }
 
                 applyUpdaterDeep(s.page, s.activeRouteId, migrateBlockColors);

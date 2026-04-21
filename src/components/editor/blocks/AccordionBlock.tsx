@@ -120,11 +120,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
                                     {item.title}
                                 </div>
                                 {iconStyle === "plus" ? (
-                                    <div style={{
-                                        position: "relative",
-                                        width: iconSize,
-                                        height: iconSize,
-                                    }}>
+                                    <div style={{ position: "relative", width: iconSize, height: iconSize, }}>
                                         <div style={{
                                             position: "absolute",
                                             top: "50%",

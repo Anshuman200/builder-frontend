@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, SelectInput, ColorInput, MediaInput, ToggleSwitch, PaddingFields, SortableList, arrayMove } from "./shared";
+import { Section, Field, TextInput, SelectInput, ColorInput, MediaInput, ToggleSwitch, PaddingFields, SortableList, arrayMove, TextInputWithUnit } from "./shared";
 import { AnimationPanel } from "./AnimationPanel";
 
 export function GalleryPanel({ block }: { block: Block }) {
@@ -15,8 +15,8 @@ export function GalleryPanel({ block }: { block: Block }) {
         <>
             <Section title="Gallery Layout">
                 <Field label="Columns"><SelectInput value={String(p.columns || "3")} onChange={(v) => up("columns", Number(v))} options={[{ label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }, { label: "5 Columns", value: "5" }]} /></Field>
-                <Field label="Gap"><TextInput value={p.gap || "1rem"} onChange={(v) => up("gap", v)} placeholder="1rem" /></Field>
-                <Field label="Max Width"><TextInput value={p.maxWidth || "1200px"} onChange={(v) => up("maxWidth", v)} placeholder="1200px" /></Field>
+                <Field label="Gap"><TextInputWithUnit value={p.gap || "1rem"} onChange={(v) => up("gap", v)} placeholder="1rem" /></Field>
+                <Field label="Max Width"><TextInputWithUnit value={p.maxWidth || "100dvw"} onChange={(v) => up("maxWidth", v)} placeholder="1200px" /></Field>
             </Section>
 
             <Section title="Gallery Images">

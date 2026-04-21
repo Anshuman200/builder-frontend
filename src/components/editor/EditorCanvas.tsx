@@ -93,7 +93,7 @@ export default function EditorCanvas() {
       <div
         id="editor-canvas-root"
         ref={canvasRef}
-        className={themeMode === "dark" ? "dark" : ""}
+        className=""
         style={{
           width: canvasWidth,
           minHeight: "calc(100vh - 100px)",
@@ -391,7 +391,11 @@ const CanvasBlock = memo(function CanvasBlock({
                 : undefined,
           borderRadius: isInside || isReplace ? 8 : 0,
         }}
-        onClick={(e) => { e.stopPropagation(); selectBlock(block.id); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          selectBlock(block.id);
+          e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+        }}
         onMouseEnter={() => hoverBlock(block.id)}
         onMouseLeave={() => hoverBlock(null)}
       >

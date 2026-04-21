@@ -38,6 +38,8 @@ export function FooterBlock({ block }: BlockProps) {
     const logoText = (p.logoText as string) || "PageCraft";
     const logoImage = p.logoImage as string;
     const logoWidth = (p.logoWidth as string) || "120px";
+    const logoHeight = (p.logoHeight as string) || "40px";
+    const logoObjectFit = (p.logoObjectFit as React.CSSProperties["objectFit"]) || "cover";
     const description = (p.description as string) || "Build beautiful pages in minutes.";
     const copyright = (p.copyright as string) || `© ${new Date().getFullYear()} PageCraft. All rights reserved.`;
     const links = (p.links as { id: string; label: string; url: string }[]) || [];
@@ -49,7 +51,7 @@ export function FooterBlock({ block }: BlockProps) {
 
     const routes = useEditorStore((s) => s.page?.routes) || [];
     const autoRoutes = routes.filter(r => !!r.showInFooter);
-    
+
     // 1. Resolve explicitly ordered links from block props
     const resolvedLinks = (links as any[]).map(l => {
         if (l.isAuto) {
@@ -75,25 +77,25 @@ export function FooterBlock({ block }: BlockProps) {
     };
 
     const Logo = () => (
-        <a 
-            href="/" 
+        <a
+            href="/"
             onClick={(e) => {
                 handleLink("/", e);
                 if (!isPreview) focusSubItem(block.id, "Brand & Content");
             }}
-            style={{ 
+            style={{
                 fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em",
                 color: "inherit", textDecoration: "none", cursor: "pointer",
                 display: "flex", alignItems: "center"
             }}
         >
             {logoType === "image" && logoImage ? (
-                <div style={{ width: logoWidth, height: "40px", position: "relative" }}>
-                    <Image 
-                        src={logoImage} 
-                        alt={logoText} 
-                        fill 
-                        style={{ objectFit: "contain", objectPosition: isMobile ? "center" : "left" }}
+                <div style={{ width: logoWidth, height: logoHeight, position: "relative" }}>
+                    <Image
+                        src={logoImage}
+                        alt={logoText}
+                        fill
+                        style={{ objectFit: logoObjectFit || "contain", objectPosition: isMobile ? "center" : "left" }}
                         unoptimized={!logoImage.includes('unsplash.com') && !logoImage.includes('pexels.com') && !logoImage.includes('amazonaws.com') && !logoImage.includes('cloudfront.net')}
                     />
                 </div>
@@ -109,8 +111,8 @@ export function FooterBlock({ block }: BlockProps) {
             return (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", paddingLeft: innerPad, paddingRight: innerPad }}>
                     <Logo />
-                    <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>{mergedLinks.map(link => <NavLink key={link.id} link={link} />)}</div>
-                    {copyright && <p style={{ margin: 0, fontSize: "0.82rem", opacity: 0.5 }}>{copyright}</p>}
+                    <div onClick={() => { if (!isPreview) { focusSubItem(block.id, "Footer Links") } }} style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>{mergedLinks.map(link => <NavLink key={link.id} link={link} />)}</div>
+                    {copyright && <p onClick={() => { if (!isPreview) { focusSubItem(block.id, "Copyright") } }} style={{ margin: 0, fontSize: "0.82rem", opacity: 0.5 }}>{copyright}</p>}
                 </div>
             );
         }
@@ -122,11 +124,11 @@ export function FooterBlock({ block }: BlockProps) {
                     <Logo />
                     {description && <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.7, maxWidth: 440 }}>{description}</p>}
                     {mergedLinks.length > 0 && (
-                        <nav style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem", justifyContent: "center" }}>
+                        <nav onClick={() => { if (!isPreview) { focusSubItem(block.id, "Footer Links") } }} style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem", justifyContent: "center" }}>
                             {mergedLinks.map(link => <NavLink key={link.id} link={link} />)}
                         </nav>
                     )}
-                    {copyright && <p style={{ margin: "1rem 0 0", fontSize: "0.82rem", opacity: 0.5, borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1.5rem", width: "100%" }}>{copyright}</p>}
+                    {copyright && <p onClick={() => { if (!isPreview) { focusSubItem(block.id, "Copyright") } }} style={{ margin: "1rem 0 0", fontSize: "0.82rem", opacity: 0.5, borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1.5rem", width: "100%" }}>{copyright}</p>}
                 </div>
             );
         }
@@ -141,7 +143,7 @@ export function FooterBlock({ block }: BlockProps) {
                             {description && <p style={{ margin: 0, fontSize: "0.88rem", opacity: 0.65, maxWidth: 240, lineHeight: 1.6 }}>{description}</p>}
                         </div>
                         {linkGroups.length > 0 ? linkGroups.map(group => (
-                            <div key={group.id} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                            <div key={group.id} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }} onClick={() => { if (!isPreview) { focusSubItem(block.id, "Footer Links") } }}>
                                 <p style={{ margin: 0, fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.08em", opacity: 0.5 }}>{group.heading}</p>
                                 {group.links.map(link => <NavLink key={link.id} link={link} />)}
                             </div>
@@ -152,7 +154,7 @@ export function FooterBlock({ block }: BlockProps) {
                             </div>
                         )}
                     </div>
-                    {copyright && <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1.5rem", textAlign: "center", fontSize: "0.82rem", opacity: 0.5 }}>{copyright}</div>}
+                    {copyright && <div onClick={() => { if (!isPreview) { focusSubItem(block.id, "Copyright") } }} style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1.5rem", textAlign: "center", fontSize: "0.82rem", opacity: 0.5 }}>{copyright}</div>}
                 </div>
             );
         }
@@ -165,12 +167,12 @@ export function FooterBlock({ block }: BlockProps) {
                         <Logo />
                         {description && (<p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.8, maxWidth: "250px" }}>{description}</p>)}
                     </div>
-                    <nav className={isPreview ? `footer-${block.id}-links` : undefined} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: "1.5rem", alignItems: "center" }}>
+                    <nav onClick={() => { if (!isPreview) { focusSubItem(block.id, "Footer Links") } }} className={isPreview ? `footer-${block.id}-links` : undefined} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: "1.5rem", alignItems: "center" }}>
                         {mergedLinks.map(link => <NavLink key={link.id} link={link} />)}
                     </nav>
                 </div>
                 {copyright && (
-                    <div style={{ maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "2rem auto 0", paddingLeft: innerPad, paddingRight: innerPad }}>
+                    <div onClick={() => { if (!isPreview) { focusSubItem(block.id, "Copyright") } }} style={{ maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "2rem auto 0", paddingLeft: innerPad, paddingRight: innerPad }}>
                         <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1.5rem", textAlign: "center", fontSize: "0.85rem", opacity: 0.6 }}>{copyright}</div>
                     </div>
                 )}

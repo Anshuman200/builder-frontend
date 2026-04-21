@@ -8,7 +8,7 @@ export function IconBlock({ block }: BlockProps) {
     const p = block.props;
     const iconName = (p.iconName as string) || "Star";
     const IconCmp = getIcon(iconName);
-    const size = p.size ? Number(p.size) : 24;
+    const size: any = p.size || "24px";
     const align = (p.align as string) || "center";
     const color = (p.color as string) || "#6366f1";
 
@@ -32,9 +32,9 @@ export function IconBlock({ block }: BlockProps) {
     return (
         <div id={(p.sectionId as string) || `block-${block.id}`} style={wrapperStyle}>
             {IconCmp ? (
-                <IconCmp style={{ width: size, height: size, color }} />
+                <IconCmp width={size} height={size} style={{ color }} />
             ) : (
-                <Square2StackIcon style={{ width: size, height: size, color: "#94a3b8" }} />
+                <Square2StackIcon style={{ color: "#94a3b8", width: size, height: size }} />
             )}
         </div>
     );

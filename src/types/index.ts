@@ -29,7 +29,7 @@ export interface AnimationConfig {
 }
 
 export interface ThemeConfig {
-    mode?: "light" | "dark";
+    mode: "light";
     colors: {
         primary: string;
         secondary: string;
@@ -98,8 +98,6 @@ export interface EditorPage {
     isPublic?: boolean;
     isLocked?: boolean;
     category?: string;
-    visibility?: "PUBLIC" | "PRIVATE" | string;
-    password?: string;
     thumbnail?: string | null;
     thumbnails?: string[];
 }

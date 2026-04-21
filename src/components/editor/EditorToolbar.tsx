@@ -98,8 +98,7 @@ export default function EditorToolbar() {
       theme: page.theme || DEFAULT_THEME,
       meta: page.meta || {},
       category: page.category || 'Other',
-      status: page.status || 'DRAFT',
-      visibility: page.visibility || 'PUBLIC'
+      status: page.status || 'DRAFT'
     };
 
     if (thumbnailUrl !== undefined) {
@@ -983,22 +982,6 @@ export default function EditorToolbar() {
             <h3 className="text-(--text-muted) text-xs font-bold uppercase tracking-widest border-b border-(--border) pb-2 mb-4">Global Configuration</h3>
 
             <div className="bg-(--surface) border border-(--border) rounded-xl p-4">
-              {/* <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-(--bg-primary) rounded-lg border border-(--border)">
-                    {theme.mode === 'dark' ? <MoonIcon className="w-4 h-4 text-blue-400" /> : <SunIcon className="w-4 h-4 text-amber-400" />}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-(--text)">Theme Mode</p>
-                    <p className="text-[10px] text-(--text-muted)">Toggle Dark/Light</p>
-                  </div>
-                </div>
-                <Switch
-                  checked={theme.mode === 'dark'}
-                  onChange={(v) => updateTheme({ mode: v ? 'dark' : 'light' }, true)}
-                  size="small"
-                />
-              </div> */}
 
               <div className="h-px bg-(--border)" />
 

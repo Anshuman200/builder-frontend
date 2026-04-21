@@ -11,7 +11,6 @@ import ScrollToTop from "@/components/shared/ScrollToTop";
 import { pagesApi } from "@/lib/api/client";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { useLiveHead } from "@/hooks/useLiveHead";
-import PrivatePageGate from "@/components/public/PrivatePageGate";
 import React from "react";
 
 export default function PreviewClient({ pageId, initialPath = "/" }: { pageId: string, initialPath?: string }) {
@@ -117,22 +116,20 @@ export default function PreviewClient({ pageId, initialPath = "/" }: { pageId: s
     const Wrapper = ({ children }: { children: React.ReactNode }) => {
         if (!page) return <>{children}</>;
         return (
-            <PrivatePageGate pageId={pageId} isPrivate={page.visibility === 'PRIVATE'}>
-                <DndContext>
-                    <PreviewProvider>
-                        <ActivePathContext.Provider value={normalizedPath}>
-                            <main
-                                ref={mainRef}
-                                className={page?.theme?.mode === 'dark' ? 'dark' : ''}
-                                style={{ background: "var(--background)", color: "var(--text)", minHeight: "100vh" }}
-                            >
-                                {children}
-                                <ScrollToTop />
-                            </main>
-                        </ActivePathContext.Provider>
-                    </PreviewProvider>
-                </DndContext>
-            </PrivatePageGate>
+            <DndContext>
+                <PreviewProvider>
+                    <ActivePathContext.Provider value={normalizedPath}>
+                        <main
+                            ref={mainRef}
+                            className=""
+                            style={{ background: "var(--background)", color: "var(--text)", minHeight: "100vh" }}
+                        >
+                            {children}
+                            <ScrollToTop />
+                        </main>
+                    </ActivePathContext.Provider>
+                </PreviewProvider>
+            </DndContext>
         );
     };
 

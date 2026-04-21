@@ -47,6 +47,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
     const logoWidth = (p.logoWidth as string) || "auto";
     const logoRadius = (p.logoRadius as string) || "0px";
     const logoShadow = (p.logoShadow as string) || "none";
+    const logoObjectFit = (p.logoObjectFit as React.CSSProperties["objectFit"]) || "cover";
 
     const submitLabel = (p.submitLabel as string) || "Delete Account";
     const buttonBg = (p.buttonBg as string) || "#ef4444";
@@ -199,7 +200,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
                                         width: logoWidth,
                                         borderRadius: logoRadius,
                                         boxShadow: logoShadow,
-                                        objectFit: "contain",
+                                        objectFit: logoObjectFit || "contain",
                                     }}
                                 />
                             </div>

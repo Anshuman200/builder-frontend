@@ -91,7 +91,7 @@ export default function EditorPage() {
       } else {
         setPage({
           id: pageId, title: "Untitled", slug: "untitled", status: "DRAFT",
-          theme: { mode: "dark", colors: { primary: "#6366f1", secondary: "#8b5cf6", background: "#ffffff", surface: "#f8fafc", text: "#0f172a", textMuted: "#64748b", border: "#e2e8f0", accent: "#f59e0b" }, fonts: { heading: "Inter", body: "Inter" }, borderRadius: "md", spacing: "normal" },
+          theme: { mode: "light", colors: { primary: "#6366f1", secondary: "#8b5cf6", background: "#ffffff", surface: "#f8fafc", text: "#0f172a", textMuted: "#64748b", border: "#e2e8f0", accent: "#f59e0b" }, fonts: { heading: "Inter", body: "Inter" }, borderRadius: "md", spacing: "normal" },
           meta: {}, content: [], routes: [], globalBlocks: { header: null, footer: null }
         });
       }

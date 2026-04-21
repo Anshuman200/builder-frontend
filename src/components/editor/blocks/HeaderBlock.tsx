@@ -36,6 +36,9 @@ export function HeaderBlock({ block }: BlockProps) {
     const logoText = (p.logoText as string) || "PageCraft";
     const logoImage = p.logoImage as string;
     const logoWidth = (p.logoWidth as string) || "120px";
+    const logoHeight = (p.logoHeight as string) || "40px";
+    const logoObjectFit = (p.logoObjectFit as React.CSSProperties["objectFit"]) || "cover";
+    const logoShape = (p.logoShape as string) || "square";
     const links = (p.links as { id: string; label: string; url: string }[]) || [];
     const showCta = p.showCta !== false;
     const ctaText = (p.ctaText as string) || "Get Started";
@@ -58,33 +61,43 @@ export function HeaderBlock({ block }: BlockProps) {
     const ctaStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 20px", borderRadius: "9999px", fontWeight: 600, fontSize: "0.9rem", textDecoration: "none", cursor: isPreview ? "pointer" : "default", transition: "opacity 0.2s", background: ctaVariant === "solid" ? ctaBgColor : "transparent", color: ctaVariant === "solid" ? ctaTextColor : ctaBgColor, border: ctaVariant === "outline" ? `2px solid ${ctaBgColor}` : "none" };
 
     // Logo Element
-    const LogoElement = () => (
-        <Link
-            href="/"
-            onClick={(e) => {
-                handleLink("/", e);
-                if (!isPreview) focusSubItem(block.id, "Brand (Logo)");
-            }}
-            style={{
-                fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em",
-                color: textColor, display: "flex", alignItems: "center",
-                textDecoration: "none", cursor: "pointer"
-            }}
-        >
-            {logoType === "image" && logoImage ? (
-                <div style={{ width: logoWidth, height: "40px", position: "relative" }}>
-                    <Image
-                        src={logoImage}
-                        alt={logoText}
-                        fill
-                        style={{ objectFit: "contain", objectPosition: "left" }}
-                        unoptimized={!logoImage.includes('unsplash.com') && !logoImage.includes('pexels.com') && !logoImage.includes('amazonaws.com') && !logoImage.includes('cloudfront.net')}
-                        priority
-                    />
-                </div>
-            ) : (<span>{logoText}</span>)}
-        </Link>
-    );
+    const LogoElement = () => {
+        const borderRadius = logoShape === "circle" ? "50%" : logoShape === "rounded" ? "12px" : "0px";
+        
+        return (
+            <Link
+                href="/"
+                onClick={(e) => {
+                    handleLink("/", e);
+                    if (!isPreview) focusSubItem(block.id, "Brand (Logo)");
+                }}
+                style={{
+                    fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em",
+                    color: textColor, display: "flex", alignItems: "center",
+                    textDecoration: "none", cursor: "pointer"
+                }}
+            >
+                {logoType === "image" && logoImage ? (
+                    <div style={{ 
+                        width: logoWidth, 
+                        height: logoHeight, 
+                        position: "relative",
+                        borderRadius,
+                        overflow: "hidden"
+                    }}>
+                        <Image
+                            src={logoImage}
+                            alt={logoText}
+                            fill
+                            style={{ objectFit: logoObjectFit || "contain", objectPosition: "left" }}
+                            unoptimized={!logoImage.includes('unsplash.com') && !logoImage.includes('pexels.com') && !logoImage.includes('amazonaws.com') && !logoImage.includes('cloudfront.net')}
+                            priority
+                        />
+                    </div>
+                ) : (<span>{logoText}</span>)}
+            </Link>
+        );
+    };
 
     const routes = useEditorStore((s) => s.page?.routes) || [];
     const autoRoutes = routes.filter(r => r.showInHeader !== false);

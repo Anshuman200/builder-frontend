@@ -7,7 +7,8 @@ import {
     Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, PANEL_COLORS, ShadowInput,
     TypographyFields, LayoutFields, CardFields, ButtonFields, ImageFields, PaddingFields,
     InputFields,
-    ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove
+    ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove,
+    TextInputWithUnit
 } from "./shared";
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "../IconPicker";
@@ -57,15 +58,15 @@ export function FeaturesPanel({ block }: { block: Block }) {
                 <CardFields p={p} up={up} />
             </Section>
             <Section title="Typography">
-                <Field label="Section Title Size"><TextInput value={(p.titleSize as string) || "2.25rem"} onChange={(v) => up("titleSize", v)} placeholder="2.25rem" /></Field>
-                <Field label="Section Subtitle Size"><TextInput value={(p.subtitleSize as string) || "1.125rem"} onChange={(v) => up("subtitleSize", v)} placeholder="1.125rem" /></Field>
-                <Field label="Card Title Size"><TextInput value={(p.cardTitleSize as string) || "1.2rem"} onChange={(v) => up("cardTitleSize", v)} placeholder="1.2rem" /></Field>
-                <Field label="Card Description Size"><TextInput value={(p.cardDescSize as string) || "0.95rem"} onChange={(v) => up("cardDescSize", v)} placeholder="0.95rem" /></Field>
+                <Field label="Section Title Size"><TextInputWithUnit value={(p.titleSize as string) || "2.25rem"} onChange={(v) => up("titleSize", v)} placeholder="2.25rem" /></Field>
+                <Field label="Section Subtitle Size"><TextInputWithUnit value={(p.subtitleSize as string) || "1.125rem"} onChange={(v) => up("subtitleSize", v)} placeholder="1.125rem" /></Field>
+                <Field label="Card Title Size"><TextInputWithUnit value={(p.cardTitleSize as string) || "1.2rem"} onChange={(v) => up("cardTitleSize", v)} placeholder="1.2rem" /></Field>
+                <Field label="Card Description Size"><TextInputWithUnit value={(p.cardDescSize as string) || "0.95rem"} onChange={(v) => up("cardDescSize", v)} placeholder="0.95rem" /></Field>
             </Section>
             <Section title="Icon Styling">
-                <Field label="Icon Size"><TextInput value={String(p.iconSize || 24)} onChange={(v) => up("iconSize", Number(v) || 24)} placeholder="24" /></Field>
+                <Field label="Icon Size"><TextInputWithUnit value={String(p.iconSize || 24)} onChange={(v) => up("iconSize", v)} placeholder="24px" /></Field>
                 <Field label="Icon Color"><ColorInput value={(p.iconColor as string) || "var(--primary)"} onChange={(v) => up("iconColor", v)} onBlur={(v) => up("iconColor", v, true)} /></Field>
-                <Field label="Wrapper Size"><TextInput value={String(p.iconWrapperSize || 52)} onChange={(v) => up("iconWrapperSize", Number(v) || 52)} placeholder="52" /></Field>
+                <Field label="Wrapper Size"><TextInputWithUnit value={String(p.iconWrapperSize || 52)} onChange={(v) => up("iconWrapperSize", v)} placeholder="52px" /></Field>
                 <Field label="Wrapper Radius"><BorderRadiusInput value={(p.iconRadius as string) || "14px"} onChange={(v) => up("iconRadius", v)} /></Field>
                 <Field label="Wrapper Background"><ColorInput value={(p.iconBg as string) || "rgba(var(--primary-rgb), 0.15)"} onChange={(v) => up("iconBg", v)} onBlur={(v) => up("iconBg", v, true)} /></Field>
             </Section>
@@ -172,15 +173,15 @@ export function TeamPanel({ block }: { block: Block }) {
             </Section>
             <Section title="Card Styling">
                 <CardFields p={p} up={up} />
-                <Field label="Card Height"><TextInput value={(p.cardHeight as string) || "auto"} onChange={(v) => up("cardHeight", v)} placeholder="auto or 400px" /></Field>
+                <Field label="Card Height"><TextInputWithUnit value={(p.cardHeight as string) || "auto"} onChange={(v) => up("cardHeight", v)} placeholder="auto or 400px" /></Field>
                 <PaddingInput label="Card Padding" value={(p.cardPadding as string) || "2rem 1.75rem"} onChange={(v) => up("cardPadding", v)} />
                 <PaddingInput label="Text Padding" value={(p.cardContentPadding as string) || "1rem 1.25rem"} onChange={(v) => up("cardContentPadding", v)} />
             </Section>
             <Section title="Image Styling">
                 <Field label="Image Style"><SelectInput value={(p.imageStyle as string) || "circle"} onChange={(v) => up("imageStyle", v)} options={[{ label: "Circle", value: "circle" }, { label: "Square", value: "square" }, { label: "Floating Cutout", value: "float" }, { label: "Card Cover", value: "cover" }]} /></Field>
                 {p.imageStyle !== "cover" && (<>
-                    <Field label="Image Size"><TextInput value={(p.imageSize as string) || "120px"} onChange={(v) => up("imageSize", v)} placeholder="120px" /></Field>
-                    {p.imageStyle === "square" && (<Field label="Image Height"><TextInput value={(p.imageHeight as string) || "240px"} onChange={(v) => up("imageHeight", v)} placeholder="240px" /></Field>)}
+                    <Field label="Image Size"><TextInputWithUnit value={(p.imageSize as string) || "120px"} onChange={(v) => up("imageSize", v)} placeholder="120px" /></Field>
+                    {p.imageStyle === "square" && (<Field label="Image Height"><TextInputWithUnit value={(p.imageHeight as string) || "240px"} onChange={(v) => up("imageHeight", v)} placeholder="240px" /></Field>)}
                     <Field label="Image Radius"><BorderRadiusInput value={(p.imageRadius as string) || "50%"} onChange={(v) => up("imageRadius", v)} /></Field>
                     <Field label="Image Position"><SelectInput value={(p.imagePosition as string) || "center"} onChange={(v) => up("imagePosition", v)} options={[{ label: "Center", value: "center" }, { label: "Top", value: "top" }, { label: "Bottom", value: "bottom" }]} /></Field>
                 </>)}
@@ -366,7 +367,7 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
             </Section>
             <Section title="Global Container">
                 <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Controls max-width & horizontal padding for top-level blocks.</div>
-                <Field label="Max Width"><TextInput value={l.maxWidth} onChange={(v) => upL("maxWidth", v)} placeholder="100dvw" /></Field>
+                <Field label="Max Width"><TextInputWithUnit value={l.maxWidth} onChange={(v) => upL("maxWidth", v)} placeholder="100dvw" /></Field>
                 <PaddingFields p={{ padding: l.paddingX, tabletPadding: l.tabletPaddingX, mobilePadding: l.mobilePaddingX }} up={(key, val) => {
                     const map: any = { padding: "paddingX", tabletPadding: "tabletPaddingX", mobilePadding: "mobilePaddingX" };
                     upL(map[key], val);
@@ -562,19 +563,19 @@ export function AccordionPanel({ block }: { block: Block }) {
                     showAlign: false
                 }} />
                 <Field label="Divider"><SelectInput value={(p.divider as string) || "line"} onChange={(v) => up("divider", v)} options={[{ label: "Line", value: "line" }, { label: "None", value: "none" }]} /></Field>
-                <Field label="Max Width"><TextInput value={(p.maxWidth as string) || "800px"} onChange={(v) => up("maxWidth", v)} placeholder="800px or 100%" /></Field>
+                <Field label="Max Width"><TextInputWithUnit value={(p.maxWidth as string) || "800px"} onChange={(v) => up("maxWidth", v)} placeholder="800px or 100%" /></Field>
                 <Field label="Item Radius"><BorderRadiusInput value={(p.itemRadius as string) || "8px"} onChange={(v) => up("itemRadius", v)} /></Field>
             </Section>
 
             <Section title="Typography">
-                <Field label="Title Size"><TextInput value={(p.titleSize as string) || "16px"} onChange={(v) => up("titleSize", v)} placeholder="16px" /></Field>
+                <Field label="Title Size"><TextInputWithUnit value={(p.titleSize as string) || "16px"} onChange={(v) => up("titleSize", v)} placeholder="16px" /></Field>
                 <Field label="Title Weight"><SelectInput value={(p.titleWeight as string) || "600"} onChange={(v) => up("titleWeight", v)} options={[{ label: "Normal (400)", value: "400" }, { label: "Medium (500)", value: "500" }, { label: "Semibold (600)", value: "600" }, { label: "Bold (700)", value: "700" }]} /></Field>
-                <Field label="Description Size"><TextInput value={(p.descSize as string) || "15px"} onChange={(v) => up("descSize", v)} placeholder="15px" /></Field>
+                <Field label="Description Size"><TextInputWithUnit value={(p.descSize as string) || "15px"} onChange={(v) => up("descSize", v)} placeholder="15px" /></Field>
             </Section>
 
             <Section title="Icon">
                 <Field label="Icon Style"><SelectInput value={(p.iconStyle as string) || "chevron"} onChange={(v) => up("iconStyle", v)} options={[{ label: "Chevron", value: "chevron" }, { label: "Plus / Minus", value: "plus" }]} /></Field>
-                <Field label="Icon Size"><TextInput value={(p.iconSize as string) || "20px"} onChange={(v) => up("iconSize", v)} placeholder="20px" /></Field>
+                <Field label="Icon Size"><TextInputWithUnit value={(p.iconSize as string) || "20px"} onChange={(v) => up("iconSize", v)} placeholder="20px" /></Field>
                 <Field label="Icon Color"><ColorInput value={(p.iconColor as string) || "var(--primary)"} onChange={(v) => up("iconColor", v)} /></Field>
             </Section>
 
@@ -687,7 +688,7 @@ export function ChartPanel({ block }: { block: Block }) {
         <>
             <Section title="Chart Settings">
                 <Field label="Type"><SelectInput value={(p.chartType as string) || "area"} onChange={(v) => up("chartType", v)} options={[{ label: "Area Chart", value: "area" }, { label: "Bar Chart", value: "bar" }, { label: "Line Chart", value: "line" }, { label: "Pie Chart", value: "pie" }, { label: "Donut Chart", value: "donut" }]} /></Field>
-                <Field label="Height"><TextInput value={(p.height as string) || "300px"} onChange={(v) => up("height", v)} /></Field>
+                <Field label="Height"><TextInputWithUnit value={(p.height as string) || "300px"} onChange={(v) => up("height", v)} /></Field>
                 <Field label="Primary Color"><ColorInput value={(p.color as string) || "var(--primary)"} onChange={(v) => up("color", v)} /></Field>
                 <Field label="Secondary Color"><ColorInput value={(p.secondaryColor as string) || "var(--accent)"} onChange={(v) => up("secondaryColor", v)} /></Field>
             </Section>
@@ -862,13 +863,13 @@ export function LegalPanel({ block }: { block: Block }) {
                         <div style={{ marginTop: 12 }}>
                             <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 8 }}>Font Size (Responsive)</p>
                             <Field label="Desktop">
-                                <TextInput value={(p.titleFontSize as string) || "2rem"} onChange={(v) => up("titleFontSize", v)} placeholder="2rem" />
+                                <TextInputWithUnit value={(p.titleFontSize as string) || "2rem"} onChange={(v) => up("titleFontSize", v)} placeholder="2rem" />
                             </Field>
                             <Field label="Tablet">
-                                <TextInput value={(p.titleTabletFontSize as string) || ""} onChange={(v) => up("titleTabletFontSize", v)} placeholder="1.75rem" />
+                                <TextInputWithUnit value={(p.titleTabletFontSize as string) || ""} onChange={(v) => up("titleTabletFontSize", v)} placeholder="1.75rem" />
                             </Field>
                             <Field label="Mobile">
-                                <TextInput value={(p.titleMobileFontSize as string) || ""} onChange={(v) => up("titleMobileFontSize", v)} placeholder="1.5rem" />
+                                <TextInputWithUnit value={(p.titleMobileFontSize as string) || ""} onChange={(v) => up("titleMobileFontSize", v)} placeholder="1.5rem" />
                             </Field>
                         </div>
                     </>
@@ -926,8 +927,9 @@ export function DeleteAccountPanel({ block }: { block: Block }) {
                         ]}
                     />
                 </Field>
-                <Field label="Height"><TextInput value={(p.logoHeight as string) || "48px"} onChange={(v) => up("logoHeight", v)} placeholder="48px" /></Field>
-                <Field label="Width"><TextInput value={(p.logoWidth as string) || "auto"} onChange={(v) => up("logoWidth", v)} placeholder="auto" /></Field>
+                <Field label="Height"><TextInputWithUnit value={(p.logoHeight as string) || "48px"} onChange={(v) => up("logoHeight", v)} placeholder="48px" /></Field>
+                <Field label="Width"><TextInputWithUnit value={(p.logoWidth as string) || "auto"} onChange={(v) => up("logoWidth", v)} placeholder="auto" /></Field>
+                <Field label="Object Fit"><SelectInput value={(p.logoObjectFit as string) || "cover"} onChange={(v) => up("logoObjectFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
             </Section>
 
             <Section title="Form Fields">

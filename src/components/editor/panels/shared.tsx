@@ -9,10 +9,10 @@ import type { Block, EditorPage } from "@/types";
  */
 
 import React from "react";
-import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
 import { useEditorStore } from "@/stores/editorStore";
-import { ColorPicker, Dropdown, Popover, Switch, Tooltip } from "antd";
+import { ColorPicker, Dropdown, Input, Popover, Select, Space, Switch, Tooltip } from "antd";
 import MediaPicker from "../MediaPicker";
 import PillSegmented from "../../ui/PillSegmented";
 
@@ -150,7 +150,6 @@ export function Field({ label, children }: { label: string; children: React.Reac
 }
 
 // ─── TextInput ────────────────────────────────────────────────────────────────
-
 export function TextInput({ value, onChange, placeholder, type = "text", style }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: string, style?: React.CSSProperties }) {
     return (
         <input
@@ -165,6 +164,59 @@ export function TextInput({ value, onChange, placeholder, type = "text", style }
             onFocus={(e) => { e.currentTarget.style.background = PANEL_COLORS.sectionBg; e.currentTarget.style.borderColor = PANEL_COLORS.primary; }}
             onBlur={(e) => { e.currentTarget.style.background = PANEL_COLORS.inputBg; e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; }}
         />
+    );
+}
+// ─── TextInput With Unit Suffix ────────────────────────────────────────────────────────────────
+export function TextInputWithUnit({ value = "", onChange, placeholder, style }: { value: string; onChange: (v: string) => void; placeholder?: string; style?: React.CSSProperties }) {
+    // Robust parsing: extract leading number and whatever follows as unit
+    const match = String(value || "").match(/^([+-]?\d*\.?\d+)(.*)$/);
+    const numValue = match ? match[1] : (value || "");
+    const unitValue = (match && match[2]) || "px";
+
+    const units = [
+        { label: "px", value: "px" },
+        { label: "rem", value: "rem" },
+        { label: "em", value: "em" },
+        { label: "vh", value: "vh" },
+        { label: "vw", value: "vw" },
+    ];
+
+    const currentUnit = units.find(u => u.value === unitValue) ? unitValue : "px";
+
+    const handleNumChange = (v: string) => {
+        if (v === "") {
+            onChange("");
+            return;
+        }
+        onChange(`${v}${currentUnit}`);
+    };
+
+    const handleUnitChange = (u: string) => {
+        onChange(`${numValue}${u}`);
+    };
+
+    return (
+        <Space.Compact className="w-full" style={{ height: 26 }}>
+            <Input
+                value={numValue}
+                placeholder={placeholder}
+                style={{ height: 26, fontSize: 11, background: PANEL_COLORS.inputBg, color: PANEL_COLORS.text, border: `1px solid ${PANEL_COLORS.border}`, borderRight: "none", ...style }}
+                className="w-full rounded-none"
+                onChange={(e) => handleNumChange(e.target.value)}
+                onFocus={(e) => e.target.style.borderColor = PANEL_COLORS.primary}
+                onBlur={(e) => e.target.style.borderColor = PANEL_COLORS.border}
+            />
+            <Select
+                value={currentUnit}
+                className="min-w-20"
+                size="small"
+                onChange={handleUnitChange}
+                style={{ height: 26 }}
+                dropdownStyle={{ background: PANEL_COLORS.sectionBg, border: `1px solid ${PANEL_COLORS.border}` }}
+                options={units}
+                suffixIcon={<ChevronDownIcon style={{ width: 10, height: 10 }} />}
+            />
+        </Space.Compact>
     );
 }
 
@@ -697,15 +749,15 @@ export function PaddingInput({ value, onChange, label, placeholder }: { value: s
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
     const { subItemFocus, selectedBlockId } = useEditorStore();
     const isFocused = subItemFocus?.blockId === selectedBlockId && subItemFocus?.index === title;
-    
+
     // Generate a clean ID for scrolling
     const sectionId = `section-${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
 
     return (
-        <div 
+        <div
             id={sectionId}
-            style={{ 
-                borderBottom: `1px solid ${PANEL_COLORS.border}`, 
+            style={{
+                borderBottom: `1px solid ${PANEL_COLORS.border}`,
                 padding: "12px 16px",
                 transition: "background 0.5s ease",
                 background: isFocused ? "rgba(0, 153, 255, 0.08)" : "transparent",
@@ -732,21 +784,21 @@ export function Section({ title, children }: { title: string; children: React.Re
 
 // ─── Reorderable List Primitives ───────────────────────────────────────────
 
-export function SortableList<T extends { id: string }>({ 
-    items, 
-    onReorder, 
-    onUpdate, 
-    onDelete, 
-    renderItemContent 
-}: { 
-    items: T[], 
+export function SortableList<T extends { id: string }>({
+    items,
+    onReorder,
+    onUpdate,
+    onDelete,
+    renderItemContent
+}: {
+    items: T[],
     onReorder: (activeId: string, overId: string) => void,
     onUpdate?: (idx: number, data: Partial<T>) => void,
     onDelete?: (idx: number) => void,
-    renderItemContent: (item: T, index: number) => React.ReactNode 
+    renderItemContent: (item: T, index: number) => React.ReactNode
 }) {
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
-    
+
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
         if (over && active.id !== over.id) {
@@ -759,9 +811,9 @@ export function SortableList<T extends { id: string }>({
             <SortableContext items={items.map(l => l.id)} strategy={verticalListSortingStrategy}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {items.map((item, idx) => (
-                        <SortableItem 
-                            key={item.id} 
-                            id={item.id} 
+                        <SortableItem
+                            key={item.id}
+                            id={item.id}
                             index={idx}
                             onDelete={onDelete ? () => onDelete(idx) : undefined}
                         >
@@ -779,15 +831,15 @@ function SortableItem({ id, index, children, onDelete }: { id: string, index: nu
     const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 20 : 1, position: "relative" as any, opacity: isDragging ? 0.6 : 1 };
 
     return (
-        <div ref={setNodeRef} style={{ 
-            ...style, 
-            display: "flex", 
-            flexDirection: "column", 
-            gap: 4, 
-            padding: "10px 12px", 
-            background: "var(--surface)", 
-            border: "1px solid var(--border)", 
-            borderRadius: 8, 
+        <div ref={setNodeRef} style={{
+            ...style,
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            padding: "10px 12px",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 8,
             boxShadow: isDragging ? "0 8px 20px rgba(0,0,0,0.15)" : "none",
             transition: "all 0.2s ease"
         }}>
@@ -798,10 +850,10 @@ function SortableItem({ id, index, children, onDelete }: { id: string, index: nu
                     </div>
                 </div>
                 {onDelete && (
-                    <button 
-                        onClick={onDelete} 
-                        style={{ background: "transparent", border: "none", color: "var(--error, #ef4444)", cursor: "pointer", fontSize: 16, padding: "0 4px", opacity: 0.6, display: "flex", alignItems: "center" }} 
-                        onMouseEnter={e => e.currentTarget.style.opacity = "1"} 
+                    <button
+                        onClick={onDelete}
+                        style={{ background: "transparent", border: "none", color: "var(--error, #ef4444)", cursor: "pointer", fontSize: 16, padding: "0 4px", opacity: 0.6, display: "flex", alignItems: "center" }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = "1"}
                         onMouseLeave={e => e.currentTarget.style.opacity = "0.6"}
                     >
                         &times;
@@ -833,7 +885,7 @@ export function TypographyFields({ p, up, prefix = "", showSubtitle = true }: Pr
 
     return (
         <>
-            <Field label="Title"><TextInput value={p[finalTitleKey] || ""} onChange={(v) => up(finalTitleKey, v)} /></Field>
+            <Field label="Title"><TextInput value={p[finalTitleKey] || "Title"} onChange={(v) => up(finalTitleKey, v)} /></Field>
             {showSubtitle && <Field label="Subtitle"><TextInput value={p[finalSubtitleKey] || ""} onChange={(v) => up(finalSubtitleKey, v)} /></Field>}
             <Field label="Title Color"><ColorInput value={p[titleColorKey] || "var(--text)"} onChange={(v) => up(titleColorKey, v)} onBlur={(v) => up(titleColorKey, v, true)} /></Field>
             {showSubtitle && <Field label="Subtitle Color"><ColorInput value={p[subtitleColorKey] || "var(--text-muted)"} onChange={(v) => up(subtitleColorKey, v)} onBlur={(v) => up(subtitleColorKey, v, true)} /></Field>}
@@ -847,7 +899,7 @@ export function LayoutFields({ p, up, options = {} }: PropertyGroupProps & { opt
         <>
             {layouts && <Field label="Layout"><SelectInput value={p.layout || layouts[0].value} onChange={(v) => up("layout", v)} options={layouts} /></Field>}
             {showCols && <Field label="Columns"><SelectInput value={String(p.columns || "3")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>}
-            {showGap && <Field label="Gap"><TextInput value={p.gap || "2rem"} onChange={(v) => up("gap", v)} placeholder="2rem" /></Field>}
+            {showGap && <Field label="Gap"><TextInputWithUnit value={p.gap || "2rem"} onChange={(v) => up("gap", v)} placeholder="2rem" /></Field>}
             {showAlign && <AlignmentInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} />}
         </>
     );
@@ -956,7 +1008,7 @@ export function InputFields({ p, up, prefix = "input" }: PropertyGroupProps) {
             <Field label="Placeholder"><ColorInput value={p[placeholderColorKey] || ""} onChange={(v) => up(placeholderColorKey, v)} placeholder={defaults.placeholder} /></Field>
             <Field label="Border Color"><ColorInput value={p[borderColorKey] || ""} onChange={(v) => up(borderColorKey, v)} placeholder={defaults.border} /></Field>
             <Field label="Label Color"><ColorInput value={p[labelColorKey] || ""} onChange={(v) => up(labelColorKey, v)} placeholder={defaults.label} /></Field>
-            <Field label="Height"><TextInput value={p[heightKey] || ""} onChange={(v) => up(heightKey, v)} placeholder="48px" /></Field>
+            <Field label="Height"><TextInputWithUnit value={p[heightKey] || ""} onChange={(v) => up(heightKey, v)} placeholder="48px" /></Field>
             <Field label="Border Radius"><BorderRadiusInput value={p[radiusKey] || ""} onChange={(v) => up(radiusKey, v)} placeholder="10px" /></Field>
         </>
     );
