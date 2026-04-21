@@ -53,7 +53,7 @@ function Toast({ message, type, visible }: ToastProps) {
 
 export function ContactFormBlock({ block }: BlockProps) {
     const isPreview = React.useContext(PreviewContext);
-    const { updateBlock, focusSubItem } = useEditorStore();
+    const { updateBlock, focusSubItem, selectBlock } = useEditorStore();
     const p = block.props;
     const layout = (p.layout as string) || "centered";
 
@@ -227,33 +227,47 @@ export function ContactFormBlock({ block }: BlockProps) {
             }}
         >
             <div
-                onClick={handleWrapperClick}
+                onClick={(e) => {
+                    if (e.target === e.currentTarget) {
+                        e.stopPropagation();
+                        selectBlock(block.id);
+                        focusSubItem(block.id, "Card Style");
+                    }
+                }}
                 style={{
                     ...getCardStyles({ props: p, isFocused: isSelected }),
                     boxSizing: "border-box",
                     width: "100%",
                 }}
             >
-                {titleText && (
-                    <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.8rem", fontWeight: 800, color: titleColor }}>{titleText}</h2>
-                )}
-                {subtitleText && (
-                    <p style={{ margin: "0 0 1.75rem", fontSize: "0.95rem", color: subtitleColor, lineHeight: 1.6 }}>{subtitleText}</p>
-                )}
+                <div onClick={(e) => { e.stopPropagation(); selectBlock(block.id); focusSubItem(block.id, "Card Style"); }}>
+                    {titleText && (
+                        <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.8rem", fontWeight: 800, color: titleColor }}>{titleText}</h2>
+                    )}
+                    {subtitleText && (
+                        <p style={{ margin: "0 0 1.75rem", fontSize: "0.95rem", color: subtitleColor, lineHeight: 1.6 }}>{subtitleText}</p>
+                    )}
+                </div>
 
                 <Form
                     form={form}
                     layout="vertical"
                     onFinish={onFinish}
                     requiredMark={false}
-                    disabled={!isPreview || isSubmitting}
-                    onClick={handleWrapperClick}
+                    disabled={isSubmitting}
                 >
-                    <div style={{
-                        display: "grid",
-                        gridTemplateColumns: showLastName ? "1fr 1fr" : "1fr",
-                        gap: "1rem",
-                    }}>
+                    <div
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            selectBlock(block.id);
+                            focusSubItem(block.id, "Input Style");
+                        }}
+                        style={{
+                            display: "grid",
+                            gridTemplateColumns: showLastName ? "1fr 1fr" : "1fr",
+                            gap: "1rem",
+                        }}
+                    >
                         <Form.Item
                             name="firstName"
                             label={showLabels ? <span>{firstNameLabel}{firstNameRequired && <span style={{ color: "#ef4444" }}> *</span>}</span> : null}
@@ -273,49 +287,71 @@ export function ContactFormBlock({ block }: BlockProps) {
                         )}
                     </div>
 
-                    <Form.Item
-                        name="email"
-                        label={showLabels ? <span>{emailLabel}{emailRequired && <span style={{ color: "#ef4444" }}> *</span>}</span> : null}
-                        rules={[
-                            { required: emailRequired, message: `${emailLabel} is required` },
-                            { type: 'email', message: 'Invalid email address' }
-                        ]}
-                    >
-                        <Input placeholder="you@example.com" />
-                    </Form.Item>
+                    <div onClick={(e) => {
+                        e.stopPropagation();
+                        selectBlock(block.id);
+                        focusSubItem(block.id, "Input Style");
+                    }}>
+                        <Form.Item
+                            name="email"
+                            label={showLabels ? <span>{emailLabel}{emailRequired && <span style={{ color: "#ef4444" }}> *</span>}</span> : null}
+                            rules={[
+                                { required: emailRequired, message: `${emailLabel} is required` },
+                                { type: 'email', message: 'Invalid email address' }
+                            ]}
+                        >
+                            <Input placeholder="you@example.com" />
+                        </Form.Item>
+                    </div>
 
                     {showGender && (
-                        <Form.Item
-                            name="gender"
-                            label={showLabels ? <span>{genderLabel}{genderRequired && <span style={{ color: "#ef4444" }}> *</span>}</span> : null}
-                            rules={[{ required: genderRequired, message: `${genderLabel} is required` }]}
-                        >
-                            <Radio.Group>
-                                <Space direction="horizontal" wrap size={[16, 8]}>
-                                    {genderOptions.map(option => (
-                                        <Radio key={option} value={option}>
-                                            <span style={{ color: inputTextColor }}>{option}</span>
-                                        </Radio>
-                                    ))}
-                                </Space>
-                            </Radio.Group>
-                        </Form.Item>
+                        <div onClick={(e) => {
+                            e.stopPropagation();
+                            selectBlock(block.id);
+                            focusSubItem(block.id, "Input Style");
+                        }}>
+                            <Form.Item
+                                name="gender"
+                                label={showLabels ? <span>{genderLabel}{genderRequired && <span style={{ color: "#ef4444" }}> *</span>}</span> : null}
+                                rules={[{ required: genderRequired, message: `${genderLabel} is required` }]}
+                            >
+                                <Radio.Group>
+                                    <Space direction="horizontal" wrap size={[16, 8]}>
+                                        {genderOptions.map(option => (
+                                            <Radio key={option} value={option}>
+                                                <span style={{ color: inputTextColor }}>{option}</span>
+                                            </Radio>
+                                        ))}
+                                    </Space>
+                                </Radio.Group>
+                            </Form.Item>
+                        </div>
                     )}
 
-                    <Form.Item
-                        name="message"
-                        label={showLabels ? <span>{messageLabel}{messageRequired && <span style={{ color: "#ef4444" }}> *</span>}</span> : null}
-                        rules={[{ required: messageRequired, message: `${messageLabel} is required` }]}
-                    >
-                        <Input.TextArea rows={5} placeholder="Write your message here..." style={{ resize: 'vertical' }} />
-                    </Form.Item>
+                    <div onClick={(e) => {
+                        e.stopPropagation();
+                        selectBlock(block.id);
+                        focusSubItem(block.id, "Input Style");
+                    }}>
+                        <Form.Item
+                            name="message"
+                            label={showLabels ? <span>{messageLabel}{messageRequired && <span style={{ color: "#ef4444" }}> *</span>}</span> : null}
+                            rules={[{ required: messageRequired, message: `${messageLabel} is required` }]}
+                        >
+                            <Input.TextArea rows={5} placeholder="Write your message here..." style={{ resize: 'vertical' }} />
+                        </Form.Item>
+                    </div>
 
-                    <div onClick={() => { focusSubItem(block.id, "Submit Button") }} style={{ display: "flex", justifyContent: buttonAlign === "left" ? "flex-start" : buttonAlign === "center" ? "center" : "flex-end" }}>
+                    <div onClick={(e) => {
+                        e.stopPropagation();
+                        selectBlock(block.id);
+                        focusSubItem(block.id, "Submit Button");
+                    }} style={{ display: "flex", justifyContent: buttonAlign === "left" ? "flex-start" : buttonAlign === "center" ? "center" : "flex-end" }}>
                         <CommonButton
                             type="submit"
                             props={p}
                             isLoading={isSubmitting}
-                            disabled={!isPreview}
+                        // disabled={!isPreview}
                         />
                     </div>
                 </Form>

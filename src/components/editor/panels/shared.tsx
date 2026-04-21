@@ -906,12 +906,20 @@ export function Section({ title, children }: { title: string; children: React.Re
     const { subItemFocus, selectedBlockId } = useEditorStore();
     const isFocused = subItemFocus?.blockId === selectedBlockId && subItemFocus?.index === title;
 
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    React.useEffect(() => {
+        if (isFocused && containerRef.current) {
+            containerRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+    }, [isFocused]);
+
     // Generate a clean ID for scrolling
     const sectionId = `section-${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
 
     return (
         <div
             id={sectionId}
+            ref={containerRef}
             style={{
                 borderBottom: `1px solid ${PANEL_COLORS.border}`,
                 padding: "12px 16px",
@@ -1075,16 +1083,16 @@ export function CardFields({ p, up, prefix = "card" }: PropertyGroupProps) {
     return (
         <>
             <Field label="Card Style">
-                <SelectInput 
-                    value={cardStyle} 
-                    onChange={(v) => up(styleKey, v)} 
+                <SelectInput
+                    value={cardStyle}
+                    onChange={(v) => up(styleKey, v)}
                     options={[
                         { label: "Raised (Shadow)", value: "raised" },
                         { label: "Outlined", value: "outlined" },
                         { label: "Filled", value: "filled" },
                         { label: "Glassmorphism", value: "glass" },
                         { label: "None (Clean)", value: "none" },
-                    ]} 
+                    ]}
                 />
             </Field>
             {cardStyle !== "none" && (
@@ -1093,9 +1101,9 @@ export function CardFields({ p, up, prefix = "card" }: PropertyGroupProps) {
                     <Field label="Border Radius"><BorderRadiusInput value={p[radiusKey] || "16px"} onChange={(v) => up(radiusKey, v)} /></Field>
                     {cardStyle === "raised" && (
                         <Field label="Shadow">
-                            <SelectInput 
-                                value={p[shadowKey] || "md"} 
-                                onChange={(v) => up(shadowKey, v)} 
+                            <SelectInput
+                                value={p[shadowKey] || "md"}
+                                onChange={(v) => up(shadowKey, v)}
                                 options={[
                                     { label: "Small", value: "sm" },
                                     { label: "Medium", value: "md" },
@@ -1103,7 +1111,7 @@ export function CardFields({ p, up, prefix = "card" }: PropertyGroupProps) {
                                     { label: "Extra Large", value: "xl" },
                                     { label: "Action Glow", value: "glow" },
                                     { label: "None", value: "none" },
-                                ]} 
+                                ]}
                             />
                         </Field>
                     )}
@@ -1114,15 +1122,15 @@ export function CardFields({ p, up, prefix = "card" }: PropertyGroupProps) {
             )}
             <Field label="Card Padding"><TextInputWithUnit value={p[paddingKey] || ""} onChange={(v) => up(paddingKey, v)} placeholder="2rem 1.75rem" /></Field>
             <Field label="Hover Effect">
-                <SelectInput 
-                    value={p[hoverEffectKey] || (cardStyle === "raised" ? "up" : "none")} 
-                    onChange={(v) => up(hoverEffectKey, v)} 
+                <SelectInput
+                    value={p[hoverEffectKey] || (cardStyle === "raised" ? "up" : "none")}
+                    onChange={(v) => up(hoverEffectKey, v)}
                     options={[
                         { label: "Lift Up", value: "up" },
                         { label: "Scale Up", value: "scale" },
                         { label: "Accent Glow", value: "glow" },
                         { label: "None", value: "none" },
-                    ]} 
+                    ]}
                 />
             </Field>
         </>
@@ -1167,12 +1175,12 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
         <>
             {!hideLabel && <Field label="Action Text"><TextInput value={p[textKey] || ""} onChange={(v) => up(textKey, v)} placeholder="Click Me" /></Field>}
             <Field label="Variant"><SelectInput value={variant} onChange={(v) => up(variantKey, v)} options={variantOptions} /></Field>
-            
+
             <Field label="Button Size">
-                <SelectInput 
-                    value={p[getK("size")] || "md"} 
-                    onChange={(v) => up(getK("size"), v)} 
-                    options={sizeOptions} 
+                <SelectInput
+                    value={p[getK("size")] || "md"}
+                    onChange={(v) => up(getK("size"), v)}
+                    options={sizeOptions}
                 />
             </Field>
 
