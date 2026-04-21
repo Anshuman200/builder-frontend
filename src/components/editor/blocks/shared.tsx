@@ -444,8 +444,7 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
         fontSize: (p[`${prefix}FontSize`] as string) || (p.fontSize as string) || sizeStyle.fontSize,
         letterSpacing: (p[`${prefix}LetterSpacing`] as string) || (p.letterSpacing as string) || "0.01em",
         cursor: (isPreview && !disabled && !isLoading) ? "pointer" : (isLoading || disabled ? "not-allowed" : "default"),
-        shadow: shadow === "none" ? undefined : shadow,
-        boxShadow: shadow,
+        boxShadow: shadow === "none" ? undefined : shadow,
         transition: "all 0.2s ease",
         background,
         color,
@@ -581,9 +580,9 @@ export function getCardStyles({ props: p, isFocused, isHovered, primaryColor = "
 
     // Apply editor focus state
     if (isFocused) {
-        baseStyle.boxShadow = "0 0 0 3px #0099ff, 0 0 20px rgba(0,153,255,0.4)";
-        baseStyle.zIndex = 10;
-        baseStyle.transform = "scale(1.02)";
+        baseStyle.boxShadow = "inset 0 0 0 3px #0099ff, 0 0 20px rgba(0,153,255,0.4)";
+        baseStyle.zIndex = 50;
+        baseStyle.transform = "scale(1.015)";
         baseStyle.cursor = "pointer";
     }
 

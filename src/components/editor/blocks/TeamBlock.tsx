@@ -22,7 +22,7 @@ const BRAND_ICONS: Record<string, React.ReactNode> = {
 
 type SocialValue = string | { url?: string; icon?: string };
 
-function SocialLinks({ socials, color, justify }: { socials: Record<string, SocialValue>; color: string; justify: string }) {
+function SocialLinks({ socials, color, justify, size = 18, blockId, isPreview }: { socials: Record<string, SocialValue>; color: string; justify: string; size?: number | string; blockId?: string; isPreview?: boolean }) {
     const entries = Object.entries(socials);
     if (!entries.length) return null;
     return (
@@ -40,10 +40,26 @@ function SocialLinks({ socials, color, justify }: { socials: Record<string, Soci
                         style={{ color, transition: "opacity 0.2s", display: "flex", alignItems: "center" }}
                         onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.65"; }}
                         onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
+                        onClick={(e) => {
+                            if (!isPreview && blockId) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const store = useEditorStore.getState();
+                                store.selectBlock(blockId);
+                                store.focusSubItem(blockId, "Social Links Styling");
+                            }
+                        }}
                     >
                         {customIcon
-                            ? <img src={customIcon} alt={key} style={{ width: 18, height: 18, borderRadius: 2, objectFit: "contain" }} />
-                            : (BRAND_ICONS[key.includes("-") ? key.split("-")[0] : key] || BRAND_ICONS.website)}
+                            ? <img src={customIcon} alt={key} style={{ width: size, height: size, borderRadius: 2, objectFit: "contain" }} />
+                            : (() => {
+                                const baseKey = key.includes("-") ? key.split("-")[0] : key;
+                                const icon = BRAND_ICONS[baseKey] || BRAND_ICONS.website;
+                                return React.cloneElement(icon as React.ReactElement<any>, {
+                                    style: { width: size, height: size }
+                                });
+                            })()
+                        }
                     </a>
                 );
             })}
@@ -89,6 +105,7 @@ export function TeamBlock({ block }: BlockProps) {
     const rawRoleColor = (p.roleColor as string) || "#64748b";
     const rawDescColor = (p.descColor as string) || "#475569";
     const rawSocialColor = (p.socialColor as string) || "#94a3b8";
+    const socialIconSize = (p.socialIconSize as string | number) || 18;
     const nameColor = rawNameColor;
     const roleColor = rawRoleColor;
     const descColor = rawDescColor;
@@ -225,7 +242,7 @@ export function TeamBlock({ block }: BlockProps) {
                                             <p style={{ margin: "0 0 0.15rem", fontWeight: 700, fontSize: "0.95rem", color: nameColor, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{member.name}</p>
                                             <p style={{ margin: "0 0 0.4rem", fontSize: "0.75rem", color: roleColor, opacity: 0.8, textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600 }}>{member.role}</p>
                                             {member.socials && (
-                                                <SocialLinks socials={member.socials as Record<string, SocialValue>} color={socialColor} justify="flex-start" />
+                                                <SocialLinks socials={member.socials as Record<string, SocialValue>} color={socialColor} justify="flex-start" size={socialIconSize} blockId={block.id} isPreview={isPreview} />
                                             )}
                                         </div>
                                     </div>
@@ -264,7 +281,7 @@ export function TeamBlock({ block }: BlockProps) {
                                             <p style={{ margin: "0 0 1rem", fontWeight: 600, fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "0.05em", color: roleColor }}>{member.role}</p>
                                             {member.description && <p style={{ margin: "0 0 1rem", color: descColor, lineHeight: 1.7, fontSize: "0.95rem" }}>{member.description}</p>}
                                             {member.socials && (
-                                                <SocialLinks socials={member.socials as Record<string, SocialValue>} color={socialColor} justify="inherit" />
+                                                <SocialLinks socials={member.socials as Record<string, SocialValue>} color={socialColor} justify="inherit" size={socialIconSize} blockId={block.id} isPreview={isPreview} />
                                             )}
                                         </div>
                                     </div>
@@ -300,7 +317,7 @@ export function TeamBlock({ block }: BlockProps) {
                                         <h3 style={{ margin: "0 0 0.25rem", fontSize: "1.1rem", fontWeight: 700, color: nameColor }}>{member.name}</h3>
                                         <p style={{ margin: "0 0 0.75rem", fontSize: "0.82rem", color: roleColor, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>{member.role}</p>
                                         {member.socials && (
-                                            <SocialLinks socials={member.socials as Record<string, SocialValue>} color={socialColor} justify="center" />
+                                            <SocialLinks socials={member.socials as Record<string, SocialValue>} color={socialColor} justify="center" size={socialIconSize} blockId={block.id} isPreview={isPreview} />
                                         )}
                                     </div>
                                 );
@@ -378,6 +395,9 @@ export function TeamBlock({ block }: BlockProps) {
                                                 socials={member.socials as Record<string, SocialValue>}
                                                 color={isCover ? "#ffffffcc" : socialColor}
                                                 justify={socialJustify}
+                                                size={socialIconSize}
+                                                blockId={block.id}
+                                                isPreview={isPreview}
                                             />
                                         )}
                                     </div>

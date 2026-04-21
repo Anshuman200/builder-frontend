@@ -173,15 +173,15 @@ export function TeamPanel({ block }: { block: Block }) {
             </Section>
             <Section title="Card Styling">
                 <CardFields p={p} up={up} />
-                <Field label="Card Height"><TextInputWithUnit value={(p.cardHeight as string) ?? ""} onChange={(v) => up("cardHeight", v)} placeholder="auto or 400px" /></Field>
+                <Field label="Card Height"><TextInputWithUnit value={(p.cardHeight as string) ?? ""} onChange={(v) => up("cardHeight", v)} placeholder="auto or 400" /></Field>
                 <PaddingInput label="Card Padding" value={(p.cardPadding as string) || "2rem 1.75rem"} onChange={(v) => up("cardPadding", v)} />
                 <PaddingInput label="Text Padding" value={(p.cardContentPadding as string) || "1rem 1.25rem"} onChange={(v) => up("cardContentPadding", v)} />
             </Section>
             <Section title="Image Styling">
                 <Field label="Image Style"><SelectInput value={(p.imageStyle as string) || "circle"} onChange={(v) => up("imageStyle", v)} options={[{ label: "Circle", value: "circle" }, { label: "Square", value: "square" }, { label: "Floating Cutout", value: "float" }, { label: "Card Cover", value: "cover" }]} /></Field>
                 {p.imageStyle !== "cover" && (<>
-                    <Field label="Image Size"><TextInputWithUnit value={(p.imageSize as string) ?? ""} onChange={(v) => up("imageSize", v)} placeholder="120px" /></Field>
-                    {p.imageStyle === "square" && (<Field label="Image Height"><TextInputWithUnit value={(p.imageHeight as string) ?? ""} onChange={(v) => up("imageHeight", v)} placeholder="240px" /></Field>)}
+                    <Field label="Image Size"><TextInputWithUnit value={(p.imageSize as string) ?? ""} onChange={(v) => up("imageSize", v)} placeholder="120" /></Field>
+                    {p.imageStyle === "square" && (<Field label="Image Height"><TextInputWithUnit value={(p.imageHeight as string) ?? ""} onChange={(v) => up("imageHeight", v)} placeholder="240" /></Field>)}
                     <Field label="Image Radius"><BorderRadiusInput value={(p.imageRadius as string) || "50%"} onChange={(v) => up("imageRadius", v)} /></Field>
                     <Field label="Image Position"><SelectInput value={(p.imagePosition as string) || "center"} onChange={(v) => up("imagePosition", v)} options={[{ label: "Center", value: "center" }, { label: "Top", value: "top" }, { label: "Bottom", value: "bottom" }]} /></Field>
                 </>)}
@@ -192,7 +192,12 @@ export function TeamPanel({ block }: { block: Block }) {
                 <Field label="Name Text"><ColorInput value={(p.nameColor as string) || "#0f172a"} onChange={(v) => up("nameColor", v)} /></Field>
                 <Field label="Role Text"><ColorInput value={(p.roleColor as string) || "#64748b"} onChange={(v) => up("roleColor", v)} /></Field>
                 <Field label="Description Text"><ColorInput value={(p.descColor as string) || "#475569"} onChange={(v) => up("descColor", v)} /></Field>
-                <Field label="Social Links"><ColorInput value={(p.socialColor as string) || "#94a3b8"} onChange={(v) => up("socialColor", v)} /></Field>
+            </Section>
+            <Section title="Social Links Styling">
+                <Field label="Social Links Color"><ColorInput value={(p.socialColor as string) || "#94a3b8"} onChange={(v) => up("socialColor", v)} /></Field>
+                <Field label="Social Icon Size">
+                    <TextInputWithUnit value={String(p.socialIconSize || "")} onChange={(v) => up("socialIconSize", v)} placeholder="18" />
+                </Field>
             </Section>
             <Section title="Team Members">
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
