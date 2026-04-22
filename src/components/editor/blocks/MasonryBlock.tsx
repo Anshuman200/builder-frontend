@@ -33,10 +33,17 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
     const mediaItems = items.filter((item: Block) => item.type !== "media-picker");
     const pickerItems = items.filter((item: Block) => item.type === "media-picker");
 
-    // Responsive column counts
-    const cols = Number(columns) || 5;
-    const colsTablet = Number(columnsTablet) || 3;
-    const colsMobile = Number(columnsMobile) || 1;
+    // Responsive column counts (handle legacy object format or missing values)
+    const getCol = (val: any, def: number) => {
+        if (typeof val === "object" && val !== null) {
+            return Number(val.lg || val.desktop || val.md || def);
+        }
+        return Number(val) || def;
+    };
+
+    const cols = getCol(columns, 4);
+    const colsTablet = getCol(columnsTablet, 2);
+    const colsMobile = getCol(columnsMobile, 1);
 
     // Active column count for live view based on viewMode
     const colCount = viewMode === "mobile" ? colsMobile : viewMode === "tablet" ? colsTablet : cols;

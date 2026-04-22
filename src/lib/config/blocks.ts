@@ -692,11 +692,21 @@ export const BLOCK_TYPES: BlockConfig[] = [
     icon: "Squares2X2",
     hidden: true,
     defaultProps: {
-      columns: { xs: 2, sm: 2, md: 3, lg: 4 },
+      columns: 4,
+      columnsTablet: 2,
+      columnsMobile: 1,
       gap: 16,
       padding: "24px",
       bgColor: "transparent",
-      childBlocks: [],
+      childBlocks: [
+        { id: "m1", type: "image", props: { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800", borderRadius: "12px", objectFit: "cover" } },
+        { id: "m2", type: "image", props: { src: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800", borderRadius: "12px", objectFit: "cover" } },
+        { id: "m3", type: "image", props: { src: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800", borderRadius: "12px", objectFit: "cover" } },
+        { id: "m4", type: "image", props: { src: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800", borderRadius: "12px", objectFit: "cover" } },
+        { id: "m5", type: "image", props: { src: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800", borderRadius: "12px", objectFit: "cover" } },
+        { id: "m6", type: "image", props: { src: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800", borderRadius: "12px", objectFit: "cover" } },
+        { id: "m-picker", type: "media-picker", props: {} }
+      ],
 
       // Animation
       animationPlayback: DEFAULT_CONFIG.animation.playback,

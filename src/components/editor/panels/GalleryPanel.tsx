@@ -11,12 +11,19 @@ export function GalleryPanel({ block }: { block: Block }) {
     const p = block.props as any;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
 
+    const getColStr = (val: any, def: string) => {
+        if (typeof val === "object" && val !== null) {
+            return String(val.lg || val.desktop || val.md || def);
+        }
+        return String(val || def);
+    };
+
     return (
         <>
             <Section title="Columns">
-                <Field label="Desktop"><SelectInput value={String(p.columns || "5")} onChange={(v) => up("columns", v, true)} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }, { label: "5 Columns", value: "5" }, { label: "6 Columns", value: "6" }]} /></Field>
-                <Field label="Tablet"><SelectInput value={String(p.columnsTablet || "3")} onChange={(v) => up("columnsTablet", v, true)} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>
-                <Field label="Mobile"><SelectInput value={String(p.columnsMobile || "1")} onChange={(v) => up("columnsMobile", v, true)} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }]} /></Field>
+                <Field label="Desktop"><SelectInput value={getColStr(p.columns, "4")} onChange={(v) => up("columns", v, true)} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }, { label: "5 Columns", value: "5" }, { label: "6 Columns", value: "6" }]} /></Field>
+                <Field label="Tablet"><SelectInput value={getColStr(p.columnsTablet, "2")} onChange={(v) => up("columnsTablet", v, true)} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>
+                <Field label="Mobile"><SelectInput value={getColStr(p.columnsMobile, "1")} onChange={(v) => up("columnsMobile", v, true)} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }]} /></Field>
             </Section>
 
             <Section title="Spacing">

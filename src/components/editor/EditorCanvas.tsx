@@ -276,12 +276,6 @@ const DropZone = memo(function DropZone({
 
               return (
                 <React.Fragment key={block.id}>
-                  {showInviteEmptyRoute && (
-                    <div style={{ padding: "40px 0" }}>
-                      <AddSectionInvitation isOver={isOver && dropInfo.overId === "canvas-root"} isFirst />
-                    </div>
-                  )}
-
                   {showInviteBeforeFooter && (
                     <AddSectionInvitation isOver={isOver && dropInfo.overId === "canvas-root"} />
                   )}
@@ -294,6 +288,12 @@ const DropZone = memo(function DropZone({
                     activeHeight={activeHeight}
                     dropPosition={dropInfo.position}
                   />
+
+                  {showInviteEmptyRoute && (
+                    <div style={{ padding: "40px 0" }}>
+                      <AddSectionInvitation isOver={isOver && dropInfo.overId === "canvas-root"} isFirst />
+                    </div>
+                  )}
 
                   {showInviteAtBottom && (
                     <AddSectionInvitation isOver={isOver && dropInfo.overId === "canvas-root"} />
