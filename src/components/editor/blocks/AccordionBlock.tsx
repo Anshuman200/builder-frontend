@@ -45,8 +45,9 @@ export default function AccordionBlock({ block }: { block: Block }) {
     const divider = (block.props.divider as string) || "line";
     const variant = (block.props.variant as string) || "contained";
 
-    const toggleItem = (id: string, e: React.MouseEvent) => {
+    const toggleItem = (id: string, index: number, e: React.MouseEvent) => {
         e.stopPropagation(); // Prevent block selection from interfering
+        if (!isPreview) focusSubItem(block.id, index);
         setOpenItems(prev => ({
             ...prev,
             [id]: !prev[id]
@@ -103,10 +104,10 @@ export default function AccordionBlock({ block }: { block: Block }) {
                     const isOpen = !!openItems[item.id];
                     const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === index;
                     const focusedStyle = isFocused ? {
-                        boxShadow: "0 0 0 3px #0099ff, 0 0 15px rgba(0,153,255,0.3)",
+                        boxShadow: "0 0 0 2px #6366f1, 0 0 20px rgba(99,102,241,0.4)",
                         zIndex: 10,
                         transform: "scale(1.01)",
-                        background: 'rgba(0,153,255,0.03)'
+                        background: 'rgba(99,102,241,0.03)'
                     } : {};
 
                     return (
@@ -115,7 +116,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
                         >
                             {/* Header (Clickable) */}
                             <div
-                                onClick={(e) => toggleItem(item.id, e)}
+                                onClick={(e) => toggleItem(item.id, index, e)}
                                 style={{
                                     display: "flex",
                                     justifyContent: "space-between",

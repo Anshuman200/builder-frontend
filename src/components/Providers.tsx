@@ -88,12 +88,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
             })
     );
 
+    const isPreview = pathname?.startsWith("/preview") || pathname?.startsWith("/editor");
+
     return (
         <QueryClientProvider client={queryClient}>
             <ThemeProvider
                 attribute="class"
-                defaultTheme="light"
-                enableSystem={true}
+                defaultTheme={isPreview ? "light" : "dark"}
+                forcedTheme={isPreview ? "light" : undefined}
+                enableSystem={!isPreview}
                 disableTransitionOnChange={false}
                 storageKey="pagecraft-theme"
             >

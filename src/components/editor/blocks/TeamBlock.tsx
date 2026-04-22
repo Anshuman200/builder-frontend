@@ -120,7 +120,7 @@ export function TeamBlock({ block }: BlockProps) {
     const getBaseCardStyle = (idx: number): React.CSSProperties => {
         const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
         const isFloat = imageStyle === "float";
-        
+
         const base = getCardStyles({
             props: p,
             isFocused,
@@ -220,13 +220,13 @@ export function TeamBlock({ block }: BlockProps) {
                     {layout === "compact" && (
                         <div className={`team-grid-container-${block.id}`}>
                             {members.map((member: any, idx: number) => {
-                                 const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
-                                 const baseStyle = getBaseCardStyle(idx);
-                                 
-                                 return (
-                                     <div key={`mc-${idx}`} style={{ ...baseStyle, display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", cursor: "pointer" }}
-                                         onClick={() => !isPreview && focusSubItem(block.id, idx)}
-                                     >
+                                const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+                                const baseStyle = getBaseCardStyle(idx);
+
+                                return (
+                                    <div key={`mc-${idx}`} style={{ ...baseStyle, display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", cursor: "pointer" }}
+                                        onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                    >
                                         {member.image && (
                                             <div style={{ width: 56, height: 56, borderRadius: "50%", overflow: "hidden", position: "relative", flexShrink: 0 }}>
                                                 <Image
@@ -261,7 +261,7 @@ export function TeamBlock({ block }: BlockProps) {
                                             ...getBaseCardStyle(idx),
                                             flexDirection: idx % 2 !== 0 ? "row-reverse" : "row",
                                             gap: "3rem",
-                                            alignItems: "center", 
+                                            alignItems: "center",
                                         }}
                                         onClick={() => !isPreview && focusSubItem(block.id, idx)}
                                     >
@@ -333,12 +333,12 @@ export function TeamBlock({ block }: BlockProps) {
                                 const isCover = imageStyle === "cover";
                                 const isEvenList = layout === "list" && idx % 2 !== 0;
                                 const cHeight = (p.cardHeight as string) && (p.cardHeight as string) !== "auto" ? (p.cardHeight as string) : "100%";
-                                
+
                                 const baseStyle = getBaseCardStyle(idx);
-                                const resolvedCardStyle = { 
-                                    ...baseStyle, 
-                                    height: cHeight, 
-                                    flexDirection: (layout === "list" && isEvenList && viewMode !== "mobile" ? "row-reverse" : baseStyle.flexDirection) as React.CSSProperties["flexDirection"] 
+                                const resolvedCardStyle = {
+                                    ...baseStyle,
+                                    height: cHeight,
+                                    flexDirection: (layout === "list" && isEvenList && viewMode !== "mobile" ? "row-reverse" : baseStyle.flexDirection) as React.CSSProperties["flexDirection"]
                                 };
 
                                 const iHeight = (p.imageHeight as string) || "240px";

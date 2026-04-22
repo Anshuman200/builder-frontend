@@ -64,15 +64,15 @@ export function useSubItemFocus(blockId: string) {
 // ─── Theme constants ──────────────────────────────────────────────────────────
 
 export const PANEL_COLORS = {
-    bg: "#111111",
-    sectionBg: "#1a1a1a",
-    border: "#2a2a2a",
-    text: "#ededed",
-    muted: "#a1a1aa", // Brighter muted color for better label visibility
-    inputBg: "#18181b", // Slightly deeper background for better contrast with label
-    inputBorder: "#3f3f46", // Solid visible border
-    inputHoverBg: "#27272a",
-    primary: "#0099ff",
+    bg: "#050505",
+    sectionBg: "#0a0a0a",
+    border: "rgba(255, 255, 255, 0.06)",
+    text: "#ffffff",
+    muted: "#71717a",
+    inputBg: "#111111",
+    inputBorder: "rgba(255, 255, 255, 0.1)",
+    inputHoverBg: "#1a1a1a",
+    primary: "#6366f1",
 };
 
 // ─── MediaInput ───────────────────────────────────────────────────────────────
@@ -198,15 +198,16 @@ export function MediaInput({ value, onChange, placeholder, type = "image", varia
 
 // ─── Field ────────────────────────────────────────────────────────────────────
 
-export function Field({ label, children }: { label: string; children: React.ReactNode }) {
+export function Field({ label, children, description }: { label: string; children: React.ReactNode; description?: string }) {
     return (
-        <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", alignItems: "center", gap: 12, minHeight: 32 }}>
-            <label style={{ fontSize: 11, fontWeight: 500, color: PANEL_COLORS.muted, userSelect: "none", lineHeight: 1.2 }}>
-                {label}
-            </label>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%" }}>
+        <div style={{ marginBottom: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+                <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: PANEL_COLORS.muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</label>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {children}
             </div>
+            {description && <div style={{ marginTop: 4, fontSize: 10, color: PANEL_COLORS.muted, fontStyle: "italic", lineHeight: 1.4 }}>{description}</div>}
         </div>
     );
 }
@@ -932,13 +933,19 @@ export function PaddingInput({ value, onChange, label, placeholder }: { value: s
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
     const { subItemFocus, selectedBlockId } = useEditorStore();
     const isFocused = subItemFocus?.blockId === selectedBlockId && subItemFocus?.index === title;
+    const [isFlashing, setIsFlashing] = React.useState(false);
 
     const containerRef = React.useRef<HTMLDivElement>(null);
     React.useEffect(() => {
-        if (isFocused && containerRef.current) {
-            containerRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        if (isFocused) {
+            setIsFlashing(true);
+            const timer = setTimeout(() => setIsFlashing(false), 2500);
+            if (containerRef.current) {
+                containerRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+            return () => clearTimeout(timer);
         }
-    }, [isFocused]);
+    }, [isFocused, title]);
 
     // Generate a clean ID for scrolling
     const sectionId = `section-${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
@@ -951,24 +958,33 @@ export function Section({ title, children }: { title: string; children: React.Re
                 borderBottom: `1px solid ${PANEL_COLORS.border}`,
                 padding: "12px 16px",
                 transition: "background 0.5s ease",
-                background: isFocused ? "rgba(0, 153, 255, 0.03)" : "transparent",
+                background: isFlashing ? "rgba(99, 102, 241, 0.1)" : isFocused ? "rgba(99, 102, 241, 0.05)" : "transparent",
                 position: "relative"
             }}
         >
-            {isFocused && (
-                <div style={{ position: "absolute", left: 0, top: 12, bottom: 12, width: 3, background: "var(--primary)", borderRadius: "0 4px 4px 0" }} />
+            <style>{`
+                @keyframes section-flash {
+                    0% { background: rgba(99, 102, 241, 0.3); }
+                    100% { background: rgba(99, 102, 241, 0.05); }
+                }
+                .section-focused-flash {
+                    animation: section-flash 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+                }
+            `}</style>
+            {(isFocused || isFlashing) && (
+                <div style={{ position: "absolute", left: 0, top: 12, bottom: 12, width: 3, background: PANEL_COLORS.primary, borderRadius: "0 4px 4px 0", boxShadow: `0 0 10px ${PANEL_COLORS.primary}` }} />
             )}
+            <div className={isFlashing ? "section-focused-flash" : ""} style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: isFocused ? "var(--primary)" : PANEL_COLORS.text, transition: "color 0.3s" }}>{title}</p>
+                <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.02em", color: isFocused ? PANEL_COLORS.primary : PANEL_COLORS.text, transition: "color 0.3s" }}>{title}</p>
                 <div style={{ color: PANEL_COLORS.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 16, height: 16 }}>
                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5 1V9M1 5H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
                 </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {children}
-            </div>
+            {children}
         </div>
     );
 }

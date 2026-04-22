@@ -7,7 +7,7 @@ import { CommonContainer } from "../layout/CommonContainer";
 import { useSitePages } from "@/lib/api/queries";
 
 const SOCIAL = [
-  { icon: GlobeAltIcon, href: "#", label: "Twitter" },
+  { icon: GlobeAltIcon, href: "#", label: "Twitter / X" },
   { icon: CodeBracketIcon, href: "#", label: "GitHub" },
   { icon: GlobeAltIcon, href: "#", label: "LinkedIn" },
   { icon: EnvelopeIcon, href: "#", label: "Email" },

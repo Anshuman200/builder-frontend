@@ -111,33 +111,33 @@
 
 /* ─── Dark Mode ──────────────────────────────────────────────────────────────── */
 .dark {
-  --bg: #09090b;
-  --bg-secondary: #111113;
-  --surface: #18181b;
-  --surface-hover: #27272a;
-  --border: #27272a;
-  --border-strong: #3f3f46;
+  --bg: #050505;
+  --bg-secondary: #0a0a0a;
+  --surface: #111111;
+  --surface-hover: #1a1a1a;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
 
-  --text: #fafafa;
+  --text: #ffffff;
   --text-muted: #a1a1aa;
   --text-subtle: #71717a;
 
-  --theme-switcher-bg: #18181b;
-  --theme-switcher-color: #fafafa;
+  --theme-switcher-bg: #111111;
+  --theme-switcher-color: #ffffff;
 
-  --primary: #818cf8;
-  --primary-hover: #6366f1;
-  --primary-light: #1e1b4b;
+  --primary: #6366f1;
+  --primary-hover: #818cf8;
+  --primary-light: rgba(99, 102, 241, 0.15);
   --primary-foreground: #ffffff;
 
   --accent: #a78bfa;
-  --accent-light: #2e1065;
+  --accent-light: rgba(167, 139, 250, 0.15);
 
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5);
+  --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.6);
 
   /* ── shadcn/ui dark overrides ── */
   --background: 240 10% 3.9%;
@@ -193,6 +193,16 @@ body {
   font-family: var(--font-body);
   line-height: 1.6;
   transition: background-color var(--transition-slow), color var(--transition);
+  position: relative;
+  min-height: 100vh;
+}
+
+.dark body {
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(167, 139, 250, 0.05) 0px, transparent 50%);
+  background-attachment: fixed;
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────────────────────────── */
@@ -427,6 +437,20 @@ img {
   background-clip: text;
   animation: shimmer 4s linear infinite;
   overflow: visible;
+}
+
+/* Premium Gradients & Effects */
+.bg-radial-gradient {
+  background: radial-gradient(circle, var(--tw-gradient-from) 0%, var(--tw-gradient-to) 100%);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* ─── Editor UI Shared Inputs ───────────────────────────────────────────────── */

@@ -289,12 +289,12 @@ export default function EditorShell() {
         },
       }}
     >
-      <div className="dark" style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden", color: "#ededed" }}>
+      <div className="dark" style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden", color: "#ffffff", background: "#050505" }}>
         <EditorToolbar />
         <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
           <PropertiesPanel />
           <div
-            className="flex-1 flex flex-col overflow-hidden bg-gray-100 p-2 border-2 border-dashed"
+            className="flex-1 flex flex-col overflow-hidden bg-[#0a0a0a] p-2"
             onClick={(e) => {
               if (e.target === e.currentTarget) {
                 selectBlock(null);

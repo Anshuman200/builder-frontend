@@ -875,144 +875,148 @@ export default function EditorToolbar() {
         styles={{
           body: {
             padding: 0,
-            backgroundColor: 'var(--bg-secondary)',
+            backgroundColor: '#0d0d14',
             height: '100%',
             overflowY: 'auto'
           },
           mask: {
-            backdropFilter: 'blur(4px)',
-            backgroundColor: 'rgba(0,0,0,0.4)'
+            backdropFilter: 'blur(6px)',
+            backgroundColor: 'rgba(0,0,0,0.6)'
           },
           wrapper: {
             backgroundColor: 'transparent',
           },
           section: {
             height: '100%',
-            backgroundColor: 'var(--bg-secondary)',
-            borderTop: '1px solid var(--border)',
+            backgroundColor: '#0d0d14',
+            borderTop: '1px solid rgba(99,102,241,0.25)',
             borderRadius: '24px 24px 0 0',
-            boxShadow: '0 -10px 40px rgba(0,0,0,0.2)'
+            boxShadow: '0 -20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset'
           },
           header: {
-            borderBottom: '1px solid var(--border)',
+            borderBottom: '1px solid rgba(255,255,255,0.07)',
             padding: '16px 24px',
-            backgroundColor: 'var(--bg-secondary)'
+            backgroundColor: '#0d0d14'
           }
         }}
-        closeIcon={<span className="text-(--text-muted) text-xl">×</span>}
-        title={<span className="text-(--text) uppercase tracking-widest font-extrabold text-xs">Page Settings & Configuration</span>}
+        closeIcon={<span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 20 }}>×</span>}
+        title={<span style={{ color: 'rgba(165,163,255,0.8)', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 800, fontSize: 11 }}>Page Settings &amp; Configuration</span>}
       >
-        <div className=" p-6 md:p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div style={{ padding: '40px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 40 }}>
           {/* Section 1: Page Identity */}
-          <div className="space-y-6">
-            <h3 className="text-(--text-muted) text-xs font-bold uppercase tracking-widest border-b border-(--border) pb-2 mb-4">Page Identity</h3>
-            <SettingField label="Page Title">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <h3 style={{ color: 'rgba(165,163,255,0.6)', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: 8, margin: 0 }}>Page Identity</h3>
+            <DarkSettingField label="Page Title">
               <input
-                className="w-full bg-(--surface) border border-(--border) rounded-lg px-3 py-2 text-sm text-(--text) focus:ring-1 focus:ring-(--primary) outline-none"
+                style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#fff', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
                 defaultValue={page?.title}
                 onBlur={(e) => updateTitle(e.target.value)}
                 placeholder="e.g. My Awesome Page"
+                onFocus={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.6)'}
+                onBlurCapture={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
               />
-            </SettingField>
-            <SettingField label="URL Slug">
+            </DarkSettingField>
+            <DarkSettingField label="URL Slug">
               <input
-                className="w-full bg-(--surface) border border-(--border) rounded-lg px-3 py-2 text-sm text-(--text) focus:ring-1 focus:ring-(--primary) outline-none"
+                style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#fff', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
                 defaultValue={page?.slug}
                 onBlur={(e) => updateSlug(slugify(e.target.value))}
                 placeholder="page-slug"
+                onFocus={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.6)'}
+                onBlurCapture={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
               />
-            </SettingField>
+            </DarkSettingField>
 
             {user && (
-              <SettingField label="Page Thumbnail">
-                <div className="space-y-3">
+              <DarkSettingField label="Page Thumbnail">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {page?.thumbnail ? (
-                    <div className="relative rounded-xl overflow-hidden border border-(--border) bg-(--surface) group">
-                      <img src={page.thumbnail} alt="Thumbnail" className="w-full h-32 object-cover object-top" />
+                    <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }} className="group">
+                      <img src={page.thumbnail} alt="Thumbnail" style={{ width: '100%', height: 120, objectFit: 'cover', objectPosition: 'top', display: 'block' }} />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <button onClick={() => setShowCapturePicker(true)} className="p-2 bg-white/20 blur-sm rounded-lg hover:bg-white/40 transition-colors"><ArrowsRightLeftIcon className="w-5 h-5 text-white" /></button>
+                        <button onClick={() => setShowCapturePicker(true)} style={{ padding: 8, background: 'rgba(255,255,255,0.15)', borderRadius: 8, border: 'none', cursor: 'pointer' }}><ArrowsRightLeftIcon style={{ width: 18, height: 18, color: '#fff' }} /></button>
                       </div>
                     </div>
                   ) : (
-                    <div className="h-32 rounded-xl border-2 border-dashed border-(--border) flex flex-col items-center justify-center text-(--text-subtle) space-y-2">
-                      <CameraIcon className="w-6 h-6 opacity-40" />
-                      <span className="text-[10px] font-medium">No thumbnail set</span>
+                    <div style={{ height: 120, borderRadius: 12, border: '2px dashed rgba(255,255,255,0.12)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                      <CameraIcon style={{ width: 22, height: 22, color: 'rgba(255,255,255,0.2)' }} />
+                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontWeight: 500 }}>No thumbnail set</span>
                     </div>
                   )}
                   <button
                     onClick={() => setShowCapturePicker(true)}
-                    className="w-full py-2 bg-(--primary) text-white text-xs font-bold rounded-lg hover:opacity-90 transition-all shadow-lg shadow-blue-500/20"
+                    style={{ width: '100%', padding: '8px 0', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 8, border: 'none', cursor: 'pointer', transition: 'opacity 0.2s' }}
+                    onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                   >
-                    {page?.thumbnail ? "Change Thumbnail" : "Choose Thumbnail"}
+                    {page?.thumbnail ? 'Change Thumbnail' : 'Choose Thumbnail'}
                   </button>
                 </div>
-              </SettingField>
+              </DarkSettingField>
             )}
           </div>
 
           {/* Section 2: SEO & Branding */}
-          <div className="space-y-6">
-            <h3 className="text-(--text-muted) text-xs font-bold uppercase tracking-widest border-b border-(--border) pb-2 mb-4">SEO & Branding</h3>
-            <SettingField label="Meta Description">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <h3 style={{ color: 'rgba(165,163,255,0.6)', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: 8, margin: 0 }}>SEO &amp; Branding</h3>
+            <DarkSettingField label="Meta Description">
               <textarea
-                className="w-full bg-(--surface) border border-(--border) rounded-lg px-3 py-2 text-sm text-(--text) focus:ring-1 focus:ring-(--primary) outline-none resize-none"
-                defaultValue={page?.meta?.description || ""}
+                style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#fff', outline: 'none', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.2s' }}
+                defaultValue={page?.meta?.description || ''}
                 onBlur={(e) => updateMeta({ description: e.target.value })}
                 rows={3}
                 placeholder="Brief description for search engines..."
+                onFocus={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.6)'}
+                onBlurCapture={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
               />
-            </SettingField>
+            </DarkSettingField>
 
-            <SettingField label="Keywords">
+            <DarkSettingField label="Keywords">
               <input
-                className="w-full bg-(--surface) border border-(--border) rounded-lg px-3 py-2 text-sm text-(--text) focus:ring-1 focus:ring-(--primary) outline-none"
-                defaultValue={page?.meta?.keywords || ""}
+                style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#fff', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
+                defaultValue={page?.meta?.keywords || ''}
                 onBlur={(e) => updateMeta({ keywords: e.target.value })}
                 placeholder="e.g. blog, tech, design"
+                onFocus={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.6)'}
+                onBlurCapture={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
               />
-            </SettingField>
+            </DarkSettingField>
 
-            <div className="grid grid-cols-2 gap-4">
-              <SettingField label="Favicon">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <DarkSettingField label="Favicon">
                 <MediaPreview
                   url={page?.meta?.favicon}
-                  onChoose={() => setMediaPickerType("favicon")}
-                  onClear={() => updateMeta({ favicon: "" })}
+                  onChoose={() => setMediaPickerType('favicon')}
+                  onClear={() => updateMeta({ favicon: '' })}
                   label="Favicon"
                   allowRemove={false}
                 />
-              </SettingField>
-              <SettingField label="Social Preview (OG)">
+              </DarkSettingField>
+              <DarkSettingField label="Social Preview (OG)">
                 <MediaPreview
                   url={page?.meta?.ogImage}
-                  onChoose={() => setMediaPickerType("ogImage")}
-                  onClear={() => updateMeta({ ogImage: "" })}
+                  onChoose={() => setMediaPickerType('ogImage')}
+                  onClear={() => updateMeta({ ogImage: '' })}
                   label="OG Image"
                   allowRemove={false}
                 />
-              </SettingField>
+              </DarkSettingField>
             </div>
           </div>
 
           {/* Section 3: Global Configuration */}
-          <div className="space-y-6">
-            <h3 className="text-(--text-muted) text-xs font-bold uppercase tracking-widest border-b border-(--border) pb-2 mb-4">Global Configuration</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <h3 style={{ color: 'rgba(165,163,255,0.6)', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: 8, margin: 0 }}>Global Configuration</h3>
 
-            <div className="bg-(--surface) border border-(--border) rounded-xl p-4">
-
-              <div className="h-px bg-(--border)" />
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-(--bg-primary) rounded-lg border border-(--border)">
-                    <div
-                      className="w-4 h-4 rounded-full shadow-inner"
-                      style={{ backgroundColor: colors.primary }}
-                    />
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ padding: 8, background: 'rgba(255,255,255,0.06)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', backgroundColor: colors.primary, boxShadow: `0 0 8px ${colors.primary}55` }} />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-(--text)">Primary Color</p>
-                    <p className="text-[10px] text-(--text-muted)">Site accent color</p>
+                    <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#fff' }}>Primary Color</p>
+                    <p style={{ margin: '2px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>Site accent color</p>
                   </div>
                 </div>
                 <ColorPicker
@@ -1029,18 +1033,20 @@ export default function EditorToolbar() {
               </div>
             </div>
 
-            <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 flex gap-3">
-              <div className="p-2 bg-blue-500/10 rounded-lg h-fit">
-                <ZapIcon className="w-4 h-4 text-blue-500" />
+            <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 14, padding: 16, display: 'flex', gap: 12 }}>
+              <div style={{ padding: 8, background: 'rgba(99,102,241,0.15)', borderRadius: 10, height: 'fit-content', flexShrink: 0 }}>
+                <ZapIcon style={{ width: 16, height: 16, color: '#818cf8' }} />
               </div>
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-(--text)">One-Click Sync</p>
-                <p className="text-[10px] text-(--text-muted) leading-relaxed">Instantly propagate theme changes across all page components.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#fff' }}>One-Click Sync</p>
+                <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6 }}>Instantly propagate theme changes across all page components.</p>
                 <button
                   onClick={() => useEditorStore.getState().migrateThemeColors()}
-                  className="mt-2 text-(--primary) text-[10px] font-bold hover:underline"
+                  style={{ marginTop: 4, color: '#818cf8', fontSize: 10, fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+                  onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}
                 >
-                  Sync Now &rarr;
+                  Sync Now →
                 </button>
               </div>
             </div>
@@ -1090,6 +1096,17 @@ function SettingField({ label, children }: { label: string; children: React.Reac
   return (
     <div style={{ marginBottom: 10 }}>
       <label style={{ display: "block", fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function DarkSettingField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
         {label}
       </label>
       {children}

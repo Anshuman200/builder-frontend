@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"; // Optimized font
 import "./globals.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { Providers } from "@/components/Providers";
+import { PremiumEffects } from "@/components/layout/PremiumEffects";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -52,6 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
+        <PremiumEffects />
         <Suspense fallback={null}>
           <AntdRegistry>
             <Providers>{children}</Providers>
