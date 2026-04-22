@@ -12,7 +12,8 @@ import {
     ClockCircleOutlined,
     ArrowLeftOutlined,
     LockOutlined,
-    GlobalOutlined as GlobalIcon
+    GlobalOutlined as GlobalIcon,
+    SyncOutlined
 } from '@ant-design/icons';
 import { LockClosedIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import { useCreateDomain, useVerifyDomain, useCreateProxy, useProxyStatus } from "@/lib/api/domainHooks";
@@ -499,7 +500,7 @@ function StepDeployWorker({
                 <div className="mt-2 animate-in fade-in duration-500">
                     <label className="block mb-4 font-black text-white/40 uppercase tracking-[0.2em] text-[10px]">Visibility Settings</label>
                     <div className="grid grid-cols-2 gap-4">
-                        <button 
+                        <button
                             onClick={() => setVisibility('PUBLIC')}
                             className={`flex flex-col items-center gap-4 p-8 rounded-[2rem] border transition-all duration-300 ${visibility === 'PUBLIC' ? 'bg-indigo-500/10 border-indigo-500 shadow-[0_0_30px_-10px_rgba(99,102,241,0.3)] text-white' : 'bg-white/2 border-white/5 text-white/30 hover:bg-white/5'}`}
                         >
@@ -511,7 +512,7 @@ function StepDeployWorker({
                                 <span className="block text-[10px] opacity-40 mt-1">Accessible by URL</span>
                             </div>
                         </button>
-                        <button 
+                        <button
                             onClick={() => setVisibility('PRIVATE')}
                             className={`flex flex-col items-center gap-4 p-8 rounded-[2rem] border transition-all duration-300 ${visibility === 'PRIVATE' ? 'bg-indigo-500/10 border-indigo-500 shadow-[0_0_30px_-10px_rgba(99,102,241,0.3)] text-white' : 'bg-white/2 border-white/5 text-white/30 hover:bg-white/5'}`}
                         >
@@ -526,8 +527,8 @@ function StepDeployWorker({
                     </div>
                     {visibility === 'PRIVATE' && (
                         <div className="mt-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                            <Input.Password 
-                                placeholder="Enter a secure password..." 
+                            <Input.Password
+                                placeholder="Enter a secure password..."
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 className="bg-white/5! border-white/10! text-white! h-14 rounded-2xl px-6! text-lg font-medium hover:border-white/20! focus:border-indigo-500! transition-all"
