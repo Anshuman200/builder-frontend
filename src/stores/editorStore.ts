@@ -111,6 +111,7 @@ interface EditorStore {
     duplicateBlock: (id: string) => void;
     moveBlock: (activeId: string, overId: string, position?: "before" | "after" | "inside", childProp?: string) => void;
     swapBlocks: (idA: string, idB: string) => void;
+    replaceBlock: (id: string, newBlock: Block) => void;
 
     openBlockPicker: (target: { id: string, position: "before" | "after" | "inside", childProp?: string }, preferredTab?: "sections" | "elements") => void;
     closeBlockPicker: () => void;
@@ -999,6 +1000,45 @@ export const useEditorStore = create<EditorStore>()(
             });
             get().pushHistory();
         },
+        
+        replaceBlock: (id, newBlock) => set((s) => {
+            if (!s.page) return;
+            applyUpdaterDeep(s.page, s.activeRouteId, (blocks) => {
+                const updater = (list: Block[]): Block[] => {
+                    return list.map(b => {
+                        if (b.id === id) return { ...newBlock, id }; // Keep original ID to preserve position
+                        const next = { ...b };
+                        let changed = false;
+                        if (next.children) {
+                            const res = updater(next.children);
+                            if (res !== next.children) { next.children = res; changed = true; }
+                        }
+                        ["col0", "col1", "childBlocks"].forEach(key => {
+                            if (Array.isArray(next.props[key])) {
+                                const res = updater(next.props[key] as Block[]);
+                                if (res !== next.props[key]) {
+                                    next.props = { ...next.props, [key]: res };
+                                    changed = true;
+                                }
+                            }
+                        });
+                        if (Array.isArray(next.props.items)) {
+                            const nextItems = (next.props.items as any[]).map(item => {
+                                if (!item.blocks) return item;
+                                const res = updater(item.blocks);
+                                if (res !== item.blocks) { changed = true; return { ...item, blocks: res }; }
+                                return item;
+                            });
+                            if (changed) next.props = { ...next.props, items: nextItems };
+                        }
+                        return next;
+                    });
+                };
+                return updater(blocks);
+            });
+            s.isDirty = true;
+            get().pushHistory();
+        }),
 
 
         moveBlock: (activeId, overId, position = "after", childProp?) =>

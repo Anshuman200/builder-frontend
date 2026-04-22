@@ -26,13 +26,10 @@ export const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export const SINGLETON_CATEGORIES = new Set([
-  "Contact",    // one contact form per page
-  "Pricing",    // one pricing table per page
-  "Hero",       // one hero banner per page
   "Navigation", // one nav per page (also handled as globalBlock)
   "Footer",     // one footer per page (also handled as globalBlock)
-  "FAQ",        // one FAQ section per page
-  "Stats",      // one stats / numbers section per page
+  "Contact",    // typically one contact form
+  "Pricing",    // typically one pricing table
 ]);
 
 export const SINGLETON_ELEMENT_TYPES = new Set([
@@ -60,7 +57,7 @@ export function scrollToBlock(blockId: string) {
     if (el) {
       const rect = el.getBoundingClientRect();
       const isLarge = rect.height > window.innerHeight * 0.8;
-      
+
       el.scrollIntoView({
         behavior: "smooth",
         block: isLarge ? "start" : "center",
@@ -102,13 +99,11 @@ export function findExistingInCategory(content: any[], category: string): boolea
 export function DarkConfirmModal({
   title,
   description,
-  confirmLabel = "Yes, Add Another",
   onConfirm,
   onCancel,
 }: {
   title: string;
   description: string;
-  confirmLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -157,15 +152,15 @@ export function DarkConfirmModal({
           </div>
         </div>
         <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "16px 0" }} />
-        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
           <button
             onClick={onCancel}
-            style={{ height: 36, padding: "0 18px", borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#94a3b8", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+            style={{ height: 40, padding: "0 18px", borderRadius: 12, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#94a3b8", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
           >Cancel</button>
           <button
             onClick={onConfirm}
-            style={{ height: 36, padding: "0 20px", borderRadius: 10, background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)", border: "none", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
-          >{confirmLabel}</button>
+            style={{ height: 40, padding: "0 22px", borderRadius: 12, background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)", border: "none", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(245,158,11,0.2)" }}
+          >Add as New Section</button>
         </div>
       </div>
     </div>,
@@ -185,81 +180,118 @@ export function DrawerSectionCard({ template, onAdd }: { template: SectionTempla
 
   function doAdd() {
     const rawBlock = template.create();
+    // Inject templateId so we can track exactly which template was used
+    (rawBlock as any).templateId = template.id;
     const newBlock = injectProjectName(rawBlock, projectName);
     onAdd(newBlock);
     scrollToBlock(newBlock.id);
   }
 
   function handleClick() {
-    if (SINGLETON_CATEGORIES.has(template.category)) {
-      const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
-      const content = activeRoute?.content ?? page?.content ?? [];
-      if (findExistingInCategory(content, template.category)) {
-        setShowConfirm(true);
-        return;
-      }
+    if (isAlreadyInPage) {
+      setShowConfirm(true);
+      return;
     }
     doAdd();
   }
 
-  const PREVIEW_H = 380;
-  const SCALE = 0.245;
-  const thumbH = Math.round(PREVIEW_H * SCALE);
+  const isNav = template.category === "Navigation";
+  const thumbH = isNav ? 100 : 200;
+  const SCALE = 0.25;
+
+  const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
+  const content = activeRoute?.content ?? page?.content ?? [];
+  
+  // Singleton categories (Nav, Footer) check the whole category.
+  // Others check for the specific templateId to avoid marking all as "Added".
+  const isSingleton = SINGLETON_CATEGORIES.has(template.category);
+  const isAlreadyInPage = isSingleton 
+    ? !!findExistingInCategory(content, template.category)
+    : content.some(block => (block as any).templateId === template.id);
+
+  // Symbolic badges based on template ID for demonstration
+  const isPopular = template.id.includes('split') || template.id.includes('logo-left');
+  const isNew = template.id.includes('glass') || template.id.includes('bento');
 
   return (<>
+      {showConfirm && (
+        <DarkConfirmModal
+          title={`${template.category} Already Added`}
+          description={isSingleton 
+            ? `You already have a ${template.category} on this page. Do you want to add another one?`
+            : `You already have this specific ${template.category} design. Do you want to add a second copy?`}
+          onConfirm={() => { setShowConfirm(false); doAdd(); }}
+          onCancel={() => setShowConfirm(false)}
+        />
+      )}
     <div
       ref={setNodeRef}
       {...attributes}
       {...listeners}
       onClick={handleClick}
       style={{
-        borderRadius: 16, border: "1px solid var(--border)",
+        borderRadius: 20, border: "1px solid var(--border)",
         background: "var(--surface)", cursor: "pointer",
         opacity: isDragging ? 0.4 : 1,
         userSelect: "none", overflow: "hidden",
-        transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        transition: "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
+        boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)",
+        position: "relative"
       }}
-      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 24px rgba(0,0,0,0.15)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--primary-light)"; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-6px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 20px 40px -12px rgba(0,0,0,0.2)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--primary-light)"; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 30px -10px rgba(0,0,0,0.1)"; (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; }}
     >
+      {/* Premium Badges */}
+      <div style={{ position: "absolute", top: 12, left: 12, zIndex: 10, display: "flex", gap: 8 }}>
+        {isPopular && (
+          <div style={{ background: "rgba(59,130,246,0.9)", backdropFilter: "blur(4px)", color: "#fff", padding: "4px 10px", borderRadius: 8, fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", gap: 4, boxShadow: "0 4px 12px rgba(59,130,246,0.3)" }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} /> MOST USED
+          </div>
+        )}
+        {isNew && (
+          <div style={{ background: "rgba(34,197,94,0.9)", backdropFilter: "blur(4px)", color: "#fff", padding: "4px 10px", borderRadius: 8, fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", gap: 4, boxShadow: "0 4px 12px rgba(34,197,94,0.3)" }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff" }} /> RECENTLY ADDED
+          </div>
+        )}
+      </div>
+
+      {isAlreadyInPage && (
+        <div style={{ position: "absolute", top: 12, right: 12, zIndex: 10 }}>
+          <div style={{ background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)", color: "#fff", padding: "4px 10px", borderRadius: 8, fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e" }} /> ALREADY ADDED
+          </div>
+        </div>
+      )}
+
       <div className="light" style={{
         width: "100%",
         height: thumbH,
         overflow: "hidden",
         pointerEvents: "none",
-        background: "#ffffff",
+        background: "transparent",
         position: "relative",
-        borderBottom: "1px solid rgba(0,0,0,0.05)"
+        borderBottom: "1px solid var(--border)"
       }}>
         <div
           style={{
-            width: "100%",
-            height: "100%",
+            width: "400%", // 100% / 0.25 = 400%
+            height: thumbH / SCALE, // Total virtual height
             pointerEvents: "none",
             color: "#0f172a",
-            fontFamily: "system-ui, sans-serif"
+            fontFamily: "Inter, system-ui, sans-serif",
+            transform: `scale(${SCALE})`,
+            transformOrigin: "top left",
           }}
           dangerouslySetInnerHTML={{ __html: template.preview }}
         />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.02), transparent)" }} />
       </div>
-      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)" }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.01em" }}>{template.name}</span>
-        <div style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--primary-light)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <PlusIcon style={{ width: 12, height: 12, color: "var(--primary)" }} />
+      <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)" }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.01em" }}>{template.name}</span>
+        <div style={{ width: 28, height: 28, borderRadius: 10, background: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 10px rgba(99,102,241,0.3)" }}>
+          <PlusIcon style={{ width: 16, height: 16, color: "#fff" }} />
         </div>
       </div>
     </div>
-    {showConfirm && (
-      <DarkConfirmModal
-        title={`Already have a ${template.category} section`}
-        description={`This page already has a ${template.category} section ("${template.name}"). Adding another one is unusual.`}
-        confirmLabel="Yes, Add Another"
-        onConfirm={() => { setShowConfirm(false); doAdd(); }}
-        onCancel={() => setShowConfirm(false)}
-      />
-    )}
   </>);
 }
 
@@ -328,7 +360,6 @@ export function PaletteCard({ config, onAdd }: { config: BlockConfig; onAdd: (bl
       <DarkConfirmModal
         title={`Already have a ${config.label}`}
         description={`This page already has a ${config.label} block. Adding another one is unusual.`}
-        confirmLabel="Yes, Add Another"
         onConfirm={() => { setShowConfirm(false); doAdd(); }}
         onCancel={() => setShowConfirm(false)}
       />
@@ -374,12 +405,12 @@ export function LibraryHeader({
       gap: 20,
       position: "relative"
     }}>
-      <div style={{ 
-        display: "flex", 
-        alignItems: "center", 
-        justifyContent: "center", 
-        gap: 20, 
-        width: "100%", 
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 20,
+        width: "100%",
         maxWidth,
         padding: "0 10px", // Breathing room for small screens
         flexWrap: "wrap" // Allow wrap on very small devices
@@ -600,9 +631,9 @@ export function ElementsPanel({ onAdd, isGrid = false }: { onAdd: (block: any) =
 
         {/* Expansive Results Grid */}
         <div style={{ flex: 1, overflowY: "auto", padding: "40px 60px" }}>
-          <div style={{ 
-            display: "grid", 
-            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
             gap: 24,
             maxWidth: 1600,
             margin: "0 auto"
@@ -620,14 +651,14 @@ export function ElementsPanel({ onAdd, isGrid = false }: { onAdd: (block: any) =
   return (
     <div style={{ width: "100%", background: "var(--bg-secondary)", borderRadius: 14, overflow: "hidden", display: "flex", flexDirection: "column" }}>
       <div style={{ padding: "10px 10px 8px", borderBottom: "1px solid var(--border)" }}>
-          <SearchInput
-            value={search}
-            onChange={v => setSearch(v)}
-            placeholder="Search elements…"
-            autoFocus
-            width="100%"
-            style={{ borderRadius: 7, padding: "5px 8px 5px 27px", fontSize: 12 }}
-          />
+        <SearchInput
+          value={search}
+          onChange={v => setSearch(v)}
+          placeholder="Search elements…"
+          autoFocus
+          width="100%"
+          style={{ borderRadius: 7, padding: "5px 8px 5px 27px", fontSize: 12 }}
+        />
       </div>
       <div style={{
         // flex: 1,
