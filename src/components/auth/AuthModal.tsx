@@ -121,7 +121,9 @@ export function AuthModal({
       onCancel={handleClose}
       footer={null}
       closable={false}
-      styles={{ container: { padding: 0 } }}
+      classNames={{
+        container: 'bg-transparent !shadow-none !p-0',
+      }}
       centered
     >
       {/* Outer card — stops clicks bubbling to the mask */}

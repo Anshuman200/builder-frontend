@@ -29,7 +29,7 @@ export interface AnimationConfig {
 }
 
 export interface ThemeConfig {
-    mode: "light";
+    mode: "light" | "dark";
     colors: {
         primary: string;
         secondary: string;
