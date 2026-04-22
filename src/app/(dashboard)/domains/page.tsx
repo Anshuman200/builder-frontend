@@ -59,8 +59,8 @@ export default function DomainPage() {
     const handleDeleteClick = (domain: any) => {
         if (!user?._id) return;
 
-        const label = domain.isInternalProxy 
-            ? (domain.workerUrl?.replace(/^https?:\/\//, '') || 'Proxy') 
+        const label = domain.isInternalProxy
+            ? (domain.workerUrl?.replace(/^https?:\/\//, '') || 'Proxy')
             : domain.domain;
 
         startDelete(
@@ -119,7 +119,7 @@ export default function DomainPage() {
     };
 
     return (
-        <div className="p-2 lg:p-8 w-full min-h-[80vh] bg-[#0a0a0a]">
+        <div className="p-2 lg:p-8 w-full min-h-[80vh]">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                     <Title level={2} className="text-white! m-0! flex items-center gap-3">

@@ -139,7 +139,7 @@ export default function HomePage() {
 
   const filtered = pages.filter((p: Page) => {
     const matchesSearch = !search || p.title?.toLowerCase().includes(search.toLowerCase());
-    const matchesTab = activeTab === "all" 
+    const matchesTab = activeTab === "all"
       || (activeTab === "live" && p.isLive);
     return matchesSearch && matchesTab;
   });
@@ -166,14 +166,16 @@ export default function HomePage() {
             <p className="text-white/40 text-[10px] sm:text-xs md:text-base font-medium leading-relaxed">Manage and edit your high-performance landing pages</p>
           </div>
 
-          <SearchInput
-            placeholder="Search projects..."
-            value={search}
-            onChange={v => setSearch(v)}
-            className="w-full md:w-72"
-            containerStyle={{ background: "rgba(255,255,255,0.05)", borderRadius: 16 }}
-            style={{ height: 44, border: "none" }}
-          />
+          <div className="">
+            <SearchInput
+              placeholder="Search projects..."
+              value={search}
+              onChange={v => setSearch(v)}
+              className="w-full md:w-24"
+              containerStyle={{ background: "rgba(255,255,255,0.05)", borderRadius: 16 }}
+              style={{ height: 44, border: "none" }}
+            />
+          </div>
         </div>
 
         {/* Categories / Tabs */}

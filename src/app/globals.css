@@ -198,7 +198,7 @@ body {
 }
 
 .dark body {
-  background-image: 
+  background-image:
     radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
     radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.05) 0px, transparent 50%),
     radial-gradient(at 50% 100%, rgba(167, 139, 250, 0.05) 0px, transparent 50%);
@@ -839,4 +839,42 @@ label.jodit-ui-label {
 
 .subitem-highlight {
   animation: subitem-focus-highlight 10.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* ─── Dashboard Dark Theme (Home / Templates / Media / Domains) ─────────────── */
+/* Scoped to .dashboard-dark — does NOT affect editor, landing, or admin pages   */
+.dashboard-dark {
+  --bg: #080810;
+  --bg-secondary: #0d0d18;
+  --surface: #12121f;
+  --surface-hover: #1a1a2e;
+  --border: rgba(99, 102, 241, 0.12);
+  --border-strong: rgba(99, 102, 241, 0.25);
+
+  --text: #f0f0ff;
+  --text-muted: #8b8ba8;
+  --text-subtle: #55556a;
+
+  --primary: #6366f1;
+  --primary-hover: #818cf8;
+  --primary-light: rgba(99, 102, 241, 0.15);
+  --primary-foreground: #ffffff;
+
+  --accent: #a78bfa;
+  --accent-light: rgba(167, 139, 250, 0.15);
+
+  color-scheme: dark;
+}
+
+.dashboard-dark {
+  background-color: #000000;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+    url('/assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  color: var(--text);
 }

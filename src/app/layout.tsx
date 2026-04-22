@@ -53,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
-        <PremiumEffects />
+        {/* <PremiumEffects /> */}
         <Suspense fallback={null}>
           <AntdRegistry>
             <Providers>{children}</Providers>
