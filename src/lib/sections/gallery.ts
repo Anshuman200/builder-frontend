@@ -34,14 +34,8 @@ export const gallerySections: SectionTemplate[] = [
         makeBlock("image", { src: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
         makeBlock("image", { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
         makeBlock("image", { src: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
-        makeBlock("image", { src: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
-        makeBlock("image", { src: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
-        makeBlock("image", { src: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
-        makeBlock("image", { src: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
-        makeBlock("image", { src: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
-        makeBlock("image", { src: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
-        makeBlock("image", { src: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
-        makeBlock("image", { src: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
+        makeBlock("image", { src: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
+        makeBlock("image", { src: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800&q=80", borderRadius: "12px", aspectRatio: "auto", height: "auto" }),
         makeBlock("media-picker", { borderRadius: "12px" }),
       ];
 

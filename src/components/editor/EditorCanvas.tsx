@@ -270,9 +270,9 @@ const DropZone = memo(function DropZone({
               // 1. If route is empty and we just rendered the header, show invitation
               const showInviteEmptyRoute = isHeader && routeBlocksLength === 0;
 
-              // 2. If route has content and we're at the bottom (before footer or at very end)
-              const showInviteBeforeFooter = isFooter && routeBlocksLength > 0;
-              const showInviteAtBottom = isLast && !footerId && routeBlocksLength > 0;
+              // 2. If route has content OR it's a blank page without a header, show before footer
+              const showInviteBeforeFooter = isFooter && (routeBlocksLength > 0 || !headerId);
+              const showInviteAtBottom = isLast && !footerId && (routeBlocksLength > 0 || !headerId);
 
               return (
                 <React.Fragment key={block.id}>

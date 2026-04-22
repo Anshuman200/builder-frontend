@@ -33,8 +33,9 @@ export default function BlockPalette() {
         trigger={"hover"}
         placement="bottomLeft"
         arrow={false}
-        styles={{ content: { padding: 0, borderRadius: 14, overflow: "hidden", background: "var(--bg-secondary)", border: "1px solid var(--border)", boxShadow: "0 16px 48px rgba(0,0,0,0.3)" } }}
-        content={<div style={{ width: 480, height: 480 }}><SectionsPanel onAdd={handleAdd} /></div>}
+        overlayClassName="dark"
+        styles={{ content: { padding: 0, borderRadius: 16, overflow: "hidden", background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 20px 50px rgba(0,0,0,0.5)" } }}
+        content={<div style={{ width: 480, height: 480 }} className="dark"><SectionsPanel onAdd={handleAdd} /></div>}
       >
         <button
           style={{
@@ -57,8 +58,9 @@ export default function BlockPalette() {
         trigger="hover"
         placement="bottomLeft"
         arrow={false}
-        styles={{ content: { padding: 0, borderRadius: 14, overflow: "hidden", background: "var(--bg-secondary)", border: "1px solid var(--border)", boxShadow: "0 16px 48px rgba(0,0,0,0.3)" } }}
-        content={<div style={{ width: 280 }}><ElementsPanel onAdd={handleAdd} /></div>}
+        overlayClassName="dark"
+        styles={{ content: { padding: 0, borderRadius: 16, overflow: "hidden", background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 20px 50px rgba(0,0,0,0.5)" } }}
+        content={<div style={{ width: 280 }} className="dark"><ElementsPanel onAdd={handleAdd} /></div>}
       >
         <button
           style={{

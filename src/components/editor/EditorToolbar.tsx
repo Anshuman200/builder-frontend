@@ -328,12 +328,12 @@ export default function EditorToolbar() {
         algorithm: antdTheme.darkAlgorithm,
         token: {
           colorPrimary: PANEL_COLORS.primary,
-          colorBgContainer: PANEL_COLORS.inputBg,
-          colorBorder: PANEL_COLORS.border,
-          colorText: PANEL_COLORS.text,
-          colorTextDescription: PANEL_COLORS.muted,
-          colorBgElevated: PANEL_COLORS.sectionBg,
-          borderRadius: 8,
+          colorBgContainer: "#111111",
+          colorBorder: "rgba(255,255,255,0.08)",
+          colorText: "#ffffff",
+          colorTextDescription: "rgba(255,255,255,0.45)",
+          colorBgElevated: "#0a0a0a",
+          borderRadius: 12,
         },
       }}
     >
