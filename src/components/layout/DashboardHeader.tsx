@@ -90,32 +90,43 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
                   {
                     key: "user-info",
                     label: (
-                      <div className="p-3 bg-white/5 rounded-md mb-1">
-                        <div className="font-black text-sm text-white uppercase tracking-tight">{user?.name}</div>
-                        <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-0.5">{user?.email}</div>
+                      <div className="">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                            <UserIcon className="w-4 h-4 text-indigo-400" />
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <div className="font-black text-xs text-white uppercase tracking-tight truncate">{user?.name}</div>
+                            <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest mt-0.5 truncate">{user?.email}</div>
+                          </div>
+                        </div>
                       </div>
                     ),
-                    disabled: true,
+                    className: "!bg-white/5 !rounded-sm py-2"
                   },
+                  { type: "divider", className: "my-1" },
                   {
                     key: "profile",
-                    label: "Profile Settings",
-                    icon: <PencilIcon className="w-4 h-4" />,
+                    label: <span className="font-bold text-[11px] uppercase tracking-wider text-white/70">Profile Settings</span>,
+                    icon: <PencilIcon className="w-3.5 h-3.5 text-white/40" />,
                     onClick: () => router.push("/home/profile"),
+                    className: "!bg-white/5 !rounded-sm py-2"
                   },
-                  { type: "divider" },
+                  { type: "divider", className: "border-white/5 my-1" },
                   {
                     key: "logout",
-                    label: "Log out",
+                    label: <span className="font-black text-[11px] uppercase tracking-widest">Log out</span>,
                     danger: true,
-                    icon: <ArrowRightOnRectangleIcon className="w-4 h-4" />,
+                    icon: <ArrowRightOnRectangleIcon className="w-3.5 h-3.5" />,
                     onClick: async () => { await logout(); router.push("/"); },
+                    className: "!bg-red-500/10 !rounded-sm py-2 mt-1"
                   },
                 ].filter(Boolean) as any,
-                className: "[&_.ant-dropdown-menu]:bg-neutral-900 [&_.ant-dropdown-menu]:border [&_.ant-dropdown-menu]:border-white/10 [&_.ant-dropdown-menu]:rounded-md p-2",
+                className: "bg-neutral-900 border border-white/10 rounded-2xl p-2 shadow-2xl min-w-[200px] backdrop-blur-2xl",
               }}
               placement="bottomRight"
               trigger={["click"]}
+              overlayClassName="profile-dropdown-overlay"
             >
               <button
                 className="w-10 h-10 rounded-md bg-linear-to-br from-indigo-500 to-purple-600 p-px cursor-pointer hover:scale-105 transition-transform overflow-hidden relative"

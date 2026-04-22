@@ -140,7 +140,9 @@ export default function HomePage() {
   const filtered = pages.filter((p: Page) => {
     const matchesSearch = !search || p.title?.toLowerCase().includes(search.toLowerCase());
     const matchesTab = activeTab === "all"
-      || (activeTab === "live" && p.isLive);
+      || (activeTab === "live" && p.isLive)
+      || (activeTab === "public" && p.isPublic)
+      || (activeTab === "private" && !p.isPublic);
     return matchesSearch && matchesTab;
   });
 
@@ -183,6 +185,8 @@ export default function HomePage() {
           {[
             { id: "all", label: "All Projects" },
             { id: "live", label: "Live" },
+            { id: "public", label: "Public" },
+            { id: "private", label: "Private" },
           ].map((t) => (
             <button
               key={t.id}
@@ -229,6 +233,7 @@ export default function HomePage() {
                         { key: "capture", label: "Update Thumbnail", icon: <CameraIcon className="w-4 h-4" />, onClick: () => { setCaptureTarget(p); setShowCapturePicker(true); } },
                         !p.isLive && { key: "preview", label: "Preview", icon: <EyeIcon className="w-4 h-4" />, onClick: () => window.open(`/preview/${p._id}`, "_blank") },
                         !p.isLive && { key: "duplicate", label: "Duplicate", icon: <Squares2X2Icon className="w-4 h-4" />, onClick: () => duplicateMutation.mutate(p._id) },
+                        { key: "visibility", label: p.isPublic ? "Make Private" : "Make Public", icon: p.isPublic ? <LockClosedIcon className="w-4 h-4 text-zinc-400" /> : <GlobeAltIcon className="w-4 h-4 text-indigo-400" />, onClick: () => handleTogglePublish(p) },
                         { type: 'divider' },
                         !p.isLive && { key: "delete", label: <span className="text-red-400 font-bold">Delete</span>, icon: <TrashIcon className="text-red-400 w-4 h-4" />, onClick: () => handleDelete(p) },
                       ].filter(Boolean) as any,

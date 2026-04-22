@@ -878,3 +878,44 @@ label.jodit-ui-label {
   min-height: 100vh;
   color: var(--text);
 }
+
+/* ─── Ant Design Dropdown Premium Overrides ────────────────────────────────── */
+.ant-dropdown .ant-dropdown-menu {
+  background-color: rgba(10, 10, 10, 0.8) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 8px !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
+}
+
+.ant-dropdown .ant-dropdown-menu-item {
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
+  padding: 8px 12px !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.ant-dropdown .ant-dropdown-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+}
+
+.ant-dropdown .ant-dropdown-menu-item-active {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.ant-dropdown .ant-dropdown-menu-item-danger:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+}
+
+.ant-dropdown .ant-dropdown-menu-item-divider {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  margin: 6px 4px !important;
+}
+
+/* Specific profile overlay adjustments */
+.profile-dropdown-overlay .ant-dropdown-menu {
+  min-width: 220px !important;
+}
