@@ -126,7 +126,7 @@ export default function EditorPage() {
   const handleWizardSubmit = async (title: string, slug: string, selectedSections: string[]) => {
     const { updateTitle, updateSlug, addBlock } = useEditorStore.getState();
     const { SECTION_TEMPLATES } = await import("@/lib/config/sections");
-    
+
     if (title) updateTitle(title);
     if (slug) updateSlug(slug);
 
@@ -172,9 +172,9 @@ export default function EditorPage() {
   return (
     <>
       <EditorShell />
-    <NewPageWizard 
-        open={showWizard} 
-        onClose={() => setShowWizard(false)} 
+      <NewPageWizard
+        open={showWizard}
+        onClose={() => setShowWizard(false)}
         onSubmit={handleWizardSubmit}
         closable={!(isGuest && (!page?.routes || page.routes.length === 0 || page.routes[0].content.length === 0))}
       />

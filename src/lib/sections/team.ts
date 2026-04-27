@@ -30,16 +30,6 @@ export const teamSections: SectionTemplate[] = [
     name: "Team Grid",
     category: "Team",
     previewImage: "/previews/team/team-grid.png",
-    preview: `<div style="font-family:'Inter',sans-serif;padding:80px;background:#f8fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;box-sizing:border-box">
-      <div style="font-size:48px;font-weight:900;color:#0f172a;margin-bottom:40px;letter-spacing:-0.02em">Meet the Team</div>
-      <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:32px;width:100%;max-width:1000px">
-        ${[1, 2, 3].map(() => `<div style="background:#ffffff;border-radius:24px;padding:40px;border:1px solid #e2e8f0;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.03)">
-          <div style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg, #6366f1, #a78bfa);margin:0 auto 24px;box-shadow:0 8px 16px rgba(99,102,241,0.2)"></div>
-          <div style="font-size:24px;font-weight:800;color:#0f172a;margin-bottom:8px">Jane Doe</div>
-          <div style="font-size:16px;color:#6366f1;font-weight:600;text-transform:uppercase;letter-spacing:1px">Lead Designer</div>
-        </div>`).join("")}
-      </div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", { bgColor: "#f8fafc", padding: "5rem 2rem" });
       root.props.childBlocks = [
@@ -58,18 +48,6 @@ export const teamSections: SectionTemplate[] = [
     name: "Team Cards",
     category: "Team",
     previewImage: "/previews/team/team-cards.png",
-    preview: `<div style="font-family:'Inter',sans-serif;padding:80px;background:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;box-sizing:border-box">
-      <div style="font-size:52px;font-weight:900;color:#0f172a;margin-bottom:48px;letter-spacing:-0.03em">Our World-Class Team</div>
-      <div style="display:flex;gap:40px;width:100%;max-width:1100px">
-        ${[1, 2].map(() => `<div style="flex:1;background:#f8fafc;border-radius:32px;padding:16px;border:1px solid #e2e8f0;transition:transform 0.3s ease">
-          <div style="width:100%;height:320px;background:#e2e8f0;border-radius:24px;margin-bottom:24px;background-image:linear-gradient(45deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%)"></div>
-          <div style="padding:0 16px 16px">
-            <div style="font-size:28px;font-weight:800;color:#0f172a;margin-bottom:4px">Alex Kim</div>
-            <div style="font-size:18px;color:#64748b;font-weight:500">Engineering Director</div>
-          </div>
-        </div>`).join("")}
-      </div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", { bgColor: "#f8fafc", padding: "5rem 2rem" });
       root.props.childBlocks = [
@@ -88,16 +66,6 @@ export const teamSections: SectionTemplate[] = [
     name: "Elegant Cards (Circle Head)",
     category: "Team",
     previewImage: "/previews/team/team-elegant.png",
-    preview: `<div style="font-family:'Inter',sans-serif;padding:80px;background:#f1f5f9;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;box-sizing:border-box">
-      <div style="font-size:44px;font-weight:900;color:#1e293b;margin-bottom:60px;text-transform:uppercase;letter-spacing:2px">Meet Our Leadership</div>
-      <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:40px;width:100%;max-width:900px">
-        ${[1, 2].map(() => `<div style="background:#ffffff;border-radius:24px;padding:60px 40px 40px;border:1px solid #e2e8f0;position:relative;box-shadow:0 20px 40px rgba(0,0,0,0.04)">
-          <div style="width:110px;height:110px;border-radius:50%;background:#6366f1;position:absolute;top:-55px;left:50%;transform:translateX(-50%);border:8px solid #f1f5f9;box-shadow:0 10px 20px rgba(99,102,241,0.2)"></div>
-          <div style="font-size:26px;font-weight:800;color:#0f172a;margin-bottom:8px;text-align:center">Sarah Wilson</div>
-          <div style="font-size:16px;color:#64748b;text-align:center;font-weight:500">Chief Executive Officer</div>
-        </div>`).join("")}
-      </div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", { bgColor: "#e2e8f0", padding: "6rem 2rem" });
       root.props.childBlocks = [
@@ -118,18 +86,6 @@ export const teamSections: SectionTemplate[] = [
     name: "Colorful Block Portraits",
     category: "Team",
     previewImage: "/previews/team/team-colorful.png",
-    preview: `<div style="font-family:'Inter',sans-serif;padding:80px;background:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;box-sizing:border-box">
-      <div style="font-size:48px;font-weight:900;color:#ffffff;margin-bottom:48px;letter-spacing:-0.02em">The Minds Behind Pro</div>
-      <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:24px;width:100%;max-width:1100px">
-        ${["#eab308", "#22c55e", "#ef4444"].map((c) => `<div style="position:relative;overflow:hidden;border-radius:16px">
-          <div style="width:100%;height:380px;background:${c};transition:transform 0.5s ease"></div>
-          <div style="position:absolute;bottom:0;left:0;right:0;padding:24px;background:linear-gradient(transparent, rgba(0,0,0,0.8))">
-            <div style="font-size:22px;font-weight:700;color:#ffffff">Mike Cannon</div>
-            <div style="font-size:14px;color:rgba(255,255,255,0.7)">Product Lead</div>
-          </div>
-        </div>`).join("")}
-      </div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", { bgColor: "#ffffff", padding: "5rem 2rem" });
       root.props.childBlocks = [
@@ -149,16 +105,6 @@ export const teamSections: SectionTemplate[] = [
     name: "Dark Gradient Posters",
     category: "Team",
     previewImage: "/previews/team/team-red-gradient.png",
-    preview: `<div style="font-family:'Inter',sans-serif;padding:80px;background:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;box-sizing:border-box">
-      <div style="font-size:16px;color:#e11d48;font-weight:800;letter-spacing:4px;margin-bottom:16px">CRAFTED WITH PASSION</div>
-      <div style="font-size:60px;font-weight:900;color:#1e1b4b;margin-bottom:60px;letter-spacing:-0.04em">MEET THE EXPERTS</div>
-      <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:32px;width:100%;max-width:1200px">
-        ${[1, 2, 3].map(() => `<div style="border-radius:32px;height:450px;background:linear-gradient(to top, #e11d48, #cbd5e1);display:flex;flex-direction:column;justify-content:flex-end;padding:40px;box-shadow:0 30px 60px rgba(225,29,72,0.15)">
-          <div style="color:white;font-size:28px;font-weight:900;margin-bottom:8px">Chasity Jones</div>
-          <div style="color:rgba(255,255,255,0.8);font-size:18px;font-weight:600">Founder & CEO</div>
-        </div>`).join("")}
-      </div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", { bgColor: "#f4f6ff", padding: "6rem 2rem" });
       root.props.childBlocks = [
@@ -181,19 +127,6 @@ export const teamSections: SectionTemplate[] = [
     name: "Alternating Horizontal Cards",
     category: "Team",
     previewImage: "/previews/team/team-alternating.png",
-    preview: `<div style="font-family:'Inter',sans-serif;padding:80px;background:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;box-sizing:border-box">
-      <div style="font-size:32px;font-weight:800;color:#0f172a;margin-bottom:40px;align-self:flex-start">MEET OUR TEAM</div>
-      <div style="display:flex;flex-direction:column;gap:16px;width:100%;max-width:1000px">
-        <div style="display:flex;background:#0f172a;padding:32px;border-radius:16px;gap:32px;align-items:center;">
-          <div style="width:120px;height:120px;border-radius:50%;background:#e2e8f0;flex-shrink:0;"></div>
-          <div style="flex:1;">
-            <div style="font-size:20px;font-weight:700;color:#ffffff;margin-bottom:4px">AMBER GRACE W.</div>
-            <div style="font-size:12px;color:#94a3b8;font-weight:600;margin-bottom:8px">VICE PRESIDENT OF SALES</div>
-            <div style="font-size:14px;color:#e2e8f0;line-height:1.5">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
-          </div>
-        </div>
-      </div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", { bgColor: "#ffffff", padding: "4rem 2rem" });
       root.props.childBlocks = [

@@ -117,8 +117,7 @@ export interface SectionTemplate {
     id: string;
     name: string;
     category: string;
-    preview: string;
-    previewImage?: string;
+    previewImage: string;
     create: () => Block;
 }
 

@@ -37,7 +37,7 @@ export default function EditorShell() {
     history, addBlock, moveBlock, selectBlock, updateBlock,
     activeDrag, setActiveDrag, activeRouteId
   } = useEditorStore();
-  
+
   const [draggedWidth, setDraggedWidth] = useState<number | string>("auto");
   const [draggedHeight, setDraggedHeight] = useState<number | string>("auto");
 

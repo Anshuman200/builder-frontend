@@ -8,18 +8,6 @@ export const gallerySections: SectionTemplate[] = [
     name: "Gallery Masonry",
     category: "Gallery",
     previewImage: "/previews/gallery/gallery-masonry.png",
-    preview: `<div style="font-family:sans-serif;padding:12px;background:#f8fafc;height:100%;width:100%;box-sizing:border-box">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-        <div style="display:flex;flex-direction:column;gap:4px">
-          <div style="height:48px;background:url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=100&q=80) center/cover;border-radius:4px;border:1px solid var(--border)"></div>
-          <div style="height:64px;background:url(https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=100&q=80) center/cover;border-radius:4px;border:1px solid var(--border)"></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px">
-          <div style="height:64px;background:url(https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=100&q=80) center/cover;border-radius:4px;border:1px solid var(--border)"></div>
-          <div style="height:48px;background:url(https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=100&q=80) center/cover;border-radius:4px;border:1px solid var(--border)"></div>
-        </div>
-      </div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", { bgColor: "#f8fafc", padding: "5rem 2rem" });
       const masonry = makeBlock("masonry", {

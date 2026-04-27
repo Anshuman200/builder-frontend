@@ -201,22 +201,8 @@ export function SectionPreview({ template, scale = PREVIEW_SCALE }: { template: 
             pointerEvents: "none",
             backgroundColor: "transparent",
           }}
-
         />
-      ) : (
-        <div
-          style={{
-            width: `${100 / scale}%`,
-            height: `${100 / scale}%`,
-            pointerEvents: "none",
-            color: "#0f172a",
-            fontFamily: "Inter, system-ui, sans-serif",
-            transform: `scale(${scale})`,
-            transformOrigin: "top left",
-          }}
-          dangerouslySetInnerHTML={{ __html: template.preview }}
-        />
-      )}
+      ) : null}
     </div>
   );
 }

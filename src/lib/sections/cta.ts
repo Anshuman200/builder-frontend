@@ -8,14 +8,6 @@ export const ctaSections: SectionTemplate[] = [
     name: "Modern Wavy Gradient",
     category: "CTA",
     previewImage: "/previews/cta/cta-wavy.png",
-    preview: `<div style="font-family:sans-serif;padding:16px;background:linear-gradient(135deg,#312e81 0%,#7c3aed 50%,#ea580c 100%);border-radius:12px;text-align:center">
-      <div style="font-size:11px;font-weight:800;color:#fff;margin-bottom:4px">Ready to Unlock potential?</div>
-      <div style="font-size:6px;color:rgba(255,255,255,0.7);margin-bottom:8px">Let's create a lasting impression.</div>
-      <div style="display:flex;gap:4px;justify-content:center">
-        <div style="background:#fff;color:#000;font-size:5px;padding:3px 8px;border-radius:10px">Get a quote</div>
-        <div style="border:1px solid #fff;color:#fff;font-size:5px;padding:3px 8px;border-radius:10px">Learn more</div>
-      </div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", {
         bgColor: "linear-gradient(135deg, #1e1b4b 0%, #4c1d95 30%, #7c3aed 50%, #ea580c 80%, #fbbf24 100%)",
@@ -52,13 +44,6 @@ export const ctaSections: SectionTemplate[] = [
     name: "AI Elevate (Concentric)",
     category: "CTA",
     previewImage: "/previews/cta/cta-mobile-ai.png",
-    preview: `<div style="font-family:sans-serif;padding:16px;background:#dcfce7;display:flex;gap:8px;align-items:center;border-radius:12px">
-      <div style="flex:1">
-        <div style="font-size:10px;font-weight:800;color:#166534">Ready to Elevate?</div>
-        <div style="font-size:5px;color:#15803d;margin-top:2px">Experience the efficiency.</div>
-      </div>
-      <div style="width:40px;height:50px;background:#fff;border:1px solid #166534;border-radius:4px"></div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", {
         bgColor: "#e0f2fe",
@@ -103,13 +88,6 @@ export const ctaSections: SectionTemplate[] = [
     name: "Laptop Catchy Headline",
     category: "CTA",
     previewImage: "/previews/cta/cta-laptop-luxury.png",
-    preview: `<div style="font-family:sans-serif;padding:16px;background:#f8fafc;display:flex;gap:8px;align-items:center;border-radius:12px">
-      <div style="flex:1">
-        <div style="font-size:9px;font-weight:700;color:#0f172a">A catchy headline</div>
-        <div style="font-size:5px;color:#64748b;margin-top:2px">Lorem ipsum dolor sit.</div>
-      </div>
-      <div style="width:60px;height:40px;background:#e2e8f0;border-radius:4px"></div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", {
         bgColor: "#f9fafb",
@@ -152,13 +130,6 @@ export const ctaSections: SectionTemplate[] = [
     name: "Minimalist Pill Contrast",
     category: "CTA",
     previewImage: "/previews/cta/cta-minimalist.png",
-    preview: `<div style="font-family:sans-serif;padding:16px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;text-align:center">
-      <div style="font-size:11px;font-weight:900;color:#000;margin-bottom:8px">Ready to make everyday life clearer?</div>
-      <div style="display:flex;gap:4px;justify-content:center">
-        <div style="border:1px solid #000;color:#000;font-size:5px;padding:3px 10px;border-radius:20px">Buy now</div>
-        <div style="background:#000;color:#fff;font-size:5px;padding:3px 10px;border-radius:20px">Learn more</div>
-      </div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", {
         bgColor: "#ffffff",

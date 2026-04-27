@@ -26,56 +26,29 @@ export default function BlockPalette() {
   };
 
   return (
-    <>
-      <Popover
-        open={openPopover === "sections"}
-        onOpenChange={(open) => setOpenPopover(open ? "sections" : null)}
-        trigger={"hover"}
-        placement="bottomLeft"
-        arrow={false}
-        overlayClassName="dark"
-        styles={{ content: { padding: 0, borderRadius: 16, overflow: "hidden", background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 20px 50px rgba(0,0,0,0.5)" } }}
-        content={<div style={{ width: 480, height: 480 }} className="dark"><SectionsPanel onAdd={handleAdd} /></div>}
+    <Popover
+      open={openPopover === "elements"}
+      onOpenChange={(open) => setOpenPopover(open ? "elements" : null)}
+      trigger="hover"
+      placement="bottomLeft"
+      arrow={false}
+      classNames={{ root: "dark" }}
+      styles={{ content: { padding: 0, borderRadius: 16, overflow: "hidden", background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 20px 50px rgba(0,0,0,0.5)" } }}
+      content={<div style={{ width: 280 }} className="dark"><ElementsPanel onAdd={handleAdd} /></div>}
+    >
+      <button
+        style={{
+          display: "flex", alignItems: "center", gap: 6,
+          padding: "5px 12px", borderRadius: 8, border: "none",
+          background: openPopover === "elements" ? "var(--primary)" : "var(--surface)",
+          color: openPopover === "elements" ? "#fff" : "var(--text)",
+          cursor: "pointer", fontSize: 12, fontWeight: 600,
+          transition: "background 0.15s, color 0.15s",
+        }}
       >
-        <button
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "5px 12px", borderRadius: 8, border: "none",
-            background: openPopover === "sections" ? "var(--primary)" : "var(--surface)",
-            color: openPopover === "sections" ? "#fff" : "var(--text)",
-            cursor: "pointer", fontSize: 12, fontWeight: 600,
-            transition: "background 0.15s, color 0.15s",
-          }}
-        >
-          <span style={{ fontSize: 13 }}>🧩</span>
-          Sections
-        </button>
-      </Popover>
-
-      <Popover
-        open={openPopover === "elements"}
-        onOpenChange={(open) => setOpenPopover(open ? "elements" : null)}
-        trigger="hover"
-        placement="bottomLeft"
-        arrow={false}
-        overlayClassName="dark"
-        styles={{ content: { padding: 0, borderRadius: 16, overflow: "hidden", background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 20px 50px rgba(0,0,0,0.5)" } }}
-        content={<div style={{ width: 280 }} className="dark"><ElementsPanel onAdd={handleAdd} /></div>}
-      >
-        <button
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "5px 12px", borderRadius: 8, border: "none",
-            background: openPopover === "elements" ? "var(--primary)" : "var(--surface)",
-            color: openPopover === "elements" ? "#fff" : "var(--text)",
-            cursor: "pointer", fontSize: 12, fontWeight: 600,
-            transition: "background 0.15s, color 0.15s",
-          }}
-        >
-          <span style={{ fontSize: 13 }}>⚡</span>
-          Elements
-        </button>
-      </Popover>
-    </>
+        <span style={{ fontSize: 13 }}>⚡</span>
+        Elements
+      </button>
+    </Popover>
   );
 }

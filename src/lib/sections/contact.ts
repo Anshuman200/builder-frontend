@@ -24,20 +24,6 @@ export const contactSections: SectionTemplate[] = [
     name: "Simple Form & Icon Cards",
     category: "Contact",
     previewImage: "/previews/contact/contact-teal-icon-cards.png",
-    preview: `<div style="font-family:sans-serif;border-radius:8px;overflow:hidden">
-      <div style="background:#fff;padding:10px;text-align:center">
-        <div style="font-size:9px;font-weight:800;color:#111;margin-bottom:2px">Contact Us</div>
-        <div style="font-size:5px;color:#555;margin-bottom:6px">Any questions? Just write us!</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px">
-          <div style="height:7px;background:#f0f0f0;border-radius:10px"></div>
-          <div style="height:7px;background:#f0f0f0;border-radius:10px"></div>
-        </div>
-        <div style="height:8px;background:#00bcd4;border-radius:10px"></div>
-      </div>
-      <div style="background:#e0f7fa;padding:8px;display:flex;gap:4px;justify-content:center">
-        ${["🏃", "📞", "📍"].map(e => `<div style="text-align:center;flex:1"><div style="width:14px;height:14px;background:#00bcd4;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 2px;font-size:7px">${e}</div><div style="font-size:4px;font-weight:700;color:#111">Info</div></div>`).join("")}
-      </div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", { bgColor: "#ffffff", padding: "0" });
 
@@ -89,13 +75,6 @@ export const contactSections: SectionTemplate[] = [
     name: "Gradient CTA with Cards",
     category: "Contact",
     previewImage: "/previews/contact/contact-gradient-cta.png",
-    preview: `<div style="font-family:sans-serif;padding:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);border-radius:8px;text-align:center">
-      <div style="font-size:10px;font-weight:800;color:#fff;margin-bottom:3px">Let's Work Together</div>
-      <div style="font-size:6px;color:#e0e7ff;margin-bottom:8px">Start your project with us today.</div>
-      <div style="display:flex;gap:4px;justify-content:center">
-        ${["📍", "✉️", "📞"].map(e => `<div style="background:rgba(255,255,255,0.15);border-radius:4px;padding:4px 6px;font-size:9px">${e}</div>`).join("")}
-      </div>
-    </div>`,
     create: () => {
       const root = makeBlock("hero", {
         bgColor: "#6366f1",
@@ -144,16 +123,6 @@ export const contactSections: SectionTemplate[] = [
     name: "Image Split Contact",
     category: "Contact",
     previewImage: "/previews/contact/contact-image-split.png",
-    preview: `<div style="font-family:sans-serif;display:flex;border-radius:8px;overflow:hidden;min-height:80px">
-              <div style="flex:1;background:linear-gradient(to bottom,#a78bfa,#6366f1);min-height:80px;position:relative">
-                <div style="position:absolute;inset:0;background:#6366f1;opacity:0.7"></div>
-              </div>
-              <div style="flex:1;padding:10px;background:#fff">
-                <div style="font-size:9px;font-weight:800;color:#0f172a;margin-bottom:3px">Contact Us</div>
-                ${["", "", "", ""].map(() => `<div style="height:5px;background:#f1f5f9;border-radius:2px;margin-bottom:3px"></div>`).join("")}
-                <div style="height:8px;background:#6366f1;border-radius:2px;margin-top:4px"></div>
-              </div>
-            </div>`,
     create: () => {
       const root = makeBlock("container", { bgColor: "#ffffff", padding: "0" });
       const cols = makeBlock("columns", { leftWidth: "45", gap: "0", padding: "0" });

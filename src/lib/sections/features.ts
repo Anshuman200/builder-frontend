@@ -8,16 +8,6 @@ export const featuresSections: SectionTemplate[] = [
     name: "3-Column Feature Grid",
     category: "Features",
     previewImage: "/previews/features/features-grid.png",
-    preview: `<div style="font-family:sans-serif;padding:12px;background:var(--bg-secondary);text-align:center">
-      <div style="font-size:9px;font-weight:700;color:var(--text);margin-bottom:8px">Why Choose Us?</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-        ${[1, 2, 3].map(() => `<div style="background:var(--surface);border-radius:4px;padding:6px;border:1px solid var(--border)">
-          <div style="width:14px;height:14px;background:var(--primary);border-radius:3px;margin:0 auto 4px;opacity:0.8"></div>
-          <div style="font-size:6px;font-weight:600;color:var(--text)">Feature</div>
-          <div style="font-size:5px;color:var(--text-muted)">Short desc.</div>
-        </div>`).join("")}
-      </div>
-    </div>`,
     create: () => makeBlock("features", {
       bgColor: "#f8fafc", textColor: "#0f172a", padding: "5rem 2rem",
       title: "Why Choose Us?", subtitle: "Everything you need to build faster.",
@@ -38,22 +28,6 @@ export const featuresSections: SectionTemplate[] = [
     name: "Alternating Image & Text",
     category: "Features",
     previewImage: "/previews/features/features-alternating.png",
-    preview: `<div style="font-family:sans-serif;padding:12px;background:var(--bg-secondary)">
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-        <div style="flex:1">
-          <div style="font-size:8px;font-weight:700;color:var(--text)">Build visually</div>
-          <div style="font-size:6px;color:var(--text-muted)">See what your site looks like as you build.</div>
-        </div>
-        <div style="width:44px;height:28px;background:var(--surface);border-radius:4px;flex-shrink:0;border:1px solid var(--border)"></div>
-      </div>
-      <div style="border-top:1px solid var(--border);padding-top:8px;display:flex;gap:8px;align-items:center">
-        <div style="width:44px;height:28px;background:var(--surface);border-radius:4px;flex-shrink:0;border:1px solid var(--border)"></div>
-        <div style="flex:1">
-          <div style="font-size:8px;font-weight:700;color:var(--text)">Publish instantly</div>
-          <div style="font-size:6px;color:var(--text-muted)">Push changes live with a click.</div>
-        </div>
-      </div>
-    </div>`,
     create: () => {
       const root = makeBlock("container", { bgColor: "#f8fafc", padding: "5rem 2rem" });
       const row1 = makeBlock("columns", { leftWidth: "50", gap: "4rem", align: "center", padding: "0 0 4rem 0" });

@@ -10,7 +10,7 @@ import {
     ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove,
     TextInputWithUnit, useSubItemFocus, PrefixInput
 } from "./shared";
-import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, PlusIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, PlusIcon, GlobeAltIcon, Squares2X2Icon, ListBulletIcon } from "@heroicons/react/24/outline";
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "../IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
@@ -476,39 +476,125 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                                 <div
                                     onClick={() => !isActive && setActiveRoute(route.id)}
                                     style={{
-                                        padding: "8px",
-                                        background: isActive ? "rgba(99,102,241,0.08)" : "var(--surface)",
-                                        border: isActive ? "1.5px solid var(--primary)" : "1px solid var(--border)",
-                                        borderRadius: 6,
+                                        padding: "12px",
+                                        background: isActive ? "rgba(99,102,241,0.05)" : "rgba(255,255,255,0.02)",
+                                        border: isActive ? "1px solid var(--primary)" : "1px solid rgba(255,255,255,0.06)",
+                                        borderRadius: 12,
                                         cursor: isActive ? "default" : "pointer",
-                                        transition: "all 0.2s",
-                                        width: "100%"
+                                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                                        width: "100%",
+                                        position: "relative",
+                                        overflow: "hidden"
                                     }}
                                 >
-                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                                        <span style={{ fontSize: 11, fontWeight: 700, color: isActive ? "var(--primary)" : "var(--text)" }}>{route.name}</span>
+                                    {isActive && (
+                                        <div style={{ position: "absolute", top: 0, left: 0, width: 2, height: "100%", background: "var(--primary)" }} />
+                                    )}
+
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                            <div style={{ width: 20, height: 20, borderRadius: 6, background: isActive ? "rgba(99,102,241,0.15)" : "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center", border: isActive ? "1px solid rgba(99,102,241,0.2)" : "1px solid rgba(255,255,255,0.1)" }}>
+                                                <GlobeAltIcon style={{ width: 12, height: 12, color: isActive ? "var(--primary)" : "rgba(255,255,255,0.4)" }} />
+                                            </div>
+                                            <span style={{ fontSize: 12, fontWeight: 800, color: isActive ? "#fff" : "rgba(255,255,255,0.8)", letterSpacing: "-0.01em" }}>{route.name}</span>
+                                        </div>
                                         {!isActive && (
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); deleteRoute(route.id); }}
-                                                style={{ padding: "2px 6px", fontSize: 10, background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "none", borderRadius: 4, cursor: "pointer" }}
+                                                className="group/del"
+                                                style={{ 
+                                                    padding: "6px", 
+                                                    background: "rgba(239,68,68,0.05)", 
+                                                    border: "1px solid rgba(239,68,68,0.1)", 
+                                                    borderRadius: 8, 
+                                                    cursor: "pointer", 
+                                                    transition: "all 0.2s",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center"
+                                                }}
+                                                onMouseEnter={e => {
+                                                    e.currentTarget.style.background = "rgba(239,68,68,0.15)";
+                                                    e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)";
+                                                }}
+                                                onMouseLeave={e => {
+                                                    e.currentTarget.style.background = "rgba(239,68,68,0.05)";
+                                                    e.currentTarget.style.borderColor = "rgba(239,68,68,0.1)";
+                                                }}
                                             >
-                                                &times;
+                                                <TrashIcon style={{ width: 14, height: 14 }} className="text-red-400/60 group-hover/del:text-red-400" />
                                             </button>
                                         )}
                                     </div>
-                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }} onClick={e => e.stopPropagation()}>
-                                        <TextInput value={route.name} onChange={(v) => updateRoute(route.id, { name: v })} placeholder="Name" />
-                                        <TextInput value={route.path} onChange={(v) => updateRoute(route.id, { path: v })} placeholder="Path" />
+
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }} onClick={e => e.stopPropagation()}>
+                                        <div className="flex flex-col gap-1.5">
+                                            <label style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Page Name</label>
+                                            <TextInput 
+                                                value={route.name} 
+                                                onChange={(v) => updateRoute(route.id, { name: v })} 
+                                                placeholder="Name" 
+                                                style={{ height: 28, fontSize: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.05)" }} 
+                                            />
+                                        </div>
+                                        <div className="flex flex-col gap-1.5">
+                                            <label style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.05em" }}>URL Path</label>
+                                            <TextInput 
+                                                value={route.path} 
+                                                onChange={(v) => updateRoute(route.id, { path: v })} 
+                                                placeholder="Path" 
+                                                style={{ height: 28, fontSize: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.05)" }} 
+                                            />
+                                        </div>
                                     </div>
-                                    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 8px" }} onClick={e => e.stopPropagation()}>
-                                        <label style={{ fontSize: 9, display: "flex", alignItems: "center", gap: 4, color: route.showInHeader !== false ? "var(--primary)" : "var(--text-muted)", fontWeight: 600 }}>
-                                            <input type="checkbox" checked={route.showInHeader !== false} onChange={(e) => updateRoute(route.id, { showInHeader: e.target.checked })} />
-                                            HEADER
-                                        </label>
-                                        <label style={{ fontSize: 9, display: "flex", alignItems: "center", gap: 4, color: route.showInFooter ? "var(--primary)" : "var(--text-muted)", fontWeight: 600 }}>
-                                            <input type="checkbox" checked={!!route.showInFooter} onChange={(e) => updateRoute(route.id, { showInFooter: e.target.checked })} />
-                                            FOOTER
-                                        </label>
+
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }} onClick={e => e.stopPropagation()}>
+                                        <button
+                                            onClick={() => updateRoute(route.id, { showInHeader: route.showInHeader === false })}
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                gap: 6,
+                                                padding: "7px 0",
+                                                borderRadius: 8,
+                                                fontSize: 9,
+                                                fontWeight: 800,
+                                                textTransform: "uppercase",
+                                                letterSpacing: "0.05em",
+                                                cursor: "pointer",
+                                                transition: "all 0.2s",
+                                                background: route.showInHeader !== false ? "rgba(99,102,241,0.1)" : "rgba(255,255,255,0.03)",
+                                                border: route.showInHeader !== false ? "1px solid rgba(99,102,241,0.3)" : "1px solid rgba(255,255,255,0.05)",
+                                                color: route.showInHeader !== false ? "var(--primary)" : "rgba(255,255,255,0.3)"
+                                            }}
+                                        >
+                                            <Squares2X2Icon style={{ width: 12, height: 12 }} />
+                                            Header
+                                        </button>
+                                        <button
+                                            onClick={() => updateRoute(route.id, { showInFooter: !route.showInFooter })}
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                gap: 6,
+                                                padding: "7px 0",
+                                                borderRadius: 8,
+                                                fontSize: 9,
+                                                fontWeight: 800,
+                                                textTransform: "uppercase",
+                                                letterSpacing: "0.05em",
+                                                cursor: "pointer",
+                                                transition: "all 0.2s",
+                                                background: !!route.showInFooter ? "rgba(99,102,241,0.1)" : "rgba(255,255,255,0.03)",
+                                                border: !!route.showInFooter ? "1px solid rgba(99,102,241,0.3)" : "1px solid rgba(255,255,255,0.05)",
+                                                color: !!route.showInFooter ? "var(--primary)" : "rgba(255,255,255,0.3)"
+                                            }}
+                                        >
+                                            <ListBulletIcon style={{ width: 12, height: 12 }} />
+                                            Footer
+                                        </button>
                                     </div>
                                 </div>
                             );
@@ -525,7 +611,24 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                             ]
                         }}
                     >
-                        <button style={{ padding: "8px 0", background: "rgba(99,102,241,0.08)", color: "var(--primary)", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer", marginTop: 4, width: "100%" }}>+ Add Page</button>
+                        <button style={{ 
+                            padding: "10px 0", 
+                            background: "rgba(99,102,241,0.05)", 
+                            color: "var(--primary)", 
+                            border: "1px solid rgba(99,102,241,0.15)", 
+                            borderRadius: 12, 
+                            fontSize: 11, 
+                            fontWeight: 800, 
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            cursor: "pointer", 
+                            marginTop: 8, 
+                            width: "100%",
+                            transition: "all 0.2s"
+                        }}>
+                            <PlusIcon style={{ width: 14, height: 14, display: "inline-block", marginRight: 6, marginTop: -2 }} />
+                            Add New Page
+                        </button>
                     </Dropdown>
                 </div>
             </Section>

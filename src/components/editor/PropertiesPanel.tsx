@@ -141,36 +141,50 @@ export default function PropertiesPanel() {
         ? findBlock(rootSearchBlocks, selectedBlockId)
         : null;
 
+    const configTheme = {
+        algorithm: antdTheme.darkAlgorithm,
+        token: {
+            colorPrimary: PANEL_COLORS.primary,
+            colorBgContainer: PANEL_COLORS.inputBg,
+            colorBorder: PANEL_COLORS.border,
+            colorText: PANEL_COLORS.text,
+            colorTextDescription: PANEL_COLORS.muted,
+            colorBgElevated: PANEL_COLORS.sectionBg,
+            borderRadius: 6,
+        },
+        components: {
+            Select: {
+                controlHeight: 30,
+                fontSize: 11,
+                colorBgContainer: PANEL_COLORS.inputBg,
+                colorBorder: PANEL_COLORS.border,
+                colorText: PANEL_COLORS.text,
+            },
+            Input: {
+                controlHeight: 30,
+                fontSize: 11,
+                colorBgContainer: PANEL_COLORS.inputBg,
+                colorBorder: PANEL_COLORS.border,
+                colorText: PANEL_COLORS.text,
+            },
+            Segmented: {
+                controlHeight: 28,
+                fontSize: 11,
+            }
+        }
+    };
+
     if (!selectedBlock) {
-        if (page) return <PageSettingsPanel page={page} />;
+        if (page) return (
+            <ConfigProvider theme={configTheme}>
+                <PageSettingsPanel page={page} />
+            </ConfigProvider>
+        );
         return null;
     }
 
     return (
-        <ConfigProvider
-            theme={{
-                algorithm: antdTheme.darkAlgorithm,
-                token: {
-                    colorPrimary: PANEL_COLORS.primary,
-                    colorBgContainer: PANEL_COLORS.inputBg,
-                    colorBorder: PANEL_COLORS.border,
-                    colorText: PANEL_COLORS.text,
-                    colorTextDescription: PANEL_COLORS.muted,
-                    colorBgElevated: PANEL_COLORS.sectionBg,
-                    borderRadius: 4,
-                },
-                components: {
-                    Select: {
-                        controlHeight: 26,
-                        fontSize: 11,
-                    },
-                    Input: {
-                        controlHeight: 26,
-                        fontSize: 11,
-                    }
-                }
-            }}
-        >
+        <ConfigProvider theme={configTheme}>
             <aside
                 ref={scrollRef}
                 style={{

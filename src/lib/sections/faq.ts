@@ -23,12 +23,6 @@ export const faqSections: SectionTemplate[] = [
         category: "FAQ",
         name: "Simple FAQ",
         previewImage: "/previews/faq/faq-simple.png",
-        preview: `<div style="font-family:sans-serif;background:#fff;padding:2rem 1rem;text-align:center;">
-       <h3 style="margin:0 0 1rem 0;font-size:1.2rem;color:#0f172a;">Frequently Asked Questions</h3>
-       <div style="background:#f8fafc;padding:0.5rem 1rem;border-radius:6px;margin-bottom:0.5rem;text-align:left;color:#333;font-size:0.85rem;">Q. How does it work? <span>▼</span></div>
-       <div style="background:#f8fafc;padding:0.5rem 1rem;border-radius:6px;margin-bottom:0.5rem;text-align:left;color:#333;font-size:0.85rem;">Q. What is the pricing? <span>▼</span></div>
-       <div style="background:#f8fafc;padding:0.5rem 1rem;border-radius:6px;margin-bottom:0.5rem;text-align:left;color:#333;font-size:0.85rem;">Q. Can I get a refund? <span>▼</span></div>
-    </div>`,
         create: () =>
             makeBlock("container", {
                 padding: "64px 24px",
@@ -84,13 +78,6 @@ export const faqSections: SectionTemplate[] = [
         category: "FAQ",
         name: "Two Columns FAQ",
         previewImage: "/previews/faq/faq-two-cols.png",
-        preview: `<div style="font-family:sans-serif;background:#fff;padding:2rem 1rem;text-align:center;">
-       <h3 style="margin:0 0 1rem 0;font-size:1.2rem;color:#0f172a;">Frequently Asked Questions</h3>
-       <div style="display:flex;gap:1rem;">
-         <div style="flex:1;"><div style="background:#f8fafc;padding:0.5rem;border-radius:6px;margin-bottom:0.5rem;font-size:0.7rem;">Q. Question 1 <span>▼</span></div></div>
-         <div style="flex:1;"><div style="background:#f8fafc;padding:0.5rem;border-radius:6px;margin-bottom:0.5rem;font-size:0.7rem;">Q. Question 2 <span>▼</span></div></div>
-       </div>
-    </div>`,
         create: () =>
             makeBlock("container", {
                 padding: "64px 24px",
@@ -161,17 +148,6 @@ export const faqSections: SectionTemplate[] = [
         category: "FAQ",
         name: "Split FAQ",
         previewImage: "/previews/faq/faq-split.png",
-        preview: `<div style="font-family:sans-serif;background:#fff;padding:2rem 1rem;display:flex;gap:1rem;">
-       <div style="flex:1;text-align:left;">
-         <h3 style="margin:0 0 0.5rem 0;font-size:1.1rem;">Have Any Questions?</h3>
-         <p style="font-size:0.7rem;color:#666;">Lorem ipsum dolor sit amet.</p>
-         <button style="background:#22c55e;color:#fff;border:none;padding:0.3rem 0.6rem;font-size:0.7rem;border-radius:4px;">Contact Us</button>
-       </div>
-       <div style="flex:2;">
-         <div style="background:#f8fafc;padding:0.5rem;border-radius:4px;margin-bottom:0.5rem;font-size:0.75rem;">Q. Split question 1?</div>
-         <div style="background:#f8fafc;padding:0.5rem;border-radius:4px;margin-bottom:0.5rem;font-size:0.75rem;">Q. Split question 2?</div>
-       </div>
-    </div>`,
         create: () =>
             makeBlock("container", {
                 padding: "64px 24px",

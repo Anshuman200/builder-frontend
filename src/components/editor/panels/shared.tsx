@@ -307,31 +307,35 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
     };
 
     return (
-        <Space.Compact className="w-full" style={{ height: 30 }}>
+        <div style={{ display: "flex", width: "100%", height: 30 }}>
             <Input
                 value={numValue}
                 placeholder={placeholder}
                 style={{
                     height: 30, fontSize: 11, background: PANEL_COLORS.inputBg,
                     color: PANEL_COLORS.text, border: `1px solid ${PANEL_COLORS.inputBorder}`,
-                    borderRight: "none", borderRadius: "6px 0 0 6px", ...style
+                    borderRight: "none", borderRadius: "6px 0 0 6px", flex: 1, ...style
                 }}
-                className="w-full"
                 onChange={(e) => handleNumChange(e.target.value)}
                 onFocus={(e) => { e.target.style.borderColor = PANEL_COLORS.primary; e.target.style.background = "#09090b"; }}
                 onBlur={(e) => { e.target.style.borderColor = PANEL_COLORS.inputBorder; e.target.style.background = PANEL_COLORS.inputBg; }}
             />
             <Select
                 value={currentUnit}
-                className="min-w-20"
                 size="small"
                 onChange={handleUnitChange}
-                style={{ height: 30 }}
-                dropdownStyle={{ background: "#18181b", border: `1px solid ${PANEL_COLORS.inputBorder}` }}
+                style={{ 
+                    height: 30, 
+                    width: 70,
+                }}
+                dropdownStyle={{ 
+                    background: "#18181b", 
+                    border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                }}
                 options={units}
                 suffixIcon={<ChevronDownIcon style={{ width: 10, height: 10 }} />}
             />
-        </Space.Compact>
+        </div>
     );
 }
 
@@ -1054,12 +1058,13 @@ function SortableItem({ id, index, children, onDelete }: { id: string, index: nu
             display: "flex",
             flexDirection: "column",
             gap: 4,
-            padding: "10px 12px",
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: 8,
-            boxShadow: isDragging ? "0 8px 20px rgba(0,0,0,0.15)" : "none",
-            transition: "all 0.2s ease"
+            padding: "8px",
+            background: isDragging ? "rgba(255,255,255,0.05)" : "#0a0a0a",
+            border: isDragging ? "1px solid var(--primary)" : `1px solid ${PANEL_COLORS.border}`,
+            borderRadius: 12,
+            boxShadow: isDragging ? "0 20px 40px rgba(0,0,0,0.4)" : "none",
+            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            backdropFilter: isDragging ? "blur(8px)" : "none",
         }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -1070,11 +1075,31 @@ function SortableItem({ id, index, children, onDelete }: { id: string, index: nu
                 {onDelete && (
                     <button
                         onClick={onDelete}
-                        style={{ background: "transparent", border: "none", color: "var(--error, #ef4444)", cursor: "pointer", fontSize: 16, padding: "0 4px", opacity: 0.6, display: "flex", alignItems: "center" }}
-                        onMouseEnter={e => e.currentTarget.style.opacity = "1"}
-                        onMouseLeave={e => e.currentTarget.style.opacity = "0.6"}
+                        style={{ 
+                            background: "rgba(239,68,68,0.05)", 
+                            border: "1px solid rgba(239,68,68,0.1)", 
+                            color: "#ef4444", 
+                            cursor: "pointer", 
+                            padding: "6px", 
+                            borderRadius: 8,
+                            display: "flex", 
+                            alignItems: "center",
+                            justifyContent: "center",
+                            transition: "all 0.2s",
+                            opacity: 0.8
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.opacity = "1";
+                            e.currentTarget.style.background = "rgba(239,68,68,0.15)";
+                            e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)";
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.opacity = "0.8";
+                            e.currentTarget.style.background = "rgba(239,68,68,0.05)";
+                            e.currentTarget.style.borderColor = "rgba(239,68,68,0.1)";
+                        }}
                     >
-                        &times;
+                        <TrashIcon style={{ width: 14, height: 14 }} />
                     </button>
                 )}
             </div>
