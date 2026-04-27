@@ -772,8 +772,15 @@ export const useEditorStore = create<EditorStore>()(
                 if (!activeRoute) return;
 
                 if (target.id === "canvas-root") {
-                    // Just push to end of route
-                    activeRoute.content.push(freshBlock);
+                    if (freshBlock.type === "header") {
+                        if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
+                        s.page.globalBlocks.header = freshBlock;
+                    } else if (freshBlock.type === "footer") {
+                        if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
+                        s.page.globalBlocks.footer = freshBlock;
+                    } else {
+                        activeRoute.content.push(freshBlock);
+                    }
                 } else {
                     // Reuse the deep insertion logic from moveBlock
                     let roots = [
@@ -849,8 +856,10 @@ export const useEditorStore = create<EditorStore>()(
                     })));
                 } else {
                     if (freshBlock.type === "header") {
+                        if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
                         s.page.globalBlocks.header = freshBlock;
                     } else if (freshBlock.type === "footer") {
+                        if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
                         s.page.globalBlocks.footer = freshBlock;
                     } else if (activeRoute) {
                         activeRoute.content.push(freshBlock);
@@ -1080,7 +1089,16 @@ export const useEditorStore = create<EditorStore>()(
                 if (overId === "canvas-root") {
                     // Append to end of route content
                     activeRoute.content = activeRoute.content.filter(b => b.id !== activeId);
-                    activeRoute.content.push(removed);
+                    
+                    if (removed.type === "header") {
+                        if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
+                        s.page.globalBlocks.header = removed;
+                    } else if (removed.type === "footer") {
+                        if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
+                        s.page.globalBlocks.footer = removed;
+                    } else {
+                        activeRoute.content.push(removed);
+                    }
                 } else {
                     const { newBlocks: afterInsert, inserted } = insertBlockDeep(afterRemove, removed, overId, position, childProp);
 
