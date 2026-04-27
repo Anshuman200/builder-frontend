@@ -60,26 +60,26 @@ export function HeaderBlock({ block }: BlockProps) {
     else if (style === "transparent") { background = "transparent"; }
 
     const isMobile = isPreview ? false : (viewMode === "mobile");
-    const baseHeaderStyle: React.CSSProperties = { 
-        position: position as any, 
-        top: position !== "static" ? 0 : undefined, 
-        left: position !== "static" ? 0 : undefined, 
-        right: position !== "static" ? 0 : undefined, 
-        zIndex: 50, 
+    const baseHeaderStyle: React.CSSProperties = {
+        position: position as any,
+        top: position !== "static" ? 0 : undefined,
+        left: position !== "static" ? 0 : undefined,
+        right: position !== "static" ? 0 : undefined,
+        zIndex: 50,
         background: bgImage ? `linear-gradient(rgba(0,0,0,${bgOpacity}), rgba(0,0,0,${bgOpacity})), url(${bgImage})` : background,
         backgroundSize: "cover",
         backgroundPosition: bgPosition,
-        backdropFilter, 
-        borderBottom, 
-        color: textColor, 
-        width: "100%" 
+        backdropFilter,
+        borderBottom,
+        color: textColor,
+        width: "100%"
     };
     const ctaStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 20px", borderRadius: "9999px", fontWeight: 600, fontSize: "0.9rem", textDecoration: "none", cursor: isPreview ? "pointer" : "default", transition: "opacity 0.2s", background: ctaVariant === "solid" ? ctaBgColor : "transparent", color: ctaVariant === "solid" ? ctaTextColor : ctaBgColor, border: ctaVariant === "outline" ? `2px solid ${ctaBgColor}` : "none" };
 
     // Logo Element
     const LogoElement = () => {
         const borderRadius = logoShape === "circle" ? "50%" : logoShape === "rounded" ? "12px" : "0px";
-        
+
         return (
             <Link
                 href="/"
@@ -94,9 +94,9 @@ export function HeaderBlock({ block }: BlockProps) {
                 }}
             >
                 {logoType === "image" && logoImage ? (
-                    <div style={{ 
-                        width: logoWidth, 
-                        height: logoHeight, 
+                    <div style={{
+                        width: logoWidth,
+                        height: logoHeight,
                         position: "relative",
                         borderRadius,
                         overflow: "hidden"
@@ -117,7 +117,7 @@ export function HeaderBlock({ block }: BlockProps) {
 
     const routes = useEditorStore((s) => s.page?.routes) || [];
     const autoRoutes = routes.filter(r => r.showInHeader !== false);
-    
+
     // 1. Resolve explicitly ordered links from block props
     const resolvedLinks = (links as any[]).map(l => {
         if (l.isAuto) {
