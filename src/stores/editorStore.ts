@@ -82,6 +82,10 @@ interface EditorStore {
         onSelect: (url: string) => void;
         title?: string;
     };
+    wizard: {
+        open: boolean;
+        blankMode: boolean;
+    };
 
     // ─ Actions ────────────────────────────────────────────────────────────────
     setPage: (page: EditorPage) => void;
@@ -131,6 +135,8 @@ interface EditorStore {
     undo: () => void;
     redo: () => void;
     markClean: () => void;
+    openWizard: (blankMode?: boolean) => void;
+    closeWizard: () => void;
 }
 
 function updateColProps(b: Block, id: string, updater: (b: Block) => Block): Block {
@@ -620,6 +626,10 @@ export const useEditorStore = create<EditorStore>()(
             type: "all",
             onSelect: () => { },
             title: "Select Media",
+        },
+        wizard: {
+            open: false,
+            blankMode: false,
         },
 
         setPage: (page) =>
@@ -1222,6 +1232,14 @@ export const useEditorStore = create<EditorStore>()(
             s.history.push(snapshot);
             s.historyIndex++;
             s.isDirty = true;
+        }),
+
+        openWizard: (blankMode = false) => set((s) => {
+            s.wizard.open = true;
+            s.wizard.blankMode = blankMode;
+        }),
+        closeWizard: () => set((s) => {
+            s.wizard.open = false;
         }),
     }))
 );

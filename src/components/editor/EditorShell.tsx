@@ -30,13 +30,16 @@ import { GlobalMediaPicker } from "./GlobalMediaPicker";
 import { BlockPickerDrawer } from "./BlockPickerDrawer";
 import { TemplatePickerDrawer } from "./TemplatePickerDrawer";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import NewPageWizard from "./NewPageWizard";
 
 export default function EditorShell() {
   const {
     page, undo, redo, deleteBlock, duplicateBlock, selectedBlockId, historyIndex,
     history, addBlock, moveBlock, selectBlock, updateBlock,
-    activeDrag, setActiveDrag, activeRouteId
+    activeDrag, setActiveDrag, activeRouteId,
+    wizard, closeWizard, addRoute
   } = useEditorStore();
+  const [isCreatingPage, setIsCreatingPage] = useState(false);
 
   const [draggedWidth, setDraggedWidth] = useState<number | string>("auto");
   const [draggedHeight, setDraggedHeight] = useState<number | string>("auto");
@@ -367,6 +370,56 @@ export default function EditorShell() {
       <GlobalMediaPicker />
       <BlockPickerDrawer />
       <TemplatePickerDrawer />
+      <NewPageWizard
+        open={wizard.open}
+        onClose={closeWizard}
+        isSubmitting={isCreatingPage}
+        blankMode={wizard.blankMode}
+        excludeSections={["header", "footer"]}
+        existingRoutes={page?.routes || []}
+        onSubmit={async (title, slug, selectedSections, showInHeader, showInFooter) => {
+          setIsCreatingPage(true);
+          try {
+            const finalPath = slug.startsWith("/") ? slug : `/${slug}`;
+            addRoute({ name: title, path: finalPath, showInHeader, showInFooter });
+
+            // Give store a tick to update routes, then add sections to the new route
+            await new Promise(r => setTimeout(r, 50));
+            const { SECTION_TEMPLATES } = await import("@/lib/config/sections");
+            const { injectProjectName } = await import("@/lib/config/blocks");
+
+            const SECTION_ID_MAP: Record<string, string> = {
+              header: "nav-", hero: "hero-", features: "features-",
+              stats: "stats-", team: "team-", testimonials: "testimonials-",
+              pricing: "pricing-", contact: "contact-", cta: "cta-",
+              gallery: "gallery-", faq: "faq-", footer: "footer-",
+            };
+
+            const sorted = [
+              ...selectedSections.filter(id => id === "header"),
+              ...selectedSections.filter(id => id !== "header" && id !== "footer"),
+              ...selectedSections.filter(id => id === "footer"),
+            ];
+
+            const projectName = title || page?.title || "My Page";
+            sorted.forEach(id => {
+              const prefix = SECTION_ID_MAP[id];
+              if (prefix) {
+                const template = SECTION_TEMPLATES.find((t: any) => t.id.startsWith(prefix));
+                if (template) {
+                  const raw = template.create();
+                  const migrated = injectProjectName(raw, projectName);
+                  useEditorStore.getState().addBlock(migrated);
+                }
+              }
+            });
+
+            closeWizard();
+          } finally {
+            setIsCreatingPage(false);
+          }
+        }}
+      />
     </DndContext>
   );
 }

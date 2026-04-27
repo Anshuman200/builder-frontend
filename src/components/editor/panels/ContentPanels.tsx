@@ -445,7 +445,7 @@ export function ContactInfoPanel({ block }: { block: Block }) {
 }
 
 export function PageSettingsPanel({ page }: { page: EditorPage }) {
-    const { updateTheme, updatePageData, activeRouteId, setActiveRoute, addRoute, updateRoute, deleteRoute } = useEditorStore();
+    const { updateTheme, updatePageData, activeRouteId, setActiveRoute, addRoute, updateRoute, deleteRoute, openWizard } = useEditorStore();
     const theme = page.theme || DEFAULT_THEME;
     const l = theme.layout || DEFAULT_THEME.layout!;
     const f = theme.features || DEFAULT_THEME.features!;
@@ -604,10 +604,8 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                         trigger={['click']}
                         menu={{
                             items: [
-                                { key: 'standard', label: 'Standard Page (H+F + Nav)', onClick: () => addRoute({ name: "New Page", path: "/new-page", showInHeader: true }) },
-                                { key: 'ghost', label: 'Ghost Page (No H/F, No Nav)', onClick: () => addRoute({ name: "Ghost Page", path: "/ghost", hideHeader: true, hideFooter: true, showInHeader: false, showInFooter: false }) },
-                                { key: 'no-header', label: 'No Header Layout', onClick: () => addRoute({ name: "No Header", path: "/page", hideHeader: true }) },
-                                { key: 'no-footer', label: 'No Footer Layout', onClick: () => addRoute({ name: "No Footer", path: "/page", hideFooter: true }) },
+                                { key: 'wizard', label: 'Use Page Wizard', onClick: () => openWizard(false) },
+                                { key: 'blank', label: 'Create Blank Page', onClick: () => openWizard(true) },
                             ]
                         }}
                     >

@@ -7,10 +7,8 @@ import {
   XMarkIcon,
   BoltIcon,
   PlusIcon,
-  LockClosedIcon,
-  GlobeAltIcon,
-  EyeIcon,
-  EyeSlashIcon,
+  Squares2X2Icon,
+  ListBulletIcon,
 } from "@heroicons/react/24/outline";
 
 // ─── Section definitions shown in Step 2  ─────────────────────────────────────
@@ -194,13 +192,17 @@ const WIZARD_SECTIONS: SectionType[] = [
 interface NewPageWizardProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (title: string, slug: string, selectedSections: string[]) => Promise<void>;
+  onSubmit: (title: string, slug: string, selectedSections: string[], showInHeader: boolean, showInFooter: boolean) => Promise<void>;
   isSubmitting?: boolean;
   closable?: boolean;
   /** Skip straight to the section picker step */
   initialStep?: 1 | 2;
   /** Section IDs to hide from the picker (e.g. ['header','footer']) */
   excludeSections?: string[];
+  /** If true, step 1 finishes immediately with no sections */
+  blankMode?: boolean;
+  /** List of existing route names/paths to prevent duplicates */
+  existingRoutes?: { name: string; path: string }[];
 }
 
 // ─── Stepper Bar ─────────────────────────────────────────────────────────────
@@ -235,7 +237,11 @@ function StepBar({ step }: { step: 1 | 2 }) {
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
-export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = false, closable = true, initialStep = 1, excludeSections = [] }: NewPageWizardProps) {
+export default function NewPageWizard({
+  open, onClose, onSubmit, isSubmitting = false, closable = true,
+  initialStep = 1, excludeSections = [], blankMode = false,
+  existingRoutes = []
+}: NewPageWizardProps) {
   const [step, setStep] = useState<1 | 2>(initialStep);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
@@ -243,7 +249,10 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
   const [selectedSections, setSelectedSections] = useState<string[]>(
     ["header", "hero", "footer"].filter(id => !excludeSections.includes(id))
   );
+  const [showInHeader, setShowInHeader] = useState(true);
+  const [showInFooter, setShowInFooter] = useState(true);
   const [titleError, setTitleError] = useState("");
+  const [slugError, setSlugError] = useState("");
 
   const handleClose = useCallback(() => {
     if (!closable) return;
@@ -253,6 +262,7 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
     setSlugManual(false);
     setSelectedSections(["header", "hero", "footer"].filter(id => !excludeSections.includes(id)));
     setTitleError("");
+    setSlugError("");
     onClose();
   }, [closable, onClose, initialStep, excludeSections]);
 
@@ -272,13 +282,37 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
 
   const handleTitleChange = (val: string) => {
     setTitle(val);
-    if (!slugManual) setSlug(slugify(val));
-    if (val.trim()) setTitleError("");
+    const slugVal = slugify(val);
+    if (!slugManual) setSlug(slugVal);
+
+    // Validate
+    if (!val.trim()) {
+      setTitleError("");
+    } else {
+      const isDupName = existingRoutes.some(r => r.name.toLowerCase() === val.trim().toLowerCase());
+      if (isDupName) setTitleError("This page name already exists");
+      else setTitleError("");
+    }
+
+    if (!slugManual && slugVal) {
+      const isDupSlug = existingRoutes.some(r => r.path.toLowerCase().replace(/^\//, "") === slugVal.toLowerCase());
+      if (isDupSlug) setSlugError("This URL path already exists");
+      else setSlugError("");
+    }
   };
 
   const handleSlugChange = (val: string) => {
-    setSlug(slugify(val));
+    const s = slugify(val);
+    setSlug(s);
     setSlugManual(true);
+
+    if (!s) {
+      setSlugError("");
+    } else {
+      const isDupSlug = existingRoutes.some(r => r.path.toLowerCase().replace(/^\//, "") === s.toLowerCase());
+      if (isDupSlug) setSlugError("This URL path already exists");
+      else setSlugError("");
+    }
   };
 
   const toggleSection = useCallback((id: string) => {
@@ -289,13 +323,21 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
 
   const handleNext = () => {
     if (!title.trim()) { setTitleError("Page name is required"); return; }
-    setStep(2);
+    if (titleError || slugError) return;
+    if (blankMode) {
+      handleFinishWithSections([]);
+    } else {
+      setStep(2);
+    }
+  };
+
+  const handleFinishWithSections = async (sections: string[]) => {
+    const finalSlug = slug || slugify(title) || `page-${Date.now().toString().slice(-4)}`;
+    await onSubmit(title.trim(), finalSlug, sections, showInHeader, showInFooter);
   };
 
   const handleFinish = async () => {
-    // When starting at step 2, title/slug are not filled — use empty strings (caller handles naming)
-    const finalSlug = slug || slugify(title) || `page-${Date.now().toString().slice(-4)}`;
-    await onSubmit(title.trim(), finalSlug, selectedSections);
+    await handleFinishWithSections(selectedSections);
   };
 
 
@@ -313,14 +355,14 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
       {/* Backdrop */}
       <div
         className="fixed inset-0 z-9999 flex items-center justify-center p-4 transition-all"
-        style={{ 
-          background: "rgba(0,0,0,0.75)", 
-          backdropFilter: "blur(16px)", 
-          WebkitBackdropFilter: "blur(16px)", 
-          animation: "wizard-bg 0.3s ease" 
+        style={{
+          background: "rgba(0,0,0,0.75)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          animation: "wizard-bg 0.3s ease"
         }}
-        onClick={(e) => { 
-          if (e.target === e.currentTarget && closable) handleClose(); 
+        onClick={(e) => {
+          if (e.target === e.currentTarget && closable) handleClose();
         }}
       >
         {/* Modal card */}
@@ -377,11 +419,14 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
                     className={`w-full bg-transparent text-xl font-black text-white placeholder:text-white/15 border-none outline-none resize-none leading-snug py-1 ${titleError ? "placeholder:text-red-400/50" : ""}`}
                   />
                   {titleError && (
-                    <p className="text-red-400 text-[10px] font-bold uppercase tracking-widest mt-2">{titleError}</p>
+                    <p className="text-red-400 text-[10px] font-bold uppercase tracking-widest mt-2 flex items-center gap-1.5">
+                      <XMarkIcon className="w-3 h-3" />
+                      {titleError}
+                    </p>
                   )}
                 </div>
 
-                <div className="p-4 bg-white/3 rounded-2xl border border-white/5">
+                <div className={`p-4 bg-white/3 rounded-2xl border transition-colors ${slugError ? "border-red-500/30 bg-red-500/5" : "border-white/5"}`}>
                   <label className="block text-xs font-black text-white/50 uppercase tracking-widest mb-2">URL Slug</label>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-white/20 font-mono shrink-0">/</span>
@@ -392,6 +437,29 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
                       className="flex-1 bg-transparent text-sm font-mono text-white/60 placeholder:text-white/15 border-none outline-none"
                     />
                   </div>
+                  {slugError && (
+                    <p className="text-red-400 text-[10px] font-bold uppercase tracking-widest mt-2 flex items-center gap-1.5">
+                      <XMarkIcon className="w-3 h-3" />
+                      {slugError}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowInHeader(!showInHeader)}
+                    className={`flex-1 h-12 rounded-2xl border flex items-center justify-center gap-3 transition-all duration-300 ${showInHeader ? "bg-indigo-500/10 border-indigo-500/40 text-white" : "bg-white/3 border-white/5 text-white/20 hover:text-white/40 hover:bg-white/5"}`}
+                  >
+                    <Squares2X2Icon className={`w-5 h-5 transition-transform duration-500 ${showInHeader ? "scale-110" : "scale-100 opacity-40"}`} />
+                    <span className="text-[11px] font-black uppercase tracking-[0.1em]">Header</span>
+                  </button>
+                  <button
+                    onClick={() => setShowInFooter(!showInFooter)}
+                    className={`flex-1 h-12 rounded-2xl border flex items-center justify-center gap-3 transition-all duration-300 ${showInFooter ? "bg-indigo-500/10 border-indigo-500/40 text-white" : "bg-white/3 border-white/5 text-white/20 hover:text-white/40 hover:bg-white/5"}`}
+                  >
+                    <ListBulletIcon className={`w-5 h-5 transition-transform duration-500 ${showInFooter ? "scale-110" : "scale-100 opacity-40"}`} />
+                    <span className="text-[11px] font-black uppercase tracking-[0.1em]">Footer</span>
+                  </button>
                 </div>
 
                 <div className="px-1">
@@ -477,12 +545,22 @@ export default function NewPageWizard({ open, onClose, onSubmit, isSubmitting = 
             {step === 1 ? (
               <button
                 onClick={handleNext}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/25"
+                disabled={isSubmitting || !!titleError || !!slugError}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/25 disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                Next
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-3.5 h-3.5">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
+                {isSubmitting ? (
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
+                    <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" strokeLinecap="round" className="opacity-75" />
+                  </svg>
+                ) : blankMode ? (
+                  <PlusIcon className="w-4 h-4" />
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-3.5 h-3.5">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                )}
+                {isSubmitting ? "Creating..." : blankMode ? "Create Blank Page" : "Next"}
               </button>
             ) : (
               <button

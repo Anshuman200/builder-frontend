@@ -54,7 +54,7 @@ export default function EditorToolbar() {
     setViewMode, undo, redo,
     updateTitle, updateSlug, updateMeta, updateTheme, updatePageData, markClean,
     activeRouteId, setActiveRoute, addRoute,
-    openTemplatePicker,
+    openTemplatePicker, openWizard,
   } = useEditorStore();
   const { pageId } = useParams<{ pageId: string }>() ?? {};
   const router = useRouter();
@@ -71,8 +71,6 @@ export default function EditorToolbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mediaPickerType, setMediaPickerType] = useState<"favicon" | "ogImage" | null>(null);
   const [showNewPageMenu, setShowNewPageMenu] = useState(false);
-  const [showWizardModal, setShowWizardModal] = useState(false);
-  const [isCreatingPage, setIsCreatingPage] = useState(false);
 
   const theme = page?.theme || DEFAULT_THEME;
   const colors = theme.colors || DEFAULT_THEME.colors;
@@ -463,7 +461,7 @@ export default function EditorToolbar() {
                 {/* Option 1: Blank */}
                 <button
                   onClick={() => {
-                    addRoute({ name: `Page ${routes.length + 1}`, path: `/page-${routes.length + 1}` });
+                    openWizard(true);
                     setShowNewPageMenu(false);
                   }}
                   style={{
@@ -493,8 +491,8 @@ export default function EditorToolbar() {
                 {/* Option 2: Wizard */}
                 <button
                   onClick={() => {
+                    openWizard(false);
                     setShowNewPageMenu(false);
-                    setShowWizardModal(true);
                   }}
                   style={{
                     width: "100%", display: "flex", alignItems: "center", gap: 12,
@@ -783,57 +781,6 @@ export default function EditorToolbar() {
           defaultTab="login"
           redirectOnSuccess={false}
         />
-
-        {/* New Page Wizard — triggered from header button */}
-        <NewPageWizard
-          open={showWizardModal}
-          onClose={() => setShowWizardModal(false)}
-          isSubmitting={isCreatingPage}
-          initialStep={2}
-          excludeSections={["header", "footer"]}
-          onSubmit={async (title, slug, selectedSections) => {
-            setIsCreatingPage(true);
-            try {
-              // First add the new route
-              const newPath = slug ? `/${slug}` : `/page-${routes.length + 1}`;
-              addRoute({ name: title || `Page ${routes.length + 1}`, path: newPath });
-
-              // Give store a tick to update routes, then add sections to the new route
-              await new Promise(r => setTimeout(r, 50));
-              const { SECTION_TEMPLATES } = await import("@/lib/config/sections");
-              const { injectProjectName } = await import("@/lib/config/blocks");
-
-              const SECTION_ID_MAP: Record<string, string> = {
-                header: "nav-", hero: "hero-", features: "features-",
-                stats: "stats-", team: "team-", testimonials: "testimonials-",
-                pricing: "pricing-", contact: "contact-", cta: "cta-",
-                gallery: "gallery-", faq: "faq-", footer: "footer-",
-              };
-
-              const sorted = [
-                ...selectedSections.filter(id => id === "header"),
-                ...selectedSections.filter(id => id !== "header" && id !== "footer"),
-                ...selectedSections.filter(id => id === "footer"),
-              ];
-
-              const projectName = title || page?.title || "My Page";
-              sorted.forEach(id => {
-                const prefix = SECTION_ID_MAP[id];
-                if (prefix) {
-                  const template = SECTION_TEMPLATES.find((t: any) => t.id.startsWith(prefix));
-                  if (template) {
-                    const raw = template.create();
-                    const migrated = injectProjectName(raw, projectName);
-                    useEditorStore.getState().addBlock(migrated);
-                  }
-                }
-              });
-
-              setShowWizardModal(false);
-            } finally {
-              setIsCreatingPage(false);
-            }
-          }} />
 
         {/* Capture Preview Modal */}
         {user && pageId && pageId.length >= 24 && (
