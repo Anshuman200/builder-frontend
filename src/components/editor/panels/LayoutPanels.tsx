@@ -270,6 +270,7 @@ export function FooterPanel({ block }: { block: Block }) {
                     <Field label="Image Width"><TextInputWithUnit value={(p.logoWidth as string) ?? ""} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
                     <Field label="Image Height"><TextInputWithUnit value={(p.logoHeight as string) ?? ""} onChange={(v) => up("logoHeight", v)} placeholder="40px" /></Field>
                     <Field label="Object Fit"><SelectInput value={(p.logoObjectFit as string) || "cover"} onChange={(v) => up("logoObjectFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
+                    <Field label="Logo Shape"><SelectInput value={(p.logoShape as string) || "square"} onChange={(v) => up("logoShape", v)} options={[{ label: "Square", value: "square" }, { label: "Circle", value: "circle" }, { label: "Rounded", value: "rounded" }]} /></Field>
                 </>)}
                 <Field label="Description"><TextareaInput value={(p.description as string) || ""} onChange={(v) => up("description", v)} rows={3} placeholder="Brief company description..." /></Field>
             </Section>

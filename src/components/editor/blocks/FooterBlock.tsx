@@ -40,6 +40,7 @@ export function FooterBlock({ block }: BlockProps) {
     const logoWidth = (p.logoWidth as string) || "120px";
     const logoHeight = (p.logoHeight as string) || "40px";
     const logoObjectFit = (p.logoObjectFit as React.CSSProperties["objectFit"]) || "cover";
+    const logoShape = (p.logoShape as string) || "square";
     const description = (p.description as string) || "Build beautiful pages in minutes.";
     const copyright = (p.copyright as string) || `© ${new Date().getFullYear()} PageCraft. All rights reserved.`;
     const links = (p.links as { id: string; label: string; url: string }[]) || [];
@@ -90,7 +91,13 @@ export function FooterBlock({ block }: BlockProps) {
             }}
         >
             {logoType === "image" && logoImage ? (
-                <div style={{ width: logoWidth, height: logoHeight, position: "relative" }}>
+                <div style={{ 
+                    width: logoWidth, 
+                    height: logoHeight, 
+                    position: "relative",
+                    borderRadius: logoShape === "circle" ? "50%" : logoShape === "rounded" ? "12px" : "0px",
+                    overflow: "hidden"
+                }}>
                     <Image
                         src={logoImage}
                         alt={logoText}

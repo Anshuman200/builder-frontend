@@ -764,6 +764,31 @@ export const useEditorStore = create<EditorStore>()(
 
         openBlockPicker: (target, preferredTab = "sections") => set({ blockPicker: { open: true, target, preferredTab } }),
         closeBlockPicker: () => set({ blockPicker: { open: false, target: null } }),
+        
+        _mergeBlockProps: (oldBlock: Block | null, newBlock: Block) => {
+            if (!oldBlock) return newBlock.props;
+            const op = oldBlock.props || {};
+            const np = newBlock.props || {};
+            
+            // Map common properties that users likely want to keep
+            const keysToPreserve = [
+                "logo", "logoUrl", "title", "brandName", "projectName",
+                "logoShape", "logoWidth", "logoHeight", "logoObjectFit",
+                "links", "menuItems", "navigation", "navLinks",
+                "socials", "socialLinks", "copyright",
+                "buttonText", "ctaText", "buttonLink", "ctaLink",
+                "phone", "email", "address"
+            ];
+            
+            const merged = { ...np };
+            keysToPreserve.forEach(key => {
+                if (op[key] !== undefined && op[key] !== null) {
+                    merged[key] = op[key];
+                }
+            });
+            return merged;
+        },
+
         addBlockAtTarget: (block, target) => {
             const freshBlock = recursiveClone(block);
             set((s) => {
@@ -774,9 +799,17 @@ export const useEditorStore = create<EditorStore>()(
                 if (target.id === "canvas-root") {
                     if (freshBlock.type === "header") {
                         if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
+                        if (s.page.globalBlocks.header) {
+                            if (!window.confirm("A Header already exists. Replace it and keep your current logo/links?")) return;
+                            freshBlock.props = (get() as any)._mergeBlockProps(s.page.globalBlocks.header, freshBlock);
+                        }
                         s.page.globalBlocks.header = freshBlock;
                     } else if (freshBlock.type === "footer") {
                         if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
+                        if (s.page.globalBlocks.footer) {
+                            if (!window.confirm("A Footer already exists. Replace it and keep your current content?")) return;
+                            freshBlock.props = (get() as any)._mergeBlockProps(s.page.globalBlocks.footer, freshBlock);
+                        }
                         s.page.globalBlocks.footer = freshBlock;
                     } else {
                         activeRoute.content.push(freshBlock);
@@ -857,9 +890,17 @@ export const useEditorStore = create<EditorStore>()(
                 } else {
                     if (freshBlock.type === "header") {
                         if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
+                        if (s.page.globalBlocks.header) {
+                            if (!window.confirm("A Header already exists. Replace it and keep your current logo/links?")) return;
+                            freshBlock.props = (get() as any)._mergeBlockProps(s.page.globalBlocks.header, freshBlock);
+                        }
                         s.page.globalBlocks.header = freshBlock;
                     } else if (freshBlock.type === "footer") {
                         if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
+                        if (s.page.globalBlocks.footer) {
+                            if (!window.confirm("A Footer already exists. Replace it and keep your current content?")) return;
+                            freshBlock.props = (get() as any)._mergeBlockProps(s.page.globalBlocks.footer, freshBlock);
+                        }
                         s.page.globalBlocks.footer = freshBlock;
                     } else if (activeRoute) {
                         activeRoute.content.push(freshBlock);
