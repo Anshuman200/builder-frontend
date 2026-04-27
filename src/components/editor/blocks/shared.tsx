@@ -9,7 +9,7 @@ import React from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { TrashIcon, EllipsisHorizontalIcon, ArrowsPointingOutIcon, PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, EllipsisHorizontalIcon, ArrowsPointingOutIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
 import { useEditorStore } from "@/stores/editorStore";
@@ -79,14 +79,21 @@ export function useLinkHandler() {
     };
 }
 
-/**
- * Helper to identify blocks with primary media and their property names.
- */
 export function getBlockMediaInfo(type: string) {
     if (type === "image") return { prop: "src", label: "Image", icon: PhotoIcon, mediaType: "image" as const };
     if (type === "video") return { prop: "url", label: "Video", icon: VideoCameraIcon, mediaType: "video" as const };
     if (["hero", "container", "wave", "header"].includes(type)) return { prop: "bgImage", label: "Background", icon: PhotoIcon, mediaType: "image" as const };
     if (["feature", "feature_card"].includes(type)) return { prop: "image", label: "Image", icon: PhotoIcon, mediaType: "image" as const };
+    return null;
+}
+
+/**
+ * Helper to identify blocks with multiple layout styles.
+ */
+export function getBlockLayouts(type: string) {
+    if (type === "header") return ["standard", "centered", "split"];
+    if (type === "footer") return ["standard", "minimal", "centered", "columns"];
+    if (["hero", "features", "stats", "team"].includes(type)) return ["standard", "split", "centered"];
     return null;
 }
 

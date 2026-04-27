@@ -12,11 +12,11 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { EllipsisHorizontalIcon, TrashIcon, Square2StackIcon, PlusIcon, Squares2X2Icon, ArrowsPointingOutIcon, PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
+import { EllipsisHorizontalIcon, TrashIcon, Square2StackIcon, PlusIcon, Squares2X2Icon, ArrowsPointingOutIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { BlockRenderer } from "./blocks";
-import { ActivePathContext, PreviewContext, getBlockMediaInfo } from "./blocks/shared";
+import { ActivePathContext, PreviewContext, getBlockMediaInfo, getBlockLayouts } from "./blocks/shared";
 import { IconButton } from "../ui/IconButton";
 import AppToolTip from "../common/AppToolTip";
 
@@ -493,6 +493,27 @@ const CanvasBlock = memo(function CanvasBlock({
         {/* Floating action bar — WHITE background for visibility on any block */}
         {showControls && (
           <div className="absolute top-4 right-4 p-1 rounded-sm shadow-md bg-white z-100 space-x-1 flex items-center">
+            {/* Quick Layout Change */}
+            {(() => {
+              const layouts = getBlockLayouts(block.type);
+              if (!layouts) return null;
+
+              return (
+                <AppToolTip title="Change Layout">
+                  <IconButton
+                    icon={<ViewColumnsIcon style={{ width: 14, height: 14 }} />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const current = (block.props.layout as string) || layouts[0];
+                      const idx = layouts.indexOf(current);
+                      const next = layouts[(idx + 1) % layouts.length];
+                      useEditorStore.getState().updateBlock(block.id, { layout: next }, true);
+                    }}
+                  />
+                </AppToolTip>
+              );
+            })()}
+
             {/* Quick Media Change */}
             {(() => {
               const info = getBlockMediaInfo(block.type);
