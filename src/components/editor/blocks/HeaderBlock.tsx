@@ -35,6 +35,9 @@ export function HeaderBlock({ block }: BlockProps) {
     const logoType = (p.logoType as string) || "text";
     const logoText = (p.logoText as string) || "PageCraft";
     const logoImage = p.logoImage as string;
+    const bgImage = p.bgImage as string;
+    const bgPosition = (p.bgPosition as string) || "center";
+    const bgOpacity = parseFloat((p.bgOpacity as string) || "0");
     const logoWidth = (p.logoWidth as string) || "120px";
     const logoHeight = (p.logoHeight as string) || "40px";
     const logoObjectFit = (p.logoObjectFit as React.CSSProperties["objectFit"]) || "cover";
@@ -57,7 +60,20 @@ export function HeaderBlock({ block }: BlockProps) {
     else if (style === "transparent") { background = "transparent"; }
 
     const isMobile = isPreview ? false : (viewMode === "mobile");
-    const baseHeaderStyle: React.CSSProperties = { position: position as any, top: position !== "static" ? 0 : undefined, left: position !== "static" ? 0 : undefined, right: position !== "static" ? 0 : undefined, zIndex: 50, background, backdropFilter, borderBottom, color: textColor, width: "100%" };
+    const baseHeaderStyle: React.CSSProperties = { 
+        position: position as any, 
+        top: position !== "static" ? 0 : undefined, 
+        left: position !== "static" ? 0 : undefined, 
+        right: position !== "static" ? 0 : undefined, 
+        zIndex: 50, 
+        background: bgImage ? `linear-gradient(rgba(0,0,0,${bgOpacity}), rgba(0,0,0,${bgOpacity})), url(${bgImage})` : background,
+        backgroundSize: "cover",
+        backgroundPosition: bgPosition,
+        backdropFilter, 
+        borderBottom, 
+        color: textColor, 
+        width: "100%" 
+    };
     const ctaStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 20px", borderRadius: "9999px", fontWeight: 600, fontSize: "0.9rem", textDecoration: "none", cursor: isPreview ? "pointer" : "default", transition: "opacity 0.2s", background: ctaVariant === "solid" ? ctaBgColor : "transparent", color: ctaVariant === "solid" ? ctaTextColor : ctaBgColor, border: ctaVariant === "outline" ? `2px solid ${ctaBgColor}` : "none" };
 
     // Logo Element

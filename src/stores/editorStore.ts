@@ -774,6 +774,7 @@ export const useEditorStore = create<EditorStore>()(
             const keysToPreserve = [
                 "logo", "logoUrl", "title", "brandName", "projectName",
                 "logoShape", "logoWidth", "logoHeight", "logoObjectFit",
+                "bgImage", "bgOpacity", "bgPosition",
                 "links", "menuItems", "navigation", "navLinks",
                 "socials", "socialLinks", "copyright",
                 "buttonText", "ctaText", "buttonLink", "ctaLink",
