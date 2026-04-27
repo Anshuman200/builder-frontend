@@ -20,12 +20,10 @@ export { teamSections } from "../sections/team";
 export { gallerySections } from "../sections/gallery";
 export { featuresSections } from "../sections/features";
 export { pricingSections } from "../sections/pricing";
-export { testimonialSections } from "../sections/testimonial";
 export { footerSections } from "../sections/footer";
 export { contactSections } from "../sections/contact";
 export { faqSections } from "../sections/faq";
 export { statsSections } from "../sections/stats";
-export { carouselSections } from "../sections/carousel";
 export { ctaSections } from "../sections/cta";
 export { legalSections } from "../sections/legal";
 export { gridSections } from "../sections/grid";
@@ -38,12 +36,10 @@ import { teamSections } from "../sections/team";
 import { gallerySections } from "../sections/gallery";
 import { featuresSections } from "../sections/features";
 import { pricingSections } from "../sections/pricing";
-import { testimonialSections } from "../sections/testimonial";
 import { footerSections } from "../sections/footer";
 import { contactSections } from "../sections/contact";
 import { faqSections } from "../sections/faq";
 import { statsSections } from "../sections/stats";
-import { carouselSections } from "../sections/carousel";
 import { ctaSections } from "../sections/cta";
 import { legalSections } from "../sections/legal";
 import { gridSections } from "../sections/grid";
@@ -56,12 +52,10 @@ export const SECTION_TEMPLATES: SectionTemplate[] = [
     ...gallerySections,
     ...featuresSections,
     ...pricingSections,
-    ...testimonialSections,
     ...footerSections,
     ...contactSections,
     ...faqSections,
     ...statsSections,
-    ...carouselSections,
     ...ctaSections,
     ...legalSections,
 ];

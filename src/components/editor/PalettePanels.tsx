@@ -15,12 +15,13 @@ import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { BLOCK_TYPES, createBlock, injectProjectName } from "@/lib/config/blocks";
 import { SECTION_TEMPLATES } from "@/lib/config/sections";
 import { useEditorStore } from "@/stores/editorStore";
+import Image from "next/image";
 
 // ─── Category display order ───────────────────────────────────────────────────
-export const CATEGORY_ORDER = ["Navigation", "Hero", "Grid", "Carousel", "Logos", "Team", "Gallery", "Features", "Stats", "Legal", "Pricing", "Testimonial", "FAQ", "Contact", "CTA", "Footer"];
+export const CATEGORY_ORDER = ["Navigation", "Hero", "Grid", "Logos", "Team", "Gallery", "Features", "Stats", "Legal", "Pricing", "Testimonial", "FAQ", "Contact", "CTA", "Footer"];
 
 export const CATEGORY_ICONS: Record<string, string> = {
-  Navigation: "🧭", Hero: "⭐", Grid: "🧇", Carousel: "🎠", Logos: "🏷️", Team: "👥",
+  Navigation: "🧭", Hero: "⭐", Grid: "🧇", Logos: "🏷️", Team: "👥",
   Gallery: "🖼️", Features: "✨", Stats: "📊", Legal: "⚖️", Pricing: "💰",
   Testimonial: "💬", Contact: "📬", Footer: "📄", FAQ: "❓", CTA: "⚡",
 };
@@ -43,6 +44,9 @@ export const SECTION_COVERED_TYPES = new Set<string>(
     try { return [t.create().type]; } catch { return []; }
   })
 );
+
+const PREVIEW_SCALE = 0.25;
+
 
 export function scrollToBlock(blockId: string) {
   if (!blockId) return;
@@ -168,6 +172,55 @@ export function DarkConfirmModal({
   );
 }
 
+export function SectionPreview({ template, scale = PREVIEW_SCALE }: { template: SectionTemplate; scale?: number }) {
+  return (
+    <div className="light" style={{
+      width: "100%",
+      // aspectRatio: 1 / 1,
+      height: 200,
+      overflow: "hidden",
+      pointerEvents: "none",
+      background: "#f8fafc",
+      position: "relative",
+      borderBottom: "1px solid var(--border)",
+      display: "flex",
+      alignItems: "flex-start",
+      justifyContent: "center",
+      padding: 5
+    }}>
+      {template.previewImage ? (
+        <Image
+          src={template.previewImage}
+          alt={template.name}
+          fill
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            objectPosition: "center",
+            pointerEvents: "none",
+            backgroundColor: "transparent",
+          }}
+
+        />
+      ) : (
+        <div
+          style={{
+            width: `${100 / scale}%`,
+            height: `${100 / scale}%`,
+            pointerEvents: "none",
+            color: "#0f172a",
+            fontFamily: "Inter, system-ui, sans-serif",
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+          dangerouslySetInnerHTML={{ __html: template.preview }}
+        />
+      )}
+    </div>
+  );
+}
+
 export function DrawerSectionCard({ template, onAdd }: { template: SectionTemplate; onAdd: (block: any) => void }) {
   const { page, activeRouteId } = useEditorStore();
   const [showConfirm, setShowConfirm] = React.useState(false);
@@ -195,17 +248,15 @@ export function DrawerSectionCard({ template, onAdd }: { template: SectionTempla
     doAdd();
   }
 
-  const isNav = template.category === "Navigation";
-  const thumbH = isNav ? 100 : 200;
-  const SCALE = 0.25;
+  const SCALE = PREVIEW_SCALE;
 
   const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
   const content = activeRoute?.content ?? page?.content ?? [];
-  
+
   // Singleton categories (Nav, Footer) check the whole category.
   // Others check for the specific templateId to avoid marking all as "Added".
   const isSingleton = SINGLETON_CATEGORIES.has(template.category);
-  const isAlreadyInPage = isSingleton 
+  const isAlreadyInPage = isSingleton
     ? !!findExistingInCategory(content, template.category)
     : content.some(block => (block as any).templateId === template.id);
 
@@ -214,23 +265,23 @@ export function DrawerSectionCard({ template, onAdd }: { template: SectionTempla
   const isNew = template.id.includes('glass') || template.id.includes('bento');
 
   return (<>
-      {showConfirm && (
-        <DarkConfirmModal
-          title={`${template.category} Already Added`}
-          description={isSingleton 
-            ? `You already have a ${template.category} on this page. Do you want to add another one?`
-            : `You already have this specific ${template.category} design. Do you want to add a second copy?`}
-          onConfirm={() => { setShowConfirm(false); doAdd(); }}
-          onCancel={() => setShowConfirm(false)}
-        />
-      )}
+    {showConfirm && (
+      <DarkConfirmModal
+        title={`${template.category} Already Added`}
+        description={isSingleton
+          ? `You already have a ${template.category} on this page. Do you want to add another one?`
+          : `You already have this specific ${template.category} design. Do you want to add a second copy?`}
+        onConfirm={() => { setShowConfirm(false); doAdd(); }}
+        onCancel={() => setShowConfirm(false)}
+      />
+    )}
     <div
       ref={setNodeRef}
       {...attributes}
       {...listeners}
       onClick={handleClick}
       style={{
-        borderRadius: 20, border: "1px solid var(--border)",
+        borderRadius: 14, border: "1px solid var(--border)",
         background: "var(--surface)", cursor: "pointer",
         opacity: isDragging ? 0.4 : 1,
         userSelect: "none", overflow: "hidden",
@@ -263,28 +314,7 @@ export function DrawerSectionCard({ template, onAdd }: { template: SectionTempla
         </div>
       )}
 
-      <div className="light" style={{
-        width: "100%",
-        height: thumbH,
-        overflow: "hidden",
-        pointerEvents: "none",
-        background: "transparent",
-        position: "relative",
-        borderBottom: "1px solid var(--border)"
-      }}>
-        <div
-          style={{
-            width: "400%", // 100% / 0.25 = 400%
-            height: thumbH / SCALE, // Total virtual height
-            pointerEvents: "none",
-            color: "#0f172a",
-            fontFamily: "Inter, system-ui, sans-serif",
-            transform: `scale(${SCALE})`,
-            transformOrigin: "top left",
-          }}
-          dangerouslySetInnerHTML={{ __html: template.preview }}
-        />
-      </div>
+      <SectionPreview template={template} scale={SCALE} />
       <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)" }}>
         <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.01em" }}>{template.name}</span>
         <div style={{ width: 28, height: 28, borderRadius: 10, background: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 10px rgba(99,102,241,0.3)" }}>
@@ -533,8 +563,8 @@ export function SectionsPanel({ onAdd, isGrid = false }: { onAdd: (block: any) =
 
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))",
-                gap: 32
+                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                gap: 24
               }}>
                 {(sectionsByCategory[displayCategory] ?? []).map(tpl => (
                   <DrawerSectionCard key={tpl.id} template={tpl} onAdd={onAdd} />
@@ -589,7 +619,7 @@ export function SectionsPanel({ onAdd, isGrid = false }: { onAdd: (block: any) =
               <span style={{ fontSize: 16 }}>{CATEGORY_ICONS[displayCategory]}</span>
               <span style={{ fontWeight: 700, fontSize: 13, color: "var(--text)", flex: 1 }}>{displayCategory}</span>
             </div>
-            <div style={{ flex: 1, overflowY: "auto", padding: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ flex: 1, overflowY: "auto", padding: 12, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 12 }}>
               {(sectionsByCategory[displayCategory] ?? []).map(tpl => (
                 <DrawerSectionCard key={tpl.id} template={tpl} onAdd={onAdd} />
               ))}

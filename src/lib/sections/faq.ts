@@ -22,6 +22,7 @@ export const faqSections: SectionTemplate[] = [
         id: "faq-simple",
         category: "FAQ",
         name: "Simple FAQ",
+        previewImage: "/previews/faq/faq-simple.png",
         preview: `<div style="font-family:sans-serif;background:#fff;padding:2rem 1rem;text-align:center;">
        <h3 style="margin:0 0 1rem 0;font-size:1.2rem;color:#0f172a;">Frequently Asked Questions</h3>
        <div style="background:#f8fafc;padding:0.5rem 1rem;border-radius:6px;margin-bottom:0.5rem;text-align:left;color:#333;font-size:0.85rem;">Q. How does it work? <span>▼</span></div>
@@ -82,6 +83,7 @@ export const faqSections: SectionTemplate[] = [
         id: "faq-two-cols",
         category: "FAQ",
         name: "Two Columns FAQ",
+        previewImage: "/previews/faq/faq-two-cols.png",
         preview: `<div style="font-family:sans-serif;background:#fff;padding:2rem 1rem;text-align:center;">
        <h3 style="margin:0 0 1rem 0;font-size:1.2rem;color:#0f172a;">Frequently Asked Questions</h3>
        <div style="display:flex;gap:1rem;">
@@ -158,6 +160,7 @@ export const faqSections: SectionTemplate[] = [
         id: "faq-split",
         category: "FAQ",
         name: "Split FAQ",
+        previewImage: "/previews/faq/faq-split.png",
         preview: `<div style="font-family:sans-serif;background:#fff;padding:2rem 1rem;display:flex;gap:1rem;">
        <div style="flex:1;text-align:left;">
          <h3 style="margin:0 0 0.5rem 0;font-size:1.1rem;">Have Any Questions?</h3>

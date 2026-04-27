@@ -23,6 +23,7 @@ export const contactSections: SectionTemplate[] = [
     id: "contact-teal-icon-cards",
     name: "Simple Form & Icon Cards",
     category: "Contact",
+    previewImage: "/previews/contact/contact-teal-icon-cards.png",
     preview: `<div style="font-family:sans-serif;border-radius:8px;overflow:hidden">
       <div style="background:#fff;padding:10px;text-align:center">
         <div style="font-size:9px;font-weight:800;color:#111;margin-bottom:2px">Contact Us</div>
@@ -87,6 +88,7 @@ export const contactSections: SectionTemplate[] = [
     id: "contact-gradient-cta",
     name: "Gradient CTA with Cards",
     category: "Contact",
+    previewImage: "/previews/contact/contact-gradient-cta.png",
     preview: `<div style="font-family:sans-serif;padding:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);border-radius:8px;text-align:center">
       <div style="font-size:10px;font-weight:800;color:#fff;margin-bottom:3px">Let's Work Together</div>
       <div style="font-size:6px;color:#e0e7ff;margin-bottom:8px">Start your project with us today.</div>
@@ -141,6 +143,7 @@ export const contactSections: SectionTemplate[] = [
     id: "contact-image-split",
     name: "Image Split Contact",
     category: "Contact",
+    previewImage: "/previews/contact/contact-image-split.png",
     preview: `<div style="font-family:sans-serif;display:flex;border-radius:8px;overflow:hidden;min-height:80px">
               <div style="flex:1;background:linear-gradient(to bottom,#a78bfa,#6366f1);min-height:80px;position:relative">
                 <div style="position:absolute;inset:0;background:#6366f1;opacity:0.7"></div>

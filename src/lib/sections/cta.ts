@@ -7,6 +7,7 @@ export const ctaSections: SectionTemplate[] = [
     id: "cta-wavy",
     name: "Modern Wavy Gradient",
     category: "CTA",
+    previewImage: "/previews/cta/cta-wavy.png",
     preview: `<div style="font-family:sans-serif;padding:16px;background:linear-gradient(135deg,#312e81 0%,#7c3aed 50%,#ea580c 100%);border-radius:12px;text-align:center">
       <div style="font-size:11px;font-weight:800;color:#fff;margin-bottom:4px">Ready to Unlock potential?</div>
       <div style="font-size:6px;color:rgba(255,255,255,0.7);margin-bottom:8px">Let's create a lasting impression.</div>
@@ -50,6 +51,7 @@ export const ctaSections: SectionTemplate[] = [
     id: "cta-mobile-ai",
     name: "AI Elevate (Concentric)",
     category: "CTA",
+    previewImage: "/previews/cta/cta-mobile-ai.png",
     preview: `<div style="font-family:sans-serif;padding:16px;background:#dcfce7;display:flex;gap:8px;align-items:center;border-radius:12px">
       <div style="flex:1">
         <div style="font-size:10px;font-weight:800;color:#166534">Ready to Elevate?</div>
@@ -100,6 +102,7 @@ export const ctaSections: SectionTemplate[] = [
     id: "cta-laptop-luxury",
     name: "Laptop Catchy Headline",
     category: "CTA",
+    previewImage: "/previews/cta/cta-laptop-luxury.png",
     preview: `<div style="font-family:sans-serif;padding:16px;background:#f8fafc;display:flex;gap:8px;align-items:center;border-radius:12px">
       <div style="flex:1">
         <div style="font-size:9px;font-weight:700;color:#0f172a">A catchy headline</div>
@@ -148,6 +151,7 @@ export const ctaSections: SectionTemplate[] = [
     id: "cta-minimalist",
     name: "Minimalist Pill Contrast",
     category: "CTA",
+    previewImage: "/previews/cta/cta-minimalist.png",
     preview: `<div style="font-family:sans-serif;padding:16px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;text-align:center">
       <div style="font-size:11px;font-weight:900;color:#000;margin-bottom:8px">Ready to make everyday life clearer?</div>
       <div style="display:flex;gap:4px;justify-content:center">

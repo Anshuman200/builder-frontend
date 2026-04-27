@@ -7,6 +7,7 @@ export const footerSections: SectionTemplate[] = [
     id: "footer-simple",
     name: "Simple Footer",
     category: "Footer",
+    previewImage: "/previews/footer/footer-simple.png",
     preview: `<div style="font-family:sans-serif;padding:12px;background:var(--surface);border:1px solid var(--border)">
       <div style="display:flex;gap:12px;margin-bottom:8px">
         <div style="flex:1">
@@ -25,28 +26,8 @@ export const footerSections: SectionTemplate[] = [
       bgColor: "var(--surface)", textColor: "var(--text)", padding: "48px 32px",
       description: "The easiest way to build pages.",
       copyright: `© ${new Date().getFullYear()} Company. All rights reserved.`,
-      links: [{ id: "1", label: "Privacy", url: "#" }, { id: "2", label: "Terms of Use", url: "#" }],
-    }),
-  },
-  {
-    id: "footer-subscribe",
-    name: "Footer Subscribe",
-    category: "Footer",
-    preview: `<div style="font-family:sans-serif;padding:12px;background:var(--bg-secondary)">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-        <div style="font-size:7px;font-weight:700;color:var(--text);flex:1">Subscribe Newsletters</div>
-        <div style="display:flex;gap:3px">
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:3px 6px;font-size:6px;color:var(--text-muted)">Enter email</div>
-          <div style="background:var(--primary);color:#fff;border-radius:3px;padding:3px 6px;font-size:6px;font-weight:600">SUB</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;font-size:6px;color:var(--text-muted)">About &nbsp; Features &nbsp; Pricing</div>
-    </div>`,
-    create: () => makeBlock("footer", {
-      bgColor: "var(--bg-secondary)", textColor: "var(--text)", padding: "32px",
-      description: "",
-      copyright: `© ${new Date().getFullYear()} Company name. All rights reserved.`,
-      links: [{ id: "1", label: "About us", url: "#" }, { id: "2", label: "Features", url: "#" }, { id: "3", label: "Pricing", url: "#" }],
+      fullWidth: true,
+      links: [{ id: "1", label: "Privacy", url: "/privacy" }, { id: "2", label: "Terms of Use", url: "/terms" }],
     }),
   },
 ];

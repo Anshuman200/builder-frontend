@@ -7,6 +7,7 @@ export const featuresSections: SectionTemplate[] = [
     id: "features-grid",
     name: "3-Column Feature Grid",
     category: "Features",
+    previewImage: "/previews/features/features-grid.png",
     preview: `<div style="font-family:sans-serif;padding:12px;background:var(--bg-secondary);text-align:center">
       <div style="font-size:9px;font-weight:700;color:var(--text);margin-bottom:8px">Why Choose Us?</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
@@ -36,6 +37,7 @@ export const featuresSections: SectionTemplate[] = [
     id: "features-alternating",
     name: "Alternating Image & Text",
     category: "Features",
+    previewImage: "/previews/features/features-alternating.png",
     preview: `<div style="font-family:sans-serif;padding:12px;background:var(--bg-secondary)">
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
         <div style="flex:1">

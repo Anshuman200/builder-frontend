@@ -7,6 +7,7 @@ export const heroSections: SectionTemplate[] = [
         id: "hero-split",
         name: "Hero Heading Left",
         category: "Hero",
+        previewImage: "/previews/hero/hero-split.png",
         preview: `<div style="font-family:'Inter',sans-serif;padding:60px 80px;background:#f8fafc;display:flex;align-items:center;gap:60px;height:100%;width:100%">
                 <div style="flex:1">
                   <div style="font-size:56px;font-weight:900;color:#0f172a;line-height:1.1;margin-bottom:24px;letter-spacing:-0.03em">Launch your next big idea</div>
@@ -34,6 +35,7 @@ export const heroSections: SectionTemplate[] = [
         id: "hero-centered",
         name: "Hero Heading Center",
         category: "Hero",
+        previewImage: "/previews/hero/hero-centered.png",
         preview: `<div style="font-family:'Inter',sans-serif;padding:60px 40px;background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;height:100%;width:100%;color:#fff">
                 <div style="font-size:64px;font-weight:900;margin-bottom:24px;letter-spacing:-0.04em;line-height:1.1">Design Everything.</div>
                 <div style="font-size:22px;color:rgba(255,255,255,0.7);max-width:700px;margin-bottom:48px;line-height:1.6">The most powerful and flexible builder for modern creative teams to launch fast and scale.</div>
@@ -53,6 +55,7 @@ export const heroSections: SectionTemplate[] = [
         id: "hero-right",
         name: "Hero Heading Right",
         category: "Hero",
+        previewImage: "/previews/hero/hero-right.png",
         preview: `<div style="font-family:'Inter',sans-serif;padding:60px 80px;background:#ffffff;display:flex;align-items:center;gap:60px;height:100%;width:100%">
                 <div style="width:400px;height:400px;background:url(https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80) center/cover;border-radius:24px;box-shadow:0 30px 60px rgba(0,0,0,0.05);flex-shrink:0"></div>
                 <div style="flex:1">
@@ -78,6 +81,7 @@ export const heroSections: SectionTemplate[] = [
         id: "hero-stack",
         name: "Hero Stack",
         category: "Hero",
+        previewImage: "/previews/hero/hero-stack.png",
         preview: `<div style="font-family:'Inter',sans-serif;padding:60px 80px;background:#f1f5f9;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;height:100%;width:100%">
                 <div style="font-size:56px;font-weight:900;color:#0f172a;margin-bottom:16px;letter-spacing:-0.03em">Experience the Future</div>
                 <div style="font-size:22px;color:#64748b;margin-bottom:48px;max-width:700px">A completely new and intuitive way to build web applications without any complexity.</div>

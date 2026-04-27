@@ -7,11 +7,12 @@ export const statsSections: SectionTemplate[] = [
     id: "stats-strip-modern",
     name: "Modern Stats Strip",
     category: "Stats",
-    preview: `<div style="padding:16px;background:var(--bg-secondary);display:flex;justify-content:space-around;gap:12px">
+    previewImage: "/previews/stats/stats-strip-modern.png",
+    preview: `<div style="font-family:'Inter',sans-serif;padding:80px;background:#0f172a;display:flex;justify-content:space-around;align-items:center;height:100%;width:100%;box-sizing:border-box">
       ${[["420%", "Speed"], ["21K", "Ratings"], ["110X", "Growth"]].map(([v, l]) => `
         <div style="text-align:center">
-          <div style="font-size:14px;font-weight:900;color:var(--primary)">${v}</div>
-          <div style="font-size:6px;font-weight:700;color:var(--text-muted);text-transform:uppercase">${l}</div>
+          <div style="font-size:64px;font-weight:900;color:#6366f1;letter-spacing:-0.04em">${v}</div>
+          <div style="font-size:16px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:3px;margin-top:8px">${l}</div>
         </div>`).join("")}
     </div>`,
     create: () => {
@@ -33,9 +34,15 @@ export const statsSections: SectionTemplate[] = [
     id: "stats-hero-grid",
     name: "Stats Hero Grid",
     category: "Stats",
-    preview: `<div style="padding:16px;background:var(--bg);display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div style="grid-column: span 2; font-size:10px; font-weight:900; margin-bottom:4px">By the numbers</div>
-      ${[1, 2, 3, 4].map(() => `<div style="height:20px;background:var(--surface);border-radius:4px"></div>`).join("")}
+    previewImage: "/previews/stats/stats-hero-grid.png",
+    preview: `<div style="font-family:'Inter',sans-serif;padding:80px;background:#ffffff;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;height:100%;width:100%;box-sizing:border-box">
+      <div>
+        <div style="font-size:48px;font-weight:900;color:#0f172a;margin-bottom:24px;line-height:1.1">The numbers speak for themselves.</div>
+        <div style="font-size:18px;color:#64748b;line-height:1.6">Join over 10,000 teams building the future with our tools.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+        ${[1, 2, 3, 4].map(() => `<div style="height:120px;background:#f1f5f9;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#6366f1">100+</div>`).join("")}
+      </div>
     </div>`,
     create: () => {
       const parent = makeBlock("columns", {

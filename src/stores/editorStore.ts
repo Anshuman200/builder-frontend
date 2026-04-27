@@ -531,7 +531,7 @@ export function recursiveClone(block: Block): Block {
         }));
     }
 
-    // Generic nested objects with IDs (e.g. Accordion items, Carousel slides)
+    // Generic nested objects with IDs (e.g. Accordion items, sub-features)
     for (const key in newProps) {
         const val = newProps[key];
         if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'object' && val[0] !== null && 'id' in (val[0] as any)) {

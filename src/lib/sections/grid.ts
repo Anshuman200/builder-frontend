@@ -6,6 +6,7 @@ export const gridSections: SectionTemplate[] = [
         id: "grid-4x2-bento",
         name: "4-Column Bento Grid",
         category: "Grid",
+        previewImage: "/previews/grid/grid-4x2-bento.png",
         preview: `<div style="font-family:'Inter',sans-serif;height:100%;background:#ffffff;padding:40px 80px;display:flex;flex-direction:column;width:100%">
                 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;flex:1">
                   ${Array.from({ length: 8 }).map(() => `
@@ -50,6 +51,7 @@ export const gridSections: SectionTemplate[] = [
         id: "grid-6-logos",
         name: "6-Column Logo Wall",
         category: "Grid",
+        previewImage: "/previews/grid/grid-6-logos.png",
         preview: `<div style="font-family:'Inter',sans-serif;height:100%;background:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 80px;width:100%">
                 <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:40px;width:100%;align-items:center">
                   ${Array.from({ length: 6 }).map((_, i) => `

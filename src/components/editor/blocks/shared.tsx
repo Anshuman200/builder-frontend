@@ -316,7 +316,7 @@ export function DropZoneStrip({
                 // 1. Determine the actual block ID (cleaning prefixes if necessary)
                 let targetId = zoneId;
                 const colMatch = zoneId.match(/^col-([01])-(.+)$/);
-                const childMatch = zoneId.match(/^(?:hero|container|wave|features|carousel)-(.+)$/);
+                const childMatch = zoneId.match(/^(?:hero|container|wave|features)-(.+)$/);
 
                 if (colMatch) targetId = colMatch[2];
                 else if (childMatch) targetId = childMatch[1];

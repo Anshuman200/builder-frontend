@@ -6,7 +6,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { useEditorStore } from "@/stores/editorStore";
 import { PreviewContext, BlockProps, ChildBlockWrapper, SortableBlockGroup, DropZoneStrip } from "./shared";
 
-function ColumnDropZone({ zoneId, blocks, label, flexBasis }: { zoneId: string; blocks: Block[]; label: string; flexBasis: string }) {
+function ColumnDropZone({ zoneId, blocks, label, flexBasis, alignItems }: { zoneId: string; blocks: Block[]; label: string; flexBasis: string; alignItems?: string }) {
     const isPreview = React.useContext(PreviewContext);
     const { setNodeRef, isOver } = useDroppable({ id: zoneId });
     const { viewMode } = useEditorStore();
@@ -19,6 +19,10 @@ function ColumnDropZone({ zoneId, blocks, label, flexBasis }: { zoneId: string; 
                 flex: isStacked ? "none" : `${flexBasis.replace("%", "")} ${flexBasis.replace("%", "")} 0%`,
                 width: isStacked ? "100%" : undefined,
                 minHeight: blocks.length === 0 ? 80 : undefined,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: alignItems === "center" ? "center" : alignItems === "end" ? "flex-end" : "flex-start",
+                alignItems: "stretch",
                 alignSelf: "stretch",
                 border: isPreview ? "none" : `2px dashed ${isOver ? "#6366f1" : "#e2e8f0"}`,
                 borderRadius: 6,
@@ -76,8 +80,8 @@ export function ColumnsBlock({ block }: BlockProps) {
                 className={isPreview ? `builder-columns-${block.id}` : undefined}
                 style={isPreview ? {} : { display: "flex", flexDirection: isStackedEditor ? "column" : "row", alignItems: (p.alignItems as any) || "stretch", gap, padding: editorPadding, width: "100%" }}
             >
-                <ColumnDropZone zoneId={`col-0-${block.id}`} blocks={col0} label="Drag blocks here (Column 1)" flexBasis={`${leftWidth}%`} />
-                <ColumnDropZone zoneId={`col-1-${block.id}`} blocks={col1} label="Drag blocks here (Column 2)" flexBasis={`${rightWidth}%`} />
+                <ColumnDropZone zoneId={`col-0-${block.id}`} blocks={col0} label="Drag blocks here (Column 1)" flexBasis={`${leftWidth}%`} alignItems={p.alignItems as string} />
+                <ColumnDropZone zoneId={`col-1-${block.id}`} blocks={col1} label="Drag blocks here (Column 2)" flexBasis={`${rightWidth}%`} alignItems={p.alignItems as string} />
             </div>
         </>
     );

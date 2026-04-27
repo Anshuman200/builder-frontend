@@ -7,23 +7,32 @@ export const pricingSections: SectionTemplate[] = [
     id: "pricing-cards",
     name: "Pricing Cards",
     category: "Pricing",
-    preview: `<div style="font-family:sans-serif;padding:12px;background:var(--bg-secondary);text-align:center">
-      <div style="font-size:9px;font-weight:700;color:var(--text);margin-bottom:8px">Simple Pricing</div>
-      <div style="display:flex;gap:5px">
-        <div style="flex:1;border:1px solid var(--border);border-radius:6px;padding:6px;background:var(--surface);box-shadow:0 2px 8px rgba(0,0,0,0.08)">
-          <div style="font-size:7px;font-weight:700;color:var(--text)">Starter</div>
-          <div style="font-size:9px;font-weight:800;color:var(--text);margin:2px 0">$0</div>
-          <div style="font-size:6px;color:var(--text-muted)">/mo</div>
+    previewImage: "/previews/pricing/pricing-cards.png",
+    preview: `<div style="font-family:'Inter',sans-serif;padding:80px;background:#f8fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;box-sizing:border-box">
+      <div style="font-size:48px;font-weight:900;color:#0f172a;margin-bottom:16px;letter-spacing:-0.03em">Simple Pricing</div>
+      <div style="font-size:20px;color:#64748b;margin-bottom:60px">No hidden fees. Scale as you grow.</div>
+      <div style="display:flex;gap:32px;width:100%;max-width:1100px">
+        <div style="flex:1;border:1px solid #e2e8f0;border-radius:24px;padding:48px;background:#ffffff;box-shadow:0 10px 30px rgba(0,0,0,0.03)">
+          <div style="font-size:20px;font-weight:700;color:#0f172a;margin-bottom:12px">Starter</div>
+          <div style="font-size:48px;font-weight:900;color:#0f172a;margin-bottom:12px">$0 <span style="font-size:18px;color:#64748b;font-weight:500">/mo</span></div>
+          <div style="height:120px;display:flex;flex-direction:column;gap:12px;margin-top:24px">
+            ${[1, 2, 3].map(() => `<div style="height:10px;width:100%;background:#f1f5f9;border-radius:99px"></div>`).join("")}
+          </div>
         </div>
-        <div style="flex:1;border:1px solid var(--primary);border-radius:6px;padding:6px;background:var(--primary);box-shadow:0 4px 16px rgba(99,102,241,0.3)">
-          <div style="font-size:7px;font-weight:700;color:#fff">Pro</div>
-          <div style="font-size:9px;font-weight:800;color:#fff;margin:2px 0">$29</div>
-          <div style="font-size:6px;color:#c7d2fe">/mo</div>
+        <div style="flex:1;border:2px solid #6366f1;border-radius:24px;padding:48px;background:#ffffff;box-shadow:0 20px 40px rgba(99,102,241,0.15);position:relative">
+          <div style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);background:#6366f1;color:#fff;font-size:14px;font-weight:800;padding:8px 20px;border-radius:99px;letter-spacing:1px">MOST POPULAR</div>
+          <div style="font-size:20px;font-weight:700;color:#0f172a;margin-bottom:12px">Pro</div>
+          <div style="font-size:48px;font-weight:900;color:#0f172a;margin-bottom:12px">$29 <span style="font-size:18px;color:#64748b;font-weight:500">/mo</span></div>
+          <div style="height:120px;display:flex;flex-direction:column;gap:12px;margin-top:24px">
+            ${[1, 2, 3, 4].map(() => `<div style="height:10px;width:100%;background:#e0e7ff;border-radius:99px"></div>`).join("")}
+          </div>
         </div>
-        <div style="flex:1;border:1px solid var(--border);border-radius:6px;padding:6px;background:var(--surface);box-shadow:0 2px 8px rgba(0,0,0,0.08)">
-          <div style="font-size:7px;font-weight:700;color:var(--text)">Team</div>
-          <div style="font-size:9px;font-weight:800;color:var(--text);margin:2px 0">$99</div>
-          <div style="font-size:6px;color:var(--text-muted)">/mo</div>
+        <div style="flex:1;border:1px solid #e2e8f0;border-radius:24px;padding:48px;background:#ffffff;box-shadow:0 10px 30px rgba(0,0,0,0.03)">
+          <div style="font-size:20px;font-weight:700;color:#0f172a;margin-bottom:12px">Team</div>
+          <div style="font-size:48px;font-weight:900;color:#0f172a;margin-bottom:12px">$99 <span style="font-size:18px;color:#64748b;font-weight:500">/mo</span></div>
+          <div style="height:120px;display:flex;flex-direction:column;gap:12px;margin-top:24px">
+            ${[1, 2, 3, 4].map(() => `<div style="height:10px;width:100%;background:#f1f5f9;border-radius:99px"></div>`).join("")}
+          </div>
         </div>
       </div>
     </div>`,
