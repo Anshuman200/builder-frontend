@@ -325,12 +325,12 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
                 value={currentUnit}
                 size="small"
                 onChange={handleUnitChange}
-                style={{ 
-                    height: 30, 
+                style={{
+                    height: 30,
                     width: 70,
                 }}
-                dropdownStyle={{ 
-                    background: "#18181b", 
+                dropdownStyle={{
+                    background: "#18181b",
                     border: `1px solid ${PANEL_COLORS.inputBorder}`,
                 }}
                 options={units}
@@ -599,8 +599,8 @@ export function BorderRadiusInput({ value, onChange, placeholder }: { value: str
         else { const next = { tl, tr, br, bl, [corner]: v }; onChange(serializeRadius(next.tl, next.tr, next.br, next.bl)); }
     };
 
-    const presets = ["0px", "4px", "8px", "12px", "16px", "999px"];
-    const presetLabels = ["0", "4", "8", "12", "16", "Full"];
+    const presets = ["0px", "8px", "16px", "24px", "28px", "32px", "36px", "40px", "48px", "56px", "64px", "72px", "999px"];
+    const presetLabels = ["0", "8", "16", "24", "28", "32", "36", "40", "48", "56", "64", "72", "Full"];
     const corners: Array<{ key: "tl" | "tr" | "br" | "bl"; val: string }> = [
         { key: "tl", val: tl }, { key: "tr", val: tr }, { key: "bl", val: bl }, { key: "br", val: br },
     ];
@@ -1115,27 +1115,27 @@ function SortableItem({ id, index, children, onDelete }: { id: string, index: nu
             backdropFilter: isDragging ? "blur(8px)" : "none",
         }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
-                    <div {...attributes} {...listeners} style={{ cursor: "grab", color: "var(--text-muted)", display: "flex", alignItems: "center", padding: "2px" }} title="Drag to reorder">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                            <circle cx="9" cy="5" r="2" />
-                            <circle cx="9" cy="12" r="2" />
-                            <circle cx="9" cy="19" r="2" />
-                            <circle cx="15" cy="5" r="2" />
-                            <circle cx="15" cy="12" r="2" />
-                            <circle cx="15" cy="19" r="2" />
-                        </svg>
-                    </div>
+                <div {...attributes} {...listeners} style={{ cursor: "grab", color: "var(--text-muted)", display: "flex", alignItems: "center", padding: "2px" }} title="Drag to reorder">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="9" cy="5" r="2" />
+                        <circle cx="9" cy="12" r="2" />
+                        <circle cx="9" cy="19" r="2" />
+                        <circle cx="15" cy="5" r="2" />
+                        <circle cx="15" cy="12" r="2" />
+                        <circle cx="15" cy="19" r="2" />
+                    </svg>
+                </div>
                 {onDelete && (
                     <button
                         onClick={onDelete}
-                        style={{ 
-                            background: "rgba(239,68,68,0.05)", 
-                            border: "1px solid rgba(239,68,68,0.1)", 
-                            color: "#ef4444", 
-                            cursor: "pointer", 
-                            padding: "6px", 
+                        style={{
+                            background: "rgba(239,68,68,0.05)",
+                            border: "1px solid rgba(239,68,68,0.1)",
+                            color: "#ef4444",
+                            cursor: "pointer",
+                            padding: "6px",
                             borderRadius: 8,
-                            display: "flex", 
+                            display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             transition: "all 0.2s",

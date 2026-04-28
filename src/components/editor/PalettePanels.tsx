@@ -220,7 +220,8 @@ export function DrawerSectionCard({ template, onAdd }: { template: SectionTempla
   function doAdd() {
     const rawBlock = template.create();
     // Inject templateId so we can track exactly which template was used
-    (rawBlock as any).templateId = template.id;
+    if (!rawBlock.props) rawBlock.props = {};
+    rawBlock.props.templateId = template.id;
     const newBlock = injectProjectName(rawBlock, projectName);
     onAdd(newBlock);
     scrollToBlock(newBlock.id);
@@ -244,7 +245,7 @@ export function DrawerSectionCard({ template, onAdd }: { template: SectionTempla
   const isSingleton = SINGLETON_CATEGORIES.has(template.category);
   const isAlreadyInPage = isSingleton
     ? !!findExistingInCategory(content, template.category)
-    : content.some(block => (block as any).templateId === template.id);
+    : content.some(block => block.props?.templateId === template.id);
 
   // Symbolic badges based on template ID for demonstration
   const isPopular = template.id.includes('split') || template.id.includes('logo-left');

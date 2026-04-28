@@ -533,7 +533,25 @@ const CanvasBlock = memo(function CanvasBlock({
                 chart: chartSections
               };
 
-              const templates = sectionTypeTemplates[block.type];
+              const templates = (() => {
+                const tid = (block.props.templateId as string) || (block as any).templateId || "";
+                if (tid.startsWith("hero-")) return heroSections;
+                if (tid.startsWith("contact-")) return contactSections;
+                if (tid.startsWith("features-")) return featuresSections;
+                if (tid.startsWith("stats-")) return statsSections;
+                if (tid.startsWith("team-")) return teamSections;
+                if (tid.startsWith("navigation-")) return navigationSections;
+                if (tid.startsWith("footer-")) return footerSections;
+                if (tid.startsWith("cta-")) return ctaSections;
+                if (tid.startsWith("faq-")) return faqSections;
+                if (tid.startsWith("pricing-")) return pricingSections;
+                if (tid.startsWith("gallery-")) return gallerySections;
+                if (tid.startsWith("grid-")) return gridSections;
+                if (tid.startsWith("legal-")) return legalSections;
+                if (tid.startsWith("chart-")) return chartSections;
+                
+                return sectionTypeTemplates[block.type];
+              })();
 
               if (templates) {
                 const currentTemplateId = (block.props.templateId as string) || templates[0].id;
