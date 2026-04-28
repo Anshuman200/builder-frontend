@@ -13,11 +13,7 @@ export const navigationSections: SectionTemplate[] = [
       layoutWidth: "fluid",
       fullWidth: true,
       logoText: "PageCraft",
-      links: [
-        { id: "1", label: "Features", url: "#features" },
-        { id: "2", label: "Pricing", url: "#pricing" },
-        { id: "3", label: "About", url: "#about" }
-      ],
+      links: [],
       showCta: true, ctaText: "Get Started",
       bgColor: "#ffffff", textColor: "#0f172a",
     }),
@@ -32,10 +28,7 @@ export const navigationSections: SectionTemplate[] = [
       layoutWidth: "fluid",
       fullWidth: true,
       logoText: "PageCraft",
-      links: [
-        { id: "1", label: "Product", url: "#product" },
-        { id: "2", label: "Blog", url: "#blog" }
-      ],
+      links: [],
       showCta: true, ctaText: "Login",
       bgColor: "#ffffff", textColor: "#0f172a",
       ctaBgColor: "#0f172a",
@@ -52,10 +45,7 @@ export const navigationSections: SectionTemplate[] = [
       fullWidth: true,
       logoText: "PageCraft",
       style: "glass",
-      links: [
-        { id: "1", label: "Tour", url: "#tour" },
-        { id: "2", label: "Docs", url: "#docs" }
-      ],
+      links: [],
       showCta: true, ctaText: "Launch App", ctaVariant: "outline",
       bgColor: "#0f172a", textColor: "#ffffff",
     }),

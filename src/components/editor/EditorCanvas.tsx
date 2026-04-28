@@ -12,13 +12,15 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { EllipsisHorizontalIcon, TrashIcon, Square2StackIcon, PlusIcon, Squares2X2Icon, ArrowsPointingOutIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon } from "@heroicons/react/24/outline";
+import { EllipsisHorizontalIcon, TrashIcon, Square2StackIcon, PlusIcon, Squares2X2Icon, ArrowsUpDownIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
+import { heroSections } from "@/lib/sections/hero";
 import { BlockRenderer } from "./blocks";
 import { ActivePathContext, PreviewContext, getBlockMediaInfo, getBlockLayouts } from "./blocks/shared";
 import { IconButton } from "../ui/IconButton";
 import AppToolTip from "../common/AppToolTip";
+import { Dropdown } from "antd";
 
 // Viewport widths per mode
 const VIEWPORT_WIDTHS = {
@@ -355,7 +357,7 @@ const CanvasBlock = memo(function CanvasBlock({
   activeHeight: number;
   dropPosition: "before" | "after" | "inside" | "replace";
 }) {
-  const { selectedBlockId, hoveredBlockId, selectBlock, hoverBlock, deleteBlock, duplicateBlock } =
+  const { selectedBlockId, hoveredBlockId, selectBlock, hoverBlock, deleteBlock, duplicateBlock, replaceBlock } =
     useEditorStore();
 
   const isSelected = selectedBlockId === block.id;
@@ -495,13 +497,95 @@ const CanvasBlock = memo(function CanvasBlock({
           <div className="absolute top-4 right-4 p-1 rounded-sm shadow-md bg-white z-100 space-x-1 flex items-center">
             {/* Quick Layout Change */}
             {(() => {
+              if (block.type === "hero") {
+                const menuItems = heroSections.map(s => ({
+                  key: s.id,
+                  label: (
+                    <div className="px-2 py-1 flex items-center justify-between gap-4">
+                      <span className="font-medium text-xs">{s.name}</span>
+                      {block.props.templateId === s.id && <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
+                    </div>
+                  ),
+                  onClick: () => {
+                    const template = heroSections.find(ts => ts.id === s.id);
+                    if (template) {
+                      // 1. Extract content from current block
+                      const extractText = (b: Block): string[] => {
+                        let res: string[] = [];
+                        if (b.type === "text" && b.props.content) res.push(b.props.content as string);
+                        else if (b.type === "button" && b.props.label) res.push(b.props.label as string);
+
+                        ["childBlocks", "col0", "col1"].forEach(pName => {
+                          const children = b.props[pName] as Block[] | undefined;
+                          if (Array.isArray(children)) children.forEach(c => { res = [...res, ...extractText(c)]; });
+                        });
+                        return res;
+                      };
+                      const oldText = extractText(block);
+
+                      // 2. Create new block
+                      const newBlock = template.create();
+
+                      // 3. Inject content into new block
+                      const injectText = (b: Block, texts: string[]): string[] => {
+                        let remaining = [...texts];
+                        if (remaining.length === 0) return [];
+                        if (b.type === "text") b.props.content = remaining.shift();
+                        else if (b.type === "button") b.props.label = remaining.shift();
+
+                        ["childBlocks", "col0", "col1"].forEach(pName => {
+                          const children = b.props[pName] as Block[] | undefined;
+                          if (Array.isArray(children)) children.forEach(c => { remaining = injectText(c, remaining); });
+                        });
+                        return remaining;
+                      };
+                      injectText(newBlock, oldText);
+
+                      // 4. Smart Merge: Preserve existing style props
+                      const preserved: Record<string, any> = {};
+                      [
+                        "bgColor", "bgImage", "bgOverlay", "bgOverlayColor", 
+                        "textColor", "minHeight", "padding", "tabletPadding", 
+                        "mobilePadding", "borderRadius"
+                      ].forEach(prop => {
+                        if (block.props[prop] !== undefined) preserved[prop] = block.props[prop];
+                      });
+
+                      newBlock.props = {
+                        ...newBlock.props,
+                        ...preserved,
+                        templateId: s.id
+                      };
+
+                      replaceBlock(block.id, newBlock);
+                    }
+                  }
+                }));
+
+                return (
+                  <AppToolTip title="Change Hero Template">
+                    <Dropdown
+                      menu={{ items: menuItems }}
+                      trigger={['click']}
+                      placement="bottomRight"
+                      overlayClassName="hero-template-dropdown"
+                    >
+                      <IconButton
+                        icon={<Squares2X2Icon style={{ width: 14, height: 14 }} />}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </Dropdown>
+                  </AppToolTip>
+                );
+              }
+
               const layouts = getBlockLayouts(block.type);
               if (!layouts) return null;
 
               return (
                 <AppToolTip title="Change Layout">
                   <IconButton
-                    icon={<ViewColumnsIcon style={{ width: 14, height: 14 }} />}
+                    icon={<Squares2X2Icon style={{ width: 14, height: 14 }} />}
                     onClick={(e) => {
                       e.stopPropagation();
                       const current = (block.props.layout as string) || layouts[0];
@@ -543,7 +627,12 @@ const CanvasBlock = memo(function CanvasBlock({
               <>
                 {/* Drag to reorder */}
                 <AppToolTip title="Drag to reorder">
-                  <IconButton {...attributes} {...listeners} icon={<ArrowsPointingOutIcon style={{ width: 14, height: 14 }} />} />
+                  <IconButton 
+                    {...attributes} 
+                    {...listeners} 
+                    className="cursor-grab active:cursor-grabbing" 
+                    icon={<ArrowsUpDownIcon style={{ width: 14, height: 14 }} />} 
+                  />
                 </AppToolTip>
 
                 {/* Duplicate block */}

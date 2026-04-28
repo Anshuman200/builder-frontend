@@ -8,9 +8,10 @@ import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { Input as AntInput } from "antd";
 import { EDITOR_FEATURES } from "@/lib/config/features";
+import { heroSections } from "@/lib/sections/hero";
 
 export function HeroPanel({ block }: { block: Block }) {
-    const { updateBlock } = useEditorStore();
+    const { updateBlock, replaceBlock } = useEditorStore();
     const p = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     return (
@@ -21,7 +22,69 @@ export function HeroPanel({ block }: { block: Block }) {
                 <Field label="Image Overlay Color"><ColorInput value={(p.bgOverlay as string) || "var(--overlay)"} onChange={(v) => up("bgOverlay", v)} onBlur={(v) => up("bgOverlay", v, true)} /></Field>
             </Section>
             <Section title="Style">
-                <Field label="Section Layout"><SelectInput value={(p.layout as string) || "centered"} onChange={(v) => up("layout", v)} options={[{ label: "Fluid / Edge-to-Edge", value: "fluid" }, { label: "Centered (Container)", value: "centered" }, { label: "Narrow Content (800px)", value: "narrow" }, { label: "Full Screen (100vh)", value: "fullscreen" }]} /></Field>
+                <Field label="Hero Template">
+                    <SelectInput
+                        value={(p.templateId as string) || ""}
+                        onChange={(v) => {
+                            const template = heroSections.find(s => s.id === v);
+                            if (template) {
+                                // 1. Extract content from current block
+                                const extractText = (b: Block): string[] => {
+                                    let res: string[] = [];
+                                    if (b.type === "text" && b.props.content) res.push(b.props.content as string);
+                                    else if (b.type === "button" && b.props.label) res.push(b.props.label as string);
+                                    
+                                    ["childBlocks", "col0", "col1"].forEach(pName => {
+                                        const children = b.props[pName] as Block[] | undefined;
+                                        if (Array.isArray(children)) children.forEach(c => { res = [...res, ...extractText(c)]; });
+                                    });
+                                    return res;
+                                };
+                                const oldText = extractText(block);
+
+                                // 2. Create new block
+                                const newBlock = template.create();
+                                
+                                // 3. Inject content into new block
+                                const injectText = (b: Block, texts: string[]): string[] => {
+                                    let remaining = [...texts];
+                                    if (remaining.length === 0) return [];
+                                    if (b.type === "text") b.props.content = remaining.shift();
+                                    else if (b.type === "button") b.props.label = remaining.shift();
+                                    
+                                    ["childBlocks", "col0", "col1"].forEach(pName => {
+                                        const children = b.props[pName] as Block[] | undefined;
+                                        if (Array.isArray(children)) children.forEach(c => { remaining = injectText(c, remaining); });
+                                    });
+                                    return remaining;
+                                };
+                                injectText(newBlock, oldText);
+
+                                // 4. Smart Merge: Preserve existing style props
+                                const preserved: Record<string, any> = {};
+                                [
+                                    "bgColor", "bgImage", "bgOverlay", "bgOverlayColor", 
+                                    "textColor", "minHeight", "padding", "tabletPadding", 
+                                    "mobilePadding", "borderRadius"
+                                ].forEach(prop => {
+                                    if (p[prop] !== undefined) preserved[prop] = p[prop];
+                                });
+
+                                newBlock.props = {
+                                    ...newBlock.props,
+                                    ...preserved,
+                                    templateId: v
+                                };
+
+                                replaceBlock(block.id, newBlock);
+                            }
+                        }}
+                        options={[
+                            ...heroSections.map(s => ({ label: s.name, value: s.id }))
+                        ]}
+                        placeholder="Select Template"
+                    />
+                </Field>
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#ffffff"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
                 <Field label="Min Height"><TextInputWithUnit value={(p.minHeight as string) ?? ""} onChange={(v) => up("minHeight", v)} placeholder="480px" /></Field>
                 <AlignmentInput label="Content Alignment" value={(p.align as string) || "center"} onChange={(v) => up("align", v)} />

@@ -9,7 +9,7 @@ import React from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { TrashIcon, EllipsisHorizontalIcon, ArrowsPointingOutIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, EllipsisHorizontalIcon, ArrowsUpDownIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
 import { useEditorStore } from "@/stores/editorStore";
@@ -82,7 +82,7 @@ export function useLinkHandler() {
 export function getBlockMediaInfo(type: string) {
     if (type === "image") return { prop: "src", label: "Image", icon: PhotoIcon, mediaType: "image" as const };
     if (type === "video") return { prop: "url", label: "Video", icon: VideoCameraIcon, mediaType: "video" as const };
-    if (["hero", "container", "wave", "header"].includes(type)) return { prop: "bgImage", label: "Background", icon: PhotoIcon, mediaType: "image" as const };
+    if (["hero", "container", "wave", "header"].includes(type)) return { prop: "bgImage", label: "Background", icon: PaintBrushIcon, mediaType: "image" as const };
     if (["feature", "feature_card"].includes(type)) return { prop: "image", label: "Image", icon: PhotoIcon, mediaType: "image" as const };
     return null;
 }
@@ -267,7 +267,12 @@ export function ChildBlockWrapper({
 
                     {/* Drag to reorder */}
                     <AppToolTip title="Drag to reorder">
-                        <IconButton {...attributes} {...listeners} icon={<ArrowsPointingOutIcon style={{ width: 14, height: 14 }} />} />
+                        <IconButton 
+                            {...attributes} 
+                            {...listeners} 
+                            className="cursor-grab active:cursor-grabbing"
+                            icon={<ArrowsUpDownIcon style={{ width: 14, height: 14 }} />} 
+                        />
                     </AppToolTip>
                     {/* Delete block */}
                     <AppToolTip title="Delete block">
