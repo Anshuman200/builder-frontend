@@ -796,14 +796,18 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
 
     interface Stop { id: string; color: string; offset: number; }
 
-    const parseStops = (val: string): { deg: number, stops: Stop[] } => {
+    const parseStops = (val: string): { type: string, deg: number, stops: Stop[] } => {
+        const typeMatch = val.match(/^(linear|radial|conic)-gradient/);
+        const type = typeMatch ? typeMatch[1] : "linear";
+
         const degMatch = val.match(/(\d+)deg/);
         const deg = degMatch ? parseInt(degMatch[1]) : 135;
-        
+
         // Match COLOR OFFSET%
         const stopsMatch = val.match(/((rgba?\(.*?\)|#[\da-fA-F]+|var\(.*?\))\s+(\d+)%)/g);
         if (stopsMatch) {
             return {
+                type,
                 deg,
                 stops: stopsMatch.map((s, i) => {
                     const parts = s.match(/(.*)\s+(\d+)%/);
@@ -811,15 +815,23 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                 })
             };
         }
-        return { deg: 135, stops: [{ id: "s1", color: "#6366f1", offset: 0 }, { id: "s2", color: "#a855f7", offset: 100 }] };
+        return { type: "linear", deg: 135, stops: [{ id: "s1", color: "#6366f1", offset: 0 }, { id: "s2", color: "#a855f7", offset: 100 }] };
     };
 
-    const { deg, stops } = parseStops(value || gradients[1].value);
+    const { type, deg, stops } = parseStops(value || gradients[1].value);
 
-    const update = (newDeg: number, newStops: Stop[]) => {
+    const update = (newType: string, newDeg: number, newStops: Stop[]) => {
         const sorted = [...newStops].sort((a, b) => a.offset - b.offset);
         const stopsStr = sorted.map(s => `${s.color} ${s.offset}%`).join(", ");
-        const newVal = `linear-gradient(${newDeg}deg, ${stopsStr})`;
+
+        let newVal = "";
+        if (newType === "linear") newVal = `linear-gradient(${newDeg}deg, ${stopsStr})`;
+        else if (newType === "radial") newVal = `radial-gradient(circle at center, ${stopsStr})`;
+        else if (newType === "conic") newVal = `conic-gradient(from ${newDeg}deg at center, ${stopsStr.replace(/%/g, 'deg')})`; // Conic uses deg or %? Actually it uses deg mostly, but CSS supports both. But for simplicity we map 0-100% to 0-360deg if needed, but CSS conic supports % too.
+
+        // Fix for conic: conic-gradient(from 135deg at center, #6366f1 0%, #a855f7 100%) is valid.
+        if (newType === "conic") newVal = `conic-gradient(from ${newDeg}deg at center, ${stopsStr})`;
+
         onChange(newVal);
     };
 
@@ -828,8 +840,8 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", padding: "4px 0" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Dropdown 
-                    menu={{ 
+                <Dropdown
+                    menu={{
                         items: gradients.map(g => ({
                             key: g.name,
                             label: (
@@ -840,9 +852,9 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                                 </div>
                             ),
                             onClick: () => { onChange(g.value); if (onBlur) onBlur(g.value); }
-                        })) 
-                    }} 
-                    trigger={['click']} 
+                        }))
+                    }}
+                    trigger={['click']}
                     placement="bottomRight"
                 >
                     <button
@@ -853,13 +865,58 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                         }}
                     >
                         <div style={{ width: 18, height: 18, borderRadius: 4, background: value || PANEL_COLORS.inputBg, border: "1px solid rgba(255,255,255,0.15)", flexShrink: 0 }} />
-                        <span style={{ flex: 1, textAlign: "left", fontSize: 11, opacity: 0.9 }}>{currentPreset ? currentPreset.name : "Custom Multi-Stop"}</span>
+                        <span style={{ flex: 1, textAlign: "left", fontSize: 11, opacity: 0.9 }}>{currentPreset ? currentPreset.name : `Custom ${type}`}</span>
                         <ChevronDownIcon style={{ width: 12, height: 12, opacity: 0.4 }} />
                     </button>
                 </Dropdown>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10, background: "rgba(255,255,255,0.02)", padding: 12, borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)" }}>
+                {/* Type Selection */}
+                <div className="flex justify-between gap-4 mb-4 items-center">
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 10, color: PANEL_COLORS.muted, textTransform: "uppercase", fontWeight: 700 }}>Type</span>
+                        <SelectInput
+                            value={type}
+                            onChange={(v) => update(v, deg, stops)}
+                            options={[
+                                { label: "Linear", value: "linear" },
+                                { label: "Radial", value: "radial" },
+                                { label: "Angular", value: "conic" },
+                            ]}
+                        />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <Tooltip title="Reverse Stops">
+                            <button
+                                onClick={() => {
+                                    const nS = [...stops].map(s => ({ ...s, offset: 100 - s.offset }));
+                                    update(type, deg, nS);
+                                }}
+                                style={{ background: "none", border: "none", color: PANEL_COLORS.muted, cursor: "pointer", padding: 4, display: "flex", borderRadius: 4 }}
+                                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+                                onMouseLeave={e => e.currentTarget.style.background = "none"}
+                            >
+                                <ArrowPathIcon style={{ width: 14, height: 14, transform: "rotate(90deg)" }} />
+                            </button>
+                        </Tooltip>
+                        <Tooltip title="Shuffle Colors">
+                            <button
+                                onClick={() => {
+                                    const colors = stops.map(s => s.color).sort(() => Math.random() - 0.5);
+                                    const nS = stops.map((s, i) => ({ ...s, color: colors[i] }));
+                                    update(type, deg, nS);
+                                }}
+                                style={{ background: "none", border: "none", color: PANEL_COLORS.muted, cursor: "pointer", padding: 4, display: "flex", borderRadius: 4 }}
+                                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+                                onMouseLeave={e => e.currentTarget.style.background = "none"}
+                            >
+                                <ArrowPathIcon style={{ width: 14, height: 14 }} />
+                            </button>
+                        </Tooltip>
+                    </div>
+                </div>
+
                 {/* Visual Gradient Bar */}
                 <div style={{ height: 24, width: "100%", borderRadius: 6, background: value || "transparent", border: "1px solid rgba(255,255,255,0.1)", marginBottom: 4 }} />
 
@@ -867,49 +924,51 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: 10, color: PANEL_COLORS.muted, textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>Stops</span>
-                        <button 
-                            onClick={() => update(deg, [...stops, { id: `stop-${Date.now()}`, color: "#ffffff", offset: 50 }])}
+                        <button
+                            onClick={() => update(type, deg, [...stops, { id: `stop-${Date.now()}`, color: "#ffffff", offset: 50 }])}
                             style={{ background: "none", border: "none", color: PANEL_COLORS.primary, cursor: "pointer", fontSize: 10, fontWeight: 700 }}
                         >
                             + Add Stop
                         </button>
                     </div>
 
-                    {stops.map((s, idx) => (
+                    {/* Sorted stops list */}
+                    {[...stops].sort((a, b) => a.offset - b.offset).map((s) => (
                         <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.03)", padding: "6px 8px", borderRadius: 6 }}>
-                            <ColorInput 
-                                value={s.color} 
+                            <ColorInput
+                                value={s.color}
                                 onChange={(v) => {
-                                    const nS = [...stops];
-                                    nS[idx] = { ...nS[idx], color: v };
-                                    update(deg, nS);
-                                }} 
+                                    const nS = stops.map(st => st.id === s.id ? { ...st, color: v } : st);
+                                    update(type, deg, nS);
+                                }}
                                 hideText
                             />
                             <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
-                                <input 
-                                    type="number" 
-                                    value={s.offset} 
+                                <input
+                                    type="number"
+                                    value={s.offset}
                                     min={0} max={100}
                                     onChange={(e) => {
-                                        const nS = [...stops];
-                                        nS[idx] = { ...nS[idx], offset: parseInt(e.target.value) || 0 };
-                                        update(deg, nS);
+                                        const val = Math.min(100, Math.max(0, parseInt(e.target.value) || 0));
+                                        const nS = stops.map(st => st.id === s.id ? { ...st, offset: val } : st);
+                                        update(type, deg, nS);
                                     }}
                                     style={{ width: 40, background: "none", border: "none", color: "#fff", fontSize: 11, textAlign: "right", outline: "none" }}
                                 />
                                 <span style={{ fontSize: 10, opacity: 0.4 }}>%</span>
-                                <SliderInput 
-                                    value={s.offset} 
+                                <SliderInput
+                                    value={s.offset}
                                     onChange={(v) => {
-                                        const nS = [...stops];
-                                        nS[idx] = { ...nS[idx], offset: v };
-                                        update(deg, nS);
+                                        const nS = stops.map(st => st.id === s.id ? { ...st, offset: v } : st);
+                                        update(type, deg, nS);
                                     }}
                                 />
                             </div>
                             {stops.length > 2 && (
-                                <button onClick={() => update(deg, stops.filter((_, i) => i !== idx))} style={{ background: "none", border: "none", color: "#ef4444", opacity: 0.6, cursor: "pointer", padding: 4 }}>
+                                <button
+                                    onClick={() => update(type, deg, stops.filter(st => st.id !== s.id))}
+                                    style={{ background: "none", border: "none", color: "#ef4444", opacity: 0.6, cursor: "pointer", padding: 4 }}
+                                >
                                     <TrashIcon style={{ width: 14, height: 14 }} />
                                 </button>
                             )}
@@ -923,21 +982,21 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                         <span style={{ fontSize: 10, color: PANEL_COLORS.muted, textTransform: "uppercase", fontWeight: 700 }}>Angle</span>
                         <span style={{ fontSize: 10, color: PANEL_COLORS.primary }}>{deg}°</span>
                     </div>
-                    <SliderInput value={deg} min={0} max={360} onChange={(v) => update(v, stops)} />
+                    <SliderInput value={deg} min={0} max={360} onChange={(v) => update(type, v, stops)} />
                 </div>
             </div>
         </div>
     );
 }
-export function UnifiedBackgroundInput({ 
-    bgColor, 
-    bgGradient, 
-    onChangeColor, 
-    onChangeGradient 
-}: { 
-    bgColor: string; 
-    bgGradient: string; 
-    onChangeColor: (v: string) => void; 
+export function UnifiedBackgroundInput({
+    bgColor,
+    bgGradient,
+    onChangeColor,
+    onChangeGradient
+}: {
+    bgColor: string;
+    bgGradient: string;
+    onChangeColor: (v: string) => void;
     onChangeGradient: (v: string) => void;
 }) {
     const [mode, setMode] = React.useState<"solid" | "gradient">(bgGradient ? "gradient" : "solid");
@@ -967,16 +1026,16 @@ export function UnifiedBackgroundInput({
             />
             <div style={{ minHeight: 32 }}>
                 {mode === "solid" ? (
-                    <ColorInput 
-                        value={bgColor || "transparent"} 
-                        onChange={onChangeColor} 
-                        onBlur={(v) => onChangeColor(v)} 
+                    <ColorInput
+                        value={bgColor || "transparent"}
+                        onChange={onChangeColor}
+                        onBlur={(v) => onChangeColor(v)}
                     />
                 ) : (
-                    <GradientInput 
-                        value={bgGradient || ""} 
-                        onChange={onChangeGradient} 
-                        onBlur={(v) => onChangeGradient(v)} 
+                    <GradientInput
+                        value={bgGradient || ""}
+                        onChange={onChangeGradient}
+                        onBlur={(v) => onChangeGradient(v)}
                     />
                 )}
             </div>

@@ -658,53 +658,55 @@ export function getCardStyles({ props: p, isFocused, isHovered, primaryColor = "
 }
 
 export function getBackgroundStyles(p: Record<string, any>, theme: any): React.CSSProperties {
-  const defaultPrimary = theme.colors?.primary || "#6366f1";
-  
   const bgColor = (p.bgColor as string) || (p.sectionBg as string) || "transparent";
-  const bgGradient = p.bgGradient as string;
-  const bgImage = p.bgImage as string;
-  const bgSize = (p.bgSize as string) || "cover";
-  const bgPosition = (p.bgPosition as string) || "center";
-  const bgRepeat = (p.bgRepeat as string) || "no-repeat";
   
-  // Overlay
-  const overlayColor = (p.bgOverlayColor as string) || "rgba(0,0,0,0.5)";
-  const overlayOpacity = Number(p.bgOverlayOpacity ?? (p.bgImage ? 50 : 0)) / 100;
-
-  const styles: React.CSSProperties = {
+  return {
     backgroundColor: bgColor,
-    backgroundSize: bgSize,
-    backgroundPosition: bgPosition,
-    backgroundRepeat: bgRepeat as any,
     position: "relative",
     overflow: "hidden",
   };
-
-  if (bgGradient) {
-    styles.backgroundImage = bgGradient;
-  } else if (bgImage) {
-    styles.backgroundImage = `url("${bgImage}")`;
-  }
-
-  return styles;
 }
 
 export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
-  if (!p.bgImage && !p.bgColor && !p.sectionBg) return null;
-  
-  const overlayColor = (p.bgOverlayColor as string) || "rgba(0,0,0,0.5)";
-  const overlayOpacity = Number(p.bgOverlayOpacity ?? (p.bgImage ? 50 : 0)) / 100;
+  const bgImage = p.bgImage as string;
+  const bgGradient = p.bgGradient as string;
+  const imageOpacity = Number(p.bgImageOpacity ?? 100) / 100;
+  const fillOpacity = Number(p.bgFillOpacity ?? 100) / 100;
+
+  if (!bgImage && !bgGradient) return null;
 
   return (
-    <div 
-      style={{ 
-        position: "absolute", 
-        inset: 0, 
-        backgroundColor: overlayColor, 
-        opacity: overlayOpacity,
-        zIndex: 1,
-        pointerEvents: "none"
-      }} 
-    />
+    <>
+      {/* Image Layer (Bottom) */}
+      {bgImage && (
+        <div 
+          style={{ 
+            position: "absolute", 
+            inset: 0, 
+            backgroundImage: `url("${bgImage}")`,
+            backgroundSize: (p.bgSize as string) || "cover",
+            backgroundPosition: (p.bgPosition as string) || "center",
+            backgroundRepeat: (p.bgRepeat as string) || "no-repeat",
+            opacity: imageOpacity,
+            zIndex: 1,
+            pointerEvents: "none"
+          }} 
+        />
+      )}
+
+      {/* Fill Layer (Top / Overlay) */}
+      {bgGradient && (
+        <div 
+          style={{ 
+            position: "absolute", 
+            inset: 0, 
+            background: bgGradient,
+            opacity: fillOpacity,
+            zIndex: 2,
+            pointerEvents: "none"
+          }} 
+        />
+      )}
+    </>
   );
 }

@@ -26,7 +26,16 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
         />
       </Field>
 
-      <Field label="Background Image">
+      {(!!p.bgColor || !!p.bgGradient) && (
+        <Field label="Fill Opacity">
+          <SliderInput 
+            value={Number(p.bgFillOpacity ?? 100)} 
+            onChange={(v) => up("bgFillOpacity", v, true)} 
+          />
+        </Field>
+      )}
+
+      <Field label="Image">
         <MediaInput 
           value={(p.bgImage as string) || ""} 
           onChange={(v) => up("bgImage", v, true)} 
@@ -36,6 +45,13 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
 
       {!!p.bgImage && (
         <>
+          <Field label="Image Opacity">
+            <SliderInput 
+              value={Number(p.bgImageOpacity ?? 100)} 
+              onChange={(v) => up("bgImageOpacity", v, true)} 
+            />
+          </Field>
+          
           <Field label="Image Size">
             <SelectInput
               value={(p.bgSize as string) || "cover"}
@@ -75,26 +91,6 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
               ]}
             />
           </Field>
-
-          <Section title="Image Overlay">
-            <Field label="Overlay Color">
-              <ColorInput 
-                value={(p.bgOverlayColor as string) || "rgba(0,0,0,0.5)"} 
-                onChange={(v) => up("bgOverlayColor", v)} 
-                onBlur={(v) => up("bgOverlayColor", v, true)} 
-              />
-            </Field>
-            <Field label="Overlay Opacity">
-              <SliderInput 
-                value={Number(p.bgOverlayOpacity ?? (p.bgImage ? 50 : 0))} 
-                onChange={(v) => up("bgOverlayOpacity", v, true)}
-                min={0}
-                max={100}
-                step={1}
-                unit="%"
-              />
-            </Field>
-          </Section>
         </>
       )}
     </Section>
