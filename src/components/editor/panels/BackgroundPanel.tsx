@@ -16,7 +16,7 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
     updateBlock(block.id, { [key]: val }, commit);
 
   return (
-    <Section title="Background" collapsible defaultOpen>
+    <Section title="Background">
       <Field label="Background Color">
         <ColorInput 
           value={(p.bgColor as string) || "transparent"} 
@@ -33,7 +33,7 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
         />
       </Field>
 
-      {p.bgImage && (
+      {!!p.bgImage && (
         <>
           <Field label="Image Size">
             <SelectInput
@@ -75,7 +75,7 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
             />
           </Field>
 
-          <Section title="Image Overlay" subSection>
+          <Section title="Image Overlay">
             <Field label="Overlay Color">
               <ColorInput 
                 value={(p.bgOverlayColor as string) || "rgba(0,0,0,0.5)"} 
@@ -85,7 +85,7 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
             </Field>
             <Field label="Overlay Opacity">
               <SliderInput 
-                value={Number(p.bgOverlayOpacity ?? 50)} 
+                value={Number(p.bgOverlayOpacity ?? (p.bgImage ? 50 : 0))} 
                 onChange={(v) => up("bgOverlayOpacity", v, true)}
                 min={0}
                 max={100}

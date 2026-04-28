@@ -9,7 +9,7 @@ import React from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { TrashIcon, EllipsisHorizontalIcon, ArrowsUpDownIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, EllipsisHorizontalIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
 import { useEditorStore } from "@/stores/editorStore";
@@ -80,10 +80,10 @@ export function useLinkHandler() {
 }
 
 export function getBlockMediaInfo(type: string) {
-    if (type === "image") return { prop: "src", label: "Image", icon: PhotoIcon, mediaType: "image" as const };
+    if (type === "image") return { prop: "src", label: "Image", icon: ArrowPathIcon, mediaType: "image" as const };
     if (type === "video") return { prop: "url", label: "Video", icon: VideoCameraIcon, mediaType: "video" as const };
-    if (["hero", "container", "wave", "header", "features", "stats", "team"].includes(type)) return { prop: "bgImage", label: "Background", icon: PhotoIcon, mediaType: "image" as const };
-    if (["feature", "feature_card"].includes(type)) return { prop: "image", label: "Image", icon: PhotoIcon, mediaType: "image" as const };
+    if (["hero", "container", "wave", "header", "features", "stats", "team"].includes(type)) return { prop: "bgImage", label: "Background", icon: ArrowPathIcon, mediaType: "image" as const };
+    if (["feature", "feature_card"].includes(type)) return { prop: "image", label: "Image", icon: ArrowPathIcon, mediaType: "image" as const };
     return null;
 }
 
@@ -252,7 +252,7 @@ export function ChildBlockWrapper({
                         return (
                             <AppToolTip title={`Change ${info.label}`}>
                                 <IconButton
-                                    icon={<info.icon style={{ width: 14, height: 14 }} />}
+                                    icon={<info.icon />}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         useEditorStore.getState().showMediaPicker({
@@ -623,7 +623,7 @@ export function getBackgroundStyles(p: Record<string, any>, theme: any): React.C
   
   // Overlay
   const overlayColor = (p.bgOverlayColor as string) || "rgba(0,0,0,0.5)";
-  const overlayOpacity = Number(p.bgOverlayOpacity ?? 50) / 100;
+  const overlayOpacity = Number(p.bgOverlayOpacity ?? (p.bgImage ? 50 : 0)) / 100;
 
   const styles: React.CSSProperties = {
     backgroundColor: bgColor,
@@ -645,7 +645,7 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
   if (!p.bgImage && !p.bgColor && !p.sectionBg) return null;
   
   const overlayColor = (p.bgOverlayColor as string) || "rgba(0,0,0,0.5)";
-  const overlayOpacity = Number(p.bgOverlayOpacity ?? 50) / 100;
+  const overlayOpacity = Number(p.bgOverlayOpacity ?? (p.bgImage ? 50 : 0)) / 100;
 
   return (
     <div 

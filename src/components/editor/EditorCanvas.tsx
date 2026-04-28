@@ -12,13 +12,27 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { EllipsisHorizontalIcon, TrashIcon, Square2StackIcon, PlusIcon, Squares2X2Icon, ArrowsUpDownIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import {
+  EllipsisHorizontalIcon, TrashIcon, Square2StackIcon, PlusIcon,
+  Squares2X2Icon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon,
+  PaintBrushIcon, SparklesIcon, ChartBarIcon, PencilIcon
+} from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { heroSections } from "@/lib/sections/hero";
 import { featuresSections } from "@/lib/sections/features";
 import { statsSections } from "@/lib/sections/stats";
 import { teamSections } from "@/lib/sections/team";
+import { navigationSections } from "@/lib/sections/navigation";
+import { footerSections } from "@/lib/sections/footer";
+import { contactSections } from "@/lib/sections/contact";
+import { ctaSections } from "@/lib/sections/cta";
+import { faqSections } from "@/lib/sections/faq";
+import { pricingSections } from "@/lib/sections/pricing";
+import { gallerySections } from "@/lib/sections/gallery";
+import { gridSections } from "@/lib/sections/grid";
+import { legalSections } from "@/lib/sections/legal";
+import { chartSections } from "@/lib/sections/chart";
 import { BlockRenderer } from "./blocks";
 import { ActivePathContext, PreviewContext, getBlockMediaInfo, getBlockLayouts } from "./blocks/shared";
 import { IconButton } from "../ui/IconButton";
@@ -504,7 +518,19 @@ const CanvasBlock = memo(function CanvasBlock({
                 hero: heroSections,
                 features: featuresSections,
                 stats: statsSections,
-                team: teamSections
+                team: teamSections,
+                header: navigationSections,
+                footer: footerSections,
+                contactForm: contactSections,
+                cta: ctaSections,
+                faq: faqSections,
+                pricing: pricingSections,
+                gallery: gallerySections,
+                grid: gridSections,
+                tos: legalSections,
+                privacy: legalSections,
+                about: legalSections,
+                chart: chartSections
               };
 
               const templates = sectionTypeTemplates[block.type];
@@ -527,12 +553,33 @@ const CanvasBlock = memo(function CanvasBlock({
                         let res: string[] = [];
                         if (b.type === "text" && b.props.content) res.push(b.props.content as string);
                         else if (b.type === "button" && b.props.label) res.push(b.props.label as string);
-                        
+
+                        // Handle nested list content (Features, Stats, Team, FAQ)
                         if (b.type === "features" && Array.isArray(b.props.features)) {
                           b.props.features.forEach((f: any) => {
                             if (f.title) res.push(f.title);
                             if (f.description) res.push(f.description);
                           });
+                        } else if (b.type === "stats" && Array.isArray(b.props.items)) {
+                          b.props.items.forEach((f: any) => {
+                            if (f.label) res.push(f.label);
+                            if (f.value) res.push(f.value);
+                            if (f.description) res.push(f.description);
+                          });
+                        } else if (b.type === "team" && Array.isArray(b.props.members)) {
+                          b.props.members.forEach((f: any) => {
+                            if (f.name) res.push(f.name);
+                            if (f.role) res.push(f.role);
+                            if (f.description) res.push(f.description);
+                          });
+                        } else if (b.type === "accordion" && Array.isArray(b.props.items)) {
+                          b.props.items.forEach((f: any) => {
+                            if (f.title) res.push(f.title);
+                            if (f.content) res.push(f.content);
+                          });
+                        } else if (b.type === "chart") {
+                          if (b.props.title) res.push(b.props.title as string);
+                          if (b.props.subtitle) res.push(b.props.subtitle as string);
                         }
 
                         ["childBlocks", "col0", "col1"].forEach(pName => {
@@ -552,12 +599,33 @@ const CanvasBlock = memo(function CanvasBlock({
                         if (remaining.length === 0) return [];
                         if (b.type === "text") b.props.content = remaining.shift();
                         else if (b.type === "button") b.props.label = remaining.shift();
-                        
+
+                        // Handle nested list content (Features, Stats, Team, FAQ)
                         if (b.type === "features" && Array.isArray(b.props.features)) {
                           b.props.features.forEach((f: any) => {
                             if (remaining.length > 0) f.title = remaining.shift();
                             if (remaining.length > 0) f.description = remaining.shift();
                           });
+                        } else if (b.type === "stats" && Array.isArray(b.props.items)) {
+                          b.props.items.forEach((f: any) => {
+                            if (remaining.length > 0) f.label = remaining.shift();
+                            if (remaining.length > 0) f.value = remaining.shift();
+                            if (remaining.length > 0) f.description = remaining.shift();
+                          });
+                        } else if (b.type === "team" && Array.isArray(b.props.members)) {
+                          b.props.members.forEach((f: any) => {
+                            if (remaining.length > 0) f.name = remaining.shift();
+                            if (remaining.length > 0) f.role = remaining.shift();
+                            if (remaining.length > 0) f.description = remaining.shift();
+                          });
+                        } else if (b.type === "accordion" && Array.isArray(b.props.items)) {
+                          b.props.items.forEach((f: any) => {
+                            if (remaining.length > 0) f.title = remaining.shift();
+                            if (remaining.length > 0) f.content = remaining.shift();
+                          });
+                        } else if (b.type === "chart") {
+                          if (remaining.length > 0) b.props.title = remaining.shift();
+                          if (remaining.length > 0) b.props.subtitle = remaining.shift();
                         }
 
                         ["childBlocks", "col0", "col1"].forEach(pName => {
@@ -571,9 +639,11 @@ const CanvasBlock = memo(function CanvasBlock({
                       // 4. Smart Merge
                       const preserved: Record<string, any> = {};
                       [
-                        "bgColor", "bgImage", "bgOverlay", "bgOverlayColor", 
-                        "textColor", "minHeight", "padding", "tabletPadding", 
-                        "mobilePadding", "borderRadius"
+                        "bgColor", "bgImage", "bgOverlay", "bgOverlayColor",
+                        "textColor", "minHeight", "padding", "tabletPadding",
+                        "mobilePadding", "borderRadius", "data", "height", 
+                        "color", "secondaryColor", "showGrid", "showXAxis", 
+                        "showYAxis", "showTooltip", "showLegend"
                       ].forEach(prop => {
                         if (block.props[prop] !== undefined) preserved[prop] = block.props[prop];
                       });
@@ -607,21 +677,55 @@ const CanvasBlock = memo(function CanvasBlock({
               }
 
               const layouts = getBlockLayouts(block.type);
-              if (!layouts) return null;
+              const isChart = block.type === "chart";
+              if (!layouts && !isChart) return null;
 
               return (
-                <AppToolTip title="Change Layout">
-                  <IconButton
-                    icon={<Squares2X2Icon style={{ width: 14, height: 14 }} />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const current = (block.props.layout as string) || layouts[0];
-                      const idx = layouts.indexOf(current);
-                      const next = layouts[(idx + 1) % layouts.length];
-                      useEditorStore.getState().updateBlock(block.id, { layout: next }, true);
-                    }}
-                  />
-                </AppToolTip>
+                <div className="flex gap-1">
+                  {layouts && (
+                    <AppToolTip title="Change Layout">
+                      <IconButton
+                        icon={<Squares2X2Icon style={{ width: 14, height: 14 }} />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const current = (block.props.layout as string) || layouts[0];
+                          const idx = layouts.indexOf(current);
+                          const next = layouts[(idx + 1) % layouts.length];
+                          useEditorStore.getState().updateBlock(block.id, { layout: next }, true);
+                        }}
+                      />
+                    </AppToolTip>
+                  )}
+
+                  {isChart && (
+                    <>
+                      <AppToolTip title="Change Title">
+                        <IconButton
+                          icon={<PencilIcon style={{ width: 14, height: 14 }} />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const newTitle = window.prompt("Enter new chart title:", (block.props.title as string) || "");
+                            if (newTitle !== null) {
+                              useEditorStore.getState().updateBlock(block.id, { title: newTitle }, true);
+                            }
+                          }}
+                        />
+                      </AppToolTip>
+                      <AppToolTip title="Change Description">
+                        <IconButton
+                          icon={<EllipsisHorizontalIcon style={{ width: 14, height: 14 }} />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const newSub = window.prompt("Enter new chart description:", (block.props.subtitle as string) || "");
+                            if (newSub !== null) {
+                              useEditorStore.getState().updateBlock(block.id, { subtitle: newSub }, true);
+                            }
+                          }}
+                        />
+                      </AppToolTip>
+                    </>
+                  )}
+                </div>
               );
             })()}
 
@@ -633,7 +737,7 @@ const CanvasBlock = memo(function CanvasBlock({
               return (
                 <AppToolTip title={`Change ${info.label}`}>
                   <IconButton
-                    icon={<info.icon style={{ width: 14, height: 14 }} />}
+                    icon={<info.icon />}
                     onClick={(e) => {
                       e.stopPropagation();
                       useEditorStore.getState().showMediaPicker({
@@ -654,11 +758,20 @@ const CanvasBlock = memo(function CanvasBlock({
               <>
                 {/* Drag to reorder */}
                 <AppToolTip title="Drag to reorder">
-                  <IconButton 
-                    {...attributes} 
-                    {...listeners} 
-                    className="cursor-grab active:cursor-grabbing" 
-                    icon={<ArrowsUpDownIcon style={{ width: 14, height: 14 }} />} 
+                  <IconButton
+                    {...attributes}
+                    {...listeners}
+                    className="cursor-grab active:cursor-grabbing"
+                    icon={
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="9" cy="5" r="2" />
+                        <circle cx="9" cy="12" r="2" />
+                        <circle cx="9" cy="19" r="2" />
+                        <circle cx="15" cy="5" r="2" />
+                        <circle cx="15" cy="12" r="2" />
+                        <circle cx="15" cy="19" r="2" />
+                      </svg>
+                    }
                   />
                 </AppToolTip>
 

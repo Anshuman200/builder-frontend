@@ -1,5 +1,6 @@
 "use client";
 import type { Block, EditorPage } from "@/types";
+import { CHART_COLORS } from "../blocks/ChartBlock";
 import React, { useMemo, useEffect, useRef } from "react";
 import { useEditorStore, DEFAULT_THEME } from "@/stores/editorStore";
 
@@ -978,7 +979,24 @@ export function ChartPanel({ block }: { block: Block }) {
     return (
         <>
             <Section title="Chart Settings">
-                <Field label="Type"><SelectInput value={(p.chartType as string) || "area"} onChange={(v) => up("chartType", v)} options={[{ label: "Area Chart", value: "area" }, { label: "Bar Chart", value: "bar" }, { label: "Line Chart", value: "line" }, { label: "Pie Chart", value: "pie" }, { label: "Donut Chart", value: "donut" }]} /></Field>
+                <Field label="Type">
+                    <SelectInput 
+                        value={(p.chartType as string) || "area"} 
+                        onChange={(v) => {
+                            updateBlock(block.id, { 
+                                chartType: v,
+                                templateId: `chart-${v}`
+                            }, true);
+                        }} 
+                        options={[
+                            { label: "Area Chart", value: "area" }, 
+                            { label: "Bar Chart", value: "bar" }, 
+                            { label: "Line Chart", value: "line" }, 
+                            { label: "Pie Chart", value: "pie" }, 
+                            { label: "Donut Chart", value: "donut" }
+                        ]} 
+                    />
+                </Field>
                 <Field label="Height"><TextInputWithUnit value={(p.height as string) ?? ""} onChange={(v) => up("height", v)} /></Field>
                 <Field label="Primary Color"><ColorInput value={(p.color as string) || "var(--primary)"} onChange={(v) => up("color", v)} /></Field>
                 <Field label="Secondary Color"><ColorInput value={(p.secondaryColor as string) || "var(--accent)"} onChange={(v) => up("secondaryColor", v)} /></Field>
@@ -1009,7 +1027,7 @@ export function ChartPanel({ block }: { block: Block }) {
                             up("data", nD, true);
                         }}
                         renderItemContent={(point, idx) => (
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, alignItems: "center" }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 32px", gap: 6, alignItems: "center" }}>
                                 <input
                                     value={point.name}
                                     onChange={(e) => {
@@ -1032,6 +1050,15 @@ export function ChartPanel({ block }: { block: Block }) {
                                     onBlur={() => up("data", p.data, true)}
                                     placeholder="0"
                                     style={{ background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 6, padding: "5px 8px", fontSize: 11, color: PANEL_COLORS.text, outline: "none" }}
+                                />
+                                <ColorInput 
+                                    value={point.fill || CHART_COLORS[idx % CHART_COLORS.length]} 
+                                    hideText={true}
+                                    onChange={(v) => {
+                                        const nD = [...((p.data as any[]) || [])];
+                                        nD[idx] = { ...nD[idx], fill: v };
+                                        up("data", nD, true);
+                                    }} 
                                 />
                             </div>
                         )}

@@ -9,7 +9,7 @@ import type { Block, EditorPage } from "@/types";
  */
 
 import React from "react";
-import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, ArrowsUpDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
 import { useEditorStore } from "@/stores/editorStore";
 import { ColorPicker, Dropdown, Input, Popover, Select, Space, Switch, Tooltip } from "antd";
@@ -681,19 +681,22 @@ function resolveColor(raw: string, theme?: any): string {
 
 function toHex(color: string, theme?: any): string {
     if (!color || typeof document === "undefined") return "#000000";
+    if (color === "transparent" || color === "none") return "transparent";
     const resolved = resolveColor(color, theme);
     if (/^#[0-9a-fA-F]{6}$/.test(resolved)) return resolved;
+    if (resolved === "transparent" || resolved === "none") return "transparent";
     const el = document.createElement("div");
     el.style.color = resolved;
     document.body.appendChild(el);
     const computed = getComputedStyle(el).color;
     document.body.removeChild(el);
+    if (computed === "rgba(0, 0, 0, 0)" || computed === "transparent") return "transparent";
     const m = computed.match(/\d+/g);
     if (!m || m.length < 3) return "#000000";
     return "#" + m.slice(0, 3).map(n => Number(n).toString(16).padStart(2, "0")).join("");
 }
 
-export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff" }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void; placeholder?: string }) {
+export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff", hideText = false }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void; placeholder?: string; hideText?: boolean }) {
     const { page } = useEditorStore();
     const theme = page?.theme;
     const initialValue = value || placeholder;
@@ -710,7 +713,7 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff" }:
                 onChangeComplete={(color) => {
                     if (onBlur) onBlur(color.toRgbString());
                 }}
-                showText={() => (
+                showText={hideText ? undefined : () => (
                     <span style={{ fontSize: 10, color: PANEL_COLORS.muted }}>
                         {toHex(initialValue)}
                     </span>
@@ -723,13 +726,17 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff" }:
                     {
                         label: 'Grayscale',
                         colors: ["#ffffff", "#f8fafc", "#f1f5f9", "#e2e8f0", "#cbd5e1", "#94a3b8", "#64748b", "#475569", "#1e293b", "#0f172a", "#000000"],
+                    },
+                    {
+                        label: 'Utilities',
+                        colors: ["transparent"],
                     }
                 ]}
             >
                 <button
                     style={{
-                        display: "flex", gap: 10, alignItems: "center", flex: 1, height: 30,
-                        padding: "0 10px", fontSize: 11, background: PANEL_COLORS.inputBg,
+                        display: "flex", gap: 10, alignItems: "center", flex: hideText ? "initial" : 1, height: 30, width: hideText ? 32 : "auto",
+                        padding: hideText ? "0 7px" : "0 10px", fontSize: 11, background: PANEL_COLORS.inputBg,
                         border: `1px solid ${isVariable ? PANEL_COLORS.primary : PANEL_COLORS.inputBorder}`,
                         borderRadius: 6, color: PANEL_COLORS.text, outline: "none", cursor: "pointer",
                         transition: "all 0.2s"
@@ -738,11 +745,11 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff" }:
                     onMouseLeave={e => { e.currentTarget.style.borderColor = isVariable ? PANEL_COLORS.primary : PANEL_COLORS.inputBorder; e.currentTarget.style.background = PANEL_COLORS.inputBg; }}
                 >
                     <div style={{ width: 16, height: 16, borderRadius: 4, background: resolvedDisplayValue, border: "1px solid rgba(255,255,255,0.15)", flexShrink: 0 }} />
-                    <span style={{ flex: 1, textAlign: "left", fontFamily: "monospace", fontSize: 11, opacity: 0.9, overflow: "hidden", textOverflow: "ellipsis" }}>{isVariable ? `${toHex(value, theme)} (Theme)` : toHex(value, theme)}</span>
+                    {!hideText && <span style={{ flex: 1, textAlign: "left", fontFamily: "monospace", fontSize: 11, opacity: 0.9, overflow: "hidden", textOverflow: "ellipsis" }}>{isVariable ? `${toHex(value, theme)} (Theme)` : (toHex(value, theme) === "transparent" ? "Transparent" : toHex(value, theme))}</span>}
                 </button>
             </ColorPicker>
 
-            {!isVariable && (
+            {!isVariable && !hideText && (
                 <Tooltip title="Reset to Theme Variable">
                     <button
                         onClick={() => {
@@ -1107,7 +1114,14 @@ function SortableItem({ id, index, children, onDelete }: { id: string, index: nu
         }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
                     <div {...attributes} {...listeners} style={{ cursor: "grab", color: "var(--text-muted)", display: "flex", alignItems: "center", padding: "2px" }} title="Drag to reorder">
-                        <ArrowsUpDownIcon style={{ width: 14, height: 14 }} />
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="9" cy="5" r="2" />
+                            <circle cx="9" cy="12" r="2" />
+                            <circle cx="9" cy="19" r="2" />
+                            <circle cx="15" cy="5" r="2" />
+                            <circle cx="15" cy="12" r="2" />
+                            <circle cx="15" cy="19" r="2" />
+                        </svg>
                     </div>
                 {onDelete && (
                     <button

@@ -9,7 +9,7 @@ export const featuresSections: SectionTemplate[] = [
     category: "Features",
     previewImage: "/previews/features/features-grid.png",
     create: () => makeBlock("features", {
-      bgColor: "#f8fafc", textColor: "#0f172a", padding: "5rem 2rem",
+      bgColor: "#ffffff", textColor: "#0f172a", padding: "5rem 2rem",
       title: "Why Choose Us?", subtitle: "Everything you need to build faster.",
       align: "center", columns: 3,
       cardStyle: "raised", cardBg: "#ffffff", cardRadius: "16px",
@@ -29,7 +29,7 @@ export const featuresSections: SectionTemplate[] = [
     category: "Features",
     previewImage: "/previews/features/features-alternating.png",
     create: () => {
-      const root = makeBlock("container", { bgColor: "#f8fafc", padding: "5rem 2rem" });
+      const root = makeBlock("container", { bgColor: "#ffffff", padding: "5rem 2rem" });
       const row1 = makeBlock("columns", { leftWidth: "50", gap: "4rem", align: "center", padding: "0 0 4rem 0" });
       row1.props.col0 = [
         makeBlock("text", { content: "Build visually", tag: "h2", fontSize: "2.5rem", bold: true, color: "#0f172a" }),
