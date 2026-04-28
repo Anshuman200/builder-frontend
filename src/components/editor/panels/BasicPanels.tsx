@@ -9,6 +9,7 @@ import { IconPicker } from "@/components/editor/IconPicker";
 import { Input as AntInput } from "antd";
 import { EDITOR_FEATURES } from "@/lib/config/features";
 import { heroSections } from "@/lib/sections/hero";
+import { BackgroundPanel } from "./BackgroundPanel";
 
 export function HeroPanel({ block }: { block: Block }) {
     const { updateBlock, replaceBlock } = useEditorStore();
@@ -16,11 +17,7 @@ export function HeroPanel({ block }: { block: Block }) {
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
     return (
         <>
-            <Section title="Background">
-                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "var(--primary)"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
-                <Field label="Background Image URL"><MediaInput value={(p.bgImage as string) || ""} onChange={(v) => up("bgImage", v)} placeholder="https://... (overrides color)" /></Field>
-                <Field label="Image Overlay Color"><ColorInput value={(p.bgOverlay as string) || "var(--overlay)"} onChange={(v) => up("bgOverlay", v)} onBlur={(v) => up("bgOverlay", v, true)} /></Field>
-            </Section>
+            <BackgroundPanel block={block} />
             <Section title="Style">
                 <Field label="Hero Template">
                     <SelectInput
@@ -397,9 +394,7 @@ export function ContainerPanel({ block }: { block: Block }) {
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "0px"} onChange={(v) => up("borderRadius", v)} /></Field>
             </Section>
 
-            <Section title="Style">
-                <Field label="Background"><ColorInput value={(p.bgColor as string) || ""} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
-            </Section>
+            <BackgroundPanel block={block} />
 
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
         </>
@@ -473,6 +468,7 @@ export function ColumnsPanel({ block }: { block: Block }) {
                 <PaddingInput label="Tablet" value={(p.tabletPadding as string) || ""} onChange={(v) => up("tabletPadding", v)} placeholder="same as desktop" />
                 <PaddingInput label="Mobile" value={(p.mobilePadding as string) || ""} onChange={(v) => up("mobilePadding", v)} placeholder="same as tablet" />
             </Section>
+            <BackgroundPanel block={block} />
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
         </>
     );
@@ -523,6 +519,7 @@ export function WavePanel({ block }: { block: Block }) {
                 <ToggleSwitch label="Wave on Top" value={!!p.waveOnTop} onChange={(v: boolean) => up("waveOnTop", v)} />
                 <ToggleSwitch label="CSS Drift Animation" value={!!p.animated} onChange={(v: boolean) => up("animated", v)} />
             </Section>
+            <BackgroundPanel block={block} />
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
         </>
     );
@@ -607,8 +604,8 @@ export function GridPanel({ block }: { block: Block }) {
                 </div>
             </Section>
 
+            <BackgroundPanel block={block} />
             <Section title="Style">
-                <Field label="Background"><ColorInput value={(p.bgColor as string) || ""} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "0px"} onChange={(v) => up("borderRadius", v)} /></Field>
             </Section>
 

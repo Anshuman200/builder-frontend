@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, useLinkHandler, useActivePath, CommonButton } from "./shared";
+import { PreviewContext, BlockProps, useLinkHandler, useActivePath, CommonButton, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 import Link from "next/link";
 
@@ -49,26 +49,26 @@ export function HeaderBlock({ block }: BlockProps) {
     const ctaVariant = (p.ctaVariant as string) || "solid";
 
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const bgStyles = getBackgroundStyles(p, theme);
     const defaultPrimary = theme.colors?.primary || "#6366f1";
     const defaultText = theme.colors?.buttonText || "#ffffff";
 
     const ctaBgColor = (p.ctaBgColor as string) || defaultPrimary;
     const ctaTextColor = (p.ctaTextColor as string) || defaultText;
 
-    let background = bgColor, backdropFilter = "none", borderBottom = "none";
-    if (style === "glass") { background = bgColor.length === 7 ? `${bgColor}cc` : bgColor; backdropFilter = "blur(12px)"; borderBottom = "1px solid rgba(255, 255, 255, 0.2)"; }
+    let background = bgStyles.backgroundColor || bgColor, backdropFilter = "none", borderBottom = "none";
+    if (style === "glass") { background = (background as string).length === 7 ? `${background}cc` : background; backdropFilter = "blur(12px)"; borderBottom = "1px solid rgba(255, 255, 255, 0.2)"; }
     else if (style === "transparent") { background = "transparent"; }
 
     const isMobile = isPreview ? false : (viewMode === "mobile");
     const baseHeaderStyle: React.CSSProperties = {
+        ...bgStyles,
         position: position as any,
         top: position !== "static" ? 0 : undefined,
         left: position !== "static" ? 0 : undefined,
         right: position !== "static" ? 0 : undefined,
         zIndex: 50,
-        background: bgImage ? `linear-gradient(rgba(0,0,0,${bgOpacity}), rgba(0,0,0,${bgOpacity})), url(${bgImage})` : background,
-        backgroundSize: "cover",
-        backgroundPosition: bgPosition,
+        backgroundColor: style === "transparent" ? "transparent" : background,
         backdropFilter,
         borderBottom,
         color: textColor,
@@ -230,7 +230,8 @@ export function HeaderBlock({ block }: BlockProps) {
         `}</style>
             )}
             <header id={(p.sectionId as string) || `block-${block.id}`} className={isPreview ? `header-${block.id}` : undefined} style={{ ...baseHeaderStyle, position: position === "static" ? "relative" : (position as any), padding: isPreview ? undefined : editorPadding, paddingLeft: isPreview ? undefined : 0, paddingRight: isPreview ? undefined : 0, zIndex: 50 }}>
-                <div className={isPreview ? `header-${block.id}-inner` : undefined} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: innerMaxWidth, margin: "0 auto", boxSizing: "border-box", paddingLeft: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), paddingRight: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX) }}>
+                <BackgroundOverlay p={p} />
+                <div className={isPreview ? `header-${block.id}-inner` : undefined} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: innerMaxWidth, margin: "0 auto", boxSizing: "border-box", paddingLeft: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), paddingRight: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), position: "relative", zIndex: 2 }}>
                     {layout === "split" ? (<NavLinksElement />) : layout === "centered" ? (<div className={isPreview ? `header-${block.id}-desktop-nav` : undefined} style={{ flex: 1, display: isMobile ? "none" : "flex" }}><NavLinksElement /></div>) : (<LogoElement />)}
                     {layout === "centered" ? (<div style={{ flex: 1, display: "flex", justifyContent: "center" }}><LogoElement /></div>) : layout === "split" ? (<LogoElement />) : (<div className={isPreview ? `header-${block.id}-desktop-nav` : undefined} style={{ display: isMobile ? "none" : "flex" }}><NavLinksElement /></div>)}
                     <div style={{ display: "flex", alignItems: "center", gap: "1rem", ...(layout === "centered" ? { flex: 1, justifyContent: "flex-end" } : {}) }}>

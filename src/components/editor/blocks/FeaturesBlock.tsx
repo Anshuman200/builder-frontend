@@ -4,7 +4,7 @@ import Image from "next/image";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getCardStyles } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { DEFAULT_THEME, hexToRgb } from "@/lib/utils/theme";
 
 export function FeaturesBlock({ block }: BlockProps) {
@@ -249,6 +249,8 @@ export function FeaturesBlock({ block }: BlockProps) {
         </>
     );
 
+    const bgStyles = getBackgroundStyles(p, theme);
+
     const renderContent = () => {
         switch (layout) {
             case "alternating": return renderAlternating();
@@ -263,13 +265,25 @@ export function FeaturesBlock({ block }: BlockProps) {
         <>
             {isPreview && (
                 <style>{`
-          .features-${block.id} { padding: ${desktopPadding}; background: ${bgColor}; color: ${textColor}; }
+          .features-${block.id} { padding: ${desktopPadding}; color: ${textColor}; }
           @media (max-width: 1024px) { .features-${block.id} { padding: ${tabletPadding}; } }
           @media (max-width: 768px) { .features-${block.id} { padding: ${mobilePadding}; } }
         `}</style>
             )}
-            <section id={(p.sectionId as string) || `block-${block.id}`} className={isPreview ? `features-${block.id}` : undefined} style={isPreview ? {} : { padding: editorPadding, background: bgColor, color: textColor, width: "100%", boxSizing: "border-box" }}>
-                <div style={{ maxWidth: "100dvw", margin: "0 auto", boxSizing: "border-box", width: "100%" }}>
+            <section 
+                id={(p.sectionId as string) || `block-${block.id}`} 
+                className={isPreview ? `features-${block.id}` : undefined} 
+                style={{
+                    ...bgStyles,
+                    padding: isPreview ? undefined : editorPadding, 
+                    color: textColor, 
+                    width: "100%", 
+                    boxSizing: "border-box",
+                    position: "relative"
+                }}
+            >
+                <BackgroundOverlay p={p} />
+                <div style={{ maxWidth: "100dvw", margin: "0 auto", boxSizing: "border-box", width: "100%", position: "relative", zIndex: 2 }}>
                     {renderContent()}
                 </div>
             </section>

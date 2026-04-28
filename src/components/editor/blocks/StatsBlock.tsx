@@ -3,19 +3,20 @@ import React from "react";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getCardStyles } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-
-// Removal of LucideIcon component
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function StatsBlock({ block }: BlockProps) {
   const p = block.props;
   const isPreview = React.useContext(PreviewContext);
-  const theme = useEditorStore((s) => s.page?.theme);
+  const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
   const viewMode = useEditorStore((s) => s.viewMode);
   const focusSubItem = useEditorStore((s) => s.focusSubItem);
   const subItemFocus = useEditorStore((s) => s.subItemFocus);
+
+  const bgStyles = getBackgroundStyles(p, theme);
 
   const layout = (p.layout as string) || "grid";
   const columns = Number(p.columns || 4);
@@ -23,8 +24,6 @@ export function StatsBlock({ block }: BlockProps) {
   const cardStyle = (p.cardStyle as string) || "none";
   const isGlass = cardStyle === "glass";
 
-  const desktopPadding = (p.padding as string) || "4rem 1.5rem";
-  const bgColor = (p.bgColor as string) || "transparent";
   const textColor = (p.textColor as string) || "var(--text)";
   const accentColor = (p.accentColor as string) || "var(--primary)";
 
@@ -48,7 +47,7 @@ export function StatsBlock({ block }: BlockProps) {
   return (
     <section
       style={{
-        backgroundColor: bgColor,
+        ...bgStyles,
         color: textColor,
       }}
       className={cn(
@@ -57,8 +56,9 @@ export function StatsBlock({ block }: BlockProps) {
         "py-12 px-6 lg:py-20 lg:px-8" 
       )}
     >
+      <BackgroundOverlay p={p} />
       <div className={cn(
-        "max-w-7xl mx-auto",
+        "max-w-7xl mx-auto relative z-10",
         layout === "strip" ? "flex flex-wrap justify-around items-center gap-6 lg:gap-8" : cn("grid gap-6 lg:gap-8", gridCols)
       )}>
         {items.map((item, idx) => {

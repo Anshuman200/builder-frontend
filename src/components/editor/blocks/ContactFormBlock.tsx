@@ -53,7 +53,7 @@ function Toast({ message, type, visible }: ToastProps) {
 
 export function ContactFormBlock({ block }: BlockProps) {
     const isPreview = React.useContext(PreviewContext);
-    const { updateBlock, focusSubItem, selectBlock } = useEditorStore();
+    const { focusSubItem, selectBlock } = useEditorStore();
     const p = block.props;
     const layout = (p.layout as string) || "centered";
 
@@ -76,27 +76,27 @@ export function ContactFormBlock({ block }: BlockProps) {
     const genderLabel = (p.genderLabel as string) || "Gender";
     const emailLabel = (p.emailLabel as string) || "Email";
     const messageLabel = (p.messageLabel as string) || "Message";
-    const submitLabel = (p.submitLabel as string) || "Send Message →";
+    // const submitLabel = (p.submitLabel as string) || "Send Message →";
     const successMessage = (p.successMessage as string) || "Thanks! We'll get back to you shortly.";
     const errorMessage = (p.errorMessage as string) || "Something went wrong. Please try again.";
-    const cardStyle = (p.cardStyle as string) || "raised";
-    const cardBg = (p.cardBg as string) || "#ffffff";
-    const cardPadding = (p.cardPadding as string) || "3rem 2rem";
+    // const cardStyle = (p.cardStyle as string) || "raised";
+    // const cardBg = (p.cardBg as string) || "#ffffff";
+    // const cardPadding = (p.cardPadding as string) || "3rem 2rem";
     const cardRadius = (p.cardRadius as string) || "20px";
     const inputBg = (p.inputBg as string) || "#f8fafc";
     const inputBorderColor = (p.inputBorderColor as string) || "#e2e8f0";
 
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
     const defaultPrimary = theme.colors?.primary || "#6366f1";
-    const defaultText = theme.colors?.buttonText || "#ffffff";
+    // const defaultText = theme.colors?.buttonText || "#ffffff";
 
     const inputFocusBorderColor = (p.inputFocusBorderColor as string) || defaultPrimary;
     const labelColor = (p.labelColor as string) || "#374151";
     const inputTextColor = (p.inputTextColor as string) || "#111827";
-    const buttonBg = (p.buttonBg as string) || defaultPrimary;
-    const buttonTextColor = (p.buttonTextColor as string) || defaultText;
-    const buttonBorderRadius = (p.buttonBorderRadius as string) || "10px";
-    const buttonFullWidth = p.buttonFullWidth !== false;  // default true
+    // const buttonBg = (p.buttonBg as string) || defaultPrimary;
+    // const buttonTextColor = (p.buttonTextColor as string) || defaultText;
+    // const buttonBorderRadius = (p.buttonBorderRadius as string) || "10px";
+    // const buttonFullWidth = p.buttonFullWidth !== false;  // default true
     const buttonAlign = (p.buttonAlign as string) || "right";
     const titleText = (p.titleText as string) || "";
     const subtitleText = (p.subtitleText as string) || "";
@@ -129,13 +129,13 @@ export function ContactFormBlock({ block }: BlockProps) {
     };
 
     // ── Submit ────────────────────────────────────────────────────────────────
-    const onFinish = async (values: any) => {
+    const onFinish = async (values: Record<string, string>) => {
         setIsSubmitting(true);
         try {
             if (mode === "api") {
                 if (!apiUrl) throw new Error("API URL is not configured");
 
-                const payload: Record<string, any> = {
+                const payload: Record<string, string> = {
                     [firstNameKey]: values.firstName,
                     [emailKey]: values.email,
                     [messageKey]: values.message,
@@ -172,8 +172,8 @@ export function ContactFormBlock({ block }: BlockProps) {
 
             showToast(successMessage, "success");
             form.resetFields();
-        } catch (error: any) {
-            const serverMsg = error?.message || errorMessage;
+        } catch (error: Error | unknown) {
+            const serverMsg = error instanceof Error ? error.message : errorMessage;
             showToast(serverMsg, "error");
         } finally {
             setIsSubmitting(false);
@@ -182,20 +182,20 @@ export function ContactFormBlock({ block }: BlockProps) {
 
 
     // ─── Input style ───────────────────────────────────────────────────────────
-    const fieldWrapStyle: React.CSSProperties = {
-        display: "flex",
-        flexDirection: "column",
-    };
+    // const fieldWrapStyle: React.CSSProperties = {
+    //     display: "flex",
+    //     flexDirection: "column",
+    // };
 
     // ── Wrapper click in editor ─────────────────────────────────────────────────
-    const handleWrapperClick = (e: React.MouseEvent) => {
-        if (!isPreview) {
-            e.stopPropagation();
-            updateBlock(block.id, {});
-            const store = useEditorStore.getState();
-            store.selectBlock(block.id);
-        }
-    };
+    // const handleWrapperClick = (e: React.MouseEvent) => {
+    //     if (!isPreview) {
+    //         e.stopPropagation();
+    //         updateBlock(block.id, {});
+    //         const store = useEditorStore.getState();
+    //         store.selectBlock(block.id);
+    //     }
+    // };
 
     const isSelected = !isPreview && useEditorStore.getState().selectedBlockId === block.id;
 
@@ -362,7 +362,7 @@ export function ContactFormBlock({ block }: BlockProps) {
     const infoPanel = (
         <div style={{ flex: "0 0 300px", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "2rem", background: "rgba(0,0,0,0.02)", borderRadius: cardRadius, border: `1px solid #e2e8f0` }}>
             <h3 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 800, color: (p.titleColor as string) || "#0f172a" }}>Get in Touch</h3>
-            <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.65, lineHeight: 1.7 }}>We'd love to hear from you. Fill out the form and we'll respond as soon as possible.</p>
+            <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.65, lineHeight: 1.7 }}>We&apos;d love to hear from you. Fill out the form and we&apos;ll respond as soon as possible.</p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 {[{ icon: "📧", text: (p.receiverEmail as string) || "hello@company.com" }, { icon: "📍", text: (p.infoAddress as string) || "123 Main Street, City" }, { icon: "📞", text: (p.infoPhone as string) || "+1 (555) 000-0000" }].map(({ icon, text }, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.75rem", fontSize: "0.88rem" }}>

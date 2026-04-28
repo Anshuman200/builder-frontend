@@ -1,9 +1,10 @@
 "use client";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BlockProps } from "./shared";
+import { BlockProps, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { proxyApi } from "@/lib/api/client";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 /**
  * Helper to extract nested data from an object using a dot-notated string path.
@@ -34,6 +35,8 @@ export function LegalBlock({ block }: BlockProps) {
     });
 
     const viewMode = useEditorStore((s) => s.viewMode);
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const bgStyles = getBackgroundStyles(p, theme);
 
     // Determine final content
     let finalContent = "";
@@ -61,11 +64,12 @@ export function LegalBlock({ block }: BlockProps) {
     }
 
     const wrapperStyle: React.CSSProperties = {
+        ...bgStyles,
         padding: (p.padding as string) || "64px 24px",
-        background: (p.bgColor as string) || "var(--background)",
         color: (p.textColor as string) || "var(--text)",
         width: "100%",
         minHeight: "100px",
+        position: "relative"
     };
 
     const contentStyle: React.CSSProperties = {
@@ -73,6 +77,8 @@ export function LegalBlock({ block }: BlockProps) {
         margin: "0 auto",
         lineHeight: 1.7,
         fontSize: "1rem",
+        position: "relative",
+        zIndex: 2
     };
 
     const titleStyle: React.CSSProperties = {
@@ -89,6 +95,7 @@ export function LegalBlock({ block }: BlockProps) {
             style={wrapperStyle}
             className="legal-section-content"
         >
+            <BackgroundOverlay p={p} />
             <div style={contentStyle}>
                 {p.showTitle !== false && p.title && (
                     <h1 className="legal-title" style={titleStyle}>

@@ -2,7 +2,7 @@ import type { Block } from "@/types";
 // components/editor/blocks/AccordionBlock.tsx
 import React, { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { ChildBlockWrapper, PreviewContext } from "./shared";
+import { ChildBlockWrapper, PreviewContext, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
@@ -13,12 +13,14 @@ export default function AccordionBlock({ block }: { block: Block }) {
     const subItemFocus = useEditorStore((s) => s.subItemFocus);
     const isPreview = React.useContext(PreviewContext);
 
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const bgStyles = getBackgroundStyles(block.props, theme);
+
     // Fallback to defaults if properties are missing
     const items = Array.isArray(block.props.items) ? block.props.items : [];
     const width = (block.props.width as string) || "100%";
     const maxWidth = (block.props.maxWidth as string) || "800px";
     const padding = (block.props.padding as string) || "24px";
-    const bgColor = (block.props.bgColor as string) || "transparent";
 
     // Typography
     const titleSize = (block.props.titleSize as string) || "16px";
@@ -35,7 +37,6 @@ export default function AccordionBlock({ block }: { block: Block }) {
     const itemBorderColor = (block.props.itemBorderColor as string) || "#e2e8f0";
     const itemRadius = (block.props.itemRadius as string) || "8px";
 
-    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
     const defaultPrimary = theme.colors?.primary || "#6366f1";
 
     const titleColor = (block.props.titleColor as string) || "#0f172a";
@@ -95,11 +96,13 @@ export default function AccordionBlock({ block }: { block: Block }) {
                 width: "100%",
                 display: "flex",
                 justifyContent: "center",
-                backgroundColor: bgColor,
+                ...bgStyles,
                 padding: padding,
+                position: "relative"
             }}
         >
-            <div style={{ width, maxWidth }}>
+            <BackgroundOverlay p={block.props} />
+            <div style={{ width, maxWidth, position: "relative", zIndex: 2 }}>
                 {items.map((item: any, index: number) => {
                     const isOpen = !!openItems[item.id];
                     const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === index;

@@ -12,10 +12,13 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { EllipsisHorizontalIcon, TrashIcon, Square2StackIcon, PlusIcon, Squares2X2Icon, ArrowsUpDownIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon } from "@heroicons/react/24/outline";
+import { EllipsisHorizontalIcon, TrashIcon, Square2StackIcon, PlusIcon, Squares2X2Icon, ArrowsUpDownIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { heroSections } from "@/lib/sections/hero";
+import { featuresSections } from "@/lib/sections/features";
+import { statsSections } from "@/lib/sections/stats";
+import { teamSections } from "@/lib/sections/team";
 import { BlockRenderer } from "./blocks";
 import { ActivePathContext, PreviewContext, getBlockMediaInfo, getBlockLayouts } from "./blocks/shared";
 import { IconButton } from "../ui/IconButton";
@@ -497,23 +500,40 @@ const CanvasBlock = memo(function CanvasBlock({
           <div className="absolute top-4 right-4 p-1 rounded-sm shadow-md bg-white z-100 space-x-1 flex items-center">
             {/* Quick Layout Change */}
             {(() => {
-              if (block.type === "hero") {
-                const menuItems = heroSections.map(s => ({
+              const sectionTypeTemplates: Record<string, any[]> = {
+                hero: heroSections,
+                features: featuresSections,
+                stats: statsSections,
+                team: teamSections
+              };
+
+              const templates = sectionTypeTemplates[block.type];
+
+              if (templates) {
+                const currentTemplateId = (block.props.templateId as string) || templates[0].id;
+                const menuItems = templates.map(s => ({
                   key: s.id,
                   label: (
                     <div className="px-2 py-1 flex items-center justify-between gap-4">
                       <span className="font-medium text-xs">{s.name}</span>
-                      {block.props.templateId === s.id && <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
+                      {currentTemplateId === s.id && <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
                     </div>
                   ),
                   onClick: () => {
-                    const template = heroSections.find(ts => ts.id === s.id);
+                    const template = templates.find(ts => ts.id === s.id);
                     if (template) {
-                      // 1. Extract content from current block
+                      // 1. Extract content
                       const extractText = (b: Block): string[] => {
                         let res: string[] = [];
                         if (b.type === "text" && b.props.content) res.push(b.props.content as string);
                         else if (b.type === "button" && b.props.label) res.push(b.props.label as string);
+                        
+                        if (b.type === "features" && Array.isArray(b.props.features)) {
+                          b.props.features.forEach((f: any) => {
+                            if (f.title) res.push(f.title);
+                            if (f.description) res.push(f.description);
+                          });
+                        }
 
                         ["childBlocks", "col0", "col1"].forEach(pName => {
                           const children = b.props[pName] as Block[] | undefined;
@@ -526,12 +546,19 @@ const CanvasBlock = memo(function CanvasBlock({
                       // 2. Create new block
                       const newBlock = template.create();
 
-                      // 3. Inject content into new block
+                      // 3. Inject content
                       const injectText = (b: Block, texts: string[]): string[] => {
                         let remaining = [...texts];
                         if (remaining.length === 0) return [];
                         if (b.type === "text") b.props.content = remaining.shift();
                         else if (b.type === "button") b.props.label = remaining.shift();
+                        
+                        if (b.type === "features" && Array.isArray(b.props.features)) {
+                          b.props.features.forEach((f: any) => {
+                            if (remaining.length > 0) f.title = remaining.shift();
+                            if (remaining.length > 0) f.description = remaining.shift();
+                          });
+                        }
 
                         ["childBlocks", "col0", "col1"].forEach(pName => {
                           const children = b.props[pName] as Block[] | undefined;
@@ -541,7 +568,7 @@ const CanvasBlock = memo(function CanvasBlock({
                       };
                       injectText(newBlock, oldText);
 
-                      // 4. Smart Merge: Preserve existing style props
+                      // 4. Smart Merge
                       const preserved: Record<string, any> = {};
                       [
                         "bgColor", "bgImage", "bgOverlay", "bgOverlayColor", 
@@ -563,7 +590,7 @@ const CanvasBlock = memo(function CanvasBlock({
                 }));
 
                 return (
-                  <AppToolTip title="Change Hero Template">
+                  <AppToolTip title="Change Template">
                     <Dropdown
                       menu={{ items: menuItems }}
                       trigger={['click']}
@@ -571,7 +598,7 @@ const CanvasBlock = memo(function CanvasBlock({
                       overlayClassName="hero-template-dropdown"
                     >
                       <IconButton
-                        icon={<Squares2X2Icon style={{ width: 14, height: 14 }} />}
+                        icon={<SparklesIcon style={{ width: 14, height: 14 }} />}
                         onClick={(e) => e.stopPropagation()}
                       />
                     </Dropdown>

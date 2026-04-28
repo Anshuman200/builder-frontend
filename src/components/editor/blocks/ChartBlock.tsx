@@ -7,17 +7,19 @@ import {
   PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
-import { PreviewContext, BlockProps } from "./shared";
+import { PreviewContext, BlockProps, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { cn } from "@/lib/utils";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function ChartBlock({ block }: BlockProps) {
-  const p = block.props as any;
+  const p = block.props as Record<string, unknown>;
   const isPreview = React.useContext(PreviewContext);
-  const theme = useEditorStore((s) => s.page?.theme);
+  const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
 
+  const bgStyles = getBackgroundStyles(p, theme);
   const chartType = (p.chartType as string) || "area";
-  const data = (p.data as any[]) || [];
+  const data = (p.data as Record<string, unknown>[]) || [];
   const height = (p.height as string) || "300px";
   const color = (p.color as string) || "var(--primary)";
   const secondaryColor = (p.secondaryColor as string) || "var(--accent)";
@@ -28,7 +30,7 @@ export function ChartBlock({ block }: BlockProps) {
   const showTooltip = p.showTooltip !== false;
   const showLegend = p.showLegend === true;
   const curve = (p.curve as "smooth" | "step" | "linear") || "smooth";
-  const textColor = (p.textColor as string) || "var(--text)";
+  // textColorRaw removed because it's unused.
 
   const renderChart = () => {
     switch (chartType) {
@@ -122,11 +124,11 @@ export function ChartBlock({ block }: BlockProps) {
   return (
     <div
       className={cn(
-        "w-full",
+        "w-full relative overflow-hidden",
         !isPreview && "p-4"
       )}
       style={{
-        backgroundColor: p.bgColor as string || "transparent",
+        ...bgStyles,
         color: (() => {
           const tc = (p.textColor as string) || "var(--text)";
           if ((theme?.mode as string) === "dark" && (tc === "#000000" || tc === "#000" || tc === "#0f172a")) {
@@ -138,24 +140,27 @@ export function ChartBlock({ block }: BlockProps) {
         padding: p.padding as string || "2rem"
       }}
     >
-      {(p.title || p.subtitle) && (
-        <div className="mb-8 select-none">
-          {p.title && (
-            <h3 className="text-2xl font-black tracking-tight mb-1">
-              {p.title as string}
-            </h3>
-          )}
-          {p.subtitle && (
-            <p className="text-sm font-medium opacity-60">
-              {p.subtitle as string}
-            </p>
-          )}
+      <BackgroundOverlay p={p} />
+      <div style={{ position: "relative", zIndex: 2 }}>
+        {!!(p.title || p.subtitle) && (
+          <div className="mb-8 select-none">
+            {!!p.title && (
+              <h3 className="text-2xl font-black tracking-tight mb-1">
+                {p.title as string}
+              </h3>
+            )}
+            {!!p.subtitle && (
+              <p className="text-sm font-medium opacity-60">
+                {p.subtitle as string}
+              </p>
+            )}
+          </div>
+        )}
+        <div style={{ height, width: "100%" }}>
+          <ResponsiveContainer width="100%" height="100%">
+            {renderChart()}
+          </ResponsiveContainer>
         </div>
-      )}
-      <div style={{ height, width: "100%" }}>
-        <ResponsiveContainer width="100%" height="100%">
-          {renderChart() as any}
-        </ResponsiveContainer>
       </div>
     </div>
   );

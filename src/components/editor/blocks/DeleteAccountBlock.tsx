@@ -1,20 +1,22 @@
 "use client";
-import React, { useState, useMemo } from "react";
-import { Form, Input, Select, Button, message, ConfigProvider, theme } from "antd";
+import React, { useMemo } from "react";
+import { Form, Input, Select, message, ConfigProvider, theme as antdTheme } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import type { BlockProps } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, CommonButton } from "./shared";
+import { PreviewContext, CommonButton, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 const { Option } = Select;
 
 export function DeleteAccountBlock({ block }: BlockProps) {
     const isPreview = React.useContext(PreviewContext);
-    const { updateBlock, selectBlock } = useEditorStore();
     const p = block.props;
+    const { selectBlock } = useEditorStore();
+    const activeTheme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const bgStyles = getBackgroundStyles(p, activeTheme);
     
     const [form] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
@@ -25,7 +27,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
     const showLastName = p.showLastName === true;
     const firstNameRequired = p.firstNameRequired === true;
     const lastNameRequired = p.lastNameRequired === true;
-    const emailRequired = p.emailRequired !== false;
+    // const emailRequired = p.emailRequired !== false;
     const reasonRequired = p.reasonRequired === true;
     
     // Reason options from line-by-line list
@@ -49,12 +51,6 @@ export function DeleteAccountBlock({ block }: BlockProps) {
     const logoShadow = (p.logoShadow as string) || "none";
     const logoObjectFit = (p.logoObjectFit as React.CSSProperties["objectFit"]) || "cover";
 
-    const submitLabel = (p.submitLabel as string) || "Delete Account";
-    const buttonBg = (p.buttonBg as string) || "#ef4444";
-    const buttonTextColor = (p.buttonTextColor as string) || "#ffffff";
-    const buttonBorderRadius = (p.buttonBorderRadius as string) || "10px";
-
-    const bgColor = (p.bgColor as string) || "var(--surface)";
     const textColor = (p.textColor as string) || "var(--text)";
     
     // Input Styles
@@ -66,7 +62,6 @@ export function DeleteAccountBlock({ block }: BlockProps) {
     const padding = (p.padding as string) || "3rem 2rem";
     const borderRadius = (p.borderRadius as string) || "20px";
     const boxShadow = (p.boxShadow as string) || "0 16px 48px rgba(0,0,0,0.15)";
-    const bgImage = (p.bgImage as string) || "";
 
     const inputHeight = (p.inputHeight as string) || "50px";
     const inputRadius = (p.inputRadius as string) || "10px";
@@ -75,9 +70,15 @@ export function DeleteAccountBlock({ block }: BlockProps) {
     const successMessageStr = (p.successMessage as string) || "Your account deletion request has been submitted.";
     const errorMessageStr = (p.errorMessage as string) || "Something went wrong. Please try again.";
 
+    // Button Styles
+    const submitLabel = (p.submitLabel as string) || "Delete My Account";
+    const buttonBg = (p.buttonBg as string) || "#ef4444";
+    const buttonTextColor = (p.buttonTextColor as string) || "#ffffff";
+    const buttonBorderRadius = (p.buttonBorderRadius as string) || "10px";
+
     // ── Mutation ─────────────────────────────────────────────────────────────
     const mutation = useMutation({
-        mutationFn: async (values: any) => {
+        mutationFn: async (values: Record<string, string>) => {
             if (!apiUrl) {
                 // If no API URL, just simulate for preview
                 return new Promise((resolve) => setTimeout(resolve, 1500));
@@ -94,19 +95,20 @@ export function DeleteAccountBlock({ block }: BlockProps) {
             messageApi.success(successMessageStr);
             form.resetFields();
         },
-        onError: (err: any) => {
-            messageApi.error(err.message || errorMessageStr);
+        onError: (err: Error | unknown) => {
+            const errorMsg = err instanceof Error ? err.message : errorMessageStr;
+            messageApi.error(errorMsg);
         },
     });
 
-    const onFinish = (values: any) => {
+    const onFinish = (values: Record<string, string>) => {
         if (!isPreview) return;
         mutation.mutate(values);
     };
 
     // ── Styles ───────────────────────────────────────────────────────────────
     const containerStyle: React.CSSProperties = {
-        background: bgImage ? `url(${bgImage}) center/cover no-repeat` : bgColor,
+        background: (p.bgColor as string) || "var(--surface)",
         padding,
         borderRadius,
         boxShadow,
@@ -129,9 +131,9 @@ export function DeleteAccountBlock({ block }: BlockProps) {
     return (
         <ConfigProvider
             theme={{
-                algorithm: theme.defaultAlgorithm,
+                algorithm: antdTheme.defaultAlgorithm,
                 token: {
-                    colorPrimary: buttonBg,
+                    colorPrimary: activeTheme.colors?.primary || "#6366f1",
                     borderRadius: parseInt(inputRadius) || 8,
                     controlHeight: parseInt(inputHeight) || 40,
                     colorBgContainer: inputBg,
@@ -160,29 +162,21 @@ export function DeleteAccountBlock({ block }: BlockProps) {
             <section
                 id={(p.sectionId as string) || `block-${block.id}`}
                 style={{
+                    ...bgStyles,
                     width: "100%",
                     padding: (p.sectionPadding as string) || "4rem 1rem",
-                    background: (p.sectionBg as string) || "#ffffff",
-                    transition: "all 0.3s ease"
+                    transition: "all 0.3s ease",
+                    position: "relative"
                 }}
                 onClick={handleWrapperClick}
             >
+                <BackgroundOverlay p={p} />
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    style={containerStyle}
+                    style={{...containerStyle, position: "relative", zIndex: 2}}
                 >
-                    {/* Glassmorphism Overlay if bgImage exists */}
-                    {bgImage && (
-                        <div style={{
-                            position: "absolute",
-                            inset: 0,
-                            background: "rgba(255,255,255,0.8)",
-                            backdropFilter: "blur(4px)",
-                            zIndex: 0,
-                        }} />
-                    )}
 
                     <div style={{ position: "relative", zIndex: 1 }}>
                         {/* Logo */}

@@ -35,7 +35,7 @@ export const featuresSections: SectionTemplate[] = [
         makeBlock("text", { content: "Build visually", tag: "h2", fontSize: "2.5rem", bold: true, color: "#0f172a" }),
         makeBlock("text", { content: "See exactly what your site will look like as you build it.", tag: "p", fontSize: "1.125rem", color: "#64748b" }),
       ];
-      row1.props.col1 = [makeBlock("image", { src: "https://images.unsplash.com/photo-1542744094-24638ea0b562?auto=format&fit=crop&w=800&q=80", borderRadius: "12px", aspectRatio: "16/9" })];
+      row1.props.col1 = [makeBlock("image", { src: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80", borderRadius: "12px", aspectRatio: "16/9" })];
       const row2 = makeBlock("columns", { leftWidth: "50", gap: "4rem", align: "center", padding: "4rem 0 0 0" });
       row2.props.col0 = [makeBlock("image", { src: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80", borderRadius: "12px", aspectRatio: "16/9" })];
       row2.props.col1 = [

@@ -82,7 +82,7 @@ export function useLinkHandler() {
 export function getBlockMediaInfo(type: string) {
     if (type === "image") return { prop: "src", label: "Image", icon: PhotoIcon, mediaType: "image" as const };
     if (type === "video") return { prop: "url", label: "Video", icon: VideoCameraIcon, mediaType: "video" as const };
-    if (["hero", "container", "wave", "header"].includes(type)) return { prop: "bgImage", label: "Background", icon: PaintBrushIcon, mediaType: "image" as const };
+    if (["hero", "container", "wave", "header", "features", "stats", "team"].includes(type)) return { prop: "bgImage", label: "Background", icon: PhotoIcon, mediaType: "image" as const };
     if (["feature", "feature_card"].includes(type)) return { prop: "image", label: "Image", icon: PhotoIcon, mediaType: "image" as const };
     return null;
 }
@@ -93,7 +93,10 @@ export function getBlockMediaInfo(type: string) {
 export function getBlockLayouts(type: string) {
     if (type === "header") return ["standard", "centered", "split"];
     if (type === "footer") return ["standard", "minimal", "centered", "columns"];
-    if (["hero", "features", "stats", "team"].includes(type)) return ["standard", "split", "centered"];
+    if (type === "hero") return ["standard", "split", "centered"];
+    if (type === "features") return ["grid", "alternating", "horizontal", "icon-grid", "bento"];
+    if (type === "stats") return ["grid", "strip", "kpi"];
+    if (type === "team") return ["grid", "list", "compact", "large", "spotlight"];
     return null;
 }
 
@@ -265,13 +268,21 @@ export function ChildBlockWrapper({
                         );
                     })()}
 
-                    {/* Drag to reorder */}
                     <AppToolTip title="Drag to reorder">
                         <IconButton 
                             {...attributes} 
                             {...listeners} 
                             className="cursor-grab active:cursor-grabbing"
-                            icon={<ArrowsUpDownIcon style={{ width: 14, height: 14 }} />} 
+                            icon={
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <circle cx="9" cy="5" r="2" />
+                                    <circle cx="9" cy="12" r="2" />
+                                    <circle cx="9" cy="19" r="2" />
+                                    <circle cx="15" cy="5" r="2" />
+                                    <circle cx="15" cy="12" r="2" />
+                                    <circle cx="15" cy="19" r="2" />
+                                </svg>
+                            } 
                         />
                     </AppToolTip>
                     {/* Delete block */}
@@ -599,4 +610,53 @@ export function getCardStyles({ props: p, isFocused, isHovered, primaryColor = "
     }
 
     return baseStyle;
+}
+
+export function getBackgroundStyles(p: Record<string, any>, theme: any): React.CSSProperties {
+  const defaultPrimary = theme.colors?.primary || "#6366f1";
+  
+  const bgColor = (p.bgColor as string) || (p.sectionBg as string) || "transparent";
+  const bgImage = p.bgImage as string;
+  const bgSize = (p.bgSize as string) || "cover";
+  const bgPosition = (p.bgPosition as string) || "center";
+  const bgRepeat = (p.bgRepeat as string) || "no-repeat";
+  
+  // Overlay
+  const overlayColor = (p.bgOverlayColor as string) || "rgba(0,0,0,0.5)";
+  const overlayOpacity = Number(p.bgOverlayOpacity ?? 50) / 100;
+
+  const styles: React.CSSProperties = {
+    backgroundColor: bgColor,
+    backgroundSize: bgSize,
+    backgroundPosition: bgPosition,
+    backgroundRepeat: bgRepeat as any,
+    position: "relative",
+    overflow: "hidden",
+  };
+
+  if (bgImage) {
+    styles.backgroundImage = `url("${bgImage}")`;
+  }
+
+  return styles;
+}
+
+export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
+  if (!p.bgImage && !p.bgColor && !p.sectionBg) return null;
+  
+  const overlayColor = (p.bgOverlayColor as string) || "rgba(0,0,0,0.5)";
+  const overlayOpacity = Number(p.bgOverlayOpacity ?? 50) / 100;
+
+  return (
+    <div 
+      style={{ 
+        position: "absolute", 
+        inset: 0, 
+        backgroundColor: overlayColor, 
+        opacity: overlayOpacity,
+        zIndex: 1,
+        pointerEvents: "none"
+      }} 
+    />
+  );
 }

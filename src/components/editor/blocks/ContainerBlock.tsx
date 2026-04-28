@@ -2,24 +2,20 @@
 import React from "react";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup } from "./shared";
+import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function ContainerBlock({ block }: BlockProps) {
     const p = block.props;
     const childBlocks = (p.childBlocks as any[]) ?? [];
-    const rawBg = p.bgColor as string;
-    const bgImage = p.bgImage as string;
+
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const bgStyles = getBackgroundStyles(p, theme);
 
     const viewMode = useEditorStore((s) => s.viewMode);
     const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
     const isSelected = selectedBlockId === block.id;
     const isPreview = React.useContext(PreviewContext);
-
-    const background = bgImage
-        ? (bgImage.startsWith("linear-gradient") || bgImage.startsWith("radial-gradient")
-            ? bgImage
-            : `url("${bgImage}") center/cover no-repeat`)
-        : (rawBg || "transparent");
 
     const desktopPadding = (p.padding as string) || "24px";
     const tabletPadding = (p.tabletPadding as string) || desktopPadding;
@@ -39,8 +35,8 @@ export function ContainerBlock({ block }: BlockProps) {
                 id={(p.sectionId as string) || `block-${block.id}`}
                 className={isPreview ? `container-${block.id}` : undefined}
                 style={{
+                    ...bgStyles,
                     padding: isPreview ? undefined : editorPadding,
-                    background: background || "transparent",
                     maxWidth: (p.maxWidth as string) || "100%",
                     width: "100%",
                     margin: "0 auto",
@@ -65,6 +61,7 @@ export function ContainerBlock({ block }: BlockProps) {
                     minHeight: (p.minHeight as string) || undefined,
                 }}
             >
+                <BackgroundOverlay p={p} />
                 {!isPreview && childBlocks.length === 0 && (
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, paddingBottom: 8, color: "#94a3b8" }}>
                         <Square2StackIcon style={{ width: 22, height: 22 }} />

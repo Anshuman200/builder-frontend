@@ -2,7 +2,8 @@
 import React from "react";
 import { getIcon } from "@/lib/utils/icons";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getCardStyles } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 interface ContactItem {
     id: string;
@@ -16,6 +17,8 @@ export function ContactInfoBlock({ block }: BlockProps) {
     const isPreview = React.useContext(PreviewContext);
     const { updateBlock, selectedBlockId } = useEditorStore();
     const p = block.props;
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const bgStyles = getBackgroundStyles(p, theme);
 
     const items = (p.items as ContactItem[]) || [];
     const layout = (p.layout as "list" | "grid") || "list";
@@ -42,22 +45,27 @@ export function ContactInfoBlock({ block }: BlockProps) {
 
     return (
         <div
+            id={(p.sectionId as string) || `block-${block.id}`}
             onClick={handleWrapperClick}
             style={{
+                ...bgStyles,
                 padding: (p.padding as string) || "1rem 0",
-                background: (p.bgColor as string) || "transparent",
                 width: "100%",
                 boxSizing: "border-box",
                 cursor: isPreview ? "default" : "pointer",
                 outline: !isPreview && isSelected ? "2px solid var(--primary)" : "none",
                 borderRadius: "8px",
+                position: "relative"
             }}
         >
+            <BackgroundOverlay p={p} />
             <div
                 style={{
                     display: "grid",
                     gridTemplateColumns: layout === "grid" ? `repeat(${columns}, 1fr)` : "1fr",
                     gap,
+                    position: "relative",
+                    zIndex: 2
                 }}
             >
                 {items.map((item, idx) => {

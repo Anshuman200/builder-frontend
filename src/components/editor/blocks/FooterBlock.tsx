@@ -2,7 +2,8 @@
 import React from "react";
 import Image from "next/image";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, useLinkHandler } from "./shared";
+import { PreviewContext, BlockProps, useLinkHandler, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function FooterBlock({ block }: BlockProps) {
     const p = block.props;
@@ -12,21 +13,10 @@ export function FooterBlock({ block }: BlockProps) {
     const handleLink = useLinkHandler();
     const focusSubItem = useEditorStore((s) => s.focusSubItem);
 
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const bgStyles = getBackgroundStyles(p, theme);
 
-    const rawBg = (p.bgColor as string) || "#0f172a";
     const rawText = (p.textColor as string) || "#f8fafc";
-
-    // Helper to check if a color is effectively our default dark/light values (handles both hex and rgb from color picker)
-    const isDefaultBg = (c: string) => {
-        const normalized = c.toLowerCase().replace(/\s+/g, "");
-        return normalized === "#0f172a" || normalized === "rgb(15,23,42)";
-    };
-    const isDefaultText = (c: string) => {
-        const normalized = c.toLowerCase().replace(/\s+/g, "");
-        return normalized === "#f8fafc" || normalized === "rgb(248,250,252)";
-    };
-
-    const bgColor = rawBg;
     const textColor = rawText;
 
     const desktopPadding = p.padding ? (p.padding as string) : "48px 32px";
@@ -116,7 +106,7 @@ export function FooterBlock({ block }: BlockProps) {
         // ── Minimal ──────────────────────────────────────────────────────
         if (footerLayout === "minimal") {
             return (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", paddingLeft: innerPad, paddingRight: innerPad }}>
+                <div style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", paddingLeft: innerPad, paddingRight: innerPad }}>
                     <Logo />
                     <div onClick={() => { if (!isPreview) { focusSubItem(block.id, "Footer Links") } }} style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>{mergedLinks.map(link => <NavLink key={link.id} link={link} />)}</div>
                     {copyright && <p onClick={() => { if (!isPreview) { focusSubItem(block.id, "Copyright") } }} style={{ margin: 0, fontSize: "0.82rem", opacity: 0.5 }}>{copyright}</p>}
@@ -127,7 +117,7 @@ export function FooterBlock({ block }: BlockProps) {
         // ── Centered ─────────────────────────────────────────────────────
         if (footerLayout === "centered") {
             return (
-                <div style={{ maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", paddingLeft: innerPad, paddingRight: innerPad, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "1.5rem" }}>
+                <div style={{ position: "relative", zIndex: 2, maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", paddingLeft: innerPad, paddingRight: innerPad, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "1.5rem" }}>
                     <Logo />
                     {description && <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.7, maxWidth: 440 }}>{description}</p>}
                     {mergedLinks.length > 0 && (
@@ -143,7 +133,7 @@ export function FooterBlock({ block }: BlockProps) {
         // ── Columns ───────────────────────────────────────────────────────
         if (footerLayout === "columns") {
             return (
-                <div style={{ maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", paddingLeft: innerPad, paddingRight: innerPad }}>
+                <div style={{ position: "relative", zIndex: 2, maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", paddingLeft: innerPad, paddingRight: innerPad }}>
                     <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : `auto repeat(${Math.max(1, linkGroups.length)}, 1fr)`, gap: "2rem 3rem", marginBottom: "2rem" }}>
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                             <Logo />
@@ -168,7 +158,7 @@ export function FooterBlock({ block }: BlockProps) {
 
         // ── Standard (default) ────────────────────────────────────────────
         return (
-            <>
+            <div style={{ position: "relative", zIndex: 2 }}>
                 <div className={isPreview && !p.fullWidth ? `footer-${block.id}-inner` : undefined} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: "center", justifyContent: "space-between", gap: isMobile ? "2rem" : "1rem", width: "100%", maxWidth: p.fullWidth ? "100%" : layoutObj.maxWidth, margin: "0 auto", boxSizing: "border-box", textAlign: isMobile ? "center" : "left", paddingLeft: innerPad, paddingRight: innerPad }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: isMobile ? "center" : "flex-start" }}>
                         <Logo />
@@ -183,7 +173,7 @@ export function FooterBlock({ block }: BlockProps) {
                         <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "1.5rem", textAlign: "center", fontSize: "0.85rem", opacity: 0.6 }}>{copyright}</div>
                     </div>
                 )}
-            </>
+            </div>
         );
     };
 
@@ -196,7 +186,18 @@ export function FooterBlock({ block }: BlockProps) {
           @media (max-width: 768px) { .footer-${block.id} { padding: ${mobilePadding}; } .footer-${block.id}-links { flex-direction: column; gap: 1rem; align-items: center; } }
         `}</style>
             )}
-            <footer id={(p.sectionId as string) || `block-${block.id}`} className={isPreview ? `footer-${block.id}` : undefined} style={{ background: bgColor, color: textColor, width: "100%", padding: isPreview ? undefined : editorPadding }}>
+            <footer 
+                id={(p.sectionId as string) || `block-${block.id}`} 
+                className={isPreview ? `footer-${block.id}` : undefined} 
+                style={{ 
+                    ...bgStyles,
+                    color: textColor, 
+                    width: "100%", 
+                    padding: isPreview ? undefined : editorPadding,
+                    position: "relative"
+                }}
+            >
+                <BackgroundOverlay p={p} />
                 {renderFooterContent()}
             </footer>
         </>

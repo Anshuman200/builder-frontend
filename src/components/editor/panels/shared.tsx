@@ -9,7 +9,7 @@ import type { Block, EditorPage } from "@/types";
  */
 
 import React from "react";
-import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, ArrowsUpDownIcon } from "@heroicons/react/24/outline";
 
 import { useEditorStore } from "@/stores/editorStore";
 import { ColorPicker, Dropdown, Input, Popover, Select, Space, Switch, Tooltip } from "antd";
@@ -814,6 +814,45 @@ export function ToggleSwitch({ value, onChange, label }: { value: boolean; onCha
     return control;
 }
 
+// ─── SliderInput ──────────────────────────────────────────────────────────────
+export function SliderInput({ value, onChange, min = 0, max = 100, step = 1, unit = "" }: { value: number; onChange: (v: number) => void; min?: number; max?: number; step?: number; unit?: string }) {
+    return (
+        <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", height: 30 }}>
+            <input
+                type="range"
+                min={min}
+                max={max}
+                step={step}
+                value={value}
+                onChange={(e) => onChange(Number(e.target.value))}
+                style={{
+                    flex: 1,
+                    height: 4,
+                    background: `linear-gradient(to right, ${PANEL_COLORS.primary} 0%, ${PANEL_COLORS.primary} ${(value - min) / (max - min) * 100}%, ${PANEL_COLORS.inputBg} ${(value - min) / (max - min) * 100}%, ${PANEL_COLORS.inputBg} 100%)`,
+                    borderRadius: 2,
+                    appearance: "none",
+                    outline: "none",
+                    cursor: "pointer",
+                }}
+            />
+            <div style={{
+                minWidth: 45,
+                fontSize: 10,
+                fontWeight: 700,
+                color: PANEL_COLORS.text,
+                textAlign: "right",
+                fontFamily: "monospace",
+                background: PANEL_COLORS.inputBg,
+                padding: "2px 6px",
+                borderRadius: 4,
+                border: `1px solid ${PANEL_COLORS.inputBorder}`
+            }}>
+                {value}{unit}
+            </div>
+        </div>
+    );
+}
+
 // ─── AlignmentInput ──────────────────────────────────────────────────────────
 
 const ALIGN_ICONS: Record<string, React.ReactNode> = {
@@ -1067,11 +1106,9 @@ function SortableItem({ id, index, children, onDelete }: { id: string, index: nu
             backdropFilter: isDragging ? "blur(8px)" : "none",
         }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <div {...attributes} {...listeners} style={{ cursor: "grab", color: "var(--text-muted)", display: "flex", alignItems: "center", padding: "2px" }} title="Drag to reorder">
-                        <Bars2Icon style={{ width: 14, height: 14 }} />
+                        <ArrowsUpDownIcon style={{ width: 14, height: 14 }} />
                     </div>
-                </div>
                 {onDelete && (
                     <button
                         onClick={onDelete}

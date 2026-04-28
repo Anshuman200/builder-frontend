@@ -3,7 +3,8 @@ import React from "react";
 import Image from "next/image";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getCardStyles } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 // ─── Inline brand SVG icons ───────────────────────────────────────────────────
 const BRAND_ICONS: Record<string, React.ReactNode> = {
@@ -73,12 +74,11 @@ export function TeamBlock({ block }: BlockProps) {
     const focusSubItem = useEditorStore((s) => s.focusSubItem);
     const subItemFocus = useEditorStore((s) => s.subItemFocus);
     const isPreview = React.useContext(PreviewContext);
-    const LIGHT_BGS = ["#ffffff", "#fff", "#f8fafc", "#f1f5f9"];
-    const LIGHT_TEXTS = ["#1e293b", "#0f172a", "#111111", "#000", "#000000"];
-    const rawBg = (p.bgColor as string) || "#ffffff";
-    const rawText = (p.textColor as string) || "#1e293b";
-    const bgColor = rawBg;
-    const textColor = rawText;
+    
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const bgStyles = getBackgroundStyles(p, theme);
+
+    const textColor = (p.textColor as string) || "#1e293b";
     const title = typeof p.title === "string" ? p.title : "Meet Our Team";
     const subtitle = typeof p.subtitle === "string" ? p.subtitle : "The people behind the magic";
     const align = (p.align as string) || "center";
@@ -155,16 +155,18 @@ export function TeamBlock({ block }: BlockProps) {
             <style>{`
                 .team-section-${block.id} { 
                     padding: ${desktopPadding}; 
-                    background: ${bgColor}; 
                     color: ${textColor}; 
                     width: 100%; 
                     box-sizing: border-box; 
+                    position: relative;
                 }
                 .team-grid-container-${block.id} { 
                     display: grid; 
                     grid-template-columns: repeat(${columns}, 1fr); 
                     gap: ${gap}; 
                     margin-top: ${title || subtitle ? "4rem" : "0"}; 
+                    position: relative;
+                    z-index: 2;
                 }
                 .team-large-card-${block.id} {
                     display: flex;
@@ -210,8 +212,13 @@ export function TeamBlock({ block }: BlockProps) {
                     .team-large-card-${block.id}, .team-large-card-reverse-${block.id} { gap: 2rem !important; padding: 1.5rem !important; }
                 ` : ''}
             `}</style>
-            <section id={(p.sectionId as string) || `block-${block.id}`} className={`team-section-${block.id}`}>
-                <div style={{ boxSizing: "border-box", width: "100%" }}>
+            <section 
+                id={(p.sectionId as string) || `block-${block.id}`} 
+                className={`team-section-${block.id}`}
+                style={bgStyles}
+            >
+                <BackgroundOverlay p={p} />
+                <div style={{ boxSizing: "border-box", width: "100%", position: "relative", zIndex: 2 }}>
                     <div onClick={() => !isPreview && focusSubItem(block.id, "Content")} style={{ textAlign: align as React.CSSProperties["textAlign"], cursor: "pointer" }}>
                         {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor }}>{title}</h2>}
                         {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor }}>{subtitle}</p>}

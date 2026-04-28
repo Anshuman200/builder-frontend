@@ -4,7 +4,8 @@ import React from "react";
 import { useDroppable } from "@dnd-kit/core";
 
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, ChildBlockWrapper, SortableBlockGroup, DropZoneStrip } from "./shared";
+import { PreviewContext, BlockProps, ChildBlockWrapper, SortableBlockGroup, DropZoneStrip, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 function ColumnDropZone({ zoneId, blocks, label, flexBasis, alignItems }: { zoneId: string; blocks: Block[]; label: string; flexBasis: string; alignItems?: string }) {
     const isPreview = React.useContext(PreviewContext);
@@ -66,23 +67,30 @@ export function ColumnsBlock({ block }: BlockProps) {
     const col0 = (p.col0 as Block[]) ?? [];
     const col1 = (p.col1 as Block[]) ?? [];
 
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const bgStyles = getBackgroundStyles(p, theme);
+
     return (
-        <>
+        <div
+            id={(p.sectionId as string) || `block-${block.id}`}
+            className={isPreview ? `builder-columns-${block.id}` : undefined}
+            style={{
+                ...(isPreview ? {} : { display: "flex", flexDirection: isStackedEditor ? "column" : "row", alignItems: (p.alignItems as string) || "stretch", gap, width: "100%" }),
+                ...bgStyles,
+                padding: editorPadding,
+                position: "relative"
+            }}
+        >
+            <BackgroundOverlay p={p} />
             {isPreview && (
                 <style>{`
-          .builder-columns-${block.id} { display: flex; flex-direction: row; align-items: ${p.alignItems || "stretch"}; gap: ${gap}; padding: ${desktopPadding}; width: 100%; }
-          @media (max-width: 1024px) { .builder-columns-${block.id} { padding: ${tabletPadding}; } }
-          @media (max-width: 768px) { .builder-columns-${block.id} { flex-direction: column !important; padding: ${mobilePadding}; } }
+          .builder-columns-${block.id} { display: flex; flex-direction: row; align-items: ${p.alignItems || "stretch"}; gap: ${gap}; width: 100%; }
+          @media (max-width: 1024px) { .builder-columns-${block.id} { } }
+          @media (max-width: 768px) { .builder-columns-${block.id} { flex-direction: column !important; } }
         `}</style>
             )}
-            <div
-                id={(p.sectionId as string) || `block-${block.id}`}
-                className={isPreview ? `builder-columns-${block.id}` : undefined}
-                style={isPreview ? {} : { display: "flex", flexDirection: isStackedEditor ? "column" : "row", alignItems: (p.alignItems as any) || "stretch", gap, padding: editorPadding, width: "100%" }}
-            >
-                <ColumnDropZone zoneId={`col-0-${block.id}`} blocks={col0} label="Drag blocks here (Column 1)" flexBasis={`${leftWidth}%`} alignItems={p.alignItems as string} />
-                <ColumnDropZone zoneId={`col-1-${block.id}`} blocks={col1} label="Drag blocks here (Column 2)" flexBasis={`${rightWidth}%`} alignItems={p.alignItems as string} />
-            </div>
-        </>
+            <ColumnDropZone zoneId={`col-0-${block.id}`} blocks={col0} label="Drag blocks here (Column 1)" flexBasis={`${leftWidth}%`} alignItems={p.alignItems as string} />
+            <ColumnDropZone zoneId={`col-1-${block.id}`} blocks={col1} label="Drag blocks here (Column 2)" flexBasis={`${rightWidth}%`} alignItems={p.alignItems as string} />
+        </div>
     );
 }

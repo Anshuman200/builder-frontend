@@ -1,7 +1,8 @@
 "use client";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
-import { BlockProps } from "./shared";
+import { PreviewContext, BlockProps, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function TextBlock({ block }: BlockProps) {
     const p = block.props;
@@ -9,6 +10,8 @@ export function TextBlock({ block }: BlockProps) {
     const defaultSizes: Record<string, string> = { h1: "2.25rem", h2: "1.875rem", h3: "1.5rem", h4: "1.25rem", p: "1rem" };
     const tag = (p.tag as string) || "p";
     const viewMode = useEditorStore((s) => s.viewMode);
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const bgStyles = getBackgroundStyles(p, theme);
 
 
     const desktopSize = (p.fontSize as string) || defaultSizes[tag] || "1rem";
@@ -19,6 +22,7 @@ export function TextBlock({ block }: BlockProps) {
     const finalColor = (p.color as string) || "inherit";
 
     const wrapperStyle: React.CSSProperties = {
+        ...bgStyles,
         padding: (p.padding as string) || "12px 24px",
         width: "100%",
         marginTop: (p.marginTop as string) || "0",
@@ -52,10 +56,13 @@ export function TextBlock({ block }: BlockProps) {
         whiteSpace: "pre-wrap",
         wordBreak: "break-word",
         listStylePosition: "inside",
+        position: "relative",
+        zIndex: 2
     };
 
     return (
         <div id={(p.sectionId as string) || `block-${block.id}`} style={wrapperStyle}>
+            <BackgroundOverlay p={p} />
             {rawContent ? (
                 <Tag style={tagStyle}>
                     {lines.map((line, i) => (

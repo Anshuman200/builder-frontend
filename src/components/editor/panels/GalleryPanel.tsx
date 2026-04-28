@@ -6,6 +6,8 @@ import { useEditorStore } from "@/stores/editorStore";
 import { Section, Field, TextInput, SelectInput, ColorInput, MediaInput, ToggleSwitch, PaddingFields, SortableList, arrayMove, TextInputWithUnit, rectSortingStrategy } from "./shared";
 import { AnimationPanel } from "./AnimationPanel";
 
+import { BackgroundPanel } from "./BackgroundPanel";
+
 export function GalleryPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props as any;
@@ -100,8 +102,8 @@ export function GalleryPanel({ block }: { block: Block }) {
                 })()}
             </Section>
 
+            <BackgroundPanel block={block} />
             <Section title="Styling">
-                <Field label="Background"><ColorInput value={p.bgColor || "transparent"} onChange={(v) => up("bgColor", v)} /></Field>
                 <Field label="Border Radius"><TextInput value={p.borderRadius || "8px"} onChange={(v) => up("borderRadius", v)} /></Field>
                 <ToggleSwitch label="Show Captions" value={p.showCaptions !== false} onChange={(v) => up("showCaptions", v)} />
             </Section>

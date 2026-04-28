@@ -2,8 +2,9 @@
 
 import React from "react";
 import type { Block } from "@/types";
-import { ChildBlockWrapper, PreviewContext, DropZoneStrip, SortableBlockGroup } from "./shared";
+import { ChildBlockWrapper, PreviewContext, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 interface MasonryBlockProps {
     block: Block;
@@ -14,17 +15,18 @@ export const MasonryContext = React.createContext<string | null>(null);
 export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
     const isPreview = React.useContext(PreviewContext);
     const viewMode = useEditorStore(s => s.viewMode);
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
 
     const {
         gap: rawGap = 8,
         padding = "24px",
-        bgColor = "transparent",
         childBlocks = [],
         columns,
         columnsTablet,
         columnsMobile,
     } = block.props as any;
 
+    const bgStyles = getBackgroundStyles(block.props, theme);
     const gap = typeof rawGap === "number" ? `${rawGap}px` : rawGap;
 
     const items = (childBlocks as Block[]);
@@ -52,92 +54,96 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
         <div
             className="w-full"
             style={{
+                ...bgStyles,
                 padding,
-                backgroundColor: bgColor as string,
                 minHeight: isPreview ? "auto" : "200px",
+                position: "relative"
             }}
         >
+            <BackgroundOverlay p={block.props} />
             <MasonryContext.Provider value={block.id}>
-                {/* ── CSS Columns masonry ──────────────────────────────── */}
-                {mediaItems.length > 0 && (
-                    <div
-                        style={{
-                            columns: isPreview ? undefined : colCount,
-                            columnCount: isPreview ? undefined : colCount,
-                            columnGap: gap,
-                            // In preview, use CSS responsive columns via classname (below)
-                        }}
-                        className={isPreview ? "masonry-preview-grid" : undefined}
-                    >
-                        {isPreview && (
-                            <style>{`
-                                .masonry-preview-grid {
-                                    column-count: ${cols};
-                                    column-gap: ${gap};
-                                }
-                                @media (max-width: 1280px) {
-                                    .masonry-preview-grid { column-count: ${cols}; }
-                                }
-                                @media (max-width: 1024px) {
-                                    .masonry-preview-grid { column-count: ${colsTablet}; }
-                                }
-                                @media (max-width: 768px) {
-                                    .masonry-preview-grid { column-count: ${colsTablet}; }
-                                }
-                                @media (max-width: 480px) {
-                                    .masonry-preview-grid { column-count: ${colsMobile}; }
-                                }
-                            `}</style>
-                        )}
-                        <SortableBlockGroup blocks={mediaItems}>
-                            {mediaItems.map((child: Block) => (
-                                <div
-                                    key={child.id}
-                                    style={{
-                                        breakInside: "avoid",
-                                        display: "inline-block",
-                                        width: "100%",
-                                        marginBottom: gap,
-                                        borderRadius: "12px",
-                                        overflow: "hidden",
-                                    }}
-                                >
-                                    <ChildBlockWrapper block={child} />
-                                </div>
-                            ))}
-                        </SortableBlockGroup>
-                    </div>
-                )
-                }
-
-                {/* ── "Add Media" always pinned at bottom-left ─────────── */}
-                {
-                    !isPreview && pickerItems.length > 0 && (
+                <div style={{ position: "relative", zIndex: 2 }}>
+                    {/* ── CSS Columns masonry ──────────────────────────────── */}
+                    {mediaItems.length > 0 && (
                         <div
                             style={{
-                                marginTop: mediaItems.length > 0 ? gap : 0,
-                                width: "100%",
-                                display: "flex",
-                                justifyContent: "center",
+                                columns: isPreview ? undefined : colCount,
+                                columnCount: isPreview ? undefined : colCount,
+                                columnGap: gap,
+                                // In preview, use CSS responsive columns via classname (below)
                             }}
+                            className={isPreview ? "masonry-preview-grid" : undefined}
                         >
-                            <div style={{ width: "min(100%, 280px)" }}>
-                                {pickerItems.map((picker: Block) => (
-                                    <ChildBlockWrapper key={picker.id} block={picker} />
+                            {isPreview && (
+                                <style>{`
+                                    .masonry-preview-grid {
+                                        column-count: ${cols};
+                                        column-gap: ${gap};
+                                    }
+                                    @media (max-width: 1280px) {
+                                        .masonry-preview-grid { column-count: ${cols}; }
+                                    }
+                                    @media (max-width: 1024px) {
+                                        .masonry-preview-grid { column-count: ${colsTablet}; }
+                                    }
+                                    @media (max-width: 768px) {
+                                        .masonry-preview-grid { column-count: ${colsTablet}; }
+                                    }
+                                    @media (max-width: 480px) {
+                                        .masonry-preview-grid { column-count: ${colsMobile}; }
+                                    }
+                                `}</style>
+                            )}
+                            <SortableBlockGroup blocks={mediaItems}>
+                                {mediaItems.map((child: Block) => (
+                                    <div
+                                        key={child.id}
+                                        style={{
+                                            breakInside: "avoid",
+                                            display: "inline-block",
+                                            width: "100%",
+                                            marginBottom: gap,
+                                            borderRadius: "12px",
+                                            overflow: "hidden",
+                                        }}
+                                    >
+                                        <ChildBlockWrapper block={child} />
+                                    </div>
                                 ))}
-                            </div>
+                            </SortableBlockGroup>
                         </div>
                     )
-                }
+                    }
 
-                {/* ── Empty state ──────────────────────────────────────── */}
-                {
-                    !isPreview && mediaItems.length === 0 && pickerItems.length === 0 && (
-                        <div style={{ marginTop: 16 }}>
-                            <DropZoneStrip zoneId={block.id} hasChildren={false} />
-                        </div>
-                    )
-                }
+                    {/* ── "Add Media" always pinned at bottom-left ─────────── */}
+                    {
+                        !isPreview && pickerItems.length > 0 && (
+                            <div
+                                style={{
+                                    marginTop: mediaItems.length > 0 ? gap : 0,
+                                    width: "100%",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <div style={{ width: "min(100%, 280px)" }}>
+                                    {pickerItems.map((picker: Block) => (
+                                        <ChildBlockWrapper key={picker.id} block={picker} />
+                                    ))}
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    {/* ── Empty state ──────────────────────────────────────── */}
+                    {
+                        !isPreview && mediaItems.length === 0 && pickerItems.length === 0 && (
+                            <div style={{ marginTop: 16 }}>
+                                <DropZoneStrip zoneId={block.id} hasChildren={false} />
+                            </div>
+                        )
+                    }
+                </div>
             </MasonryContext.Provider >
         </div >
     );

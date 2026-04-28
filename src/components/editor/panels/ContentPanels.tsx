@@ -14,6 +14,7 @@ import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCame
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "../IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
+import { BackgroundPanel } from "./BackgroundPanel";
 import { Dropdown } from "antd";
 import dynamic from "next/dynamic";
 
@@ -35,7 +36,7 @@ export function FeaturesPanel({ block }: { block: Block }) {
                 <LayoutFields p={p} up={up} options={{
                     layouts: [{ label: "Card Grid", value: "grid" }, { label: "Alternating Row (Icon + Text)", value: "alternating" }, { label: "Horizontal List", value: "horizontal" }, { label: "Icon-Only Grid", value: "icon-grid" }, { label: "Bento / Asymmetric", value: "bento" }]
                 }} />
-                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
+                <BackgroundPanel block={block} />
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#1e293b"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
             <Section title="Card Styling">
@@ -187,8 +188,8 @@ export function TeamPanel({ block }: { block: Block }) {
                 </>)}
                 {p.imageStyle === "cover" && (<Field label="Gradient Overlay"><ColorInput value={(p.coverGradientBottom as string) || "rgba(0,0,0,0.9)"} onChange={(v) => up("coverGradientBottom", v)} /></Field>)}
             </Section>
+            <BackgroundPanel block={block} />
             <Section title="Colors">
-                <Field label="Main Background"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} /></Field>
                 <Field label="Name Text"><ColorInput value={(p.nameColor as string) || "#0f172a"} onChange={(v) => up("nameColor", v)} /></Field>
                 <Field label="Role Text"><ColorInput value={(p.roleColor as string) || "#64748b"} onChange={(v) => up("roleColor", v)} /></Field>
                 <Field label="Description Text"><ColorInput value={(p.descColor as string) || "#475569"} onChange={(v) => up("descColor", v)} /></Field>
@@ -733,7 +734,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Spacing">
-                <Field label="Section Background"><ColorInput value={(p.sectionBg as string) || "transparent"} onChange={(v) => up("sectionBg", v)} placeholder="transparent" /></Field>
+                <BackgroundPanel block={block} />
                 <PaddingInput label="Section Padding" value={(p.sectionPadding as string) || "4rem 1rem"} onChange={(v) => up("sectionPadding", v)} placeholder="4rem 1rem" />
             </Section>
 
@@ -879,7 +880,7 @@ export function AccordionPanel({ block }: { block: Block }) {
 
 
             <Section title="Colors">
-                <Field label="Main Background"><ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} /></Field>
+                <BackgroundPanel block={block} />
                 <Field label="Item Background"><ColorInput value={(p.itemBgColor as string) || "#ffffff"} onChange={(v) => up("itemBgColor", v)} /></Field>
                 <Field label="Item Border"><ColorInput value={(p.itemBorderColor as string) || "#e2e8f0"} onChange={(v) => up("itemBorderColor", v)} /></Field>
                 <Field label="Title Color"><ColorInput value={(p.titleColor as string) || "#0f172a"} onChange={(v) => up("titleColor", v)} /></Field>
@@ -908,7 +909,7 @@ export function StatsPanel({ block }: { block: Block }) {
                 <LayoutFields p={p} up={up} options={{
                     layouts: [{ label: "Grid", value: "grid" }, { label: "Strip", value: "strip" }, { label: "KPI Cards", value: "kpi" }]
                 }} />
-                <Field label="Background"><ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} /></Field>
+                <BackgroundPanel block={block} />
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "var(--text)"} onChange={(v) => up("textColor", v)} /></Field>
                 <Field label="Accent Color"><ColorInput value={(p.accentColor as string) || "var(--primary)"} onChange={(v) => up("accentColor", v)} /></Field>
             </Section>
@@ -1167,9 +1168,7 @@ export function LegalPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Section Styling">
-                <Field label="Background Color">
-                    <ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} />
-                </Field>
+                <BackgroundPanel block={block} />
                 <Field label="Text Color">
                     <ColorInput value={(p.textColor as string) || "var(--text)"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} />
                 </Field>
@@ -1195,7 +1194,7 @@ export function DeleteAccountPanel({ block }: { block: Block }) {
                         placeholder="https://api.example.com/delete-account"
                     />
                 </Field>
-                <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>
+                <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4}}>
                     Endpoint to send the deletion request.
                 </div>
             </Section>
@@ -1250,18 +1249,7 @@ export function DeleteAccountPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Style & Background">
-                <Field label="Section Background">
-                    <ColorInput value={(p.sectionBg as string) || "transparent"} onChange={(v) => up("sectionBg", v)} placeholder="transparent" />
-                </Field>
-                <Field label="Section Padding">
-                    <TextInput value={(p.sectionPadding as string) || "4rem 1rem"} onChange={(v) => up("sectionPadding", v)} placeholder="4rem 1rem" />
-                </Field>
-                <Field label="Card Background">
-                    <ColorInput value={(p.bgColor as string) || "var(--surface)"} onChange={(v) => up("bgColor", v)} />
-                </Field>
-                <Field label="BG Image">
-                    <MediaInput value={(p.bgImage as string) || ""} onChange={(v) => up("bgImage", v)} />
-                </Field>
+                <BackgroundPanel block={block} />
                 <Field label="Text Color">
                     <ColorInput value={(p.textColor as string) || "var(--text)"} onChange={(v) => up("textColor", v)} />
                 </Field>

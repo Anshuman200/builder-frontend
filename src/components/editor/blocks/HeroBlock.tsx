@@ -2,7 +2,7 @@
 import React from "react";
 
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup } from "./shared";
+import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 import NextImage from "next/image";
 
@@ -10,13 +10,9 @@ export function HeroBlock({ block }: BlockProps) {
     const p = block.props;
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
     const defaultPrimary = theme.colors?.primary || "#6366f1";
-    const defaultOverlay = theme.colors?.overlay || "rgba(0,0,0,0.25)";
-
-    const align = (p.align as string) || "center";
-    const bgColor = (p.bgColor as string) || defaultPrimary;
-    const bgImage = p.bgImage as string;
-    const bgOverlay = (p.bgOverlay as string) || defaultOverlay;
+    const bgStyles = getBackgroundStyles(p, theme);
     const childBlocks = (p.childBlocks as any[]) ?? [];
+    const align = (p.align as string) || "center";
 
     const viewMode = useEditorStore((s) => s.viewMode);
     const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
@@ -28,17 +24,6 @@ export function HeroBlock({ block }: BlockProps) {
     const tabletPadding = (p.tabletPadding as string) || desktopPadding;
     const mobilePadding = (p.mobilePadding as string) || tabletPadding;
     const editorPadding = viewMode === "mobile" ? mobilePadding : viewMode === "tablet" ? tabletPadding : desktopPadding;
-
-    const isSimpleImage = bgImage && !bgImage.startsWith("linear-gradient") && !bgImage.startsWith("radial-gradient");
-
-    let background: string;
-    if (bgImage) {
-        background = bgImage.startsWith("linear-gradient") || bgImage.startsWith("radial-gradient")
-            ? bgImage
-            : `linear-gradient(${bgOverlay}, ${bgOverlay}), url("${bgImage}") center/cover no-repeat`;
-    } else {
-        background = bgColor;
-    }
 
     const layout = (p.layout as string) || "fluid";
     const innerMaxWidth = layout === "fluid" ? "100%" : (layout === "narrow" ? "800px" : layoutObj.maxWidth);
@@ -57,51 +42,38 @@ export function HeroBlock({ block }: BlockProps) {
             <section
                 id={(p.sectionId as string) || `block-${block.id}`}
                 className={isPreview ? `hero-${block.id}` : undefined}
-                style={{ 
-                    minHeight: sectionMinHeight, 
-                    background: isSimpleImage ? bgColor : background, 
-                    borderRadius: (p.borderRadius as string) || "0px", 
-                    overflow: "hidden", 
-                    color: (p.textColor as string) || "#ffffff", 
-                    display: "flex", 
-                    flexDirection: "column", 
-                    alignItems: "stretch", 
-                    justifyContent: "center", 
-                    padding: isPreview ? undefined : editorPadding, 
-                    paddingLeft: isPreview ? undefined : 0, 
-                    paddingRight: isPreview ? undefined : 0, 
-                    textAlign: align as React.CSSProperties["textAlign"], 
-                    position: "relative" 
+                style={{
+                    ...bgStyles,
+                    minHeight: sectionMinHeight,
+                    borderRadius: (p.borderRadius as string) || "0px",
+                    color: (p.textColor as string) || "#ffffff",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "stretch",
+                    justifyContent: "center",
+                    padding: isPreview ? undefined : editorPadding,
+                    paddingLeft: isPreview ? undefined : 0,
+                    paddingRight: isPreview ? undefined : 0,
+                    textAlign: align as React.CSSProperties["textAlign"],
+                    position: "relative"
                 }}
             >
-                {isSimpleImage && (
-                    <>
-                        <NextImage 
-                            src={bgImage} 
-                            alt="" 
-                            fill 
-                            priority 
-                            className="pointer-events-none"
-                            style={{ objectFit: "cover", zIndex: 0 }} 
-                        />
-                        <div style={{ position: "absolute", inset: 0, background: bgOverlay, zIndex: 1 }} />
-                    </>
-                )}
+                <BackgroundOverlay p={p} />
                 <div
                     className={isPreview ? `hero-inner-${block.id}` : undefined}
-                    style={{ 
+                    style={{
                         position: "relative",
                         zIndex: 2,
-                        maxWidth: innerMaxWidth, 
-                        margin: "0 auto", 
-                        width: "100%", 
-                        boxSizing: "border-box", 
-                        display: "flex", 
-                        flexDirection: "column", 
-                        alignItems: "stretch", 
-                        gap: 4, 
-                        paddingLeft: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), 
-                        paddingRight: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX) 
+                        maxWidth: innerMaxWidth,
+                        margin: "0 auto",
+                        width: "100%",
+                        boxSizing: "border-box",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "stretch",
+                        gap: 4,
+                        paddingLeft: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX),
+                        paddingRight: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX)
                     }}
                 >
                     <SortableBlockGroup blocks={childBlocks}>

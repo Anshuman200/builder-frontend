@@ -4,7 +4,8 @@ import React from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { recursiveClone, useEditorStore } from "@/stores/editorStore";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup } from "./shared";
+import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 function GridSlot({ zoneId, slotId, blockId, blocks, onDelete, style }: { zoneId: string; slotId: string; blockId: string; blocks: Block[]; onDelete: () => void; style?: React.CSSProperties }) {
     const isPreview = React.useContext(PreviewContext);
@@ -74,6 +75,8 @@ export function GridBlock({ block }: BlockProps) {
     const isPreview = React.useContext(PreviewContext);
     const isMobile = viewMode === "mobile";
     const isTablet = viewMode === "tablet";
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const bgStyles = getBackgroundStyles(p, theme);
 
     // Alignment Mapping
     const justifyMap: Record<string, string> = {
@@ -150,15 +153,17 @@ export function GridBlock({ block }: BlockProps) {
         <div
             id={(p.sectionId as string) || `block-${block.id}`}
             style={{
+                ...bgStyles,
                 width: "100%",
-                background: p.bgColor as string,
                 padding,
                 borderRadius: p.borderRadius as string,
                 display: "flex",
                 flexDirection: "column",
                 gap: 24,
+                position: "relative"
             }}
         >
+            <BackgroundOverlay p={p} />
             <div
                 style={{
                     display: "grid",
@@ -171,6 +176,8 @@ export function GridBlock({ block }: BlockProps) {
                     // Cell internal alignment
                     justifyItems: "stretch",
                     alignItems: "stretch",
+                    position: "relative",
+                    zIndex: 2
                 }}
             >
                 {items.map((item, idx) => (
@@ -193,7 +200,7 @@ export function GridBlock({ block }: BlockProps) {
             </div>
 
             {!isPreview && (
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-center" style={{ position: "relative", zIndex: 2 }}>
                     <button
                         onClick={handleAddCell}
                         className="add-item-button w-96 border border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-center gap-2 text-gray-500 cursor-pointer hover:bg-blue-900 hover:text-white transition-all text-sm font-bold uppercase tracking-wide"

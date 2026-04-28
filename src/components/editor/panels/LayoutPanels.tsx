@@ -7,6 +7,7 @@ import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, Medi
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
+import { BackgroundPanel } from "./BackgroundPanel";
 
 export function ButtonPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
@@ -65,15 +66,8 @@ export function HeaderPanel({ block }: { block: Block }) {
                 <Field label="Header Width"><SelectInput value={(p.layoutWidth as string) || (p.fullWidth ? "fluid" : "centered")} onChange={(v) => updateProps({ layoutWidth: v, fullWidth: v === "fluid" })} options={[{ label: "Fluid / Edge-to-Edge", value: "fluid" }, { label: "Centered (Container)", value: "centered" }, { label: "Narrow Content (800px)", value: "narrow" }]} /></Field>
                 <Field label="Position"><SelectInput value={(p.position as string) || "static"} onChange={(v) => updateProps({ position: v })} options={[{ label: "Static (Normal flow)", value: "static" }, { label: "Sticky (Stays at top)", value: "sticky" }, { label: "Fixed (Overlays content)", value: "fixed" }]} /></Field>
                 <Field label="Background Style"><SelectInput value={(p.style as string) || "solid"} onChange={(v) => up("style", v)} options={[{ label: "Solid Color", value: "solid" }, { label: "Glassmorphism (Blur)", value: "glass" }, { label: "Transparent", value: "transparent" }]} /></Field>
-                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#ffffff"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
-                <Field label="Background Image"><MediaInput value={(p.bgImage as string) || ""} onChange={(v) => up("bgImage", v)} placeholder="https://..." /></Field>
-                {!!p.bgImage && (
-                    <Field label="Background Position"><SelectInput value={(p.bgPosition as string) || "center"} onChange={(v) => up("bgPosition", v)} options={[{ label: "Top", value: "top" }, { label: "Center", value: "center" }, { label: "Bottom", value: "bottom" }]} /></Field>
-                )}
-                <Field label="Overlay Opacity"><SelectInput value={(p.bgOpacity as string) || "0"} onChange={(v) => up("bgOpacity", v)} options={[{ label: "None", value: "0" }, { label: "10%", value: "0.1" }, { label: "20%", value: "0.2" }, { label: "30%", value: "0.3" }, { label: "40%", value: "0.4" }, { label: "50%", value: "0.5" }, { label: "60%", value: "0.6" }, { label: "70%", value: "0.7" }, { label: "80%", value: "0.8" }, { label: "90%", value: "0.9" }]} /></Field>
-                <Field label="Overlay Color"><ColorInput value={(p.bgOverlayColor as string) || "#000000"} onChange={(v) => up("bgOverlayColor", v)} onBlur={(v) => up("bgOverlayColor", v, true)} /></Field>
-                <Field label="Text/Link Color"><ColorInput value={(p.textColor as string) || "#0f172a"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
+            <BackgroundPanel block={block} />
             <Section title="Section Padding (Responsive)">
                 <PaddingFields p={p} up={up} />
             </Section>
@@ -262,7 +256,9 @@ export function FooterPanel({ block }: { block: Block }) {
             <Section title="Layout & Styling">
                 <Field label="Section Layout"><SelectInput value={(p.layout as string) || "standard"} onChange={(v) => updateProps({ layout: v })} options={[{ label: "Standard (Logo + Links)", value: "standard" }, { label: "Centered (Logo Center)", value: "centered" }, { label: "Columns (Multi-section)", value: "columns" }, { label: "Minimal (1 line)", value: "minimal" }]} /></Field>
                 <ToggleSwitch label="Full Width Container" value={!!p.fullWidth} onChange={(v) => updateProps({ fullWidth: v })} />
-                <Field label="Background Color"><ColorInput value={(p.bgColor as string) || "#0f172a"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
+            </Section>
+            <BackgroundPanel block={block} />
+            <Section title="Text Styling">
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#f8fafc"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
             <Section title="Section Padding (Responsive)">
