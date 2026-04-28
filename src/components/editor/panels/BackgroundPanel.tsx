@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Section, Field, ColorInput, MediaInput, SelectInput, SliderInput } from "./shared";
+import { Section, Field, ColorInput, GradientInput, UnifiedBackgroundInput, MediaInput, SelectInput, SliderInput } from "./shared";
 import { Block } from "@/types";
 import { useEditorStore } from "@/stores/editorStore";
 
@@ -17,11 +17,12 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
 
   return (
     <Section title="Background">
-      <Field label="Background Color">
-        <ColorInput 
-          value={(p.bgColor as string) || "transparent"} 
-          onChange={(v) => up("bgColor", v)} 
-          onBlur={(v) => up("bgColor", v, true)} 
+      <Field label="Fill">
+        <UnifiedBackgroundInput 
+          bgColor={(p.bgColor as string) || (p.sectionBg as string) || "transparent"}
+          bgGradient={(p.bgGradient as string) || ""}
+          onChangeColor={(v) => up("bgColor", v, true)}
+          onChangeGradient={(v) => up("bgGradient", v, true)}
         />
       </Field>
 

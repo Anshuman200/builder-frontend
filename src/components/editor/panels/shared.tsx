@@ -698,6 +698,7 @@ function toHex(color: string, theme?: any): string {
     return "#" + m.slice(0, 3).map(n => Number(n).toString(16).padStart(2, "0")).join("");
 }
 
+// Test comment
 export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff", hideText = false }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void; placeholder?: string; hideText?: boolean }) {
     const { page } = useEditorStore();
     const theme = page?.theme;
@@ -779,6 +780,209 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff", h
     );
 }
 
+export function GradientInput({ value, onChange, onBlur }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void }) {
+    const gradients = [
+        { name: "None", value: "" },
+        { name: "Indigo Night", value: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)" },
+        { name: "Ocean Breeze", value: "linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%)" },
+        { name: "Sunset Glow", value: "linear-gradient(135deg, #f97316 0%, #ef4444 100%)" },
+        { name: "Midnight", value: "linear-gradient(135deg, #0f172a 0%, #334155 100%)" },
+        { name: "Sweet Candy", value: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)" },
+        { name: "Emerald", value: "linear-gradient(135deg, #10b981 0%, #059669 100%)" },
+        { name: "Golden Hour", value: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)" },
+        { name: "Glass Dark", value: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)" },
+        { name: "Neon Blue", value: "linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%)" },
+    ];
+
+    interface Stop { id: string; color: string; offset: number; }
+
+    const parseStops = (val: string): { deg: number, stops: Stop[] } => {
+        const degMatch = val.match(/(\d+)deg/);
+        const deg = degMatch ? parseInt(degMatch[1]) : 135;
+        
+        // Match COLOR OFFSET%
+        const stopsMatch = val.match(/((rgba?\(.*?\)|#[\da-fA-F]+|var\(.*?\))\s+(\d+)%)/g);
+        if (stopsMatch) {
+            return {
+                deg,
+                stops: stopsMatch.map((s, i) => {
+                    const parts = s.match(/(.*)\s+(\d+)%/);
+                    return { id: `stop-${i}`, color: parts![1].trim(), offset: parseInt(parts![2]) };
+                })
+            };
+        }
+        return { deg: 135, stops: [{ id: "s1", color: "#6366f1", offset: 0 }, { id: "s2", color: "#a855f7", offset: 100 }] };
+    };
+
+    const { deg, stops } = parseStops(value || gradients[1].value);
+
+    const update = (newDeg: number, newStops: Stop[]) => {
+        const sorted = [...newStops].sort((a, b) => a.offset - b.offset);
+        const stopsStr = sorted.map(s => `${s.color} ${s.offset}%`).join(", ");
+        const newVal = `linear-gradient(${newDeg}deg, ${stopsStr})`;
+        onChange(newVal);
+    };
+
+    const currentPreset = gradients.find(g => g.value === value);
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%", padding: "4px 0" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Dropdown 
+                    menu={{ 
+                        items: gradients.map(g => ({
+                            key: g.name,
+                            label: (
+                                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 8px" }}>
+                                    <div style={{ width: 24, height: 24, borderRadius: 6, background: g.value || PANEL_COLORS.inputBg, border: "1px solid rgba(255,255,255,0.1)" }} />
+                                    <span style={{ fontSize: 12 }}>{g.name}</span>
+                                    {value === g.value && <CheckIcon style={{ width: 14, height: 14, marginLeft: "auto", color: PANEL_COLORS.primary }} />}
+                                </div>
+                            ),
+                            onClick: () => { onChange(g.value); if (onBlur) onBlur(g.value); }
+                        })) 
+                    }} 
+                    trigger={['click']} 
+                    placement="bottomRight"
+                >
+                    <button
+                        style={{
+                            display: "flex", gap: 10, alignItems: "center", height: 32, padding: "0 10px", fontSize: 11, background: PANEL_COLORS.inputBg,
+                            border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 6, color: PANEL_COLORS.text, outline: "none", cursor: "pointer",
+                            transition: "all 0.2s", flex: 1
+                        }}
+                    >
+                        <div style={{ width: 18, height: 18, borderRadius: 4, background: value || PANEL_COLORS.inputBg, border: "1px solid rgba(255,255,255,0.15)", flexShrink: 0 }} />
+                        <span style={{ flex: 1, textAlign: "left", fontSize: 11, opacity: 0.9 }}>{currentPreset ? currentPreset.name : "Custom Multi-Stop"}</span>
+                        <ChevronDownIcon style={{ width: 12, height: 12, opacity: 0.4 }} />
+                    </button>
+                </Dropdown>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, background: "rgba(255,255,255,0.02)", padding: 12, borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)" }}>
+                {/* Visual Gradient Bar */}
+                <div style={{ height: 24, width: "100%", borderRadius: 6, background: value || "transparent", border: "1px solid rgba(255,255,255,0.1)", marginBottom: 4 }} />
+
+                {/* Stops List */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 10, color: PANEL_COLORS.muted, textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>Stops</span>
+                        <button 
+                            onClick={() => update(deg, [...stops, { id: `stop-${Date.now()}`, color: "#ffffff", offset: 50 }])}
+                            style={{ background: "none", border: "none", color: PANEL_COLORS.primary, cursor: "pointer", fontSize: 10, fontWeight: 700 }}
+                        >
+                            + Add Stop
+                        </button>
+                    </div>
+
+                    {stops.map((s, idx) => (
+                        <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.03)", padding: "6px 8px", borderRadius: 6 }}>
+                            <ColorInput 
+                                value={s.color} 
+                                onChange={(v) => {
+                                    const nS = [...stops];
+                                    nS[idx] = { ...nS[idx], color: v };
+                                    update(deg, nS);
+                                }} 
+                                hideText
+                            />
+                            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
+                                <input 
+                                    type="number" 
+                                    value={s.offset} 
+                                    min={0} max={100}
+                                    onChange={(e) => {
+                                        const nS = [...stops];
+                                        nS[idx] = { ...nS[idx], offset: parseInt(e.target.value) || 0 };
+                                        update(deg, nS);
+                                    }}
+                                    style={{ width: 40, background: "none", border: "none", color: "#fff", fontSize: 11, textAlign: "right", outline: "none" }}
+                                />
+                                <span style={{ fontSize: 10, opacity: 0.4 }}>%</span>
+                                <SliderInput 
+                                    value={s.offset} 
+                                    onChange={(v) => {
+                                        const nS = [...stops];
+                                        nS[idx] = { ...nS[idx], offset: v };
+                                        update(deg, nS);
+                                    }}
+                                />
+                            </div>
+                            {stops.length > 2 && (
+                                <button onClick={() => update(deg, stops.filter((_, i) => i !== idx))} style={{ background: "none", border: "none", color: "#ef4444", opacity: 0.6, cursor: "pointer", padding: 4 }}>
+                                    <TrashIcon style={{ width: 14, height: 14 }} />
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                {/* Angle */}
+                <div style={{ marginTop: 4, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                        <span style={{ fontSize: 10, color: PANEL_COLORS.muted, textTransform: "uppercase", fontWeight: 700 }}>Angle</span>
+                        <span style={{ fontSize: 10, color: PANEL_COLORS.primary }}>{deg}°</span>
+                    </div>
+                    <SliderInput value={deg} min={0} max={360} onChange={(v) => update(v, stops)} />
+                </div>
+            </div>
+        </div>
+    );
+}
+export function UnifiedBackgroundInput({ 
+    bgColor, 
+    bgGradient, 
+    onChangeColor, 
+    onChangeGradient 
+}: { 
+    bgColor: string; 
+    bgGradient: string; 
+    onChangeColor: (v: string) => void; 
+    onChangeGradient: (v: string) => void;
+}) {
+    const [mode, setMode] = React.useState<"solid" | "gradient">(bgGradient ? "gradient" : "solid");
+
+    // Sync mode if props change externally
+    React.useEffect(() => {
+        if (bgGradient && mode !== "gradient") setMode("gradient");
+        else if (!bgGradient && mode !== "solid") setMode("solid");
+    }, [bgGradient]);
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
+            <PillSegmented
+                value={mode}
+                onChange={(v: any) => {
+                    setMode(v);
+                    if (v === "solid") {
+                        onChangeGradient("");
+                    }
+                }}
+                block
+                size="small"
+                options={[
+                    { label: "Solid", value: "solid" },
+                    { label: "Gradient", value: "gradient" },
+                ]}
+            />
+            <div style={{ minHeight: 32 }}>
+                {mode === "solid" ? (
+                    <ColorInput 
+                        value={bgColor || "transparent"} 
+                        onChange={onChangeColor} 
+                        onBlur={(v) => onChangeColor(v)} 
+                    />
+                ) : (
+                    <GradientInput 
+                        value={bgGradient || ""} 
+                        onChange={onChangeGradient} 
+                        onBlur={(v) => onChangeGradient(v)} 
+                    />
+                )}
+            </div>
+        </div>
+    );
+}
 // ─── ToggleInput ──────────────────────────────────────────────────────────────
 export function ToggleInput({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label?: string }) {
     const control = (

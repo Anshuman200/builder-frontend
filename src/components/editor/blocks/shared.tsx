@@ -661,6 +661,7 @@ export function getBackgroundStyles(p: Record<string, any>, theme: any): React.C
   const defaultPrimary = theme.colors?.primary || "#6366f1";
   
   const bgColor = (p.bgColor as string) || (p.sectionBg as string) || "transparent";
+  const bgGradient = p.bgGradient as string;
   const bgImage = p.bgImage as string;
   const bgSize = (p.bgSize as string) || "cover";
   const bgPosition = (p.bgPosition as string) || "center";
@@ -679,7 +680,9 @@ export function getBackgroundStyles(p: Record<string, any>, theme: any): React.C
     overflow: "hidden",
   };
 
-  if (bgImage) {
+  if (bgGradient) {
+    styles.backgroundImage = bgGradient;
+  } else if (bgImage) {
     styles.backgroundImage = `url("${bgImage}")`;
   }
 

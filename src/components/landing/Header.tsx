@@ -29,36 +29,13 @@ export function Header({ onLoginClick }: HeaderProps) {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    const userMenuItems: MenuProps['items'] = [
-        {
-            key: 'dashboard',
-            label: <Link href={(user as any)?.role === 'admin' ? "/admin" : "/home"}>Dashboard</Link>,
-            icon: <HomeIcon className="w-4 h-4" />,
-        },
-        {
-            key: 'profile',
-            label: <Link href="/home/profile">Edit Profile</Link>,
-            icon: <UserCircleIcon className="w-4 h-4" />,
-        },
-        {
-            type: 'divider',
-        },
-        {
-            key: 'logout',
-            label: 'Log out',
-            icon: <ArrowRightOnRectangleIcon className="w-4 h-4" />,
-            danger: true,
-            onClick: () => logout(),
-        },
-    ];
-
     return (
         <div className="fixed top-0 inset-x-0 z-[100] flex justify-center p-4 md:p-6 transition-all duration-300">
             <header
                 className={
                     "w-full max-w-5xl flex items-center justify-between gap-4 px-6 h-14 md:h-16 rounded-2xl md:rounded-full transition-all duration-500 ease-in-out border " +
                     (scrolled || mobileOpen
-                        ? "bg-[var(--bg)]/80 backdrop-blur-2xl border-[var(--border)] shadow-[var(--shadow-lg)]"
+                        ? "bg-[var(--bg)]/80 backdrop-blur-2xl border-0 shadow-[var(--shadow-lg)]"
                         : "bg-transparent border-transparent")
                 }
             >
@@ -76,7 +53,7 @@ export function Header({ onLoginClick }: HeaderProps) {
                     >
                         <BoltIcon style={{ width: 16, height: 16, color: "white" }} />
                     </div>
-                    <span className="text-lg font-bold tracking-tight text-[var(--text)] hidden sm:block">
+                    <span className="text-lg font-bold tracking-tight text-white] hidden sm:block">
                         PageCraft
                     </span>
                 </Link>
@@ -93,7 +70,7 @@ export function Header({ onLoginClick }: HeaderProps) {
 
                 {/* Right Section: Auth */}
                 <div className="flex items-center gap-2 md:gap-4">
-                    <Button type="text" onClick={onLoginClick} className="hidden sm:inline-flex text-[var(--text)]/60 hover:text-[var(--text)]">Log in</Button>
+                    <Button type="text" onClick={onLoginClick} className="hidden sm:inline-flex !text-white hover:text-white">Log in</Button>
                     <Button
                         type="primary"
                         shape="round"
