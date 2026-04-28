@@ -978,6 +978,26 @@ export function ChartPanel({ block }: { block: Block }) {
 
     return (
         <>
+            <Section title="Content">
+                <Field label="Title">
+                    <TextInput 
+                        value={(p.title as string) || ""} 
+                        onChange={(v) => up("title", v)} 
+                        onBlur={(v) => up("title", v, true)} 
+                        placeholder="e.g. Sales Report" 
+                    />
+                </Field>
+                <Field label="Description">
+                    <TextareaInput 
+                        value={(p.subtitle as string) || ""} 
+                        onChange={(v) => up("subtitle", v)} 
+                        onBlur={(v) => up("subtitle", v, true)} 
+                        placeholder="Describe what this chart represents..." 
+                        rows={3} 
+                    />
+                </Field>
+            </Section>
+
             <Section title="Chart Settings">
                 <Field label="Type">
                     <SelectInput 

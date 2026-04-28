@@ -29,13 +29,13 @@ export function ChartBlock({ block }: BlockProps) {
   const p = block.props as Record<string, unknown>;
   const isPreview = React.useContext(PreviewContext);
   const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+  const focusSubItem = useEditorStore((s) => s.focusSubItem);
 
   const bgStyles = getBackgroundStyles(p, theme);
   const chartType = (p.chartType as string) || "area";
   const data = (p.data as Record<string, unknown>[]) || [];
   const height = (p.height as string) || "350px";
   const color = (p.color as string) || "var(--primary)";
-  const secondaryColor = (p.secondaryColor as string) || "var(--accent)";
 
   const showGrid = p.showGrid !== false;
   const showXAxis = p.showXAxis !== false;
@@ -86,9 +86,9 @@ export function ChartBlock({ block }: BlockProps) {
                   <div className="flex flex-wrap justify-end gap-x-6 gap-y-2 mb-4 animate-in fade-in slide-in-from-top-2 duration-500">
                     {data.map((entry: any, index: number) => (
                       <div key={`legend-${index}`} className="flex items-center gap-2 group cursor-default">
-                        <div 
-                          className="w-2.5 h-2.5 rounded-full shadow-sm transition-transform group-hover:scale-125" 
-                          style={{ backgroundColor: entry.fill || CHART_COLORS[index % CHART_COLORS.length] }} 
+                        <div
+                          className="w-2.5 h-2.5 rounded-full shadow-sm transition-transform group-hover:scale-125"
+                          style={{ backgroundColor: entry.fill || CHART_COLORS[index % CHART_COLORS.length] }}
                         />
                         <span className="text-xs font-semibold text-slate-600 transition-colors group-hover:text-slate-900">
                           {entry.name}
@@ -117,9 +117,9 @@ export function ChartBlock({ block }: BlockProps) {
                   <div className="flex flex-wrap justify-end gap-x-6 gap-y-2 mb-4 animate-in fade-in slide-in-from-top-2 duration-500">
                     {data.map((entry: any, index: number) => (
                       <div key={`legend-${index}`} className="flex items-center gap-2 group cursor-default">
-                        <div 
-                          className="w-2.5 h-2.5 rounded-full shadow-sm transition-transform group-hover:scale-125" 
-                          style={{ backgroundColor: entry.fill || CHART_COLORS[index % CHART_COLORS.length] }} 
+                        <div
+                          className="w-2.5 h-2.5 rounded-full shadow-sm transition-transform group-hover:scale-125"
+                          style={{ backgroundColor: entry.fill || CHART_COLORS[index % CHART_COLORS.length] }}
                         />
                         <span className="text-xs font-semibold text-slate-600 transition-colors group-hover:text-slate-900">
                           {entry.name}
@@ -152,9 +152,9 @@ export function ChartBlock({ block }: BlockProps) {
                   <div className="flex flex-wrap justify-end gap-x-6 gap-y-2 mb-4 animate-in fade-in slide-in-from-top-2 duration-500">
                     {data.map((entry: any, index: number) => (
                       <div key={`legend-${index}`} className="flex items-center gap-2 group cursor-default">
-                        <div 
-                          className="w-2.5 h-2.5 rounded-full shadow-sm transition-transform group-hover:scale-125" 
-                          style={{ backgroundColor: entry.fill || CHART_COLORS[index % CHART_COLORS.length] }} 
+                        <div
+                          className="w-2.5 h-2.5 rounded-full shadow-sm transition-transform group-hover:scale-125"
+                          style={{ backgroundColor: entry.fill || CHART_COLORS[index % CHART_COLORS.length] }}
                         />
                         <span className="text-xs font-semibold text-slate-600 transition-colors group-hover:text-slate-900">
                           {entry.name}
@@ -204,9 +204,9 @@ export function ChartBlock({ block }: BlockProps) {
                   <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                     {data.map((entry: any, index: number) => (
                       <div key={`legend-${index}`} className="flex items-center gap-2 group cursor-default">
-                        <div 
-                          className="w-2.5 h-2.5 rounded-full shadow-sm transition-transform group-hover:scale-125" 
-                          style={{ backgroundColor: entry.fill || CHART_COLORS[index % CHART_COLORS.length] }} 
+                        <div
+                          className="w-2.5 h-2.5 rounded-full shadow-sm transition-transform group-hover:scale-125"
+                          style={{ backgroundColor: entry.fill || CHART_COLORS[index % CHART_COLORS.length] }}
                         />
                         <span className="text-xs font-semibold text-slate-600 transition-colors group-hover:text-slate-900">
                           {entry.name}
@@ -246,7 +246,7 @@ export function ChartBlock({ block }: BlockProps) {
       <BackgroundOverlay p={p} />
       <div style={{ position: "relative", zIndex: 2 }}>
         {!!(p.title || p.subtitle) && (
-          <div className="mb-8 select-none">
+          <div className="mb-8 select-none" onClick={() => !isPreview && focusSubItem(block.id, "Content")}>
             {!!p.title && (
               <h3 className="text-2xl font-black tracking-tight mb-1">
                 {p.title as string}
@@ -259,7 +259,7 @@ export function ChartBlock({ block }: BlockProps) {
             )}
           </div>
         )}
-        <div style={{ height, width: "100%" }}>
+        <div style={{ height, width: "100%" }} onClick={() => !isPreview && focusSubItem(block.id, "Data Management")}>
           <ResponsiveContainer width="100%" height="100%">
             {renderChart()}
           </ResponsiveContainer>

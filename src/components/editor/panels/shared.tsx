@@ -213,7 +213,7 @@ export function Field({ label, children, description }: { label: string; childre
 }
 
 // ─── TextInput ────────────────────────────────────────────────────────────────
-export function TextInput({ value, onChange, placeholder, type = "text", style }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: string, style?: React.CSSProperties }) {
+export function TextInput({ value, onChange, onBlur, placeholder, type = "text", style }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void; placeholder?: string; type?: string, style?: React.CSSProperties }) {
     return (
         <input
             type={type}
@@ -238,6 +238,7 @@ export function TextInput({ value, onChange, placeholder, type = "text", style }
                 e.currentTarget.style.background = PANEL_COLORS.inputBg;
                 e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder;
                 e.currentTarget.style.boxShadow = "none";
+                onBlur?.(e.target.value);
             }}
         />
     );
@@ -369,7 +370,7 @@ export function PrefixInput({ prefix, value, onChange, placeholder, style }: { p
 
 // ─── TextareaInput ────────────────────────────────────────────────────────────
 
-export function TextareaInput({ value, onChange, rows = 3, placeholder }: { value: string; onChange: (v: string) => void; rows?: number; placeholder?: string }) {
+export function TextareaInput({ value, onChange, onBlur, rows = 3, placeholder }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void; rows?: number; placeholder?: string }) {
     return (
         <textarea
             value={value}
@@ -392,6 +393,7 @@ export function TextareaInput({ value, onChange, rows = 3, placeholder }: { valu
                 e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder;
                 e.currentTarget.style.background = PANEL_COLORS.inputBg;
                 e.currentTarget.style.boxShadow = "none";
+                onBlur?.(e.target.value);
             }}
         />
     );
