@@ -527,34 +527,7 @@ export default function EditorToolbar() {
             }
           >
             <button
-              style={{
-                display: "flex", alignItems: "center", gap: 6,
-                height: 30, padding: "0 10px",
-                background: showNewPageMenu
-                  ? "linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.15))"
-                  : "linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.06))",
-                border: `1px solid ${showNewPageMenu ? "rgba(99,102,241,0.6)" : "rgba(99,102,241,0.3)"}`,
-                borderRadius: 8, cursor: "pointer",
-                color: "#818cf8",
-                fontSize: 12, fontWeight: 700,
-                letterSpacing: "0.02em",
-                transition: "all 0.2s ease",
-                boxShadow: showNewPageMenu ? "0 0 12px rgba(99,102,241,0.2)" : "none",
-              }}
-              onMouseEnter={e => {
-                if (!showNewPageMenu) {
-                  e.currentTarget.style.background = "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.12))";
-                  e.currentTarget.style.borderColor = "rgba(99,102,241,0.5)";
-                  e.currentTarget.style.boxShadow = "0 0 10px rgba(99,102,241,0.15)";
-                }
-              }}
-              onMouseLeave={e => {
-                if (!showNewPageMenu) {
-                  e.currentTarget.style.background = "linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.06))";
-                  e.currentTarget.style.borderColor = "rgba(99,102,241,0.3)";
-                  e.currentTarget.style.boxShadow = "none";
-                }
-              }}
+              className="flex items-center gap-2 bg-linear-to-r from-blue/10 to-green/10 border border-primary/30 hover:from-primary/20 hover:to-primary/12 hover:border-primary/50 transition-all duration-200 rounded-lg px-3 py-1.5 text-primary font-bold text-xs tracking-wide cursor-pointer min-w-32"
             >
               <PlusIcon style={{ width: 13, height: 13, strokeWidth: 2.5 }} />
               New Page
@@ -569,27 +542,7 @@ export default function EditorToolbar() {
           {/* ── Choose Template Button ── */}
           <button
             onClick={openTemplatePicker}
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              height: 30, padding: "0 10px",
-              background: "linear-gradient(135deg, rgba(34,197,94,0.12), rgba(20,184,166,0.06))",
-              border: "1px solid rgba(34,197,94,0.3)",
-              borderRadius: 8, cursor: "pointer",
-              color: "#4ade80",
-              fontSize: 12, fontWeight: 700,
-              letterSpacing: "0.02em",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "linear-gradient(135deg, rgba(34,197,94,0.2), rgba(20,184,166,0.12))";
-              e.currentTarget.style.borderColor = "rgba(34,197,94,0.5)";
-              e.currentTarget.style.boxShadow = "0 0 10px rgba(34,197,94,0.15)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "linear-gradient(135deg, rgba(34,197,94,0.12), rgba(20,184,166,0.06))";
-              e.currentTarget.style.borderColor = "rgba(34,197,94,0.3)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
+            className="flex items-center gap-2 bg-linear-to-r from-green-400/10 to-emerald-400/10 border border-green-400/30 hover:from-green-400/20 hover:to-emerald-400/12 hover:border-green-400/50 transition-all duration-200 rounded-lg px-3 py-1.5 text-green-400 font-bold text-xs tracking-wide cursor-pointer min-w-36"
           >
             <SparklesIcon style={{ width: 13, height: 13, strokeWidth: 2.5 }} />
             Choose Template

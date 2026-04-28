@@ -729,7 +729,7 @@ export function ContactFormPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Form Setup">
-                <Field label="Section Layout"><SelectInput value={(p.layout as string) || "centered"} onChange={(v) => up("layout", v)} options={[{ label: "Centered (Narrow)", value: "centered" }, { label: "Split — Form + Info Panel", value: "split" }, { label: "Full Width", value: "full" }, { label: "Card / Floating", value: "card" }]} /></Field>
+                <Field label="Section Layout"><SelectInput value={(p.layout as string) || "centered"} onChange={(v) => up("layout", v)} options={[{ label: "Centered (Narrow)", value: "centered" }, { label: "Full Width", value: "full" }, { label: "Card / Floating", value: "card" }]} /></Field>
                 <ToggleSwitch value={p.showLastName !== false} onChange={(v) => up("showLastName", v)} label="Show Last Name Field" />
                 <ToggleSwitch value={p.showGender === true} onChange={(v) => up("showGender", v)} label="Show Gender Field" />
             </Section>

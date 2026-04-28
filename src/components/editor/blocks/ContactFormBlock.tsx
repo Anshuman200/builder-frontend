@@ -359,35 +359,11 @@ export function ContactFormBlock({ block }: BlockProps) {
         </ConfigProvider>
     );
 
-    const infoPanel = (
-        <div style={{ flex: "0 0 300px", display: "flex", flexDirection: "column", gap: "1.5rem", padding: "2rem", background: "rgba(0,0,0,0.02)", borderRadius: cardRadius, border: `1px solid #e2e8f0` }}>
-            <h3 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 800, color: (p.titleColor as string) || "#0f172a" }}>Get in Touch</h3>
-            <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.65, lineHeight: 1.7 }}>We&apos;d love to hear from you. Fill out the form and we&apos;ll respond as soon as possible.</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {[{ icon: "📧", text: (p.receiverEmail as string) || "hello@company.com" }, { icon: "📍", text: (p.infoAddress as string) || "123 Main Street, City" }, { icon: "📞", text: (p.infoPhone as string) || "+1 (555) 000-0000" }].map(({ icon, text }, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.75rem", fontSize: "0.88rem" }}>
-                        <span style={{ fontSize: "1.1rem" }}>{icon}</span>
-                        <span style={{ opacity: 0.7 }}>{text}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-
     const sectionBg = (p.sectionBg as string) || "transparent";
     const sectionPadding = (p.sectionPadding as string) || "4rem 1rem";
 
     const wrapLayout = () => {
         switch (layout) {
-            case "split":
-                return (
-                    <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: sectionBg, padding: sectionPadding, width: "100%", boxSizing: "border-box" }}>
-                        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", gap: "3rem", alignItems: "flex-start", flexWrap: "wrap" }}>
-                            {infoPanel}
-                            <div style={{ flex: 1, minWidth: 300 }}>{formNode}</div>
-                        </div>
-                    </section>
-                );
             case "full":
                 return (
                     <section id={(p.sectionId as string) || `block-${block.id}`} style={{ background: sectionBg, padding: sectionPadding, width: "100%", boxSizing: "border-box" }}>
