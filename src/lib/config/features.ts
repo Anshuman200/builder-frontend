@@ -43,4 +43,5 @@ export const EDITOR_FEATURES = {
     // Page Settings Features
     enableThemeToggle: false,
     enableScrollToTop: true,
+    enableTemplateChange: true,
 };

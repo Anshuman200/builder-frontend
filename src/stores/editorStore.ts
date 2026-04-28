@@ -661,7 +661,26 @@ export const useEditorStore = create<EditorStore>()(
                     page.theme = JSON.parse(JSON.stringify(DEFAULT_THEME));
                 }
 
-                const fallbackRouteId = page.routes && page.routes.length > 0 ? page.routes[0].id : "home";
+                const currentRouteId = get().activeRouteId;
+                let fallbackRouteId = page.routes && page.routes.length > 0 ? page.routes[0].id : "home";
+
+                if (currentRouteId && page.routes?.some(r => r.id === currentRouteId)) {
+                    fallbackRouteId = currentRouteId;
+                } else if (typeof window !== "undefined") {
+                    // 1. Try URL param first
+                    const params = new URLSearchParams(window.location.search);
+                    const queryRouteId = params.get("route");
+                    
+                    if (queryRouteId && page.routes?.some(r => r.id === queryRouteId)) {
+                        fallbackRouteId = queryRouteId;
+                    } else {
+                        // 2. Try localStorage backup
+                        const saved = localStorage.getItem(`activeRoute_${page.id}`);
+                        if (saved && page.routes?.some(r => r.id === saved)) {
+                            fallbackRouteId = saved;
+                        }
+                    }
+                }
 
                 state.page = page;
                 state.activeRouteId = fallbackRouteId;
@@ -676,7 +695,12 @@ export const useEditorStore = create<EditorStore>()(
                 state.historyIndex = 0;
             }),
 
-        setActiveRoute: (routeId) => set({ activeRouteId: routeId }),
+        setActiveRoute: (routeId) => set((s) => {
+            s.activeRouteId = routeId;
+            if (typeof window !== "undefined" && s.page?.id) {
+                localStorage.setItem(`activeRoute_${s.page.id}`, routeId);
+            }
+        }),
         addRoute: (route) => {
             const { page } = get();
             if (!page) return;

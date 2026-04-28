@@ -9,7 +9,7 @@ import React from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { TrashIcon, EllipsisHorizontalIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, EllipsisHorizontalIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon, ArrowPathIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
 import { useEditorStore } from "@/stores/editorStore";
@@ -17,6 +17,9 @@ import { IconButton } from "@/components/ui/IconButton";
 import AppToolTip from "@/components/common/AppToolTip";
 import { getIcon } from "@/lib/utils/icons";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
+import { Dropdown } from "antd";
+
+import { getTemplatesForBlock, transformBlockToTemplate } from "@/lib/config/templates";
 
 // ─── Preview context ──────────────────────────────────────────────────────────
 
@@ -114,6 +117,46 @@ let _BlockRenderer: React.FC<{ block: Block }> = () => null;
 export function setBlockRenderer(fn: React.FC<{ block: Block }>) {
     _BlockRenderer = fn;
 }
+// ─── Quick Layout Switcher ──────────────────────────────────────────────────
+
+export function QuickLayoutChange({ block }: { block: Block }) {
+    const { replaceBlock } = useEditorStore();
+    const templates = getTemplatesForBlock(block);
+
+    if (!templates) return null;
+
+    const currentTemplateId = (block.props.templateId as string) || templates[0].id;
+    
+    const menuItems = templates.map(s => ({
+        key: s.id,
+        label: (
+            <div className="px-2 py-1 flex items-center justify-between gap-4">
+                <span className="font-medium text-xs">{s.name}</span>
+                {currentTemplateId === s.id && <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
+            </div>
+        ),
+        onClick: () => {
+            const template = templates.find(ts => ts.id === s.id);
+            if (template) {
+                const newBlock = transformBlockToTemplate(block, template);
+                replaceBlock(block.id, newBlock);
+            }
+        }
+    }));
+
+
+    return (
+        <AppToolTip title="Change Template">
+            <Dropdown menu={{ items: menuItems }} placement="bottomRight" trigger={['click']}>
+                <IconButton icon={<SparklesIcon style={{ width: 14, height: 14 }} />} />
+            </Dropdown>
+        </AppToolTip>
+    );
+}
+
+// ─── BlockRenderer ──────────────────────────────────────────────────────────
+
+
 export function BlockRendererRef({ block }: { block: Block }) {
     return <_BlockRenderer block={block} />;
 }
@@ -244,6 +287,8 @@ export function ChildBlockWrapper({
                     border: "1px solid #e2e8f0",
                     boxShadow: "0 2px 12px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)",
                 }}>
+                    <QuickLayoutChange block={block} />
+
                     {/* Quick Media Change */}
                     {(() => {
                         const info = getBlockMediaInfo(block.type);

@@ -3,6 +3,25 @@ import type { SectionTemplate } from "@/types";
 
 export const gridSections: SectionTemplate[] = [
     {
+        id: "grid-2x2-bento",
+        name: "2-Column Grid",
+        category: "Grid",
+        previewImage: "/previews/grid/grid-2x2.png",
+        create: () => {
+            return makeBlock("grid", {
+                columns: 2,
+                gap: "1rem",
+                padding: "60px 24px",
+                align: "stretch",
+                verticalAlign: "stretch",
+                items: Array.from({ length: 2 }).map((_, i) => ({
+                    id: `slot-${crypto.randomUUID()}`,
+                    blocks: []
+                }))
+            });
+        }
+    },
+    {
         id: "grid-4x2-bento",
         name: "4-Column Bento Grid",
         category: "Grid",

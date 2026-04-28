@@ -304,7 +304,10 @@ export default function EditorToolbar() {
     },
     ...routes.map(r => ({
       key: r.id,
-      onClick: () => setActiveRoute(r.id),
+      onClick: () => {
+        setActiveRoute(r.id);
+        router.push(`?route=${r.id}`, { scroll: false });
+      },
       label: (
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "2px 4px" }}>
           <DocumentIcon style={{ width: 14, height: 14, opacity: 0.6 }} />

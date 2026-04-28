@@ -599,8 +599,8 @@ export function BorderRadiusInput({ value, onChange, placeholder }: { value: str
         else { const next = { tl, tr, br, bl, [corner]: v }; onChange(serializeRadius(next.tl, next.tr, next.br, next.bl)); }
     };
 
-    const presets = ["0px", "8px", "16px", "24px", "28px", "32px", "36px", "40px", "48px", "56px", "64px", "72px", "999px"];
-    const presetLabels = ["0", "8", "16", "24", "28", "32", "36", "40", "48", "56", "64", "72", "Full"];
+    const presets = ["0px", "8px", "16px", "24px", "28px", "36px", "40px", "48px", "56px", "64px", "999px"];
+    const presetLabels = ["0", "8", "16", "24", "28", "36", "40", "48", "56", "64", "Full"];
     const corners: Array<{ key: "tl" | "tr" | "br" | "bl"; val: string }> = [
         { key: "tl", val: tl }, { key: "tr", val: tr }, { key: "bl", val: bl }, { key: "br", val: br },
     ];

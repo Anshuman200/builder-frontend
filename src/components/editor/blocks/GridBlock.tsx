@@ -7,7 +7,7 @@ import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
-function GridSlot({ zoneId, slotId, blockId, blocks, onDelete, style }: { zoneId: string; slotId: string; blockId: string; blocks: Block[]; onDelete: () => void; style?: React.CSSProperties }) {
+function GridSlot({ zoneId, slotId, blockId, blocks, onDelete, itemsCount, style }: { zoneId: string; slotId: string; blockId: string; blocks: Block[]; onDelete: () => void; itemsCount: number; style?: React.CSSProperties }) {
     const isPreview = React.useContext(PreviewContext);
     const { setNodeRef, isOver } = useDroppable({ id: zoneId });
     const [isHovered, setIsHovered] = React.useState(false);
@@ -32,7 +32,7 @@ function GridSlot({ zoneId, slotId, blockId, blocks, onDelete, style }: { zoneId
                 ...style
             }}
         >
-            {!isPreview && isHovered && (
+            {!isPreview && isHovered && itemsCount > 2 && (
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
@@ -49,7 +49,21 @@ function GridSlot({ zoneId, slotId, blockId, blocks, onDelete, style }: { zoneId
                 {blocks.map((child) => <ChildBlockWrapper key={child.id} block={child} />)}
             </SortableBlockGroup>
 
-            {!isPreview && (
+            {!isPreview && blocks.length === 0 && (
+                <div 
+                    className="flex-1 flex flex-col items-center justify-center gap-3 p-8 group cursor-pointer hover:bg-indigo-50/50 transition-all rounded-lg"
+                    onClick={() => {
+                        useEditorStore.getState().openBlockPicker({ id: blockId, position: "inside", childProp: slotId }, "elements");
+                    }}
+                >
+                    <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform shadow-sm border border-indigo-100">
+                        <PlusIcon className="w-6 h-6" />
+                    </div>
+                    <span className="text-xs font-medium text-slate-400 group-hover:text-indigo-500 transition-colors">Add Content</span>
+                </div>
+            )}
+
+            {!isPreview && blocks.length > 0 && (
                 <div className="p-2 w-full">
                     <DropZoneStrip
                         zoneId={blockId}
@@ -112,6 +126,7 @@ export function GridBlock({ block }: BlockProps) {
     };
 
     const handleDeleteCell = (idx: number) => {
+        if (items.length <= 2) return;
         const next = [...items];
         next.splice(idx, 1);
         updateBlock(block.id, { items: next }, true);
@@ -188,6 +203,7 @@ export function GridBlock({ block }: BlockProps) {
                         blockId={block.id}
                         blocks={item.blocks || []}
                         onDelete={() => handleDeleteCell(idx)}
+                        itemsCount={items.length}
                         style={{
                             alignItems: justifyMap[align] || "center",
                             justifyContent: alignMap[verticalAlign] || "center",
