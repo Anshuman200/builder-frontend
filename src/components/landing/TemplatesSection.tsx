@@ -17,7 +17,7 @@ export function TemplatesSection() {
 }
 
 /**
- * Data fetcher wrapper using the reusable CacheBox component.
+ * Data fetcher wrapper using the reusable CacheBox component....
  * Granularly caches the Community Templates query on the server.
  */
 async function TemplatesDataWrapper() {
