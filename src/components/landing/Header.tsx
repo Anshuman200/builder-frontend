@@ -14,6 +14,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, Dropdown, Button, MenuProps } from "antd";
+import { Logo } from "@/components/shared/Logo";
 
 interface HeaderProps {
     onLoginClick?: () => void;
@@ -60,20 +61,9 @@ export function Header({ onLoginClick }: HeaderProps) {
                 {/* Logo Section */}
                 <Link
                     href={!user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home"}
-                    className="group flex items-center gap-2 no-underline shrink-0"
+                    className="flex items-center gap-3 no-underline shrink-0 group"
                 >
-                    <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
-                        style={{
-                            background: "linear-gradient(135deg, #6366f1, #a855f7)",
-                            boxShadow: "0 0 15px rgba(99,102,241,0.4)",
-                        }}
-                    >
-                        <BoltIcon style={{ width: 16, height: 16, color: "white" }} />
-                    </div>
-                    <span className="text-lg font-bold tracking-tight text-white] hidden sm:block">
-                        PageCraft
-                    </span>
+                    <Logo src="/logoOnly.png" className="w-8 h-8 md:w-9 md:h-9" />
                 </Link>
 
                 {/* Centre Nav Links */}

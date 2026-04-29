@@ -9,6 +9,7 @@ import { useToasts } from "@/hooks/useToasts";
 import { Modal } from "antd";
 
 import { GlassOrb, TabSwitcher } from "./AuthShared";
+import { Logo } from "@/components/shared/Logo";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
@@ -146,18 +147,7 @@ export function AuthModal({
           {/* ── Header ── */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.75rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{
-                width: 34, height: 34, borderRadius: 10,
-                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 4px 14px rgba(99,102,241,0.5)",
-                flexShrink: 0,
-              }}>
-                <BoltIcon style={{ width: 16, height: 16, color: "#fff" }} />
-              </div>
-              <span style={{ fontWeight: 800, fontSize: "1.15rem", color: "#f9fafb", letterSpacing: "-0.02em" }}>
-                PageCraft
-              </span>
+              <Logo src="/logoOnly.png" className="w-8 h-8 md:w-9 md:h-9" />
             </div>
 
             {!forced && (

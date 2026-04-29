@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { BoltIcon, GlobeAltIcon, CodeBracketIcon, EnvelopeIcon, HeartIcon } from "@heroicons/react/24/outline";
+import { Logo } from "@/components/shared/Logo";
 import { Container } from "@/components/ui/Container";
 import { CommonContainer } from "../layout/CommonContainer";
 import { useSitePages } from "@/lib/api/queries";
@@ -56,49 +57,21 @@ export function Footer() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Brand column */}
             <div>
-              <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none", marginBottom: "1rem" }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: 9,
-                  background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                  display: "flex", alignItems: "center", justifyItems: "center",
-                }}>
-                  <BoltIcon style={{ width: 16, height: 16, color: "white" }} />
-                </div>
-                <span style={{
-                  fontSize: "1.1rem", fontWeight: 800, letterSpacing: "-0.02em",
-                  background: "linear-gradient(135deg, #818cf8, #a78bfa)",
-                  WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-                }}>
-                  PageCraft
-                </span>
+              <Link href="/" style={{ textDecoration: "none", display: "block", marginBottom: "1rem" }}>
+                <Logo className="w-32 h-32 rounded-full" />
               </Link>
               <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", lineHeight: 1.7, maxWidth: 220, marginBottom: "1.5rem" }}>
                 The no-code page builder for creators who care about design and performance.
               </p>
               <div style={{ display: "flex", gap: "0.5rem" }}>
                 {SOCIAL.map(({ icon: Icon, href, label }) => (
-                  <a key={label} href={href} aria-label={label} style={{
-                    width: 34, height: 34,
-                    borderRadius: "var(--radius)",
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "rgba(255,255,255,0.4)",
-                    textDecoration: "none",
-                    transition: "all 0.2s",
-                  }}
-                    onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.background = "var(--surface-hover)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "var(--primary)";
-                      (e.currentTarget as HTMLElement).style.color = "var(--primary)";
-                    }}
-                    onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.background = "var(--surface)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
-                      (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
-                    }}
+                  <a
+                    key={label}
+                    href={href}
+                    aria-label={label}
+                    className=" w-[34px] h-[34px] flex items-center justify-center rounded-[var(--radius)] bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.4)] no-underline transition-all duration-200 hover:bg-[var(--surface-hover)] hover:border-[var(--primary)] hover:text-[var(--primary)] "
                   >
-                    <Icon style={{ width: 14, height: 14 }} />
+                    <Icon className="w-[14px] h-[14px]" />
                   </a>
                 ))}
               </div>

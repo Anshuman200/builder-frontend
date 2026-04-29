@@ -70,7 +70,9 @@ export default function TemplatesPage() {
     }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
     return (
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1 bg-[url('/solarioBg.png')] object-center no-repeat bg-cover bg-fixed">
+            {/* Black overlay */}
+            <div className="absolute inset-0 bg-black/60" />
             {/* Hero & Search Section */}
             <section className="relative z-10 pt-44 pb-20 px-6 text-center">
                 <CommonContainer>

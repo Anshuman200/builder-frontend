@@ -16,6 +16,7 @@ import {
   GlobeAltIcon
 } from "@heroicons/react/24/outline";
 import { Dropdown } from "antd";
+import { Logo } from "@/components/shared/Logo";
 
 interface DashboardHeaderProps {
   onCreatePage?: () => void;
@@ -42,9 +43,7 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
             href={!user ? "/" : (user as any).role === 'admin' ? "/admin" : "/home"}
             className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity"
           >
-            <div className="w-10 h-10 rounded-md bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
-              <BoltIcon className="w-6 h-6 text-indigo-400" />
-            </div>
+            <Logo src="/logoOnly.png" className="w-8 h-8 md:w-9 md:h-9" />
             <h1 className="text-lg font-black tracking-tighter text-white hidden sm:block">PageCraft</h1>
           </Link>
         </div>

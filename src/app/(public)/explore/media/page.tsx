@@ -102,7 +102,9 @@ export default function PublicMediaPage() {
     ];
 
     return (
-        <div className="flex flex-col flex-1 min-h-screen">
+        <div className="flex flex-col flex-1 bg-[url('/solarioBg.png')] object-center no-repeat bg-cover bg-fixed">
+            {/* Black overlay */}
+            <div className="absolute inset-0 bg-black/60" />
 
             {/* ── Hero ─────────────────────────────────────────────────── */}
             <section className="relative z-10 pt-44 pb-16 px-6 text-center">
@@ -155,8 +157,8 @@ export default function PublicMediaPage() {
                                             key={f.value}
                                             onClick={() => setTypeFilter(f.value)}
                                             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${typeFilter === f.value
-                                                    ? "bg-indigo-600 text-white shadow-[0_8px_20px_-6px_rgba(79,70,229,0.5)]"
-                                                    : "bg-white/5 text-zinc-500 hover:bg-white/10 hover:text-zinc-300 border border-white/5"
+                                                ? "bg-indigo-600 text-white shadow-[0_8px_20px_-6px_rgba(79,70,229,0.5)]"
+                                                : "bg-white/5 text-zinc-500 hover:bg-white/10 hover:text-zinc-300 border border-white/5"
                                                 }`}
                                         >
                                             {f.icon}
