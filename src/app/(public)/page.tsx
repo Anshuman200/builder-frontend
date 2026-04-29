@@ -1,5 +1,6 @@
 import { HeroSection } from "@/components/landing/HeroSection";
 import { TemplatesSection } from "@/components/landing/TemplatesSection";
+export const dynamic = 'force-dynamic';
 
 /**
  * Landing Page (Server Component).
