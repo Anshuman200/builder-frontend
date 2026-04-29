@@ -292,7 +292,7 @@ export default function EditorShell() {
         },
       }}
     >
-      <div className="dark" style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden", color: "#ffffff", background: "#050505" }}>
+      <div className="dark flex flex-col h-full w-full overflow-hidden bg-background-black text-white">
         <EditorToolbar />
         <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
           <PropertiesPanel />

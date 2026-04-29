@@ -99,7 +99,7 @@ export default function EditorCanvas() {
         className=""
         style={{
           width: canvasWidth,
-          minHeight: "calc(100vh - 100px)",
+          minHeight: "100dvh",
           background: "var(--background)",
           color: "var(--text)",
           boxShadow: isConstrained ? "0 4px 24px rgba(0,0,0,0.15)" : "none",
@@ -250,7 +250,6 @@ const DropZone = memo(function DropZone({
         }}
         style={{
           minHeight: "inherit",
-          paddingBottom: 200,
           transition: "background 0.15s",
           background: isOver && blocks.length === 0 ? "rgba(99,102,241,0.04)" : "transparent",
         }}

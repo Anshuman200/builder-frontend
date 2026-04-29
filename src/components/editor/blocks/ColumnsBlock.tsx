@@ -22,7 +22,7 @@ function ColumnDropZone({ zoneId, blocks, label, flexBasis, alignItems }: { zone
                 minHeight: blocks.length === 0 ? 80 : undefined,
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: alignItems === "center" ? "center" : alignItems === "end" ? "flex-end" : "flex-start",
+                justifyContent: alignItems === "center" ? "center" : alignItems === "flex-end" ? "flex-end" : "flex-start",
                 alignItems: "stretch",
                 alignSelf: "stretch",
                 border: isPreview ? "none" : `2px dashed ${isOver ? "#6366f1" : "#e2e8f0"}`,

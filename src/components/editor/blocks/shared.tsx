@@ -671,7 +671,7 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
   const bgImage = p.bgImage as string;
   const bgGradient = p.bgGradient as string;
   const imageOpacity = Number(p.bgImageOpacity ?? 100) / 100;
-  const fillOpacity = Number(p.bgFillOpacity ?? 100) / 100;
+  const fillOpacity = Number(p.bgFillOpacity ?? 50) / 100;
 
   if (!bgImage && !bgGradient) return null;
 

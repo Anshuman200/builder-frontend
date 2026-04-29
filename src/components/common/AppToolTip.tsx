@@ -106,24 +106,26 @@ const AppToolTip = ({
 
             {open &&
                 createPortal(
-                    <div
-                        ref={tooltipRef}
-                        style={{
-                            position: "fixed",
-                            top: coords.top,
-                            left: coords.left,
-                            zIndex: 9999,
-                        }}
-                        className={cn(
-                            "px-3 py-1.5 text-sm rounded-sm shadow-lg",
-                            "bg-[var(--surface)] text-[var(--text)]",
-                            "backdrop-blur-md",
-                            "pointer-events-none",
-                            "transition-opacity duration-150",
-                            className
-                        )}
-                    >
-                        {title}
+                    <div className="dark">
+                        <div
+                            ref={tooltipRef}
+                            style={{
+                                position: "fixed",
+                                top: coords.top,
+                                left: coords.left,
+                                zIndex: 9999,
+                            }}
+                            className={cn(
+                                "px-3 py-1.5 text-sm rounded-sm shadow-lg",
+                                "bg-[var(--surface)] text-[var(--text)] border border-[var(--border)]",
+                                "backdrop-blur-md",
+                                "pointer-events-none",
+                                "transition-opacity duration-150",
+                                className
+                            )}
+                        >
+                            {title}
+                        </div>
                     </div>,
                     document.body
                 )}

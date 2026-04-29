@@ -21,6 +21,8 @@ import { SortableContext, verticalListSortingStrategy, rectSortingStrategy, useS
 import { CSS } from "@dnd-kit/utilities";
 import { Bars2Icon } from "@heroicons/react/20/solid";
 import { IconPicker } from "../IconPicker";
+import AppToolTip from "../../common/AppToolTip";
+import { cn } from "@/lib/utils";
 
 export { arrayMove, rectSortingStrategy };
 
@@ -142,7 +144,7 @@ export function MediaInput({ value, onChange, placeholder, type = "image", varia
                         <div className="flex flex-col gap-1 items-start">
                             {variant === "compact" ? (
                                 <div className="flex gap-2">
-                                    <Tooltip title="Change">
+                                    <AppToolTip title="Change">
                                         <button
                                             onClick={() => setPickerOpen(true)}
                                             style={{ background: "none", border: "none", padding: 4, color: PANEL_COLORS.primary, cursor: "pointer", display: "flex", alignItems: "center", borderRadius: 4 }}
@@ -151,8 +153,8 @@ export function MediaInput({ value, onChange, placeholder, type = "image", varia
                                         >
                                             <ArrowPathIcon style={{ width: 14, height: 14 }} />
                                         </button>
-                                    </Tooltip>
-                                    <Tooltip title="Remove">
+                                    </AppToolTip>
+                                    <AppToolTip title="Remove">
                                         <button
                                             onClick={() => onChange("")}
                                             style={{ background: "none", border: "none", padding: 4, color: "#ef4444", cursor: "pointer", display: "flex", alignItems: "center", borderRadius: 4 }}
@@ -161,7 +163,7 @@ export function MediaInput({ value, onChange, placeholder, type = "image", varia
                                         >
                                             <TrashIcon style={{ width: 14, height: 14 }} />
                                         </button>
-                                    </Tooltip>
+                                    </AppToolTip>
                                 </div>
                             ) : (
                                 <>
@@ -753,7 +755,7 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff", h
             </ColorPicker>
 
             {!isVariable && !hideText && (
-                <Tooltip title="Reset to Theme Variable">
+                <AppToolTip title="Reset to Theme Variable">
                     <button
                         onClick={() => {
                             // Smart guess: if white text -> var(--text), if dark bg -> var(--surface)
@@ -774,7 +776,7 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff", h
                     >
                         <ArrowPathIcon style={{ width: 16, height: 16 }} />
                     </button>
-                </Tooltip>
+                </AppToolTip>
             )}
         </div>
     );
@@ -876,7 +878,7 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                 <div className="flex justify-between gap-4 mb-4 items-center">
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ fontSize: 10, color: PANEL_COLORS.muted, textTransform: "uppercase", fontWeight: 700 }}>Type</span>
-                        <SelectInput
+                        <PillSegmented
                             value={type}
                             onChange={(v) => update(v, deg, stops)}
                             options={[
@@ -884,10 +886,11 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                                 { label: "Radial", value: "radial" },
                                 { label: "Angular", value: "conic" },
                             ]}
+                            size="small"
                         />
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                        <Tooltip title="Reverse Stops">
+                        <AppToolTip title="Reverse Stops">
                             <button
                                 onClick={() => {
                                     const nS = [...stops].map(s => ({ ...s, offset: 100 - s.offset }));
@@ -899,8 +902,8 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                             >
                                 <ArrowPathIcon style={{ width: 14, height: 14, transform: "rotate(90deg)" }} />
                             </button>
-                        </Tooltip>
-                        <Tooltip title="Shuffle Colors">
+                        </AppToolTip>
+                        <AppToolTip title="Shuffle Colors">
                             <button
                                 onClick={() => {
                                     const colors = stops.map(s => s.color).sort(() => Math.random() - 0.5);
@@ -913,7 +916,7 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                             >
                                 <ArrowPathIcon style={{ width: 14, height: 14 }} />
                             </button>
-                        </Tooltip>
+                        </AppToolTip>
                     </div>
                 </div>
 
@@ -943,7 +946,7 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                                 }}
                                 hideText
                             />
-                            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
+                            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 2 }}>
                                 <input
                                     type="number"
                                     value={s.offset}
@@ -1008,7 +1011,7 @@ export function UnifiedBackgroundInput({
     }, [bgGradient]);
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
+        <div className="flex flex-col g-2 w-full">
             <PillSegmented
                 value={mode}
                 onChange={(v: any) => {
@@ -1058,7 +1061,7 @@ export function ToggleInput({ value, onChange, label }: { value: boolean; onChan
     );
     if (label) {
         return (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 4 }}>
+            <div className="flex flex-col gap-2 mb-2">
                 <span style={{ fontSize: 11, fontWeight: 500, color: PANEL_COLORS.text }}>{label}</span>
                 {control}
             </div>
@@ -1072,7 +1075,14 @@ export function ToggleSwitch({ value, onChange, label }: { value: boolean; onCha
     const control = (
         <div className="flex items-center gap-2 mt-1">
             <Switch checked={value} onChange={(v) => onChange(v)} />
-            <span className={`${value ? "text-green-500" : "text-red-500"} min-w-8 mx-auto`}>{value ? "Yes" : "No"}</span>
+            <span
+                className={cn(
+                    "min-w-8 mx-auto",
+                    value ? "text-green-500" : "text-red-500"
+                )}
+            >
+                {value ? "Yes" : "No"}
+            </span>
         </div>
     );
     if (label) {
@@ -1090,8 +1100,36 @@ export function ToggleSwitch({ value, onChange, label }: { value: boolean; onCha
 export function SliderInput({ value, onChange, min = 0, max = 100, step = 1, unit = "" }: { value: number; onChange: (v: number) => void; min?: number; max?: number; step?: number; unit?: string }) {
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", height: 30 }}>
+            <style>{`
+                .ag-slider-input::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    appearance: none;
+                    width: 14px;
+                    height: 14px;
+                    background: ${PANEL_COLORS.primary};
+                    border-radius: 50%;
+                    cursor: pointer;
+                    border: 2px solid #fff;
+                    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+                    transition: all 0.2s;
+                }
+                .ag-slider-input::-webkit-slider-thumb:hover {
+                    transform: scale(1.15);
+                    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+                }
+                .ag-slider-input::-moz-range-thumb {
+                    width: 14px;
+                    height: 14px;
+                    background: ${PANEL_COLORS.primary};
+                    border-radius: 50%;
+                    cursor: pointer;
+                    border: 2px solid #fff;
+                    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+                }
+            `}</style>
             <input
                 type="range"
+                className="ag-slider-input"
                 min={min}
                 max={max}
                 step={step}
@@ -1189,11 +1227,11 @@ export function AlignmentInput({ value, onChange, label, type = "horizontal", op
 
     const items = (options || defaultOptions).map(opt => ({
         label: (
-            <Tooltip styles={{ container: { backgroundColor: "#222" } }} title={opt.label}>
+            <AppToolTip title={opt.label}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", padding: "2px 0" }}>
                     {ALIGN_ICONS[opt.value] || opt.label}
                 </div>
-            </Tooltip>
+            </AppToolTip>
         ),
         value: opt.value
     }));

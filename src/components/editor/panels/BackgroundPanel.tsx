@@ -29,7 +29,7 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
       {(!!p.bgColor || !!p.bgGradient) && (
         <Field label="Fill Opacity">
           <SliderInput 
-            value={Number(p.bgFillOpacity ?? 100)} 
+            value={Number(p.bgFillOpacity ?? 50)} 
             onChange={(v) => up("bgFillOpacity", v, true)} 
           />
         </Field>
