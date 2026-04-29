@@ -35,7 +35,7 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
         </Field>
       )}
 
-      <Field label="Image">
+      <Field label="Media (Image or Video)">
         <MediaInput 
           value={(p.bgImage as string) || ""} 
           onChange={(v) => up("bgImage", v, true)} 
@@ -45,14 +45,14 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
 
       {!!p.bgImage && (
         <>
-          <Field label="Image Opacity">
+          <Field label="Media Opacity">
             <SliderInput 
               value={Number(p.bgImageOpacity ?? 100)} 
               onChange={(v) => up("bgImageOpacity", v, true)} 
             />
           </Field>
           
-          <Field label="Image Size">
+          <Field label="Media Size">
             <SelectInput
               value={(p.bgSize as string) || "cover"}
               onChange={(v) => up("bgSize", v, true)}
@@ -65,7 +65,7 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
             />
           </Field>
           
-          <Field label="Image Position">
+          <Field label="Media Position">
             <SelectInput
               value={(p.bgPosition as string) || "center"}
               onChange={(v) => up("bgPosition", v, true)}
@@ -79,7 +79,7 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
             />
           </Field>
 
-          <Field label="Image Repeat">
+          <Field label="Media Repeat (Image only)">
             <SelectInput
               value={(p.bgRepeat as string) || "no-repeat"}
               onChange={(v) => up("bgRepeat", v, true)}

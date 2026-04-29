@@ -798,23 +798,46 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
 
     if (!bgImage && !bgGradient) return null;
 
+    const isVideo = bgImage && /\.(mp4|webm|ogg|mov)$/i.test(bgImage.split('?')[0]);
+
     return (
         <>
-            {/* Image Layer (Bottom) */}
+            {/* Image/Video Layer (Bottom) */}
             {bgImage && (
-                <div
-                    style={{
-                        position: "absolute",
-                        inset: 0,
-                        backgroundImage: `url("${bgImage}")`,
-                        backgroundSize: (p.bgSize as string) || "cover",
-                        backgroundPosition: (p.bgPosition as string) || "center",
-                        backgroundRepeat: (p.bgRepeat as string) || "no-repeat",
-                        opacity: imageOpacity,
-                        zIndex: 1,
-                        pointerEvents: "none"
-                    }}
-                />
+                isVideo ? (
+                    <video
+                        src={bgImage}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        style={{
+                            position: "absolute",
+                            inset: 0,
+                            width: "100%",
+                            height: "100%",
+                            objectFit: (p.bgSize as string) === "contain" ? "contain" : "cover",
+                            objectPosition: (p.bgPosition as string) || "center",
+                            opacity: imageOpacity,
+                            zIndex: 1,
+                            pointerEvents: "none"
+                        }}
+                    />
+                ) : (
+                    <div
+                        style={{
+                            position: "absolute",
+                            inset: 0,
+                            backgroundImage: `url("${bgImage}")`,
+                            backgroundSize: (p.bgSize as string) || "cover",
+                            backgroundPosition: (p.bgPosition as string) || "center",
+                            backgroundRepeat: (p.bgRepeat as string) || "no-repeat",
+                            opacity: imageOpacity,
+                            zIndex: 1,
+                            pointerEvents: "none"
+                        }}
+                    />
+                )
             )}
 
             {/* Fill Layer (Top / Overlay) */}
