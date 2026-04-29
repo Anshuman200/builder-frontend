@@ -18,6 +18,7 @@ export function TemplatesSectionClient({ templates }: TemplatesSectionClientProp
     const router = useRouter();
 
     if (!templates || templates.length === 0) return null;
+    console.log('TemplatesSectionClient templates >>>> ', templates)
 
     return (
         <section className="py-24 px-6 bg-[#09090b]">

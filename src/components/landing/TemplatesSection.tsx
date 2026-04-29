@@ -11,7 +11,7 @@ import { CommonContainer } from "@/components/layout/CommonContainer";
 export function TemplatesSection() {
     return (
         <Suspense fallback={<TemplatesSectionSkeleton />}>
-           <TemplatesDataWrapper />
+            <TemplatesDataWrapper />
         </Suspense>
     );
 }
@@ -32,14 +32,14 @@ async function TemplatesDataFetcher() {
     // Explicitly call the API on the server
     try {
         const { data: responseData } = await pagesApi.templates({ limit: 8 });
-        
+        console.log('responseData', responseData)
         // Correctly handle the new standardized { data: { templates: [...] } } structure
-        const templates = Array.isArray(responseData) 
-            ? responseData 
+        const templates = Array.isArray(responseData)
+            ? responseData
             : responseData?.templates ?? [];
-            
+
         if (!templates || templates.length === 0) return null;
-        
+
         return <TemplatesSectionClient templates={templates} />;
     } catch (e) {
         console.error("Templates fetch failed", e);
