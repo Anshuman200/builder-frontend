@@ -241,6 +241,7 @@ export function HeaderBlock({ block }: BlockProps) {
                                     <CommonButton
                                         props={p}
                                         prefix="cta"
+                                        blockId={block.id}
                                         onClick={() => {
                                             if (!isPreview) focusSubItem(block.id, "Call to Action (CTA)");
                                         }}
@@ -261,6 +262,7 @@ export function HeaderBlock({ block }: BlockProps) {
                                 props={p}
                                 prefix="cta"
                                 className="mt-4"
+                                blockId={block.id}
                             />
                         )}
                     </div>

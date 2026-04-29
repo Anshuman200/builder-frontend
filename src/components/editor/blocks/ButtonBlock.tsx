@@ -20,6 +20,7 @@ export function ButtonBlock({ block }: BlockProps) {
             <CommonButton
                 props={p}
                 id={`btn-${block.id}`}
+                blockId={block.id}
             />
         </div>
     );

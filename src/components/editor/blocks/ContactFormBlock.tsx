@@ -351,6 +351,7 @@ export function ContactFormBlock({ block }: BlockProps) {
                             type="submit"
                             props={p}
                             isLoading={isSubmitting}
+                            blockId={block.id}
                         // disabled={!isPreview}
                         />
                     </div>

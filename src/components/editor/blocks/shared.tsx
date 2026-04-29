@@ -126,7 +126,7 @@ export function QuickLayoutChange({ block }: { block: Block }) {
     if (!templates) return null;
 
     const currentTemplateId = (block.props.templateId as string) || templates[0].id;
-    
+
     const menuItems = templates.map(s => ({
         key: s.id,
         label: (
@@ -162,6 +162,113 @@ export function BlockRendererRef({ block }: { block: Block }) {
 }
 
 // ─── ChildBlockWrapper ────────────────────────────────────────────────────────
+
+export function InlineTextEditor({
+    blockId,
+    propName,
+    content,
+    tagName = "span",
+    style,
+    className,
+    placeholder = "Click to edit text…",
+    multiline = false
+}: {
+    blockId: string;
+    propName: string;
+    content: string;
+    tagName?: React.ElementType | string;
+    style?: React.CSSProperties;
+    className?: string;
+    placeholder?: string;
+    multiline?: boolean;
+}) {
+    const isPreview = React.useContext(PreviewContext);
+    const updateBlock = useEditorStore((s) => s.updateBlock);
+    const selectBlock = useEditorStore((s) => s.selectBlock);
+    const isSelected = useEditorStore((s) => s.selectedBlockId === blockId);
+    const [isEditing, setIsEditing] = React.useState(false);
+    const contentRef = React.useRef<HTMLElement>(null);
+
+    React.useEffect(() => {
+        if (!isSelected && isEditing) {
+            setIsEditing(false);
+        }
+    }, [isSelected, isEditing]);
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (isPreview) return;
+        e.stopPropagation();
+        e.preventDefault();
+        selectBlock(blockId);
+        setIsEditing(true);
+        setTimeout(() => {
+            if (contentRef.current) {
+                contentRef.current.focus();
+                // Move cursor to the end
+                try {
+                    const range = document.createRange();
+                    const sel = window.getSelection();
+                    if (sel) {
+                        range.selectNodeContents(contentRef.current);
+                        range.collapse(false);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                } catch (err) { }
+            }
+        }, 0);
+    };
+
+    const handleBlur = () => {
+        if (!isEditing) return;
+        setIsEditing(false);
+        if (contentRef.current) {
+            let newContent = contentRef.current.innerText || "";
+            // Remove trailing extra newlines added by some browsers
+            newContent = newContent.replace(/[\r\n]+$/, "");
+            if (newContent !== content) {
+                updateBlock(blockId, { [propName]: newContent }, true);
+            }
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Escape") {
+            setIsEditing(false);
+            if (contentRef.current) {
+                contentRef.current.blur();
+                contentRef.current.innerText = content;
+            }
+        } else if (e.key === "Enter" && !multiline) {
+            e.preventDefault();
+            contentRef.current?.blur();
+        }
+    };
+
+    const Tag = tagName as any;
+
+    return (
+        <Tag
+            ref={contentRef}
+            className={className}
+            style={{
+                ...style,
+                outline: "none",
+                cursor: isPreview ? "inherit" : (isEditing ? "text" : "pointer"),
+                minWidth: isEditing ? "20px" : undefined,
+                whiteSpace: multiline ? "pre-wrap" : (style?.whiteSpace || "normal"),
+                wordBreak: "break-word",
+            }}
+            contentEditable={isEditing}
+            suppressContentEditableWarning={true}
+            onClick={handleClick}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+        >
+            {content || (isEditing ? "" : <span style={{ opacity: 0.5, fontStyle: "italic" }}>{placeholder}</span>)}
+        </Tag>
+    );
+}
 
 export function ChildBlockWrapper({
     block,
@@ -314,9 +421,9 @@ export function ChildBlockWrapper({
                     })()}
 
                     <AppToolTip title="Drag to reorder">
-                        <IconButton 
-                            {...attributes} 
-                            {...listeners} 
+                        <IconButton
+                            {...attributes}
+                            {...listeners}
                             className="cursor-grab active:cursor-grabbing"
                             icon={
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -327,7 +434,7 @@ export function ChildBlockWrapper({
                                     <circle cx="15" cy="12" r="2" />
                                     <circle cx="15" cy="19" r="2" />
                                 </svg>
-                            } 
+                            }
                         />
                     </AppToolTip>
                     {/* Delete block */}
@@ -444,9 +551,10 @@ interface CommonButtonProps {
     className?: string;
     type?: "button" | "submit";
     prefix?: string;
+    blockId?: string; // Add blockId to support inline editing
 }
 
-export function CommonButton({ props: p, id, onClick, isLoading, disabled, className, type = "button", prefix = "button" }: CommonButtonProps) {
+export function CommonButton({ props: p, id, onClick, isLoading, disabled, className, type = "button", prefix = "button", blockId }: CommonButtonProps) {
     const isPreview = React.useContext(PreviewContext);
     const handleLink = useLinkHandler();
 
@@ -534,7 +642,17 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
                 </svg>
             )}
             {!isLoading && IconLeft && <IconLeft style={{ width: sizeStyle.iconSize, height: sizeStyle.iconSize }} />}
-            <span>{label}</span>
+            {blockId && !isPreview ? (
+                <InlineTextEditor
+                    blockId={blockId}
+                    propName={p.buttonText !== undefined ? "buttonText" : (p.submitLabel !== undefined ? "submitLabel" : (p.ctaText !== undefined ? "ctaText" : "label"))}
+                    content={label}
+                    multiline={false}
+                    style={{ display: "inline-block" }}
+                />
+            ) : (
+                <span>{label}</span>
+            )}
             {!isLoading && IconRight && <IconRight style={{ width: sizeStyle.iconSize, height: sizeStyle.iconSize }} />}
         </>
     );
@@ -658,55 +776,55 @@ export function getCardStyles({ props: p, isFocused, isHovered, primaryColor = "
 }
 
 export function getBackgroundStyles(p: Record<string, any>, theme: any): React.CSSProperties {
-  const bgColor = (p.bgColor as string) || (p.sectionBg as string) || "transparent";
-  
-  return {
-    backgroundColor: bgColor,
-    position: "relative",
-    overflow: "hidden",
-  };
+    const bgColor = (p.bgColor as string) || (p.sectionBg as string) || "transparent";
+
+    return {
+        backgroundColor: bgColor,
+        position: "relative",
+        overflow: "hidden",
+    };
 }
 
 export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
-  const bgImage = p.bgImage as string;
-  const bgGradient = p.bgGradient as string;
-  const imageOpacity = Number(p.bgImageOpacity ?? 100) / 100;
-  const fillOpacity = Number(p.bgFillOpacity ?? 50) / 100;
+    const bgImage = p.bgImage as string;
+    const bgGradient = p.bgGradient as string;
+    const imageOpacity = Number(p.bgImageOpacity ?? 100) / 100;
+    const fillOpacity = Number(p.bgFillOpacity ?? 50) / 100;
 
-  if (!bgImage && !bgGradient) return null;
+    if (!bgImage && !bgGradient) return null;
 
-  return (
-    <>
-      {/* Image Layer (Bottom) */}
-      {bgImage && (
-        <div 
-          style={{ 
-            position: "absolute", 
-            inset: 0, 
-            backgroundImage: `url("${bgImage}")`,
-            backgroundSize: (p.bgSize as string) || "cover",
-            backgroundPosition: (p.bgPosition as string) || "center",
-            backgroundRepeat: (p.bgRepeat as string) || "no-repeat",
-            opacity: imageOpacity,
-            zIndex: 1,
-            pointerEvents: "none"
-          }} 
-        />
-      )}
+    return (
+        <>
+            {/* Image Layer (Bottom) */}
+            {bgImage && (
+                <div
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        backgroundImage: `url("${bgImage}")`,
+                        backgroundSize: (p.bgSize as string) || "cover",
+                        backgroundPosition: (p.bgPosition as string) || "center",
+                        backgroundRepeat: (p.bgRepeat as string) || "no-repeat",
+                        opacity: imageOpacity,
+                        zIndex: 1,
+                        pointerEvents: "none"
+                    }}
+                />
+            )}
 
-      {/* Fill Layer (Top / Overlay) */}
-      {bgGradient && (
-        <div 
-          style={{ 
-            position: "absolute", 
-            inset: 0, 
-            background: bgGradient,
-            opacity: fillOpacity,
-            zIndex: 2,
-            pointerEvents: "none"
-          }} 
-        />
-      )}
-    </>
-  );
+            {/* Fill Layer (Top / Overlay) */}
+            {bgGradient && (
+                <div
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        background: bgGradient,
+                        opacity: fillOpacity,
+                        zIndex: 2,
+                        pointerEvents: "none"
+                    }}
+                />
+            )}
+        </>
+    );
 }

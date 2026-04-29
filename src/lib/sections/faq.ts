@@ -152,7 +152,7 @@ export const faqSections: SectionTemplate[] = [
             makeBlock("container", {
                 padding: "64px 24px",
                 bgColor: "#ffffff",
-                maxWidth: "1000px",
+                maxWidth: "100dvw",
                 childBlocks: [
                     makeBlock("columns", {
                         leftWidth: 35,

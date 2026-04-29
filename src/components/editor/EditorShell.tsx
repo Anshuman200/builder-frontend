@@ -31,6 +31,7 @@ import { BlockPickerDrawer } from "./BlockPickerDrawer";
 import { TemplatePickerDrawer } from "./TemplatePickerDrawer";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import NewPageWizard from "./NewPageWizard";
+import { cn } from "@/lib/utils";
 
 export default function EditorShell() {
   const {
@@ -297,7 +298,7 @@ export default function EditorShell() {
         <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
           <PropertiesPanel />
           <div
-            className="flex-1 flex flex-col overflow-hidden bg-[#0a0a0a] p-2"
+            className="flex-1 flex flex-col overflow-hidden bg-dot-pattern py-8 px-4"
             onClick={(e) => {
               if (e.target === e.currentTarget) {
                 selectBlock(null);
@@ -312,25 +313,12 @@ export default function EditorShell() {
       {/* Drag Overlay — ghost preview while dragging */}
       <DragOverlay dropAnimation={{ duration: 150, easing: "ease" }}>
         {activeDrag?.type === "palette" && activeDrag.blockType && (
-          <div style={{
-            display: "flex", alignItems: "center", gap: 8,
-            padding: "8px 14px", background: "#6366f1", color: "#fff",
-            borderRadius: 8, fontSize: 13, fontWeight: 600,
-            boxShadow: "0 4px 16px rgba(99,102,241,0.4)",
-            pointerEvents: "none",
-            textTransform: "capitalize",
-          }}>
+          <div className=" flex items-center gap-2 px-3.5 py-2 bg-indigo-500 text-white rounded-lg text-[13px] font-semibold shadow-[0_4px_16px_rgba(99,102,241,0.4)] pointer-events-none capitalize">
             {activeDrag.blockType}
           </div>
         )}
         {activeDrag?.type === "section" && activeDrag.templateId && (
-          <div style={{
-            display: "flex", alignItems: "center", gap: 8,
-            padding: "10px 16px", background: "#f8fafc", border: "2px solid #6366f1", color: "#1e293b",
-            borderRadius: 8, fontSize: 13, fontWeight: 600,
-            boxShadow: "0 8px 24px rgba(99,102,241,0.2)",
-            pointerEvents: "none",
-          }}>
+          <div className=" flex items-center gap-2 px-3.5 py-2 bg-white border border-indigo-200 text-indigo-900 rounded-lg text-[13px] font-semibold shadow-[0_8px_24px_rgba(99,102,241,0.2)] pointer-events-none">
             {SECTION_TEMPLATES.find(t => t.id === activeDrag.templateId)?.name || "Section"}
           </div>
         )}
@@ -339,20 +327,16 @@ export default function EditorShell() {
             ref={(el) => {
               if (el) applyThemeToElement(el, page?.theme || DEFAULT_THEME);
             }}
-            className={page?.theme?.mode === "dark" ? "dark" : ""}
+            className={cn(
+              page?.theme?.mode === "dark" ? "dark" : "",
+              ` rounded-xl opacity-95 pointer-events-none overflow-hidden border-2 shadow-[0_12px_48px_rgba(0,0,0,0.25)] origin-top`
+            )}
             style={{
               background: "var(--background, #fff)",
               color: "var(--text, #1e293b)",
-              border: "2px solid var(--primary, #6366f1)",
-              borderRadius: 12,
-              opacity: 0.95,
-              pointerEvents: "none",
+              borderColor: "var(--primary, #6366f1)",
               width: draggedWidth,
               height: draggedHeight,
-              overflow: "hidden",
-              boxShadow: "0 12px 48px rgba(0,0,0,0.25)",
-              transform: "none",
-              transformOrigin: "center top",
             }}
           >
             <ActivePathContext.Provider value={activeRoutePath}>

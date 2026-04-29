@@ -201,7 +201,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
                         )}
 
                         {/* Heading */}
-                        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+                        <div style={{ textAlign: "center", marginBottom: "2rem" }} onClick={() => {}}>
                             <h2 style={{ fontSize: "2rem", fontWeight: 800, margin: "0 0 0.5rem", color: titleColor }}>
                                 {titleText}
                             </h2>
@@ -289,6 +289,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
                                     }}
                                     isLoading={mutation.isPending}
                                     disabled={!isPreview}
+                                    blockId={block.id}
                                 />
                             </Form.Item>
                         </Form>

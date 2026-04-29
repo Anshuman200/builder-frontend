@@ -286,7 +286,7 @@ function ConnectDomainContent() {
             <div className="w-full max-w-7xl">
                 <Header onBack={() => router.push('/domains')} />
 
-                <div className="perspective-[1000px]">
+                <div className="perspective-[100dvw]">
                     <div className="bg-[#141414]! border-white/10! rounded-t-2xl! rounded-b-none! overflow-hidden shadow-2xl!">
                         <div className="bg-linear-to-br from-indigo-500/20 to-purple-600/20 p-8 border-b border-white/10 rounded-md">
                             <Title level={2} className="text-white! m-0! mb-6!">

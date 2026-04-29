@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { PreviewContext, BlockProps, getBackgroundStyles, BackgroundOverlay, InlineTextEditor } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function TextBlock({ block }: BlockProps) {
@@ -63,18 +63,14 @@ export function TextBlock({ block }: BlockProps) {
     return (
         <div id={(p.sectionId as string) || `block-${block.id}`} style={wrapperStyle}>
             <BackgroundOverlay p={p} />
-            {rawContent ? (
-                <Tag style={tagStyle}>
-                    {lines.map((line, i) => (
-                        <React.Fragment key={i}>
-                            {line || "\u00A0" /* nbsp for blank lines */}
-                            {i < lines.length - 1 && <br />}
-                        </React.Fragment>
-                    ))}
-                </Tag>
-            ) : (
-                <Tag style={tagStyle}><span style={{ fontStyle: "italic", opacity: 0.5 }}>Click to edit text…</span></Tag>
-            )}
+            <InlineTextEditor
+                blockId={block.id}
+                propName="content"
+                content={rawContent}
+                tagName={tag as any}
+                style={tagStyle}
+                multiline={true}
+            />
         </div>
     );
 }
