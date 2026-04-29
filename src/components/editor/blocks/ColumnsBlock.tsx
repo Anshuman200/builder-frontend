@@ -33,20 +33,22 @@ function ColumnDropZone({ zoneId, blocks, label, flexBasis, alignItems }: { zone
                 position: "relative",
             }}
         >
-            {blocks.length > 0 ? (
+            {blocks.length > 0 && (
                 <SortableBlockGroup blocks={blocks}>
                     {blocks.map((child) => <ChildBlockWrapper key={child.id} block={child} />)}
                 </SortableBlockGroup>
-            ) : !isPreview ? (
-                <div style={{ padding: 12 }}>
+            )}
+            
+            {!isPreview && (
+                <div style={{ padding: blocks.length > 0 ? "8px 12px" : 12, opacity: blocks.length > 0 ? 0.3 : 1, transition: "opacity 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.opacity = "1"} onMouseLeave={(e) => e.currentTarget.style.opacity = blocks.length > 0 ? "0.3" : "1"}>
                     <DropZoneStrip
                         zoneId={zoneId}
                         childProp={zoneId.startsWith("col-0") ? "col0" : "col1"}
-                        hasChildren={false}
+                        hasChildren={blocks.length > 0}
                         emptyLabel={label}
                     />
                 </div>
-            ) : null}
+            )}
         </div>
     );
 }

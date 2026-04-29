@@ -25,6 +25,7 @@ import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPan
 import { ButtonPanel, HeaderPanel, FooterPanel } from "./panels/LayoutPanels";
 import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel, ContactInfoPanel, AccordionPanel, StatsPanel, ChartPanel, LegalPanel, DeleteAccountPanel } from "./panels/ContentPanels";
 import { GalleryPanel } from "./panels/GalleryPanel";
+import { QRCodePanel } from "./panels/QRCodePanel";
 
 // ─── Friendly label map ──────────────────────────────────────────────────────
 const BLOCK_LABEL_MAP: Record<string, string> = {
@@ -52,6 +53,7 @@ const BLOCK_LABEL_MAP: Record<string, string> = {
     "media-picker": "Media Picker Block",
     tos: "Terms of Service Block",
     privacy: "Privacy Policy Block",
+    qrcode: "QR Code Block",
 };
 function blockLabel(type: string): string {
     return BLOCK_LABEL_MAP[type] ?? `${type.charAt(0).toUpperCase()}${type.slice(1)} Block`;
@@ -254,6 +256,7 @@ export default function PropertiesPanel() {
                 {selectedBlock.type === "masonry" && <GalleryPanel block={selectedBlock} />}
                 {selectedBlock.type === "stats" && <StatsPanel block={selectedBlock} />}
                 {selectedBlock.type === "chart" && <ChartPanel block={selectedBlock} />}
+                {selectedBlock.type === "qrcode" && <QRCodePanel block={selectedBlock} />}
                 {selectedBlock.type === "deleteAccount" && <DeleteAccountPanel block={selectedBlock} />}
                 {(selectedBlock.type === "tos" || selectedBlock.type === "privacy" || selectedBlock.type === "about") && <LegalPanel block={selectedBlock} />}
 

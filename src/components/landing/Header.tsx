@@ -15,6 +15,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, Dropdown, Button, MenuProps } from "antd";
 import { Logo } from "@/components/shared/Logo";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
     onLoginClick?: () => void;
@@ -28,18 +29,22 @@ export function Header({ onLoginClick }: HeaderProps) {
 
     const getLinkClass = (path: string) => {
         const isActive = pathname === path;
-        return `px-4 py-2 text-sm font-semibold rounded-xl transition-all no-underline ${isActive
-            ? "text-white bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.5)]"
-            : "text-[var(--text)]/50 hover:text-white hover:bg-[var(--text)]/10"
-            }`;
+        return cn(
+            "px-4 py-2 text-sm font-bold rounded-xl transition-all no-underline",
+            isActive
+                ? "text-white bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.5)]"
+                : "text-[var(--text)]/50 hover:text-white hover:bg-[var(--text)]/10"
+        );
     };
 
     const getMobileLinkClass = (path: string) => {
         const isActive = pathname === path;
-        return `py-3 px-4 rounded-xl transition-all font-semibold no-underline ${isActive
-            ? "text-white bg-indigo-600 shadow-md"
-            : "text-[var(--text)]/70 hover:text-white hover:bg-[var(--text)]/10"
-            }`;
+        return cn(
+            "py-3 px-4 rounded-xl transition-all font-bold no-underline",
+            isActive
+                ? "text-white bg-indigo-600 shadow-md"
+                : "text-[var(--text)]/70 hover:text-white hover:bg-[var(--text)]/10"
+        );
     };
 
     useEffect(() => {
@@ -51,12 +56,13 @@ export function Header({ onLoginClick }: HeaderProps) {
     return (
         <div className="fixed top-0 inset-x-0 z-[100] flex justify-center p-4 md:p-6 transition-all duration-300">
             <header
-                className={
-                    "w-full max-w-5xl flex items-center justify-between gap-4 px-6 h-14 md:h-16 rounded-2xl md:rounded-full transition-all duration-500 ease-in-out border " +
-                    (scrolled || mobileOpen
-                        ? "bg-[var(--bg)]/80 backdrop-blur-2xl border-0 shadow-[var(--shadow-lg)]"
-                        : "bg-transparent border-transparent")
-                }
+                className={cn(
+                    "w-full max-w-5xl flex items-center justify-between gap-4 px-6 h-14 md:h-16 rounded-2xl md:rounded-full transition-all duration-500 ease-in-out",
+                    {
+                        "bg-[var(--bg)]/80 backdrop-blur-2xl border-0 shadow-[var(--shadow-lg)]": scrolled || mobileOpen,
+                        "bg-transparent border border-transparent": !(scrolled || mobileOpen),
+                    }
+                )}
             >
                 {/* Logo Section */}
                 <Link

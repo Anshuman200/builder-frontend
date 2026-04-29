@@ -287,6 +287,30 @@ export const BLOCK_TYPES: BlockConfig[] = [
     },
   },
   {
+    type: "qrcode",
+    label: "QR Code",
+    icon: "QrCode",
+    defaultProps: {
+      value: "https://solarioforge.com",
+      renderType: "canvas", // canvas | svg
+      errorLevel: "M", // L | M | Q | H
+      color: "#000000",
+      bgColor: "transparent",
+      icon: "",
+      iconSize: 40,
+      bordered: true,
+      size: 160,
+      align: "center",
+      padding: "16px",
+
+      // Animation
+      animationType: DEFAULT_CONFIG.animation.type,
+      animationDuration: DEFAULT_CONFIG.animation.duration,
+      animationDelay: DEFAULT_CONFIG.animation.delay,
+      animationPlayback: DEFAULT_CONFIG.animation.playback,
+    },
+  },
+  {
     type: "video",
     label: "Video",
     icon: "VideoCamera",

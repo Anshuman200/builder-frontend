@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'd1xyjpr3hmv834.cloudfront.net',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'solidappmaker-pagecraft.s3.ap-south-1.amazonaws.com',
         port: '',
         pathname: '/**',

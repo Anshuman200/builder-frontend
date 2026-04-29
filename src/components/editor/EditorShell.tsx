@@ -253,17 +253,26 @@ export default function EditorShell() {
   // ── Global keyboard shortcuts ──────────────────────────────────────────────
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      const target = e.target as HTMLElement;
+      const target = e.target as HTMLElement | Node;
+      const element = (target.nodeType === 3 ? target.parentNode : target) as HTMLElement;
+      
       const isInput =
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.tagName === "SELECT" ||
-        target.isContentEditable;
+        element.tagName === "INPUT" ||
+        element.tagName === "TEXTAREA" ||
+        element.tagName === "SELECT" ||
+        element.isContentEditable ||
+        (element.closest && element.closest('[contenteditable="true"]') !== null);
 
       const meta = e.metaKey || e.ctrlKey;
 
-      if (meta && !e.shiftKey && e.key === "z") { e.preventDefault(); undo(); return; }
-      if (meta && e.shiftKey && e.key === "z") { e.preventDefault(); redo(); return; }
+      if (meta && !e.shiftKey && e.key === "z") { 
+        if (!isInput) { e.preventDefault(); undo(); }
+        return; 
+      }
+      if (meta && e.shiftKey && e.key === "z") { 
+        if (!isInput) { e.preventDefault(); redo(); }
+        return; 
+      }
       if (meta && e.key === "d") {
         e.preventDefault();
         if (selectedBlockId) duplicateBlock(selectedBlockId);

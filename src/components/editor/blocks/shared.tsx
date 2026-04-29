@@ -198,25 +198,28 @@ export function InlineTextEditor({
     const handleClick = (e: React.MouseEvent) => {
         if (isPreview) return;
         e.stopPropagation();
-        e.preventDefault();
-        selectBlock(blockId);
-        setIsEditing(true);
-        setTimeout(() => {
-            if (contentRef.current) {
-                contentRef.current.focus();
-                // Move cursor to the end
-                try {
-                    const range = document.createRange();
-                    const sel = window.getSelection();
-                    if (sel) {
-                        range.selectNodeContents(contentRef.current);
-                        range.collapse(false);
-                        sel.removeAllRanges();
-                        sel.addRange(range);
-                    }
-                } catch (err) { }
-            }
-        }, 0);
+        
+        if (!isEditing) {
+            e.preventDefault();
+            selectBlock(blockId);
+            setIsEditing(true);
+            setTimeout(() => {
+                if (contentRef.current) {
+                    contentRef.current.focus();
+                    // Move cursor to the end ONLY on initial click
+                    try {
+                        const range = document.createRange();
+                        const sel = window.getSelection();
+                        if (sel) {
+                            range.selectNodeContents(contentRef.current);
+                            range.collapse(false);
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                        }
+                    } catch (err) { }
+                }
+            }, 0);
+        }
     };
 
     const handleBlur = () => {
@@ -242,6 +245,8 @@ export function InlineTextEditor({
         } else if (e.key === "Enter" && !multiline) {
             e.preventDefault();
             contentRef.current?.blur();
+        } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
+            e.stopPropagation();
         }
     };
 
@@ -779,7 +784,7 @@ export function getBackgroundStyles(p: Record<string, any>, theme: any): React.C
     const bgColor = (p.bgColor as string) || (p.sectionBg as string) || "transparent";
 
     return {
-        backgroundColor: bgColor,
+        background: bgColor,
         position: "relative",
         overflow: "hidden",
     };

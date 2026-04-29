@@ -1027,7 +1027,7 @@ export function UnifiedBackgroundInput({
                     { label: "Gradient", value: "gradient" },
                 ]}
             />
-            <div style={{ minHeight: 32 }}>
+            <div className="mt-2" style={{ minHeight: 32, }}>
                 {mode === "solid" ? (
                     <ColorInput
                         value={bgColor || "transparent"}
