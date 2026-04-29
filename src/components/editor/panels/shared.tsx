@@ -1617,7 +1617,7 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
                 />
             </Field>
 
-            <Field label="Base Color"><ColorInput value={p[bgKey] || (prefix === "button" ? "var(--primary)" : "")} onChange={(v) => up(bgKey, v)} onBlur={(v) => up(bgKey, v, true)} /></Field>
+            <Field label="Background Color"><ColorInput value={p[bgKey] || (prefix === "button" ? "var(--primary)" : "")} onChange={(v) => up(bgKey, v)} onBlur={(v) => up(bgKey, v, true)} /></Field>
             <Field label="Text Color"><ColorInput value={p[colorKey] || (prefix === "button" ? "var(--button-text)" : "")} onChange={(v) => up(colorKey, v)} onBlur={(v) => up(colorKey, v, true)} /></Field>
 
             {variant === "gradient" && (

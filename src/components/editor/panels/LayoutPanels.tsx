@@ -66,6 +66,7 @@ export function HeaderPanel({ block }: { block: Block }) {
                 <Field label="Header Width"><SelectInput value={(p.layoutWidth as string) || (p.fullWidth ? "fluid" : "centered")} onChange={(v) => updateProps({ layoutWidth: v, fullWidth: v === "fluid" })} options={[{ label: "Fluid / Edge-to-Edge", value: "fluid" }, { label: "Centered (Container)", value: "centered" }, { label: "Narrow Content (800px)", value: "narrow" }]} /></Field>
                 <Field label="Position"><SelectInput value={(p.position as string) || "static"} onChange={(v) => updateProps({ position: v })} options={[{ label: "Static (Normal flow)", value: "static" }, { label: "Sticky (Stays at top)", value: "sticky" }, { label: "Fixed (Overlays content)", value: "fixed" }]} /></Field>
                 <Field label="Background Style"><SelectInput value={(p.style as string) || "solid"} onChange={(v) => up("style", v)} options={[{ label: "Solid Color", value: "solid" }, { label: "Glassmorphism (Blur)", value: "glass" }, { label: "Transparent", value: "transparent" }]} /></Field>
+                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#1e293b"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
             <BackgroundPanel block={block} />
             <Section title="Section Padding (Responsive)">
