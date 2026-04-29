@@ -31,7 +31,7 @@ export function LoginForm(props: any) {
 
   return (
     <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <FormHeading title="Welcome back" subtitle="Sign in to your PageCraft account" />
+      <FormHeading title="Welcome back" subtitle="Sign in to your Solario Forge account" />
 
       <Form.Item
         name="email"

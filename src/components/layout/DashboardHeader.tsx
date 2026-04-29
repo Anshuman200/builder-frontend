@@ -44,7 +44,7 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
             className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity"
           >
             <Logo src="/logoOnly.png" className="w-8 h-8 md:w-9 md:h-9" />
-            <h1 className="text-lg font-black tracking-tighter text-white hidden sm:block">PageCraft</h1>
+            <h1 className="text-lg font-black tracking-tighter text-white hidden sm:block">Solario Forge</h1>
           </Link>
         </div>
 

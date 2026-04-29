@@ -130,7 +130,7 @@ export default function EditorPage() {
     if (title) updateTitle(title);
     if (slug) updateSlug(slug);
 
-    const projectName = title || page?.title || "PageCraft";
+    const projectName = title || page?.title || "Solario Forge";
 
     // Sort: header first, footer last, rest in selection order
     const sorted = [

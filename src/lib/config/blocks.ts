@@ -61,7 +61,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
 
       // Logo text or image
       logoType: "text",         // text | image
-      logoText: "PageCraft",
+      logoText: "Solario Forge",
       logoImage: "",
       logoWidth: "120px",
 
@@ -459,12 +459,12 @@ export const BLOCK_TYPES: BlockConfig[] = [
 
       // Branding
       logoType: "text",
-      logoText: "PageCraft",
+      logoText: "Solario Forge",
       logoImage: "",
       logoWidth: "120px",
 
       description: "Build beautiful pages in minutes.",
-      copyright: `© ${new Date().getFullYear()} PageCraft. All rights reserved.`,
+      copyright: `© ${new Date().getFullYear()} Solario Forge. All rights reserved.`,
 
       // Links
       links: [
@@ -777,13 +777,13 @@ export function makeBlock(type: string, props: Record<string, unknown>): Block {
   return { id: crypto.randomUUID(), type, props };
 }
 
-// ─── Replace "PageCraft" placeholder with the real project name everywhere ────
+// ─── Replace "Solario Forge" placeholder with the real project name everywhere ────
 export function injectProjectName(block: Block, projectName: string): Block {
-  if (!projectName || projectName === "PageCraft") return block;
+  if (!projectName || projectName === "Solario Forge") return block;
   // Safety: some legacy saved blocks may have no props
   if (!block || !block.props) return block;
   const replace = (v: unknown): unknown => {
-    if (typeof v === "string") return v.replace(/PageCraft/g, projectName);
+    if (typeof v === "string") return v.replace(/Solario Forge/g, projectName);
     if (Array.isArray(v)) return (v as unknown[]).map(replace);
     return v;
   };
@@ -791,7 +791,7 @@ export function injectProjectName(block: Block, projectName: string): Block {
   for (const key of Object.keys(block.props)) {
     const val = block.props[key];
     if (typeof val === "string") {
-      newProps[key] = val.replace(/PageCraft/g, projectName);
+      newProps[key] = val.replace(/Solario Forge/g, projectName);
     } else if (Array.isArray(val) && val.length > 0 && typeof (val[0] as any)?.id === "string") {
       // Array of child blocks — recurse
       newProps[key] = (val as Block[]).map(b => injectProjectName(b, projectName));
@@ -802,9 +802,9 @@ export function injectProjectName(block: Block, projectName: string): Block {
   return { ...block, props: newProps };
 }
 
-// ─── Migrate an entire page's blocks to replace PageCraft with project name ───
+// ─── Migrate an entire page's blocks to replace Solario Forge with project name ───
 export function migrateProjectName(data: any, projectName: string): any {
-  if (!projectName || projectName === "PageCraft" || !data) return data;
+  if (!projectName || projectName === "Solario Forge" || !data) return data;
 
   // If it's an array of blocks
   if (Array.isArray(data)) {
@@ -851,7 +851,7 @@ export function createBlock(type: string): Block {
   if (type === "hero") {
     block.props.childBlocks = [
       makeBlock("text", {
-        content: "Welcome to PageCraft",
+        content: "Welcome to Solario Forge",
         tag: "h1",
         align: "center",
         fontSize: "3rem",

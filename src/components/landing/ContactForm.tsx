@@ -12,8 +12,8 @@ export default function ContactForm() {
     const onFinish = async (values: { name: string; email: string; message: string }) => {
         try {
             await submitMut.mutateAsync({
-                receiverEmail: "admin@pagecraft.com", 
-                subject: "New Contact Inquiry from PageCraft Form",
+                receiverEmail: "admin@pagecraft.com",
+                subject: "New Contact Inquiry from Solario Forge Form",
                 fields: values
             });
             toastSuccess("Thank you! Your message has been sent successfully. We'll be in touch soon.");
@@ -27,10 +27,10 @@ export default function ContactForm() {
 
     return (
         <div className="flex flex-col gap-6 w-full max-w-lg mx-auto bg-white/5 p-8 rounded-2xl border border-white/10 backdrop-blur-xl">
-            
-            <Form 
-                form={form} 
-                layout="vertical" 
+
+            <Form
+                form={form}
+                layout="vertical"
                 onFinish={onFinish}
                 requiredMark={false}
                 className="contact-antd-form"
@@ -40,7 +40,7 @@ export default function ContactForm() {
                     label={<span className="text-sm font-bold text-white/70">Your Name</span>}
                     rules={[{ required: true, message: "Please enter your name" }]}
                 >
-                    <Input 
+                    <Input
                         size="large"
                         placeholder="John Doe"
                         disabled={submitMut.isPending}
@@ -48,7 +48,7 @@ export default function ContactForm() {
                         style={{ background: "rgba(0,0,0,0.4)", color: "white", borderColor: "rgba(255,255,255,0.1)" }}
                     />
                 </Form.Item>
-                
+
                 <Form.Item
                     name="email"
                     label={<span className="text-sm font-bold text-white/70">Email Address</span>}
@@ -57,7 +57,7 @@ export default function ContactForm() {
                         { type: "email", message: "Please enter a valid email" }
                     ]}
                 >
-                    <Input 
+                    <Input
                         size="large"
                         placeholder="john@example.com"
                         disabled={submitMut.isPending}
@@ -65,13 +65,13 @@ export default function ContactForm() {
                         style={{ background: "rgba(0,0,0,0.4)", color: "white", borderColor: "rgba(255,255,255,0.1)" }}
                     />
                 </Form.Item>
-                
+
                 <Form.Item
                     name="message"
                     label={<span className="text-sm font-bold text-white/70">Message</span>}
                     rules={[{ required: true, message: "Please enter your message" }]}
                 >
-                    <Input.TextArea 
+                    <Input.TextArea
                         size="large"
                         rows={5}
                         placeholder="How can we help you?"
@@ -80,11 +80,11 @@ export default function ContactForm() {
                         style={{ background: "rgba(0,0,0,0.4)", color: "white", borderColor: "rgba(255,255,255,0.1)" }}
                     />
                 </Form.Item>
-                
+
                 <Form.Item className="mb-0 mt-4">
-                    <Button 
-                        type="primary" 
-                        htmlType="submit" 
+                    <Button
+                        type="primary"
+                        htmlType="submit"
                         size="large"
                         loading={submitMut.isPending}
                         className="w-full font-bold bg-indigo-500 hover:bg-indigo-600 border-none h-12 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all"

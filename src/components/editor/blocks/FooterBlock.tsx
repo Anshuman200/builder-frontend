@@ -25,14 +25,14 @@ export function FooterBlock({ block }: BlockProps) {
     const editorPadding = viewMode === "mobile" ? mobilePadding : viewMode === "tablet" ? tabletPadding : desktopPadding;
 
     const logoType = (p.logoType as string) || "text";
-    const logoText = (p.logoText as string) || "PageCraft";
+    const logoText = (p.logoText as string) || "Solario Forge";
     const logoImage = p.logoImage as string;
     const logoWidth = (p.logoWidth as string) || "120px";
     const logoHeight = (p.logoHeight as string) || "40px";
     const logoObjectFit = (p.logoObjectFit as React.CSSProperties["objectFit"]) || "cover";
     const logoShape = (p.logoShape as string) || "square";
     const description = (p.description as string) || "Build beautiful pages in minutes.";
-    const copyright = (p.copyright as string) || `© ${new Date().getFullYear()} PageCraft. All rights reserved.`;
+    const copyright = (p.copyright as string) || `© ${new Date().getFullYear()} Solario Forge. All rights reserved.`;
     const links = (p.links as { id: string; label: string; url: string }[]) || [];
     const footerLayout = (p.layout as string) || "standard";
     const isMobile = isPreview ? false : (viewMode === "mobile");
@@ -81,9 +81,9 @@ export function FooterBlock({ block }: BlockProps) {
             }}
         >
             {logoType === "image" && logoImage ? (
-                <div style={{ 
-                    width: logoWidth, 
-                    height: logoHeight, 
+                <div style={{
+                    width: logoWidth,
+                    height: logoHeight,
                     position: "relative",
                     borderRadius: logoShape === "circle" ? "50%" : logoShape === "rounded" ? "12px" : "0px",
                     overflow: "hidden"
@@ -186,13 +186,13 @@ export function FooterBlock({ block }: BlockProps) {
           @media (max-width: 768px) { .footer-${block.id} { padding: ${mobilePadding}; } .footer-${block.id}-links { flex-direction: column; gap: 1rem; align-items: center; } }
         `}</style>
             )}
-            <footer 
-                id={(p.sectionId as string) || `block-${block.id}`} 
-                className={isPreview ? `footer-${block.id}` : undefined} 
-                style={{ 
+            <footer
+                id={(p.sectionId as string) || `block-${block.id}`}
+                className={isPreview ? `footer-${block.id}` : undefined}
+                style={{
                     ...bgStyles,
-                    color: textColor, 
-                    width: "100%", 
+                    color: textColor,
+                    width: "100%",
                     padding: isPreview ? undefined : editorPadding,
                     position: "relative"
                 }}

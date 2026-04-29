@@ -15,17 +15,17 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: {
-    default: "PageCraft — Build & Publish Stunning Pages",
-    template: "%s | PageCraft",
+    default: "Solario Forge — Build & Publish Stunning Pages",
+    template: "%s | Solario Forge",
   },
   description:
     "The no-code SaaS page builder. Drag, drop, and publish landing pages, portfolios & websites in minutes — with zero code.",
   keywords: ["page builder", "no-code", "landing page", "portfolio", "website builder"],
-  authors: [{ name: "PageCraft" }],
+  authors: [{ name: "Solario Forge" }],
   openGraph: {
     type: "website",
-    siteName: "PageCraft",
-    title: "PageCraft — Build & Publish Stunning Pages",
+    siteName: "Solario Forge",
+    title: "Solario Forge — Build & Publish Stunning Pages",
     description: "Drag, drop, publish. Zero code required.",
   },
   twitter: { card: "summary_large_image" },

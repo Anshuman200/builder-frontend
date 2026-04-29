@@ -116,7 +116,7 @@ export function Footer() {
             flexWrap: "wrap",
           }}>
             <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.25)" }}>
-              © {new Date().getFullYear()} PageCraft, Inc. All rights reserved.
+              © {new Date().getFullYear()} Solario Forge, Inc. All rights reserved.
             </p>
             <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", gap: "0.3rem" }}>
               Made with <HeartIcon style={{ width: 11, height: 11, color: "#ef4444", fill: "#ef4444" }} /> for creators worldwide

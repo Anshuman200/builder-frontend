@@ -81,7 +81,7 @@ export function HeroSection() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-bold backdrop-blur-md mb-8 animate-fade-in-up">
             <SparklesIcon className="w-4 h-4 text-pink-400" />
-            Introducing PageCraft 2.0 — Now with AI blocks
+            Introducing Solario Forge 2.0 — Now with AI blocks
             <ArrowRightIcon className="w-3 h-3" />
           </div>
 

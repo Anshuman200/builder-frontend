@@ -215,7 +215,7 @@ export function DrawerSectionCard({ template, onAdd }: { template: SectionTempla
     data: { type: "section", templateId: template.id },
   });
 
-  const projectName = page?.title || "PageCraft";
+  const projectName = page?.title || "Solario Forge";
 
   function doAdd() {
     const rawBlock = template.create();
@@ -320,7 +320,7 @@ export function PaletteCard({ config, onAdd }: { config: BlockConfig; onAdd: (bl
     data: { type: "palette", blockType: config.type },
   });
   const Icon = getIcon(config.icon) ?? Square2StackIcon;
-  const projectName = page?.title || "PageCraft";
+  const projectName = page?.title || "Solario Forge";
 
   function doAdd() {
     const rawBlock = createBlock(config.type);

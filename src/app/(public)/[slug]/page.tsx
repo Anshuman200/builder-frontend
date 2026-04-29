@@ -13,8 +13,8 @@ interface Props {
 
 async function getPageData(slug: string) {
   try {
-    const { data } = await request<{ page: any }>(`/site-pages/${slug}`, { 
-        next: { revalidate: 3600 } // Cache for 1 hour
+    const { data } = await request<{ page: any }>(`/site-pages/${slug}`, {
+      next: { revalidate: 3600 } // Cache for 1 hour
     });
     return data.page || data;
   } catch (e) {
@@ -25,12 +25,12 @@ async function getPageData(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const pageContent = await getPageData(slug);
-  
+
   if (!pageContent) return { title: 'Page Not Found' };
 
   return {
     title: pageContent.title,
-    description: pageContent.meta?.description || 'Build your beautiful landing page with PageCraft.',
+    description: pageContent.meta?.description || 'Build your beautiful landing page with Solario Forge.',
     openGraph: {
       title: pageContent.title,
       description: pageContent.meta?.description,

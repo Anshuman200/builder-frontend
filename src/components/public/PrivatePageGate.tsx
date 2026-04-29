@@ -131,7 +131,7 @@ export default function PrivatePageGate({ pageId, isPrivate, children }: Private
 
       {/* Footer hint */}
       <div className="mt-8 opacity-20 hover:opacity-100 transition-opacity duration-500 flex flex-col items-center">
-        <p className="text-white text-[10px] font-black uppercase tracking-[0.2em] mb-2">Powered by PageCraft</p>
+        <p className="text-white text-[10px] font-black uppercase tracking-[0.2em] mb-2">Powered by Solario Forge</p>
         <div className="w-8 h-[1px] bg-white/50" />
       </div>
 

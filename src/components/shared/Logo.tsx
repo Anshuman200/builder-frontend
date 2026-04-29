@@ -16,7 +16,7 @@ export const Logo = ({ className = "w-8 h-8", src = "/logo.png" }: LogoProps) =>
         {/* User's logo image */}
         <Image
           src={src}
-          alt="PageCraft Logo"
+          alt="Solario Forge Logo"
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
           className="relative z-10 object-contain drop-shadow-xl rounded-xl"

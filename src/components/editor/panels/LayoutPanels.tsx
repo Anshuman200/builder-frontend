@@ -74,7 +74,7 @@ export function HeaderPanel({ block }: { block: Block }) {
             </Section>
             <Section title="Brand (Logo)">
                 <Field label="Logo Type"><SelectInput value={(p.logoType as string) || "text"} onChange={(v) => up("logoType", v)} options={[{ label: "Text Only", value: "text" }, { label: "Image", value: "image" }]} /></Field>
-                <Field label="Logo Text"><TextInput value={(p.logoText as string) || "PageCraft"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
+                <Field label="Logo Text"><TextInput value={(p.logoText as string) || "Solario Forge"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
                 {p.logoType === "image" && (<>
                     <Field label="Logo Image"><MediaInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
                     <Field label="Image Width"><TextInputWithUnit value={(p.logoWidth as string) ?? ""} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
@@ -267,7 +267,7 @@ export function FooterPanel({ block }: { block: Block }) {
             </Section>
             <Section title="Brand & Content">
                 <Field label="Logo Type"><SelectInput value={(p.logoType as string) || "text"} onChange={(v) => up("logoType", v)} options={[{ label: "Text Only", value: "text" }, { label: "Image", value: "image" }]} /></Field>
-                <Field label="Logo Text"><TextInput value={(p.logoText as string) || "PageCraft"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
+                <Field label="Logo Text"><TextInput value={(p.logoText as string) || "Solario Forge"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
                 {p.logoType === "image" && (<>
                     <Field label="Logo Image"><MediaInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
                     <Field label="Image Width"><TextInputWithUnit value={(p.logoWidth as string) ?? ""} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>

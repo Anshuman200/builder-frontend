@@ -186,7 +186,7 @@ export default function EditorShell() {
     }
 
     if (data?.type === "palette" && data.blockType) {
-      const projectName = useEditorStore.getState().page?.title || "PageCraft";
+      const projectName = useEditorStore.getState().page?.title || "Solario Forge";
       const rawBlock = createBlock(data.blockType);
       const newBlock = injectProjectName(rawBlock, projectName);
       addBlock(newBlock); // Adds to root
@@ -200,7 +200,7 @@ export default function EditorShell() {
     } else if (data?.type === "section" && data.templateId) {
       const template = SECTION_TEMPLATES.find((t) => t.id === data.templateId);
       if (template) {
-        const projectName = useEditorStore.getState().page?.title || "PageCraft";
+        const projectName = useEditorStore.getState().page?.title || "Solario Forge";
         const rawSection = template.create();
         const newSectionRoot = injectProjectName(rawSection, projectName);
         addBlock(newSectionRoot);

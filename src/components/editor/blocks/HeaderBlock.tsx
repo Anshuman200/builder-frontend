@@ -33,7 +33,7 @@ export function HeaderBlock({ block }: BlockProps) {
     const editorPadding = viewMode === "mobile" ? mobilePadding : viewMode === "tablet" ? tabletPadding : desktopPadding;
 
     const logoType = (p.logoType as string) || "text";
-    const logoText = (p.logoText as string) || "PageCraft";
+    const logoText = (p.logoText as string) || "Solario Forge";
     const logoImage = p.logoImage as string;
     const bgImage = p.bgImage as string;
     const bgPosition = (p.bgPosition as string) || "center";
