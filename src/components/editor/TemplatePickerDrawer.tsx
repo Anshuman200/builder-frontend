@@ -60,9 +60,13 @@ export function TemplatePickerDrawer() {
         setIsApplying(true);
         try {
           const { data: fullTemplate } = await pagesApi.get(template._id);
-          if (fullTemplate && fullTemplate.content) {
+          const rawContent = (fullTemplate?.routes && fullTemplate.routes.length > 0)
+            ? fullTemplate.routes[0].content
+            : fullTemplate?.content;
+
+          if (fullTemplate && rawContent) {
             // Filter out header and footer blocks as requested
-            const filteredContent = fullTemplate.content.filter((b: any) => b.type !== 'header' && b.type !== 'footer');
+            const filteredContent = rawContent.filter((b: any) => b.type !== 'header' && b.type !== 'footer');
 
             applyTemplate(filteredContent, fullTemplate.theme);
             success("Template applied successfully!");

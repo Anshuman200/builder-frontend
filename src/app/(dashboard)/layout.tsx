@@ -1,4 +1,4 @@
-"use client";
+  "use client";
 
 import { useCallback, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -63,15 +63,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     setMounted(true);
-    
-    // Client-side authentication guard
-    // Only redirect if we are NOT loading, we have NO user, AND we don't even have a session cookie
-    // This prevents premature redirection during state transitions.
-    const hasSessionCookie = !!getCookie("hasSession");
-    if (!authLoading && !user && !hasSessionCookie) {
-        router.push("/?auth=login");
-    }
-  }, [authLoading, user, router]);
+  }, []);
 
   const handleCreate = useCallback(() => {
     setWizardOpen(true);

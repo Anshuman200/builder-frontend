@@ -11,6 +11,7 @@ import {
     UserCircleIcon
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, Dropdown, Button, MenuProps } from "antd";
 
@@ -20,8 +21,25 @@ interface HeaderProps {
 
 export function Header({ onLoginClick }: HeaderProps) {
     const { user, logout } = useAuth();
+    const pathname = usePathname();
     const [scrolled, setScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+
+    const getLinkClass = (path: string) => {
+        const isActive = pathname === path;
+        return `px-4 py-2 text-sm font-semibold rounded-xl transition-all no-underline ${isActive
+            ? "text-white bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.5)]"
+            : "text-[var(--text)]/50 hover:text-white hover:bg-[var(--text)]/10"
+            }`;
+    };
+
+    const getMobileLinkClass = (path: string) => {
+        const isActive = pathname === path;
+        return `py-3 px-4 rounded-xl transition-all font-semibold no-underline ${isActive
+            ? "text-white bg-indigo-600 shadow-md"
+            : "text-[var(--text)]/70 hover:text-white hover:bg-[var(--text)]/10"
+            }`;
+    };
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -60,10 +78,10 @@ export function Header({ onLoginClick }: HeaderProps) {
 
                 {/* Centre Nav Links */}
                 <nav className="hidden md:flex items-center gap-1">
-                    <Link href="/explore" className="px-4 py-2 text-sm font-semibold text-[var(--text)]/50 hover:text-[var(--text)] hover:bg-[var(--text)]/5 rounded-xl transition-all no-underline">
+                    <Link href="/explore" className={getLinkClass("/explore")}>
                         Templates
                     </Link>
-                    <Link href="/explore/media" className="px-4 py-2 text-sm font-semibold text-[var(--text)]/50 hover:text-[var(--text)] hover:bg-[var(--text)]/5 rounded-xl transition-all no-underline">
+                    <Link href="/explore/media" className={getLinkClass("/explore/media")}>
                         Media
                     </Link>
                 </nav>
@@ -95,8 +113,8 @@ export function Header({ onLoginClick }: HeaderProps) {
                         trigger={['click']}
                         popupRender={() => (
                             <div className="bg-[var(--bg)] border border-[var(--border)] rounded-3xl p-4 flex flex-col gap-2 shadow-2xl mt-4 w-64 backdrop-blur-xl">
-                                <Link href="/explore" className="py-3 px-4 rounded-xl text-[var(--text)]/70 hover:text-[var(--text)] hover:bg-[var(--text)]/5 transition-all no-underline">📐 Templates</Link>
-                                <Link href="/explore/media" className="py-3 px-4 rounded-xl text-[var(--text)]/70 hover:text-[var(--text)] hover:bg-[var(--text)]/5 transition-all no-underline">🖼️ Media</Link>
+                                <Link href="/explore" className={getMobileLinkClass("/explore")}>📐 Templates</Link>
+                                <Link href="/explore/media" className={getMobileLinkClass("/explore/media")}>🖼️ Media</Link>
                                 <div className="h-px bg-[var(--text)]/5 my-1" />
                                 {!user ? (
                                     <>

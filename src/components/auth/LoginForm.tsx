@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { Form, Input, Button } from "antd";
 import { EnvelopeIcon, LockClosedIcon, ArrowLeftOnRectangleIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 import { FormHeading, GlassLink, INPUT_STYLE, LABEL_STYLE, BTN_STYLE } from "./AuthShared";
 import { useAuth } from "@/hooks/useAuth";
 
 export function LoginForm(props: any) {
   const { handleLogin, setTab, setRegEmail, setAuthError, isLoading, forced } = props;
   const { logout } = useAuth();
+  const router = useRouter();
   const [globalError, setGlobalError] = useState("");
   const [form] = Form.useForm();
 
@@ -85,7 +87,7 @@ export function LoginForm(props: any) {
 
       {forced ? (
         <Button
-          onClick={async () => { await logout(); window.location.href = "/"; }}
+          onClick={async () => { await logout(); router.push("/"); }}
           icon={<ArrowLeftOnRectangleIcon style={{ width: 16, height: 16 }} />}
           size="large"
           block
