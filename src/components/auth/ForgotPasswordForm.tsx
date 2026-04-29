@@ -7,20 +7,34 @@ import { FormHeading, GlassLink, INPUT_STYLE, LABEL_STYLE, BTN_STYLE } from "./A
 
 export function ForgotPasswordForm({ handleForgotPassword, setTab, isLoading }: any) {
   const [globalError, setGlobalError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [form] = Form.useForm();
 
   const onFinish = async (values: any) => {
     setGlobalError("");
     try {
       await handleForgotPassword(values.email);
+      setSuccess(true);
     } catch (err: any) {
       setGlobalError(err?.message || "Failed to send reset link.");
     }
   };
 
+  if (success) {
+    return (
+      <div style={{ textAlign: "center", padding: "24px 0" }}>
+        <FormHeading title="Check your email" subtitle="We've sent you a secure reset link." />
+        <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.95rem", margin: "16px 0 32px" }}>
+          Please click the link in the email to set a new password. You can close this window.
+        </p>
+        <Button size="large" block style={BTN_STYLE} onClick={() => setTab("login")}>Back to login</Button>
+      </div>
+    );
+  }
+
   return (
     <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <FormHeading title="Reset your password" subtitle="Enter your email to receive a reset code" />
+      <FormHeading title="Reset your password" subtitle="Enter your email to receive a reset link" />
 
       <Form.Item
         name="email"
@@ -49,7 +63,7 @@ export function ForgotPasswordForm({ handleForgotPassword, setTab, isLoading }: 
           block
           style={BTN_STYLE}
         >
-          Send reset code
+          Send reset link
         </Button>
       </Form.Item>
 

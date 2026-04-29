@@ -7,16 +7,30 @@ import { FormHeading, GlassLink, INPUT_STYLE, LABEL_STYLE, BTN_STYLE } from "./A
 
 export function RegisterForm({ handleRegister, setTab, isLoading }: any) {
   const [globalError, setGlobalError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [form] = Form.useForm();
 
   const onFinish = async (values: any) => {
     setGlobalError("");
     try {
       await handleRegister(values.name, values.email, values.password);
+      setSuccess(true);
     } catch (err: any) {
       setGlobalError(err?.message || "Registration failed.");
     }
   };
+
+  if (success) {
+    return (
+      <div style={{ textAlign: "center", padding: "24px 0" }}>
+        <FormHeading title="Check your email" subtitle="We've sent you a verification link." />
+        <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.95rem", margin: "16px 0 32px" }}>
+          Please click the link in the email to complete your registration and log in. You can close this window.
+        </p>
+        <Button size="large" block style={BTN_STYLE} onClick={() => setTab("login")}>Back to login</Button>
+      </div>
+    );
+  }
 
   return (
     <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false} style={{ display: "flex", flexDirection: "column", gap: 4 }}>

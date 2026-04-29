@@ -42,8 +42,17 @@ export function AuthModal({
   const router = useRouter();
 
   useEffect(() => {
-    if (open) setTab(defaultTab);
-  }, [open, defaultTab]);
+    if (open) {
+      const authParam = searchParams.get("auth");
+      if (authParam === "reset-password") {
+        setTab("reset-password");
+      } else if (authParam === "verify") {
+        setTab("verify");
+      } else {
+        setTab(defaultTab);
+      }
+    }
+  }, [open, defaultTab, searchParams]);
 
   const reset = () => {
     setLoginEmail("");
@@ -73,26 +82,23 @@ export function AuthModal({
   const executeRegister = async (name: string, email: string, password: string) => {
     setRegEmail(email);
     await register(name, email, password);
-    // Registration succeeded → OTP sent, move to verification
-    setTab("verify");
+    // Registration succeeded → magic link sent, let RegisterForm show success
   };
 
   const executeForgotPassword = async (email: string) => {
     setLoginEmail(email);
     await forgotPassword(email);
-    setTab("reset-password");
+    // Note: Do not transition tab here, let ForgotPasswordForm show success message
   };
 
-  const executeResetPassword = async (email: string, resetToken: string, newPassword: string) => {
-    await resetPassword(email, resetToken, newPassword);
+  const executeResetPassword = async (payload: string, newPassword: string) => {
+    await resetPassword(payload, newPassword);
     setTab("login");
   };
 
-  const executeVerify = async (email: string, otp: string) => {
-    await verifyOtp(email, otp);
-    if (redirectOnSuccess) router.replace("/home");
-    onClose();
-    reset();
+  const executeVerify = async (payload: string) => {
+    await verifyOtp(payload);
+    // Let VerifyOtpForm handle the redirection internally
   };
 
   // Memoised decorative orbs
@@ -201,11 +207,11 @@ export function AuthModal({
           )}
 
           {tab === "reset-password" && (
-            <ResetPasswordForm loginEmail={loginEmail} handleResetPassword={executeResetPassword} setTab={setTab} isLoading={isLoading} />
+            <ResetPasswordForm handleResetPassword={executeResetPassword} setTab={setTab} isLoading={isLoading} />
           )}
 
           {tab === "verify" && (
-            <VerifyOtpForm regEmail={regEmail} handleVerify={executeVerify} setTab={setTab} isLoading={isLoading} error={authError} />
+            <VerifyOtpForm handleVerify={executeVerify} setTab={setTab} redirectOnSuccess={redirectOnSuccess} />
           )}
         </div>
       </div>

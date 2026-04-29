@@ -28,19 +28,24 @@ export default function PublicLayout({
         }
 
         const authParam = searchParams?.get("auth");
-        if ((authParam === "login" || authParam === "register") && !user) {
-            window.dispatchEvent(new CustomEvent('show-auth-modal', { detail: { reason: authParam } }));
-            // Clear the param from URL to prevent re-triggering
-            const params = new URLSearchParams(searchParams.toString());
-            params.delete("auth");
-            const newQuery = params.toString();
-            router.replace(`${pathname}${newQuery ? `?${newQuery}` : ""}`);
+        console.log('authParam', authParam)
+        if ((authParam === "login" || authParam === "register" || authParam === "reset-password" || authParam === "verify") && !user) {
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('show-auth-modal', { detail: { reason: authParam } }));
+            }, 0);
+            // Clear the param from URL to prevent re-triggering for login/register
+            if (authParam !== "reset-password" && authParam !== "verify") {
+                const params = new URLSearchParams(searchParams.toString());
+                params.delete("auth");
+                const newQuery = params.toString();
+                router.replace(`${pathname}${newQuery ? `?${newQuery}` : ""}`);
+            }
         }
     }, [searchParams, user, isLoading, router]);
 
     // Prevent flickering while loading: Do not render public layout if isLoading
     if (isLoading) {
-        return null; 
+        return null;
     }
 
     return (

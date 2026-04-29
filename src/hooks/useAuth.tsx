@@ -20,9 +20,9 @@ interface AuthContextType {
     keyStatus: "locked" | "unlocked";
     login: (email: string, password: string) => Promise<{ redirectTo?: string }>;
     register: (name: string, email: string, password: string) => Promise<void>;
-    verifyOtp: (email: string, otp: string, password?: string) => Promise<void>;
+    verifyOtp: (payload: string, password?: string) => Promise<void>;
     forgotPassword: (email: string) => Promise<void>;
-    resetPassword: (email: string, resetToken: string, newPassword: string) => Promise<void>;
+    resetPassword: (payload: string, newPassword: string) => Promise<void>;
     logout: () => Promise<void>;
     setUser: (u: User | null) => void;
     fetchProfile: () => void;
@@ -63,8 +63,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await registerMutation.mutateAsync({ name, email, password });
     }, [registerMutation]);
 
-    const verifyOtp = useCallback(async (email: string, otp: string, password?: string) => {
-        await verifyOtpMutation.mutateAsync({ email, otp });
+    const verifyOtp = useCallback(async (payload: string, password?: string) => {
+        await verifyOtpMutation.mutateAsync({ payload });
         if (password) {
             sessionStorage.setItem("pagecraft_session_key", password);
             setKeyStatus("unlocked");
@@ -75,8 +75,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await forgotPasswordMutation.mutateAsync({ email });
     }, [forgotPasswordMutation]);
 
-    const resetPassword = useCallback(async (email: string, resetToken: string, newPassword: string) => {
-        await resetPasswordMutation.mutateAsync({ email, resetToken, newPassword });
+    const resetPassword = useCallback(async (payload: string, newPassword: string) => {
+        await resetPasswordMutation.mutateAsync({ payload, newPassword });
     }, [resetPasswordMutation]);
 
     const logout = useCallback(async () => {

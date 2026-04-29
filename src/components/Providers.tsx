@@ -46,7 +46,7 @@ function AntdThemeProvider({ children }: { children: React.ReactNode }) {
                         colorBgContainer: isDark ? '#0a0a0a' : '#ffffff',
                     },
                     Layout: {
-                        colorBgBody: "transparent", // Let the global CSS handle body background
+                        bodyBg: "transparent", // Let the global CSS handle body background
                         colorBgHeader: "transparent",
                     }
                 }
@@ -105,10 +105,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
                         <AuthProvider>
                             {children}
                             <ToastContainer />
-                            <AuthModal 
-                                open={authOpen} 
-                                onClose={() => { setAuthOpen(false); setAuthForced(false); }} 
-                                redirectOnSuccess={isLandingPage} 
+                            <AuthModal
+                                open={authOpen}
+                                onClose={() => { setAuthOpen(false); setAuthForced(false); }}
+                                redirectOnSuccess={isLandingPage}
                                 forced={authForced}
                             />
                         </AuthProvider>
