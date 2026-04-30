@@ -9,15 +9,12 @@ export default function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Retrieve cookies
+    const userRole = request.cookies.get('user_role')?.value;
     const accessToken = request.cookies.get('access_token')?.value;
     const refreshToken = request.cookies.get('refresh_token')?.value;
-    const userRole = request.cookies.get('user_role')?.value;
 
     const isAuthed = !!accessToken || !!refreshToken;
     const isAdmin = userRole === 'admin';
-
-    // Log authentication status for debugging in production
-    console.log(`[Proxy] ${pathname} - isAuthed: ${isAuthed}, hasAccessToken: ${!!accessToken}`);
 
     // 1. Redirect logged-in users away from the landing page
     if (pathname === '/' && isAuthed) {

@@ -798,7 +798,14 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
 
     if (!bgImage && !bgGradient) return null;
 
-    const isVideo = bgImage && /\.(mp4|webm|ogg|mov)$/i.test(bgImage.split('?')[0]);
+    const isVideo = bgImage ? (
+        /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(bgImage) || 
+        bgImage.toLowerCase().includes("video")
+    ) : false;
+    const bgAutoPlay = p.bgAutoPlay !== false;
+    const bgLoop = p.bgLoop !== false;
+    const bgMuted = p.bgMuted !== false;
+    const bgControls = p.bgControls === true;
 
     return (
         <>
@@ -807,9 +814,10 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
                 isVideo ? (
                     <video
                         src={bgImage}
-                        autoPlay
-                        loop
-                        muted
+                        autoPlay={bgAutoPlay}
+                        loop={bgLoop}
+                        muted={bgMuted}
+                        controls={bgControls}
                         playsInline
                         style={{
                             position: "absolute",
@@ -820,7 +828,7 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
                             objectPosition: (p.bgPosition as string) || "center",
                             opacity: imageOpacity,
                             zIndex: 1,
-                            pointerEvents: "none"
+                            pointerEvents: bgControls ? "auto" : "none"
                         }}
                     />
                 ) : (

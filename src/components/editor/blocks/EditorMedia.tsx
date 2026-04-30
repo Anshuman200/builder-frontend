@@ -149,10 +149,13 @@ export function EditorMedia({
     }, [src]);
 
     // Detect video by extension / prop
-    const videoExts = [".mp4", ".webm", ".ogg", ".mov", ".m4v"];
-    const autoDetectVideo = src
-        ? videoExts.some(ext => src.toLowerCase().endsWith(ext)) || src.toLowerCase().includes("video")
-        : false;
+    const autoDetectVideo = src ? (
+        /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(src) || 
+        src.toLowerCase().includes("video") ||
+        src.includes("youtube.com") || 
+        src.includes("youtu.be") || 
+        src.includes("vimeo.com")
+    ) : false;
     const renderAsVideo = isVideo || autoDetectVideo;
 
     // Container sizing logic

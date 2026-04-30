@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, ToggleSwitch, AlignmentInput, PaddingInput, TextInputWithUnit } from "./shared";
+import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, ToggleSwitch, AlignmentInput, PaddingInput, TextInputWithUnit, VideoPlaybackOptions, AspectPicker, SliderInput } from "./shared";
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { Input as AntInput } from "antd";
@@ -30,7 +30,7 @@ export function HeroPanel({ block }: { block: Block }) {
                                     let res: string[] = [];
                                     if (b.type === "text" && b.props.content) res.push(b.props.content as string);
                                     else if (b.type === "button" && b.props.label) res.push(b.props.label as string);
-                                    
+
                                     ["childBlocks", "col0", "col1"].forEach(pName => {
                                         const children = b.props[pName] as Block[] | undefined;
                                         if (Array.isArray(children)) children.forEach(c => { res = [...res, ...extractText(c)]; });
@@ -41,14 +41,14 @@ export function HeroPanel({ block }: { block: Block }) {
 
                                 // 2. Create new block
                                 const newBlock = template.create();
-                                
+
                                 // 3. Inject content into new block
                                 const injectText = (b: Block, texts: string[]): string[] => {
                                     let remaining = [...texts];
                                     if (remaining.length === 0) return [];
                                     if (b.type === "text") b.props.content = remaining.shift();
                                     else if (b.type === "button") b.props.label = remaining.shift();
-                                    
+
                                     ["childBlocks", "col0", "col1"].forEach(pName => {
                                         const children = b.props[pName] as Block[] | undefined;
                                         if (Array.isArray(children)) children.forEach(c => { remaining = injectText(c, remaining); });
@@ -60,8 +60,8 @@ export function HeroPanel({ block }: { block: Block }) {
                                 // 4. Smart Merge: Preserve existing style props
                                 const preserved: Record<string, any> = {};
                                 [
-                                    "bgColor", "bgImage", "bgOverlay", "bgOverlayColor", 
-                                    "textColor", "minHeight", "padding", "tabletPadding", 
+                                    "bgColor", "bgImage", "bgOverlay", "bgOverlayColor",
+                                    "textColor", "minHeight", "padding", "tabletPadding",
                                     "mobilePadding", "borderRadius"
                                 ].forEach(prop => {
                                     if (p[prop] !== undefined) preserved[prop] = p[prop];
@@ -279,18 +279,56 @@ export function ImagePanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
+
+    const src = (p.src as string) || "";
+    const isVideo = src ? (
+        /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(src) ||
+        src.toLowerCase().includes("video") ||
+        src.includes("youtube.com") ||
+        src.includes("youtu.be") ||
+        src.includes("vimeo.com")
+    ) : false;
+
     return (
         <>
             <Section title="Source">
-                <Field label="Image URL"><MediaInput value={(p.src as string) || ""} onChange={(v) => up("src", v)} placeholder="https://..." /></Field>
+                <Field label="Image URL"><MediaInput value={(p.src as string) || ""} onChange={(v) => up("src", v)} placeholder="https://..." aspectRatio={p.aspectRatio as string} /></Field>
                 <Field label="Alt Text"><TextInput value={(p.alt as string) || ""} onChange={(v) => up("alt", v)} placeholder="Describe the image" /></Field>
                 <Field label="Caption"><TextInput value={(p.caption as string) || ""} onChange={(v) => up("caption", v)} placeholder="Optional caption..." /></Field>
                 <Field label="Link (clickable)"><TextInput value={(p.link as string) || ""} onChange={(v) => up("link", v)} placeholder="https://..." /></Field>
             </Section>
+            {isVideo && (
+                <VideoPlaybackOptions
+                    autoPlay={!!p.autoPlay} onChangeAutoPlay={(v) => up("autoPlay", v, true)}
+                    loop={!!p.loop} onChangeLoop={(v) => up("loop", v, true)}
+                    muted={p.muted !== false} onChangeMuted={(v) => up("muted", v, true)}
+                    controls={p.controls !== false} onChangeControls={(v) => up("controls", v, true)}
+                    hasPadding={false}
+                />
+            )}
             <Section title="Dimensions">
-                <Field label="Width"><TextInputWithUnit value={(p.width as string) ?? ""} onChange={(v) => up("width", v)} placeholder="100%" /></Field>
+                <Field label="Width">
+                    <SliderInput
+                        value={parseInt(p.width as string) || 100}
+                        onChange={(v) => up("width", `${v}%`, true)}
+                        unit="%"
+                    />
+                </Field>
                 <Field label="Height"><TextInputWithUnit value={(p.height as string) ?? ""} onChange={(v) => up("height", v)} placeholder="auto or 300px" /></Field>
-                <Field label="Aspect Ratio"><SelectInput value={(p.aspectRatio as string) || "auto"} onChange={(v) => up("aspectRatio", v)} options={[{ label: "Auto", value: "auto" }, { label: "16:9", value: "16/9" }, { label: "4:3", value: "4/3" }, { label: "1:1 (Square)", value: "1/1" }, { label: "3:2", value: "3/2" }, { label: "21:9", value: "21/9" }]} /></Field>
+                <Field label="Aspect Ratio">
+                    <AspectPicker
+                        value={(p.aspectRatio as string) || "auto"}
+                        onChange={(v) => up("aspectRatio", v, true)}
+                        options={[
+                            { label: "Auto", value: "auto" },
+                            { label: "16:9", value: "16/9" },
+                            { label: "4:3", value: "4/3" },
+                            { label: "1:1", value: "1/1" },
+                            { label: "3:2", value: "3/2" },
+                            { label: "21:9", value: "21/9" }
+                        ]}
+                    />
+                </Field>
             </Section>
             <Section title="Style">
                 <AlignmentInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} />
@@ -428,18 +466,36 @@ export function VideoPanel({ block }: { block: Block }) {
     return (
         <>
             <Section title="Video Source">
-                <Field label="Video URL"><MediaInput value={(p.url as string) || ""} onChange={(v) => up("url", v)} placeholder="YouTube / Vimeo / .mp4" type="video" /></Field>
-                <div style={{ fontSize: 10, color: "var(--text-subtle)", marginTop: 4 }}>Supports YouTube, Vimeo, and direct .mp4 links.</div>
+                <Field label="Video URL"><MediaInput value={(p.url as string) || ""} onChange={(v) => up("url", v)} placeholder="YouTube / Vimeo / .mp4" type="video" aspectRatio={p.aspectRatio as string} /></Field>
             </Section>
-            <Section title="Playback Options">
-                <ToggleSwitch label="AutoPlay" value={!!(p.autoPlay)} onChange={(v: boolean) => up("autoPlay", v)} />
-                <ToggleSwitch label="Loop" value={!!(p.loop)} onChange={(v: boolean) => up("loop", v)} />
-                <ToggleSwitch label="Muted" value={!!(p.muted) === true} onChange={(v: boolean) => up("muted", v)} />
-                <ToggleSwitch label="Show Controls" value={!!(p.controls) === true} onChange={(v: boolean) => up("controls", v)} />
-            </Section>
+            <VideoPlaybackOptions
+                autoPlay={!!p.autoPlay} onChangeAutoPlay={(v) => up("autoPlay", v, true)}
+                loop={!!p.loop} onChangeLoop={(v) => up("loop", v, true)}
+                muted={p.muted !== false} onChangeMuted={(v) => up("muted", v, true)}
+                controls={p.controls !== false} onChangeControls={(v) => up("controls", v, true)}
+                hasPadding={false}
+            />
             <Section title="Dimensions & Style">
-                <Field label="Width"><TextInputWithUnit value={(p.width as string) ?? ""} onChange={(v) => up("width", v)} placeholder="100%" /></Field>
-                <Field label="Aspect Ratio"><SelectInput value={(p.aspectRatio as string) || "16/9"} onChange={(v) => up("aspectRatio", v)} options={[{ label: "16:9", value: "16/9" }, { label: "4:3", value: "4/3" }, { label: "1:1", value: "1/1" }, { label: "21:9", value: "21/9" }, { label: "9:16 (Vertical)", value: "9/16" }]} /></Field>
+                <Field label="Width">
+                    <SliderInput
+                        value={parseInt(p.width as string) || 100}
+                        onChange={(v) => up("width", `${v}%`, true)}
+                        unit="%"
+                    />
+                </Field>
+                <Field label="Aspect Ratio">
+                    <AspectPicker
+                        value={(p.aspectRatio as string) || "16/9"}
+                        onChange={(v) => up("aspectRatio", v, true)}
+                        options={[
+                            { label: "16:9", value: "16/9" },
+                            { label: "4:3", value: "4/3" },
+                            { label: "1:1", value: "1/1" },
+                            { label: "21:9", value: "21/9" },
+                            { label: "9:16", value: "9/16" }
+                        ]}
+                    />
+                </Field>
                 <PaddingInput value={(p.padding as string) || "16px"} onChange={(v) => up("padding", v)} placeholder="16px" />
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "8px"} onChange={(v) => up("borderRadius", v)} /></Field>
                 <AlignmentInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} />

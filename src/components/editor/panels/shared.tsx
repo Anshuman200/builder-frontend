@@ -79,26 +79,60 @@ export const PANEL_COLORS = {
 
 // ─── MediaInput ───────────────────────────────────────────────────────────────
 
-export function MediaInput({ value, onChange, placeholder, type = "image", variant = "default" }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: "image" | "video"; variant?: "default" | "compact" }) {
+export function MediaInput({ value, onChange, placeholder, type = "image", variant = "default", aspectRatio }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: "image" | "video"; variant?: "default" | "compact"; aspectRatio?: string }) {
     const [pickerOpen, setPickerOpen] = React.useState(false);
 
-    const isVideo = type === "video" || (value && (value?.endsWith(".mp4") || value?.includes("youtube.com") || value?.includes("vimeo.com")));
+    const isVideo = type === "video" || (value && (value?.endsWith(".mp4") || value?.includes("youtube.com") || value?.includes("vimeo.com") || value?.includes("youtu.be")));
 
     return (
-        <div style={{ width: "100%" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%" }}>
+            {/* Direct URL Input */}
+            <div style={{ position: "relative" }}>
+                <div style={{
+                    position: "absolute",
+                    left: 10,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "#94a3b8",
+                    pointerEvents: "none"
+                }}>Link:</div>
+                <input
+                    type="text"
+                    value={value || ""}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder={placeholder || (type === "video" ? "YouTube.com/watch?v=..." : "https://...")}
+                    style={{
+                        width: "100%",
+                        padding: "8px 12px 8px 42px",
+                        fontSize: 12,
+                        background: PANEL_COLORS.inputBg,
+                        border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                        borderRadius: 8,
+                        color: PANEL_COLORS.text,
+                        outline: "none",
+                        transition: "all 0.2s"
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = PANEL_COLORS.primary}
+                    onBlur={(e) => e.target.style.borderColor = PANEL_COLORS.inputBorder}
+                />
+            </div>
+
+            {/* Visual Preview / Upload Button */}
             {!value ? (
                 <button
                     onClick={() => setPickerOpen(true)}
                     style={{
                         width: "100%",
-                        height: 70, // Slightly taller
+                        height: 70,
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
                         justifyContent: "center",
                         gap: 8,
                         background: PANEL_COLORS.inputBg,
-                        border: `2px dashed ${PANEL_COLORS.inputBorder}`, // Thicker dashed border
+                        border: `2px dashed ${PANEL_COLORS.inputBorder}`,
                         borderRadius: 10,
                         color: PANEL_COLORS.muted,
                         cursor: "pointer",
@@ -108,22 +142,22 @@ export function MediaInput({ value, onChange, placeholder, type = "image", varia
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; e.currentTarget.style.color = PANEL_COLORS.muted; e.currentTarget.style.background = PANEL_COLORS.inputBg; }}
                 >
                     {type === "video" ? <VideoCameraIcon style={{ width: 22, height: 22 }} /> : <PhotoIcon style={{ width: 22, height: 22 }} />}
-                    <span style={{ fontSize: 11, fontWeight: 600 }}>Select {type === "video" ? "Video" : "Image"}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600 }}>Select from Library</span>
                 </button>
             ) : (
                 <div style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: variant === "compact" ? 8 : 12,
-                    padding: variant === "compact" ? 6 : 10,
+                    gap: 12,
+                    padding: 10,
                     background: PANEL_COLORS.inputBg,
                     border: `1px solid ${PANEL_COLORS.inputBorder}`,
                     borderRadius: 10,
                     overflow: "hidden"
                 }}>
                     <div style={{
-                        width: variant === "compact" ? 32 : 48,
-                        height: variant === "compact" ? 32 : 48,
+                        width: 64,
+                        height: 48,
                         borderRadius: 6,
                         background: "#121212",
                         display: "flex",
@@ -131,60 +165,76 @@ export function MediaInput({ value, onChange, placeholder, type = "image", varia
                         justifyContent: "center",
                         overflow: "hidden",
                         flexShrink: 0,
-                        border: "1px solid rgba(255,255,255,0.05)"
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        position: "relative"
                     }}>
                         {isVideo ? (
-                            <VideoCameraIcon style={{ width: variant === "compact" ? 14 : 20, height: variant === "compact" ? 14 : 20, color: PANEL_COLORS.primary }} />
+                            <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <VideoCameraIcon style={{ width: 20, height: 20, color: PANEL_COLORS.primary }} />
+                                <div style={{
+                                    position: "absolute",
+                                    top: 2,
+                                    left: 2,
+                                    background: "rgba(0,0,0,0.6)",
+                                    fontSize: 8,
+                                    padding: "1px 3px",
+                                    borderRadius: 2,
+                                    color: "white"
+                                }}>{aspectRatio && aspectRatio !== "auto" ? aspectRatio.replace("/", ":") : "16:9"}</div>
+                            </div>
                         ) : (
                             <img src={value} alt="Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { (e.target as any).src = "https://placehold.co/100x100?text=Error"; }} />
                         )}
                     </div>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="flex flex-col gap-1 items-start">
-                            {variant === "compact" ? (
-                                <div className="flex gap-2">
-                                    <AppToolTip title="Change">
-                                        <button
-                                            onClick={() => setPickerOpen(true)}
-                                            style={{ background: "none", border: "none", padding: 4, color: PANEL_COLORS.primary, cursor: "pointer", display: "flex", alignItems: "center", borderRadius: 4 }}
-                                            onMouseEnter={e => e.currentTarget.style.background = "rgba(0,153,255,0.1)"}
-                                            onMouseLeave={e => e.currentTarget.style.background = "none"}
-                                        >
-                                            <ArrowPathIcon style={{ width: 14, height: 14 }} />
-                                        </button>
-                                    </AppToolTip>
-                                    <AppToolTip title="Remove">
-                                        <button
-                                            onClick={() => onChange("")}
-                                            style={{ background: "none", border: "none", padding: 4, color: "#ef4444", cursor: "pointer", display: "flex", alignItems: "center", borderRadius: 4 }}
-                                            onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.1)"}
-                                            onMouseLeave={e => e.currentTarget.style.background = "none"}
-                                        >
-                                            <TrashIcon style={{ width: 14, height: 14 }} />
-                                        </button>
-                                    </AppToolTip>
-                                </div>
-                            ) : (
-                                <>
-                                    <button
-                                        onClick={() => setPickerOpen(true)}
-                                        style={{ background: "none", border: "none", padding: 0, color: PANEL_COLORS.primary, fontSize: 11, cursor: "pointer", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
-                                    >
-                                        <ArrowPathIcon style={{ width: 12, height: 12 }} /> Change
-                                    </button>
-                                    <button
-                                        onClick={() => onChange("")}
-                                        style={{ background: "none", border: "none", padding: 0, color: "#ef4444", fontSize: 11, cursor: "pointer", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}
-                                    >
-                                        <TrashIcon style={{ width: 12, height: 12 }} /> Remove
-                                    </button>
-                                </>
-                            )}
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setPickerOpen(true)}
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 6,
+                                    padding: "6px 12px",
+                                    borderRadius: 6,
+                                    background: "rgba(59, 130, 246, 0.1)",
+                                    border: "1px solid rgba(59, 130, 246, 0.2)",
+                                    color: "#60a5fa",
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                    cursor: "pointer"
+                                }}
+                            >
+                                <ArrowPathIcon style={{ width: 14, height: 14 }} />
+                                Change
+                            </button>
+                            <button
+                                onClick={() => onChange("")}
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 6,
+                                    padding: "6px 12px",
+                                    borderRadius: 6,
+                                    background: "rgba(239, 68, 68, 0.1)",
+                                    border: "1px solid rgba(239, 68, 68, 0.2)",
+                                    color: "#f87171",
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                    cursor: "pointer"
+                                }}
+                            >
+                                <TrashIcon style={{ width: 14, height: 14 }} />
+                                Remove
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
+
+            <div style={{ fontSize: 10, color: "#64748b", fontStyle: "italic", marginTop: -4 }}>
+                Supported Formats: YouTube, Vimeo, and direct .mp4 links.
+            </div>
 
             {pickerOpen && (
                 <MediaPicker
@@ -1073,27 +1123,130 @@ export function ToggleInput({ value, onChange, label }: { value: boolean; onChan
 // ─── ToggleSwitch ──────────────────────────────────────────────────────────────
 export function ToggleSwitch({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label?: string }) {
     const control = (
-        <div className="flex items-center gap-2 mt-1">
-            <Switch checked={value} onChange={(v) => onChange(v)} />
+        <div className="flex items-center gap-2">
+            <Switch
+                checked={value}
+                onChange={(v) => onChange(v)}
+                size="small"
+                style={{
+                    backgroundColor: value ? "#3b82f6" : "rgba(255,255,255,0.1)",
+                    boxShadow: value ? "0 0 6px rgba(59, 130, 246, 0.4)" : "none",
+                    height: "16px",
+                    minWidth: "28px"
+                }}
+            />
             <span
-                className={cn(
-                    "min-w-8 mx-auto",
-                    value ? "text-green-500" : "text-red-500"
-                )}
+                style={{
+                    fontSize: "10px",
+                    fontWeight: 600,
+                    minWidth: "20px",
+                    color: value ? "#60a5fa" : "#64748b",
+                    transition: "all 0.2s"
+                }}
             >
                 {value ? "Yes" : "No"}
             </span>
         </div>
     );
+
     if (label) {
         return (
-            <div className="flex justify-between">
-                <span style={{ fontSize: 11, fontWeight: 500, color: PANEL_COLORS.text }}>{label}</span>
+            <div className="flex items-center justify-between gap-2" style={{ width: "100%" }}>
+                {label && <span style={{ fontSize: "11px", fontWeight: 500, color: "#94a3b8", whiteSpace: "nowrap" }}>{label}</span>}
                 {control}
             </div>
         );
     }
     return control;
+}
+
+export function VideoPlaybackOptions({
+    autoPlay, onChangeAutoPlay,
+    loop, onChangeLoop,
+    muted, onChangeMuted,
+    controls, onChangeControls,
+    title = "Playback Options",
+    hasPadding = false
+}: {
+    autoPlay: boolean; onChangeAutoPlay: (v: boolean) => void;
+    loop: boolean; onChangeLoop: (v: boolean) => void;
+    muted: boolean; onChangeMuted: (v: boolean) => void;
+    controls: boolean; onChangeControls: (v: boolean) => void;
+    title?: string;
+    hasPadding?: boolean;
+}) {
+    return (
+        <Section title={title} hasPadding={hasPadding}>
+            <div style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "10px 24px",
+                padding: "12px",
+                background: "rgba(255,255,255,0.02)",
+                borderRadius: "10px",
+                border: "1px solid rgba(255,255,255,0.04)",
+                marginTop: "4px"
+            }}>
+                <ToggleSwitch label="AutoPlay" value={autoPlay} onChange={onChangeAutoPlay} />
+                <ToggleSwitch label="Muted" value={muted} onChange={onChangeMuted} />
+                <ToggleSwitch label="Loop" value={loop} onChange={onChangeLoop} />
+                <ToggleSwitch label="Show Controls" value={controls} onChange={onChangeControls} />
+            </div>
+        </Section>
+    );
+}
+
+// ─── AspectPicker ─────────────────────────────────────────────────────────────
+export function AspectPicker({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { label: string; value: string }[] }) {
+    return (
+        <div className="grid grid-cols-3 gap-2.5 mt-2">
+            {options.map((opt) => {
+                const isActive = value === opt.value;
+                return (
+                    <button
+                        key={opt.value}
+                        onClick={() => onChange(opt.value)}
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: "8px",
+                            padding: "10px 4px",
+                            borderRadius: "10px",
+                            backgroundColor: isActive ? "rgba(59, 130, 246, 0.08)" : "rgba(255,255,255,0.02)",
+                            border: `1.5px solid ${isActive ? "#3b82f6" : "rgba(255,255,255,0.06)"}`,
+                            boxShadow: isActive ? "0 0 10px rgba(59, 130, 246, 0.2)" : "none",
+                            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                            cursor: "pointer"
+                        }}
+                    >
+                        <div style={{
+                            width: "32px",
+                            height: "24px",
+                            borderRadius: "4px",
+                            backgroundColor: isActive ? "#3b82f6" : "rgba(255,255,255,0.1)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            opacity: isActive ? 1 : 0.7
+                        }}>
+                            <div style={{
+                                width: opt.value === "1/1" ? "14px" : (opt.value === "21/9" ? "22px" : "18px"),
+                                height: opt.value === "1/1" ? "14px" : (opt.value === "21/9" ? "10px" : "12px"),
+                                border: `1.5px solid ${isActive ? "white" : "rgba(255,255,255,0.8)"}`,
+                                borderRadius: "2px"
+                            }} />
+                        </div>
+                        <span style={{
+                            fontSize: "10px",
+                            fontWeight: isActive ? 700 : 500,
+                            color: isActive ? "#60a5fa" : "#94a3b8"
+                        }}>{opt.label}</span>
+                    </button>
+                );
+            })}
+        </div>
+    );
 }
 
 // ─── SliderInput ──────────────────────────────────────────────────────────────
@@ -1106,16 +1259,15 @@ export function SliderInput({ value, onChange, min = 0, max = 100, step = 1, uni
                     appearance: none;
                     width: 14px;
                     height: 14px;
-                    background: ${PANEL_COLORS.primary};
+                    background: #3b82f6;
                     border-radius: 50%;
                     cursor: pointer;
                     border: 2px solid #fff;
-                    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+                    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
                     transition: all 0.2s;
                 }
                 .ag-slider-input::-webkit-slider-thumb:hover {
                     transform: scale(1.15);
-                    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
                 }
                 .ag-slider-input::-moz-range-thumb {
                     width: 14px;
@@ -1138,7 +1290,7 @@ export function SliderInput({ value, onChange, min = 0, max = 100, step = 1, uni
                 style={{
                     flex: 1,
                     height: 4,
-                    background: `linear-gradient(to right, ${PANEL_COLORS.primary} 0%, ${PANEL_COLORS.primary} ${(value - min) / (max - min) * 100}%, ${PANEL_COLORS.inputBg} ${(value - min) / (max - min) * 100}%, ${PANEL_COLORS.inputBg} 100%)`,
+                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.1) ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.1) 100%)`,
                     borderRadius: 2,
                     appearance: "none",
                     outline: "none",
@@ -1283,7 +1435,7 @@ export function PaddingInput({ value, onChange, label, placeholder }: { value: s
 
 // ─── Section ──────────────────────────────────────────────────────────────────
 
-export function Section({ title, children }: { title: string; children: React.ReactNode }) {
+export function Section({ title, children, hasPadding = true }: { title: string; children: React.ReactNode, hasPadding?: boolean }) {
     const { subItemFocus, selectedBlockId } = useEditorStore();
     const isFocused = subItemFocus?.blockId === selectedBlockId && subItemFocus?.index === title;
     const [isFlashing, setIsFlashing] = React.useState(false);
@@ -1309,7 +1461,7 @@ export function Section({ title, children }: { title: string; children: React.Re
             ref={containerRef}
             style={{
                 borderBottom: `1px solid ${PANEL_COLORS.border}`,
-                padding: "12px 16px",
+                padding: hasPadding ? "12px 16px" : "0px",
                 transition: "background 0.5s ease",
                 background: isFlashing ? "rgba(99, 102, 241, 0.1)" : isFocused ? "rgba(99, 102, 241, 0.05)" : "transparent",
                 position: "relative"

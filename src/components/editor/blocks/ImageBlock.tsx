@@ -23,6 +23,11 @@ export function ImageBlock({ block }: BlockProps) {
     const boxShadow = (p.boxShadow as string) || "none";
     const priority = p.priority === true;
 
+    const autoPlay = p.autoPlay === true;
+    const loop = p.loop === true;
+    const muted = p.muted !== false;
+    const controls = p.controls !== false;
+
     const wrapperStyle: React.CSSProperties = {
         padding: isInMasonry ? "0" : (p.padding as string) || "8px 16px",
         width: "100%",
@@ -61,6 +66,10 @@ export function ImageBlock({ block }: BlockProps) {
             height={height}
             boxShadow={boxShadow}
             priority={priority}
+            autoPlay={autoPlay}
+            loop={loop}
+            muted={muted}
+            controls={controls}
         />
     );
 

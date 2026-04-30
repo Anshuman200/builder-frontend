@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Section, Field, ColorInput, GradientInput, UnifiedBackgroundInput, MediaInput, SelectInput, SliderInput } from "./shared";
+import { Section, Field, ColorInput, GradientInput, UnifiedBackgroundInput, MediaInput, SelectInput, SliderInput, VideoPlaybackOptions } from "./shared";
 import { Block } from "@/types";
 import { useEditorStore } from "@/stores/editorStore";
 
@@ -12,13 +12,19 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
   const { updateBlock } = useEditorStore();
   const p = block.props;
 
-  const up = (key: string, val: unknown, commit?: boolean) => 
+  const up = (key: string, val: unknown, commit?: boolean) =>
     updateBlock(block.id, { [key]: val }, commit);
+
+  const bgImage = (p.bgImage as string) || "";
+  const isVideo = bgImage ? (
+    /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(bgImage) ||
+    bgImage.toLowerCase().includes("video")
+  ) : false;
 
   return (
     <Section title="Background">
       <Field label="Fill">
-        <UnifiedBackgroundInput 
+        <UnifiedBackgroundInput
           bgColor={(p.bgColor as string) || (p.sectionBg as string) || "transparent"}
           bgGradient={(p.bgGradient as string) || ""}
           onChangeColor={(v) => up("bgColor", v, true)}
@@ -28,30 +34,40 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
 
       {(!!p.bgColor || !!p.bgGradient) && (
         <Field label="Fill Opacity">
-          <SliderInput 
-            value={Number(p.bgFillOpacity ?? 50)} 
-            onChange={(v) => up("bgFillOpacity", v, true)} 
+          <SliderInput
+            value={Number(p.bgFillOpacity ?? 50)}
+            onChange={(v) => up("bgFillOpacity", v, true)}
           />
         </Field>
       )}
 
       <Field label="Media (Image or Video)">
-        <MediaInput 
-          value={(p.bgImage as string) || ""} 
-          onChange={(v) => up("bgImage", v, true)} 
-          placeholder="https://images.unsplash.com/..."
+        <MediaInput
+          value={(p.bgImage as string) || ""}
+          onChange={(v) => up("bgImage", v, true)}
+          placeholder="https://solario.ai/cdn/videos/"
         />
       </Field>
 
       {!!p.bgImage && (
         <>
+          {isVideo && (
+            <VideoPlaybackOptions
+              autoPlay={!!p.bgAutoPlay} onChangeAutoPlay={(v) => up("bgAutoPlay", v, true)}
+              loop={!!p.bgLoop} onChangeLoop={(v) => up("bgLoop", v, true)}
+              muted={p.bgMuted !== false} onChangeMuted={(v) => up("bgMuted", v, true)}
+              controls={p.bgControls !== false} onChangeControls={(v) => up("bgControls", v, true)}
+              title="Background Video Options"
+              hasPadding={false}
+            />
+          )}
           <Field label="Media Opacity">
-            <SliderInput 
-              value={Number(p.bgImageOpacity ?? 100)} 
-              onChange={(v) => up("bgImageOpacity", v, true)} 
+            <SliderInput
+              value={Number(p.bgImageOpacity ?? 100)}
+              onChange={(v) => up("bgImageOpacity", v, true)}
             />
           </Field>
-          
+
           <Field label="Media Size">
             <SelectInput
               value={(p.bgSize as string) || "cover"}
@@ -64,7 +80,7 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
               ]}
             />
           </Field>
-          
+
           <Field label="Media Position">
             <SelectInput
               value={(p.bgPosition as string) || "center"}
@@ -79,18 +95,20 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
             />
           </Field>
 
-          <Field label="Media Repeat (Image only)">
-            <SelectInput
-              value={(p.bgRepeat as string) || "no-repeat"}
-              onChange={(v) => up("bgRepeat", v, true)}
-              options={[
-                { label: "No Repeat", value: "no-repeat" },
-                { label: "Repeat", value: "repeat" },
-                { label: "Repeat X", value: "repeat-x" },
-                { label: "Repeat Y", value: "repeat-y" },
-              ]}
-            />
-          </Field>
+          {!isVideo && (
+            <Field label="Media Repeat (Image only)">
+              <SelectInput
+                value={(p.bgRepeat as string) || "no-repeat"}
+                onChange={(v) => up("bgRepeat", v, true)}
+                options={[
+                  { label: "No Repeat", value: "no-repeat" },
+                  { label: "Repeat", value: "repeat" },
+                  { label: "Repeat X", value: "repeat-x" },
+                  { label: "Repeat Y", value: "repeat-y" },
+                ]}
+              />
+            </Field>
+          )}
         </>
       )}
     </Section>
