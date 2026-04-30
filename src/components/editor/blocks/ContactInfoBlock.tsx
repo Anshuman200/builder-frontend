@@ -116,6 +116,13 @@ export function ContactInfoBlock({ block }: BlockProps) {
                         >
                             {showIcons && Icon && (
                                 <div
+                                    onClick={(e) => {
+                                        if (isPreview) return;
+                                        e.stopPropagation();
+                                        const store = useEditorStore.getState();
+                                        store.selectBlock(block.id);
+                                        store.focusSubItem(block.id, "Icon Styling");
+                                    }}
                                     style={{
                                         display: "flex",
                                         alignItems: "center",

@@ -187,7 +187,7 @@ export function InlineTextEditor({
 }) {
     const isPreview = React.useContext(PreviewContext);
     const updateBlock = useEditorStore((s) => s.updateBlock);
-    const selectBlock = useEditorStore((s) => s.selectBlock);
+    const { selectBlock, focusSubItem } = useEditorStore();
     const isSelected = useEditorStore((s) => s.selectedBlockId === blockId);
     const [isEditing, setIsEditing] = React.useState(false);
     const contentRef = React.useRef<HTMLElement>(null);
@@ -205,6 +205,7 @@ export function InlineTextEditor({
         if (!isEditing) {
             e.preventDefault();
             selectBlock(blockId);
+            focusSubItem(blockId, propName);
             setIsEditing(true);
             setTimeout(() => {
                 if (contentRef.current) {

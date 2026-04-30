@@ -9,7 +9,7 @@ import type { Block, EditorPage } from "@/types";
  */
 
 import React from "react";
-import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 import { useEditorStore } from "@/stores/editorStore";
 import { ColorPicker, Dropdown, Input, Popover, Select, Space, Switch, Tooltip } from "antd";
@@ -68,7 +68,7 @@ export function useSubItemFocus(blockId: string) {
 export const PANEL_COLORS = {
     bg: "#050505",
     sectionBg: "#0a0a0a",
-    border: "rgba(255, 255, 255, 0.06)",
+    border: "rgba(255, 255, 255, 0.12)",
     text: "#ffffff",
     muted: "#71717a",
     inputBg: "#111111",
@@ -1374,7 +1374,7 @@ const ALIGN_ICONS: Record<string, React.ReactNode> = {
 
 export function AlignmentInput({ value, onChange, label, type = "horizontal", options }: { value: string; onChange: (v: string) => void; label?: string; type?: "horizontal" | "vertical" | "flex-vertical"; options?: { label: string; value: string }[] }) {
     const defaultOptions = type === "horizontal"
-        ? [{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }, { label: "Justify", value: "justify" }]
+        ? [{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]
         : type === "vertical"
             ? [{ label: "Top", value: "top" }, { label: "Middle", value: "middle" }, { label: "Bottom", value: "bottom" }]
             : [{ label: "Top", value: "flex-start" }, { label: "Center", value: "center" }, { label: "Bottom", value: "flex-end" }, { label: "Stretch", value: "stretch" }];
@@ -1437,9 +1437,21 @@ export function PaddingInput({ value, onChange, label, placeholder }: { value: s
 
 // ─── Section ──────────────────────────────────────────────────────────────────
 
-export function Section({ title, children, hasPadding = true }: { title: string; children: React.ReactNode, hasPadding?: boolean }) {
+export function Section({ title, children, hasPadding = true, focusKeys = [] }: { title: string; children: React.ReactNode, hasPadding?: boolean, focusKeys?: (string | number)[] }) {
     const { subItemFocus, selectedBlockId } = useEditorStore();
-    const isFocused = subItemFocus?.blockId === selectedBlockId && subItemFocus?.index === title;
+    
+    // Smart auto-focus matching for common patterns
+    const autoFocusKeys = [...focusKeys];
+    if (title.toLowerCase() === "content") autoFocusKeys.push("title", "subtitle");
+    if (title.toLowerCase().includes("items") || title.toLowerCase().includes("members")) {
+        // Auto-match indices 0-15 for list sections
+        for(let i=0; i<16; i++) autoFocusKeys.push(i);
+    }
+
+    const isFocused = subItemFocus?.blockId === selectedBlockId && (
+        subItemFocus?.index === title || 
+        autoFocusKeys.includes(subItemFocus?.index as any)
+    );
     const [isFlashing, setIsFlashing] = React.useState(false);
 
     const containerRef = React.useRef<HTMLDivElement>(null);
@@ -1462,11 +1474,17 @@ export function Section({ title, children, hasPadding = true }: { title: string;
             id={sectionId}
             ref={containerRef}
             style={{
-                borderBottom: `1px solid ${PANEL_COLORS.border}`,
-                padding: hasPadding ? "12px 16px" : "0px",
-                transition: "background 0.5s ease",
-                background: isFlashing ? "rgba(99, 102, 241, 0.1)" : isFocused ? "rgba(99, 102, 241, 0.05)" : "transparent",
-                position: "relative"
+                border: isFocused ? `1px solid ${PANEL_COLORS.primary}` : `1px solid rgba(255,255,255,0.08)`,
+                borderRadius: 12,
+                margin: "14px 16px",
+                padding: hasPadding ? "16px 20px" : "0px",
+                transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                background: isFlashing ? "rgba(99, 102, 241, 0.2)" : isFocused ? "rgba(99, 102, 241, 0.12)" : "rgba(255,255,255,0.03)",
+                backdropFilter: isFocused ? "blur(8px)" : "none",
+                position: "relative",
+                boxShadow: isFocused 
+                    ? `0 8px 32px rgba(99, 102, 241, 0.2), inset 0 0 0 1px rgba(255,255,255,0.05)` 
+                    : "0 4px 12px rgba(0,0,0,0.25)"
             }}
         >
             <style>{`
@@ -1478,17 +1496,28 @@ export function Section({ title, children, hasPadding = true }: { title: string;
                     animation: section-flash 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
                 }
             `}</style>
-            {(isFocused || isFlashing) && (
-                <div style={{ position: "absolute", left: 0, top: 12, bottom: 12, width: 3, background: PANEL_COLORS.primary, borderRadius: "0 4px 4px 0", boxShadow: `0 0 10px ${PANEL_COLORS.primary}` }} />
-            )}
-            <div className={isFlashing ? "section-focused-flash" : ""} style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+            <div className={isFlashing ? "section-focused-flash" : ""} style={{ position: "absolute", inset: 0, pointerEvents: "none", borderRadius: 10 }} />
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.02em", color: isFocused ? PANEL_COLORS.primary : PANEL_COLORS.text, transition: "color 0.3s" }}>{title}</p>
-                <div style={{ color: PANEL_COLORS.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 16, height: 16 }}>
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 1V9M1 5H9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
+            <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 12,
+                paddingBottom: 8,
+                borderBottom: "1px solid rgba(255,255,255,0.03)"
+            }}>
+                <p style={{
+                    margin: 0,
+                    fontSize: 10,
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                    color: isFocused ? PANEL_COLORS.primary : PANEL_COLORS.text,
+                    opacity: isFocused ? 1 : 0.5,
+                    transition: "all 0.3s"
+                }}>{title}</p>
+                <div style={{ color: PANEL_COLORS.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 16, height: 16, opacity: 0.3 }}>
+                    <PlusIcon style={{ width: 12, height: 12 }} />
                 </div>
             </div>
             {children}
@@ -1649,8 +1678,8 @@ export function LayoutFields({ p, up, options = {} }: PropertyGroupProps & { opt
     return (
         <>
             {layouts && <Field label="Layout"><SelectInput value={p.layout || layouts[0].value} onChange={(v) => up("layout", v)} options={layouts} /></Field>}
-            {showCols && <Field label="Columns"><SelectInput value={String(p.columns || "3")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>}
-            {showGap && <Field label="Gap"><TextInputWithUnit value={p.gap || "2rem"} onChange={(v) => up("gap", v)} placeholder="2rem" /></Field>}
+            {showCols && p.layout !== "strip" && <Field label="Columns"><SelectInput value={String(p.columns || "3")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }, { label: "5 Columns", value: "5" }, { label: "6 Columns", value: "6" }]} /></Field>}
+            {showGap && <Field label="Gap"><TextInputWithUnit value={p.gap || ""} onChange={(v) => up("gap", v)} placeholder="2" /></Field>}
             {showAlign && <AlignmentInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} />}
         </>
     );
@@ -1665,37 +1694,37 @@ export function IconFields({ p, up, prefix = "" }: PropertyGroupProps) {
     return (
         <>
             <Field label="Icon Size">
-                <TextInputWithUnit 
-                    value={String(p[getK("iconSize")] ?? "")} 
-                    placeholder="24" 
-                    onChange={(v) => up(getK("iconSize"), v)} 
+                <TextInputWithUnit
+                    value={String(p[getK("iconSize")] ?? "")}
+                    placeholder="24"
+                    onChange={(v) => up(getK("iconSize"), v)}
                 />
             </Field>
             <Field label="Icon Color">
-                <ColorInput 
-                    value={(p[getK("iconColor")] as string) || "var(--primary)"} 
-                    onChange={(v) => up(getK("iconColor"), v)} 
-                    onBlur={(v) => up(getK("iconColor"), v, true)} 
+                <ColorInput
+                    value={(p[getK("iconColor")] as string) || ""}
+                    placeholder="var(--primary)"
+                    onChange={(v) => up(getK("iconColor"), v, true)}
                 />
             </Field>
             <Field label="Wrapper Size">
-                <TextInputWithUnit 
-                    value={String(p[getK("iconWrapperSize")] ?? "")} 
-                    placeholder="52" 
-                    onChange={(v) => up(getK("iconWrapperSize"), v)} 
+                <TextInputWithUnit
+                    value={String(p[getK("iconWrapperSize")] ?? "")}
+                    placeholder="52"
+                    onChange={(v) => up(getK("iconWrapperSize"), v)}
                 />
             </Field>
             <Field label="Wrapper Background">
-                <ColorInput 
-                    value={(p[getK("iconBg")] as string) || "rgba(var(--primary-rgb), 0.15)"} 
-                    onChange={(v) => up(getK("iconBg"), v)} 
-                    onBlur={(v) => up(getK("iconBg"), v, true)} 
+                <ColorInput
+                    value={(p[getK("iconBg")] as string) || ""}
+                    placeholder="rgba(var(--primary-rgb), 0.1)"
+                    onChange={(v) => up(getK("iconBg"), v, true)}
                 />
             </Field>
             <Field label="Wrapper Radius">
-                <BorderRadiusInput 
-                    value={(p[getK("iconRadius")] as string) || "14px"} 
-                    onChange={(v) => up(getK("iconRadius"), v)} 
+                <BorderRadiusInput
+                    value={(p[getK("iconRadius")] as string) || "14px"}
+                    onChange={(v) => up(getK("iconRadius"), v)}
                 />
             </Field>
         </>

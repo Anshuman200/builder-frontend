@@ -12,13 +12,14 @@ import {
     TextInputWithUnit, useSubItemFocus, PrefixInput,
     IconFields
 } from "./shared";
-import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, PlusIcon, GlobeAltIcon, Squares2X2Icon, ListBulletIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, PlusIcon, GlobeAltIcon, Squares2X2Icon, ListBulletIcon, Bars3BottomLeftIcon, Bars3Icon, Bars3BottomRightIcon } from "@heroicons/react/24/outline";
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "../IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
 import { BackgroundPanel } from "./BackgroundPanel";
 import { Dropdown } from "antd";
 import dynamic from "next/dynamic";
+import PillSegmented from "@/components/ui/PillSegmented";
 
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false }) as any;
 
@@ -31,32 +32,32 @@ export function FeaturesPanel({ block }: { block: Block }) {
 
     return (
         <>
-            <Section title="Content">
+            <Section title="Content" focusKeys={["title", "subtitle"]}>
                 <TypographyFields p={p} up={up} />
             </Section>
-            <Section title="Layout & Style">
+            <Section title="Layout & Style" focusKeys={["layout", "columns", "align"]}>
                 <LayoutFields p={p} up={up} options={{
                     layouts: [{ label: "Card Grid", value: "grid" }, { label: "Alternating Row (Icon + Text)", value: "alternating" }, { label: "Horizontal List", value: "horizontal" }, { label: "Icon-Only Grid", value: "icon-grid" }, { label: "Bento / Asymmetric", value: "bento" }]
                 }} />
                 <BackgroundPanel block={block} />
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#1e293b"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
-            <Section title="Card Styling">
+            <Section title="Card Styling" focusKeys={["cardStyle", "cardBg", "cardRadius"]}>
                 <CardFields p={p} up={up} />
             </Section>
-            <Section title="Typography">
+            <Section title="Typography" focusKeys={["titleSize", "subtitleSize", "cardTitleSize", "cardDescSize"]}>
                 <Field label="Section Title Size"><TextInputWithUnit value={(p.titleSize as string) ?? ""} placeholder="2.25rem" onChange={(v) => up("titleSize", v)} /></Field>
                 <Field label="Section Subtitle Size"><TextInputWithUnit value={(p.subtitleSize as string) ?? ""} placeholder="1.125rem" onChange={(v) => up("subtitleSize", v)} /></Field>
                 <Field label="Card Title Size"><TextInputWithUnit value={(p.cardTitleSize as string) ?? ""} placeholder="1.2rem" onChange={(v) => up("cardTitleSize", v)} /></Field>
                 <Field label="Card Description Size"><TextInputWithUnit value={(p.cardDescSize as string) ?? ""} placeholder="0.95rem" onChange={(v) => up("cardDescSize", v)} /></Field>
             </Section>
-            <Section title="Icon Styling">
+            <Section title="Icon Styling" focusKeys={["iconSize", "iconColor", "iconBg", "iconRadius", "iconWrapperSize"]}>
                 <IconFields p={p} up={up} />
             </Section>
-            <Section title="Section Padding (Responsive)">
+            <Section title="Section Padding (Responsive)" focusKeys={["pt", "pb", "px"]}>
                 <PaddingFields p={p} up={up} />
             </Section>
-            <Section title="Feature Items">
+            <Section title="Feature Items" focusKeys={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}>
                 <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Add or remove feature items below.</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     <SortableList
@@ -162,21 +163,21 @@ export function TeamPanel({ block }: { block: Block }) {
 
     return (
         <>
-            <Section title="Content">
+            <Section title="Content" focusKeys={["title", "subtitle"]}>
                 <TypographyFields p={p} up={up} />
             </Section>
-            <Section title="Layout & Grid">
+            <Section title="Layout & Grid" focusKeys={["layout", "columns", "align"]}>
                 <LayoutFields p={p} up={up} options={{
                     layouts: [{ label: "Card Grid", value: "grid" }, { label: "Horizontal List (Photo Left)", value: "list" }, { label: "Large Cards (1 per row)", value: "large" }, { label: "Compact Row (Mini Cards)", value: "compact" }, { label: "Circular Spotlight", value: "spotlight" }]
                 }} />
             </Section>
-            <Section title="Card Styling">
+            <Section title="Card Styling" focusKeys={["cardStyle", "cardBg", "cardRadius", "cardHeight", "cardPadding"]}>
                 <CardFields p={p} up={up} />
                 <Field label="Card Height"><TextInputWithUnit value={(p.cardHeight as string) ?? ""} onChange={(v) => up("cardHeight", v)} placeholder="auto or 400" /></Field>
                 <PaddingInput label="Card Padding" value={(p.cardPadding as string) || "2rem 1.75rem"} onChange={(v) => up("cardPadding", v)} />
                 <PaddingInput label="Text Padding" value={(p.cardContentPadding as string) || "1rem 1.25rem"} onChange={(v) => up("cardContentPadding", v)} />
             </Section>
-            <Section title="Image Styling">
+            <Section title="Image Styling" focusKeys={["imageStyle", "imageSize", "imageHeight", "imageRadius", "imagePosition"]}>
                 <Field label="Image Style"><SelectInput value={(p.imageStyle as string) || "circle"} onChange={(v) => up("imageStyle", v)} options={[{ label: "Circle", value: "circle" }, { label: "Square", value: "square" }, { label: "Floating Cutout", value: "float" }, { label: "Card Cover", value: "cover" }]} /></Field>
                 {p.imageStyle !== "cover" && (<>
                     <Field label="Image Size"><TextInputWithUnit value={(p.imageSize as string) ?? ""} onChange={(v) => up("imageSize", v)} placeholder="120" /></Field>
@@ -187,15 +188,15 @@ export function TeamPanel({ block }: { block: Block }) {
                 {p.imageStyle === "cover" && (<Field label="Gradient Overlay"><ColorInput value={(p.coverGradientBottom as string) || "rgba(0,0,0,0.9)"} onChange={(v) => up("coverGradientBottom", v)} /></Field>)}
             </Section>
             <BackgroundPanel block={block} />
-            <Section title="Colors">
+            <Section title="Colors" focusKeys={["nameColor", "roleColor", "descColor"]}>
                 <Field label="Name Text"><ColorInput value={(p.nameColor as string) || "#0f172a"} onChange={(v) => up("nameColor", v)} /></Field>
                 <Field label="Role Text"><ColorInput value={(p.roleColor as string) || "#64748b"} onChange={(v) => up("roleColor", v)} /></Field>
                 <Field label="Description Text"><ColorInput value={(p.descColor as string) || "#475569"} onChange={(v) => up("descColor", v)} /></Field>
             </Section>
-            <Section title="Social Links Styling">
+            <Section title="Social Links Styling" focusKeys={["socialIconSize", "socialIconColor", "socialIconBg", "socialIconRadius"]}>
                 <IconFields p={p} up={up} prefix="social" />
             </Section>
-            <Section title="Team Members">
+            <Section title="Team Members" focusKeys={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     <SortableList
                         items={(p.members as any[]) || []}
@@ -495,12 +496,12 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); deleteRoute(route.id); }}
                                                 className="group/del"
-                                                style={{ 
-                                                    padding: "6px", 
-                                                    background: "rgba(239,68,68,0.05)", 
-                                                    border: "1px solid rgba(239,68,68,0.1)", 
-                                                    borderRadius: 8, 
-                                                    cursor: "pointer", 
+                                                style={{
+                                                    padding: "6px",
+                                                    background: "rgba(239,68,68,0.05)",
+                                                    border: "1px solid rgba(239,68,68,0.1)",
+                                                    borderRadius: 8,
+                                                    cursor: "pointer",
                                                     transition: "all 0.2s",
                                                     display: "flex",
                                                     alignItems: "center",
@@ -523,20 +524,20 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }} onClick={e => e.stopPropagation()}>
                                         <div className="flex flex-col gap-1.5">
                                             <label style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Page Name</label>
-                                            <TextInput 
-                                                value={route.name} 
-                                                onChange={(v) => updateRoute(route.id, { name: v })} 
-                                                placeholder="Name" 
-                                                style={{ height: 28, fontSize: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.05)" }} 
+                                            <TextInput
+                                                value={route.name}
+                                                onChange={(v) => updateRoute(route.id, { name: v })}
+                                                placeholder="Name"
+                                                style={{ height: 28, fontSize: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.05)" }}
                                             />
                                         </div>
                                         <div className="flex flex-col gap-1.5">
                                             <label style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.05em" }}>URL Path</label>
-                                            <TextInput 
-                                                value={route.path} 
-                                                onChange={(v) => updateRoute(route.id, { path: v })} 
-                                                placeholder="Path" 
-                                                style={{ height: 28, fontSize: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.05)" }} 
+                                            <TextInput
+                                                value={route.path}
+                                                onChange={(v) => updateRoute(route.id, { path: v })}
+                                                placeholder="Path"
+                                                style={{ height: 28, fontSize: 10, background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.05)" }}
                                             />
                                         </div>
                                     </div>
@@ -602,18 +603,18 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                             ]
                         }}
                     >
-                        <button style={{ 
-                            padding: "10px 0", 
-                            background: "rgba(99,102,241,0.05)", 
-                            color: "var(--primary)", 
-                            border: "1px solid rgba(99,102,241,0.15)", 
-                            borderRadius: 12, 
-                            fontSize: 11, 
-                            fontWeight: 800, 
+                        <button style={{
+                            padding: "10px 0",
+                            background: "rgba(99,102,241,0.05)",
+                            color: "var(--primary)",
+                            border: "1px solid rgba(99,102,241,0.15)",
+                            borderRadius: 12,
+                            fontSize: 11,
+                            fontWeight: 800,
                             textTransform: "uppercase",
                             letterSpacing: "0.05em",
-                            cursor: "pointer", 
-                            marginTop: 8, 
+                            cursor: "pointer",
+                            marginTop: 8,
                             width: "100%",
                             transition: "all 0.2s"
                         }}>
@@ -802,7 +803,7 @@ export function AccordionPanel({ block }: { block: Block }) {
 
     return (
         <>
-            <Section title="Accordion Items">
+            <Section title="Accordion Items" focusKeys={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}>
                 <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Manage FAQ items below.</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     <SortableList
@@ -897,7 +898,11 @@ export function StatsPanel({ block }: { block: Block }) {
 
     return (
         <>
-            <Section title="Layout & Style">
+            <Section title="Content" focusKeys={["title", "subtitle"]}>
+                <TypographyFields p={p} up={up} />
+            </Section>
+
+            <Section title="Layout & Style" focusKeys={["layout", "columns", "align"]}>
                 <LayoutFields p={p} up={up} options={{
                     layouts: [{ label: "Grid", value: "grid" }, { label: "Strip", value: "strip" }, { label: "KPI Cards", value: "kpi" }]
                 }} />
@@ -906,15 +911,39 @@ export function StatsPanel({ block }: { block: Block }) {
                 <Field label="Accent Color"><ColorInput value={(p.accentColor as string) || "var(--primary)"} onChange={(v) => up("accentColor", v)} /></Field>
             </Section>
 
-            <Section title="Card Styling">
+            <Section title="Card Styling" focusKeys={["cardStyle", "cardBg", "cardRadius"]}>
                 <CardFields p={p} up={up} />
             </Section>
 
-            <Section title="Icon Styling">
+            <Section title="Typography" focusKeys={["titleSize", "subtitleSize", "descSize", "descColor"]}>
+                <Field label="Value Size"><TextInputWithUnit value={(p.titleSize as string) || "2.25rem"} onChange={(v) => up("titleSize", v)} /></Field>
+                <Field label="Label Size"><TextInputWithUnit value={(p.subtitleSize as string) || "1rem"} onChange={(v) => up("subtitleSize", v)} /></Field>
+                <Field label="Description Size"><TextInputWithUnit value={(p.descSize as string) || "0.9rem"} onChange={(v) => up("descSize", v)} /></Field>
+                <Field label="Description Color"><ColorInput value={(p.descColor as string) || "var(--text-subtle)"} onChange={(v) => up("descColor", v)} /></Field>
+            </Section>
+
+            <Section title="Item Spacing" focusKeys={["gap"]}>
+                <Field label="Gap Between Items"><TextInputWithUnit value={(p.gap as string) || "2rem"} onChange={(v) => up("gap", v)} /></Field>
+            </Section>
+
+            <Section title="Icon Styling" focusKeys={["iconPosition", "iconBg", "iconColor", "iconSize", "iconWrapperSize", "iconRadius"]}>
+                <Field label="Icon Position">
+                    <PillSegmented
+                        value={(p.iconPosition as string) || "center"}
+                        onChange={(v) => up("iconPosition", v)}
+                        options={[
+                            { label: <div className="flex items-center gap-1.5 justify-center py-0.5"><Bars3BottomLeftIcon className="w-4 h-4" /> <span>Start</span></div>, value: "flex-start" },
+                            { label: <div className="flex items-center gap-1.5 justify-center py-0.5"><Bars3Icon className="w-4 h-4" /> <span>Center</span></div>, value: "center" },
+                            { label: <div className="flex items-center gap-1.5 justify-center py-0.5"><Bars3BottomRightIcon className="w-4 h-4" /> <span>End</span></div>, value: "flex-end" }
+                        ]}
+                        size="small"
+                        block
+                    />
+                </Field>
                 <IconFields p={p} up={up} />
             </Section>
 
-            <Section title="Metric Items">
+            <Section title="Metric Items" focusKeys={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     <SortableList
                         items={(p.items as any[]) || []}
@@ -953,6 +982,7 @@ export function StatsPanel({ block }: { block: Block }) {
                                         <TextInput value={item.unit} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], unit: v }; up("items", nI); }} placeholder="Unit" />
                                     </div>
                                     <TextInput value={item.label} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], label: v }; up("items", nI); }} placeholder="Label" />
+                                    <TextareaInput value={item.description} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], description: v }; up("items", nI); }} placeholder="Description" rows={2} />
                                     <IconPicker value={item.icon || "Zap"} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], icon: v }; up("items", nI); }} />
                                 </div>
                             </div>
@@ -975,41 +1005,41 @@ export function ChartPanel({ block }: { block: Block }) {
         <>
             <Section title="Content">
                 <Field label="Title">
-                    <TextInput 
-                        value={(p.title as string) || ""} 
-                        onChange={(v) => up("title", v)} 
-                        onBlur={(v) => up("title", v, true)} 
-                        placeholder="e.g. Sales Report" 
+                    <TextInput
+                        value={(p.title as string) || ""}
+                        onChange={(v) => up("title", v)}
+                        onBlur={(v) => up("title", v, true)}
+                        placeholder="e.g. Sales Report"
                     />
                 </Field>
                 <Field label="Description">
-                    <TextareaInput 
-                        value={(p.subtitle as string) || ""} 
-                        onChange={(v) => up("subtitle", v)} 
-                        onBlur={(v) => up("subtitle", v, true)} 
-                        placeholder="Describe what this chart represents..." 
-                        rows={3} 
+                    <TextareaInput
+                        value={(p.subtitle as string) || ""}
+                        onChange={(v) => up("subtitle", v)}
+                        onBlur={(v) => up("subtitle", v, true)}
+                        placeholder="Describe what this chart represents..."
+                        rows={3}
                     />
                 </Field>
             </Section>
 
             <Section title="Chart Settings">
                 <Field label="Type">
-                    <SelectInput 
-                        value={(p.chartType as string) || "area"} 
+                    <SelectInput
+                        value={(p.chartType as string) || "area"}
                         onChange={(v) => {
-                            updateBlock(block.id, { 
+                            updateBlock(block.id, {
                                 chartType: v,
                                 templateId: `chart-${v}`
                             }, true);
-                        }} 
+                        }}
                         options={[
-                            { label: "Area Chart", value: "area" }, 
-                            { label: "Bar Chart", value: "bar" }, 
-                            { label: "Line Chart", value: "line" }, 
-                            { label: "Pie Chart", value: "pie" }, 
+                            { label: "Area Chart", value: "area" },
+                            { label: "Bar Chart", value: "bar" },
+                            { label: "Line Chart", value: "line" },
+                            { label: "Pie Chart", value: "pie" },
                             { label: "Donut Chart", value: "donut" }
-                        ]} 
+                        ]}
                     />
                 </Field>
                 <Field label="Height"><TextInputWithUnit value={(p.height as string) ?? ""} onChange={(v) => up("height", v)} /></Field>
@@ -1066,14 +1096,14 @@ export function ChartPanel({ block }: { block: Block }) {
                                     placeholder="0"
                                     style={{ background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`, borderRadius: 6, padding: "5px 8px", fontSize: 11, color: PANEL_COLORS.text, outline: "none" }}
                                 />
-                                <ColorInput 
-                                    value={point.fill || CHART_COLORS[idx % CHART_COLORS.length]} 
+                                <ColorInput
+                                    value={point.fill || CHART_COLORS[idx % CHART_COLORS.length]}
                                     hideText={true}
                                     onChange={(v) => {
                                         const nD = [...((p.data as any[]) || [])];
                                         nD[idx] = { ...nD[idx], fill: v };
                                         up("data", nD, true);
-                                    }} 
+                                    }}
                                 />
                             </div>
                         )}
@@ -1236,7 +1266,7 @@ export function DeleteAccountPanel({ block }: { block: Block }) {
                         placeholder="https://api.example.com/delete-account"
                     />
                 </Field>
-                <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4}}>
+                <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>
                     Endpoint to send the deletion request.
                 </div>
             </Section>

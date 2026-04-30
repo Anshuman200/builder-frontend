@@ -77,7 +77,7 @@ export function FeaturesBlock({ block }: BlockProps) {
     const IconWrapper = ({ feature }: { feature: any }) => {
         const IconCmp = getIcon(feature.icon);
         return (
-            <div style={{ width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, color: iconColor, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden", position: "relative" }}>
+            <div style={{ width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: (p.iconBg as string) || iconBg, color: (p.iconColor as string) || iconColor, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden", position: "relative" }}>
                 {feature.iconType === "image" && feature.image ? (
                     <Image
                         src={feature.image}
@@ -94,9 +94,16 @@ export function FeaturesBlock({ block }: BlockProps) {
     };
 
     const SectionHeader = () => (
-        <div onClick={() => !isPreview && focusSubItem(block.id, "Content")} style={{ textAlign: align as any, marginBottom: "3rem" }}>
-            {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor }}>{title}</h2>}
-            {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor }}>{subtitle}</p>}
+        <div 
+            onClick={() => !isPreview && focusSubItem(block.id, "Content")} 
+            style={{ 
+                textAlign: align as any, 
+                marginBottom: "3rem",
+                transition: "all 0.4s ease-in-out" 
+            }}
+        >
+            {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor, transition: "all 0.4s ease-in-out" }}>{title}</h2>}
+            {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor, transition: "all 0.4s ease-in-out" }}>{subtitle}</p>}
         </div>
     );
 
@@ -117,7 +124,18 @@ export function FeaturesBlock({ block }: BlockProps) {
                             onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx, true))}
                             onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx))}
                         >
-                            <div style={{ marginBottom: "1.25rem" }}><IconWrapper feature={feat} /></div>
+                            <div 
+                                style={{ marginBottom: "1.25rem" }}
+                                onClick={(e) => {
+                                    if (isPreview) return;
+                                    e.stopPropagation();
+                                    const store = useEditorStore.getState();
+                                    store.selectBlock(block.id);
+                                    store.focusSubItem(block.id, "Icon Styling");
+                                }}
+                            >
+                                <IconWrapper feature={feat} />
+                            </div>
                             <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.5rem 0" }}>{feat.title}</h3>
                             <p style={{ fontSize: cardDescSize, opacity: 0.65, margin: 0, lineHeight: 1.65 }}>{feat.description}</p>
                         </div>

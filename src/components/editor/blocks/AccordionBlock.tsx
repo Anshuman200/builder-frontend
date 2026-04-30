@@ -139,17 +139,26 @@ export default function AccordionBlock({ block }: { block: Block }) {
                             >
                                 <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                                     {showIcons && item.icon && (
-                                        <div style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            width: (block.props.iconWrapperSize as string) || "40px",
-                                            height: (block.props.iconWrapperSize as string) || "40px",
-                                            borderRadius: (block.props.iconRadius as string) || "8px",
-                                            background: (block.props.iconBg as string) || "rgba(var(--primary-rgb), 0.1)",
-                                            color: (block.props.iconColor as string) || iconColor,
-                                            flexShrink: 0
-                                        }}>
+                                        <div 
+                                            onClick={(e) => {
+                                                if (isPreview) return;
+                                                e.stopPropagation();
+                                                const store = useEditorStore.getState();
+                                                store.selectBlock(block.id);
+                                                store.focusSubItem(block.id, "Icon Styling");
+                                            }}
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                width: (block.props.iconWrapperSize as string) || "40px",
+                                                height: (block.props.iconWrapperSize as string) || "40px",
+                                                borderRadius: (block.props.iconRadius as string) || "8px",
+                                                background: (block.props.iconBg as string) || "rgba(var(--primary-rgb), 0.1)",
+                                                color: (block.props.iconColor as string) || iconColor,
+                                                flexShrink: 0
+                                            }}
+                                        >
                                             {(() => {
                                                 const IconCmp = getIcon(item.icon);
                                                 const C = IconCmp || Square2StackIcon;

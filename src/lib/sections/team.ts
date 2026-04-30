@@ -31,15 +31,12 @@ export const teamSections: SectionTemplate[] = [
     category: "Team",
     previewImage: "/previews/team/team-grid.png",
     create: () => {
-      const root = makeBlock("container", { bgColor: "#f8fafc", padding: "5rem 2rem" });
-      root.props.childBlocks = [
-        makeBlock("team", {
-          title: "Meet the Team", subtitle: "The talented people behind the scenes.", bgColor: "transparent",
-          layout: "grid", columns: 3, imageStyle: "circle", imageSize: "160px", cardStyle: "raised", align: "center",
-          members: [teamData[0], teamData[1], teamData[2], teamData[3], teamData[4], teamData[5]]
-        }),
-      ];
-      return root;
+      return makeBlock("team", {
+        title: "Meet the Team", subtitle: "The talented people behind the scenes.",
+        bgColor: "#f8fafc", padding: "5rem 2rem",
+        layout: "grid", columns: 3, imageStyle: "circle", imageSize: "160px", cardStyle: "raised", align: "center",
+        members: [teamData[0], teamData[1], teamData[2], teamData[3], teamData[4], teamData[5]]
+      });
     },
   },
   // Originally existed
@@ -49,15 +46,12 @@ export const teamSections: SectionTemplate[] = [
     category: "Team",
     previewImage: "/previews/team/team-cards.png",
     create: () => {
-      const root = makeBlock("container", { bgColor: "#f8fafc", padding: "5rem 2rem" });
-      root.props.childBlocks = [
-        makeBlock("team", {
-          title: "Our Team", subtitle: "Leading the industry forward.", bgColor: "transparent",
-          layout: "grid", columns: 2, imageStyle: "square", imageSize: "100%", imageRadius: "12px", cardStyle: "raised", align: "left",
-          members: [teamData[4], teamData[5]]
-        }),
-      ];
-      return root;
+      return makeBlock("team", {
+        title: "Our Team", subtitle: "Leading the industry forward.",
+        bgColor: "#f8fafc", padding: "5rem 2rem",
+        layout: "grid", columns: 2, imageStyle: "square", imageSize: "100%", imageRadius: "12px", cardStyle: "raised", align: "left",
+        members: [teamData[4], teamData[5]]
+      });
     },
   },
   // New Layouts from Screenshots
@@ -67,18 +61,15 @@ export const teamSections: SectionTemplate[] = [
     category: "Team",
     previewImage: "/previews/team/team-elegant.png",
     create: () => {
-      const root = makeBlock("container", { bgColor: "#e2e8f0", padding: "6rem 2rem" });
-      root.props.childBlocks = [
-        makeBlock("team", {
-          title: "Meet Our Team", subtitle: "", bgColor: "transparent",
-          layout: "grid", columns: 4, gap: "1.5rem",
-          cardStyle: "raised", cardBg: "#ffffff", cardRadius: "12px",
-          imageStyle: "float", imageSize: "110px", imageRadius: "50%",
-          align: "center", nameColor: "#1e293b", roleColor: "#0f172a", descColor: "#64748b",
-          members: [teamData[4], teamData[5], { ...teamData[0], name: "Ann Richmond", role: "Web Developer" }, { ...teamData[1], name: "Roxie Swanson", role: "Web Designer" }]
-        }),
-      ];
-      return root;
+      return makeBlock("team", {
+        title: "Meet Our Team", subtitle: "",
+        bgColor: "#e2e8f0", padding: "6rem 2rem",
+        layout: "grid", columns: 4, gap: "1.5rem",
+        cardStyle: "raised", cardBg: "#ffffff", cardRadius: "12px",
+        imageStyle: "float", imageSize: "110px", imageRadius: "50%",
+        align: "center", nameColor: "#1e293b", roleColor: "#0f172a", descColor: "#64748b",
+        members: [teamData[4], teamData[5], { ...teamData[0], name: "Ann Richmond", role: "Web Developer" }, { ...teamData[1], name: "Roxie Swanson", role: "Web Designer" }]
+      });
     },
   },
   {
@@ -87,17 +78,14 @@ export const teamSections: SectionTemplate[] = [
     category: "Team",
     previewImage: "/previews/team/team-colorful.png",
     create: () => {
-      const root = makeBlock("container", { bgColor: "#ffffff", padding: "5rem 2rem" });
-      root.props.childBlocks = [
-        makeBlock("team", {
-          title: "Our leadership team", subtitle: "With over 100 years of combined experience, we've got a well-seasoned team at the helm.",
-          bgColor: "transparent", layout: "grid", columns: 3, gap: "3rem",
-          cardStyle: "raised", align: "left",
-          imageStyle: "square", imageSize: "100%", imageRadius: "0px",
-          members: [teamData[6], teamData[7], teamData[1], teamData[2], teamData[3], teamData[0]]
-        }),
-      ];
-      return root;
+      return makeBlock("team", {
+        title: "Our leadership team", subtitle: "With over 100 years of combined experience, we've got a well-seasoned team at the helm.",
+        bgColor: "#ffffff", padding: "5rem 2rem",
+        layout: "grid", columns: 3, gap: "3rem",
+        cardStyle: "raised", align: "left",
+        imageStyle: "square", imageSize: "100%", imageRadius: "0px",
+        members: [teamData[6], teamData[7], teamData[1], teamData[2], teamData[3], teamData[0]]
+      });
     },
   },
   {
@@ -106,20 +94,15 @@ export const teamSections: SectionTemplate[] = [
     category: "Team",
     previewImage: "/previews/team/team-red-gradient.png",
     create: () => {
-      const root = makeBlock("container", { bgColor: "#f4f6ff", padding: "6rem 2rem" });
-      root.props.childBlocks = [
-        makeBlock("text", { tag: "h4", content: "WHO MADE IT", align: "center", color: "#e11d48", fontSize: "0.85rem", letterSpacing: "2px", bold: true, marginBottom: "0.5rem" }),
-        makeBlock("team", {
-          title: "MEET THE TEAM", subtitle: "", bgColor: "transparent",
-          layout: "grid", columns: 3, gap: "1.5rem",
-          cardStyle: "raised", align: "center", cardHeight: "450px",
-          imageStyle: "cover", imageSize: "400px", imageRadius: "24px",
-          coverGradientBottom: "#e11d48f2", // pinkish hex
-          nameColor: "#ffffff", roleColor: "#cccccc", descColor: "#e2e8f0",
-          members: [teamData[2], teamData[1], teamData[3]]
-        }),
-      ];
-      return root;
+      return makeBlock("team", {
+        title: "MEET THE TEAM", subtitle: "", bgColor: "transparent",
+        layout: "grid", columns: 3, gap: "1.5rem",
+        cardStyle: "raised", align: "center", cardHeight: "450px",
+        imageStyle: "cover", imageSize: "400px", imageRadius: "24px",
+        coverGradientBottom: "#e11d48f2", // pinkish hex
+        nameColor: "#ffffff", roleColor: "#cccccc", descColor: "#e2e8f0",
+        members: [teamData[2], teamData[1], teamData[3]]
+      });
     },
   },
   {
@@ -128,22 +111,19 @@ export const teamSections: SectionTemplate[] = [
     category: "Team",
     previewImage: "/previews/team/team-alternating.png",
     create: () => {
-      const root = makeBlock("container", { bgColor: "#ffffff", padding: "4rem 2rem" });
-      root.props.childBlocks = [
-        makeBlock("team", {
-          title: "MEET OUR TEAM", subtitle: "", bgColor: "transparent",
-          layout: "list", columns: 1, gap: "1.5rem",
-          cardStyle: "filled", align: "left", cardRadius: "16px", cardBg: "#0f172a",
-          imageStyle: "circle", imageSize: "160px", 
-          nameColor: "#ffffff", roleColor: "#94a3b8", descColor: "#cbd5e1",
-          members: [
-            { ...teamData[0], description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud" },
-            { ...teamData[0], description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud" },
-            { ...teamData[0], description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud" }
-          ]
-        }),
-      ];
-      return root;
+      return makeBlock("team", {
+        title: "MEET OUR TEAM", subtitle: "",
+        bgColor: "#ffffff", padding: "4rem 2rem",
+        layout: "list", columns: 1, gap: "1.5rem",
+        cardStyle: "filled", align: "left", cardRadius: "16px", cardBg: "#0f172a",
+        imageStyle: "circle", imageSize: "160px",
+        nameColor: "#ffffff", roleColor: "#94a3b8", descColor: "#cbd5e1",
+        members: [
+          { ...teamData[0], description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud" },
+          { ...teamData[0], description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud" },
+          { ...teamData[0], description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud" }
+        ]
+      });
     },
   },
 ];

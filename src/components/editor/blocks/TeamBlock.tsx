@@ -230,9 +230,16 @@ export function TeamBlock({ block }: BlockProps) {
             >
                 <BackgroundOverlay p={p} />
                 <div style={{ boxSizing: "border-box", width: "100%", position: "relative", zIndex: 2 }}>
-                    <div onClick={() => !isPreview && focusSubItem(block.id, "Content")} style={{ textAlign: align as React.CSSProperties["textAlign"], cursor: "pointer" }}>
-                        {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor }}>{title}</h2>}
-                        {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor }}>{subtitle}</p>}
+                    <div 
+                        onClick={() => !isPreview && focusSubItem(block.id, "Content")} 
+                        style={{ 
+                            textAlign: align as React.CSSProperties["textAlign"], 
+                            cursor: "pointer",
+                            transition: "all 0.4s ease-in-out"
+                        }}
+                    >
+                        {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor, transition: "all 0.4s ease-in-out" }}>{title}</h2>}
+                        {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor, transition: "all 0.4s ease-in-out" }}>{subtitle}</p>}
                     </div>
                     {/* ── Compact Row ───────────────────────────────────────────── */}
                     {layout === "compact" && (

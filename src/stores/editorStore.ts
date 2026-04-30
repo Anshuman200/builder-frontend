@@ -750,10 +750,12 @@ export const useEditorStore = create<EditorStore>()(
         }),
 
         selectBlock: (id) => set((s) => { 
+            // Only clear sub-item focus if we are switching to a DIFFERENT block
+            if (s.selectedBlockId !== id) {
+                s.subItemFocus = null;
+            }
             s.selectedBlockId = id; 
             s.selectBlockTick = (s.selectBlockTick || 0) + 1; 
-            // Clear specific sub-item focus (like Wave Decoration) when selecting a block normally
-            s.subItemFocus = null;
         }),
         hoverBlock: (id) => set({ hoveredBlockId: id }),
         focusSubItem: (blockId, index: number | string) => set({ subItemFocus: { blockId, index } }),
