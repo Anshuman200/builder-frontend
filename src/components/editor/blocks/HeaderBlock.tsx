@@ -53,26 +53,40 @@ export function HeaderBlock({ block }: BlockProps) {
     const defaultPrimary = theme.colors?.primary || "#6366f1";
     const defaultText = theme.colors?.buttonText || "#ffffff";
 
-    const ctaBgColor = (p.ctaBgColor as string) || defaultPrimary;
-    const ctaTextColor = (p.ctaTextColor as string) || defaultText;
+    const ctaBgColor = (p.ctaBg as string) || (p.ctaBgColor as string) || defaultPrimary;
+    const ctaTextColor = (p.ctaTextColor as string) || (p.ctaColor as string) || defaultText;
 
     let background = bgStyles.backgroundColor || bgColor, backdropFilter = "none", borderBottom = "none";
     if (style === "glass") { background = (background as string).length === 7 ? `${background}cc` : background; backdropFilter = "blur(12px)"; borderBottom = "1px solid rgba(255, 255, 255, 0.2)"; }
     else if (style === "transparent") { background = "transparent"; }
 
     const isMobile = isPreview ? false : (viewMode === "mobile");
+    const isFloating = p.isFloating === true;
+    const floatingWidth = (p.floatingWidth as string) || "95%";
+    const floatingTop = (p.floatingTop as string) || "20px";
+    const floatingRadius = (p.floatingRadius as string) || "16px";
+
+    const layoutWidth = (p.layoutWidth as string) || "fluid";
+    const innerMaxWidth = layoutWidth === "fluid" ? "100%" : (layoutWidth === "narrow" ? "800px" : layoutObj.maxWidth);
+
     const baseHeaderStyle: React.CSSProperties = {
         ...bgStyles,
-        position: position as any,
-        top: position !== "static" ? 0 : undefined,
-        left: position !== "static" ? 0 : undefined,
-        right: position !== "static" ? 0 : undefined,
-        zIndex: 50,
+        position: isPreview ? (isFloating ? "fixed" : (position as any)) : "relative",
+        top: isPreview ? (isFloating ? floatingTop : (position !== "static" ? 0 : undefined)) : undefined,
+        left: isPreview ? (isFloating ? "50%" : (position !== "static" ? 0 : undefined)) : undefined,
+        right: isPreview ? (position !== "static" && !isFloating ? 0 : undefined) : undefined,
+        transform: isPreview ? (isFloating ? "translateX(-50%)" : undefined) : undefined,
+        zIndex: isPreview ? 10000 : undefined,
         backgroundColor: style === "transparent" ? "transparent" : background,
         backdropFilter,
-        borderBottom,
+        borderBottom: isFloating ? "none" : borderBottom,
+        border: isFloating && style !== "transparent" ? "1px solid rgba(255,255,255,0.1)" : undefined,
+        borderRadius: isFloating ? floatingRadius : undefined,
         color: textColor,
-        width: "100%"
+        width: isPreview ? (isFloating ? floatingWidth : "100%") : "100%",
+        maxWidth: isPreview ? (isFloating ? innerMaxWidth : "100%") : "100%",
+        boxShadow: isFloating ? "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)" : undefined,
+        transition: "all 0.3s ease"
     };
     const ctaStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 20px", borderRadius: "9999px", fontWeight: 600, fontSize: "0.9rem", textDecoration: "none", cursor: isPreview ? "pointer" : "default", transition: "opacity 0.2s", background: ctaVariant === "solid" ? ctaBgColor : "transparent", color: ctaVariant === "solid" ? ctaTextColor : ctaBgColor, border: ctaVariant === "outline" ? `2px solid ${ctaBgColor}` : "none" };
 
@@ -214,8 +228,7 @@ export function HeaderBlock({ block }: BlockProps) {
         </nav>
     );
 
-    const layoutWidth = (p.layoutWidth as string) || "fluid";
-    const innerMaxWidth = layoutWidth === "fluid" ? "100%" : (layoutWidth === "narrow" ? "800px" : layoutObj.maxWidth);
+
 
     return (
         <>
@@ -229,7 +242,16 @@ export function HeaderBlock({ block }: BlockProps) {
           @media (max-width: 768px) { .header-${block.id} { padding: ${mobilePadding}; padding-left: 0; padding-right: 0; } .header-${block.id}-inner { padding-left: ${layoutObj.mobilePaddingX}; padding-right: ${layoutObj.mobilePaddingX}; } .header-${block.id}-desktop-nav { display: none !important; } .header-${block.id}-desktop-cta { display: none !important; } .header-${block.id}-hamburger { display: flex !important; } .header-${block.id}-mobile-menu.open { display: flex !important; } }
         `}</style>
             )}
-            <header id={(p.sectionId as string) || `block-${block.id}`} className={isPreview ? `header-${block.id}` : undefined} style={{ ...baseHeaderStyle, position: position === "static" ? "relative" : (position as any), padding: isPreview ? undefined : editorPadding, paddingLeft: isPreview ? undefined : 0, paddingRight: isPreview ? undefined : 0, zIndex: 50 }}>
+            <header
+                id={(p.sectionId as string) || `block-${block.id}`}
+                className={isPreview ? `header-${block.id}` : undefined}
+                style={{
+                    ...baseHeaderStyle,
+                    padding: isPreview ? undefined : editorPadding,
+                    paddingLeft: isPreview ? undefined : 0,
+                    paddingRight: isPreview ? undefined : 0
+                }}
+            >
                 <BackgroundOverlay p={p} />
                 <div className={isPreview ? `header-${block.id}-inner` : undefined} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", maxWidth: innerMaxWidth, margin: "0 auto", boxSizing: "border-box", paddingLeft: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), paddingRight: isPreview ? undefined : (viewMode === "mobile" ? layoutObj.mobilePaddingX : viewMode === "tablet" ? layoutObj.tabletPaddingX : layoutObj.paddingX), position: "relative", zIndex: 2 }}>
                     {layout === "split" ? (<NavLinksElement />) : layout === "centered" ? (<div className={isPreview ? `header-${block.id}-desktop-nav` : undefined} style={{ flex: 1, display: isMobile ? "none" : "flex" }}><NavLinksElement /></div>) : (<LogoElement />)}

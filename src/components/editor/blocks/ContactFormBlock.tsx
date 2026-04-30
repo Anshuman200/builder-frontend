@@ -345,7 +345,7 @@ export function ContactFormBlock({ block }: BlockProps) {
                     <div onClick={(e) => {
                         e.stopPropagation();
                         selectBlock(block.id);
-                        focusSubItem(block.id, "Submit Button");
+                        focusSubItem(block.id, "Button Content");
                     }} style={{ display: "flex", justifyContent: buttonAlign === "left" ? "flex-start" : buttonAlign === "center" ? "center" : "flex-end" }}>
                         <CommonButton
                             type="submit"

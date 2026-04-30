@@ -38,17 +38,17 @@ function SocialLinks({ socials, color, justify, size = 18, blockId, isPreview, i
                         href={href}
                         target="_blank"
                         rel="noreferrer"
-                        style={{ 
-                            color: iconProps.iconColor || color, 
+                        style={{
+                            color: iconProps.iconColor || color,
                             background: iconProps.iconBg || "transparent",
                             width: iconProps.iconWrapperSize || "auto",
                             height: iconProps.iconWrapperSize || "auto",
                             borderRadius: iconProps.iconRadius || "0",
-                            display: "flex", 
+                            display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             padding: iconProps.iconBg ? "8px" : "0",
-                            transition: "all 0.2s" 
+                            transition: "all 0.2s"
                         }}
                         onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.65"; }}
                         onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
@@ -85,7 +85,7 @@ export function TeamBlock({ block }: BlockProps) {
     const focusSubItem = useEditorStore((s) => s.focusSubItem);
     const subItemFocus = useEditorStore((s) => s.subItemFocus);
     const isPreview = React.useContext(PreviewContext);
-    
+
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
     const bgStyles = getBackgroundStyles(p, theme);
 
@@ -223,17 +223,17 @@ export function TeamBlock({ block }: BlockProps) {
                     .team-large-card-${block.id}, .team-large-card-reverse-${block.id} { gap: 2rem !important; padding: 1.5rem !important; }
                 ` : ''}
             `}</style>
-            <section 
-                id={(p.sectionId as string) || `block-${block.id}`} 
+            <section
+                id={(p.sectionId as string) || `block-${block.id}`}
                 className={`team-section-${block.id}`}
                 style={bgStyles}
             >
                 <BackgroundOverlay p={p} />
                 <div style={{ boxSizing: "border-box", width: "100%", position: "relative", zIndex: 2 }}>
-                    <div 
-                        onClick={() => !isPreview && focusSubItem(block.id, "Content")} 
-                        style={{ 
-                            textAlign: align as React.CSSProperties["textAlign"], 
+                    <div
+                        onClick={() => !isPreview && focusSubItem(block.id, "Text Content")}
+                        style={{
+                            textAlign: align as React.CSSProperties["textAlign"],
                             cursor: "pointer",
                             transition: "all 0.4s ease-in-out"
                         }}
@@ -273,12 +273,12 @@ export function TeamBlock({ block }: BlockProps) {
                                             <p style={{ margin: "0 0 0.15rem", fontWeight: 700, fontSize: "0.95rem", color: nameColor, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{member.name}</p>
                                             <p style={{ margin: "0 0 0.4rem", fontSize: "0.75rem", color: roleColor, opacity: 0.8, textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600 }}>{member.role}</p>
                                             {member.socials && (
-                                                <SocialLinks 
-                                                    socials={member.socials as Record<string, SocialValue>} 
-                                                    color={socialColor} 
-                                                    justify="flex-start" 
-                                                    size={socialIconSize} 
-                                                    blockId={block.id} 
+                                                <SocialLinks
+                                                    socials={member.socials as Record<string, SocialValue>}
+                                                    color={socialColor}
+                                                    justify="flex-start"
+                                                    size={socialIconSize}
+                                                    blockId={block.id}
                                                     isPreview={isPreview}
                                                     iconProps={{
                                                         iconSize: p.socialIconSize,
@@ -332,12 +332,12 @@ export function TeamBlock({ block }: BlockProps) {
                                             <p style={{ margin: "0 0 1rem", fontWeight: 600, fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "0.05em", color: roleColor }}>{member.role}</p>
                                             {member.description && <p style={{ margin: "0 0 1rem", color: descColor, lineHeight: 1.7, fontSize: "0.95rem" }}>{member.description}</p>}
                                             {member.socials && (
-                                                <SocialLinks 
-                                                    socials={member.socials as Record<string, SocialValue>} 
-                                                    color={socialColor} 
-                                                    justify="inherit" 
-                                                    size={socialIconSize} 
-                                                    blockId={block.id} 
+                                                <SocialLinks
+                                                    socials={member.socials as Record<string, SocialValue>}
+                                                    color={socialColor}
+                                                    justify="inherit"
+                                                    size={socialIconSize}
+                                                    blockId={block.id}
                                                     isPreview={isPreview}
                                                     iconProps={{
                                                         iconSize: p.socialIconSize,
@@ -388,21 +388,21 @@ export function TeamBlock({ block }: BlockProps) {
                                         <h3 style={{ margin: "0 0 0.25rem", fontSize: "1.1rem", fontWeight: 700, color: nameColor }}>{member.name}</h3>
                                         <p style={{ margin: "0 0 0.75rem", fontSize: "0.82rem", color: roleColor, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>{member.role}</p>
                                         {member.socials && (
-                                                <SocialLinks 
-                                                    socials={member.socials as Record<string, SocialValue>} 
-                                                    color={socialColor} 
-                                                    justify="center" 
-                                                    size={socialIconSize} 
-                                                    blockId={block.id} 
-                                                    isPreview={isPreview}
-                                                    iconProps={{
-                                                        iconSize: p.socialIconSize,
-                                                        iconColor: p.socialIconColor,
-                                                        iconWrapperSize: p.socialIconWrapperSize,
-                                                        iconRadius: p.socialIconRadius,
-                                                        iconBg: p.socialIconBg,
-                                                    }}
-                                                />
+                                            <SocialLinks
+                                                socials={member.socials as Record<string, SocialValue>}
+                                                color={socialColor}
+                                                justify="center"
+                                                size={socialIconSize}
+                                                blockId={block.id}
+                                                isPreview={isPreview}
+                                                iconProps={{
+                                                    iconSize: p.socialIconSize,
+                                                    iconColor: p.socialIconColor,
+                                                    iconWrapperSize: p.socialIconWrapperSize,
+                                                    iconRadius: p.socialIconRadius,
+                                                    iconBg: p.socialIconBg,
+                                                }}
+                                            />
                                         )}
                                     </div>
                                 );
@@ -499,12 +499,12 @@ export function TeamBlock({ block }: BlockProps) {
                                     return (
                                         <div key={`member-${idx}`} style={{ paddingTop: `calc(${imageSize} / 2)`, display: "flex", flexDirection: "column" }}
                                             onClick={(e) => {
-                                            if (isPreview) return;
-                                            e.stopPropagation();
-                                            const store = useEditorStore.getState();
-                                            store.selectBlock(block.id);
-                                            store.focusSubItem(block.id, idx);
-                                        }}
+                                                if (isPreview) return;
+                                                e.stopPropagation();
+                                                const store = useEditorStore.getState();
+                                                store.selectBlock(block.id);
+                                                store.focusSubItem(block.id, idx);
+                                            }}
                                         >
                                             <div style={{ ...resolvedCardStyle, flex: 1 }}>{imageEl}{contentEl}</div>
                                         </div>
@@ -512,12 +512,12 @@ export function TeamBlock({ block }: BlockProps) {
                                 }
                                 return (<div key={`member-${idx}`} style={resolvedCardStyle}
                                     onClick={(e) => {
-                            if (isPreview) return;
-                            e.stopPropagation();
-                            const store = useEditorStore.getState();
-                            store.selectBlock(block.id);
-                            store.focusSubItem(block.id, idx);
-                        }}
+                                        if (isPreview) return;
+                                        e.stopPropagation();
+                                        const store = useEditorStore.getState();
+                                        store.selectBlock(block.id);
+                                        store.focusSubItem(block.id, idx);
+                                    }}
                                 >{imageEl}{contentEl}</div>);
                             })}
                         </div>

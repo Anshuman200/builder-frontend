@@ -60,12 +60,14 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
                 title="Background Video Options"
               />
             )}
-            <Field label="Media Opacity">
-              <SliderInput
-                value={Number(p.bgImageOpacity ?? 40)}
-                onChange={(v) => up("bgImageOpacity", v, true)}
-              />
-            </Field>
+            <div className="mt-4">
+              <Field label="Media Opacity">
+                <SliderInput
+                  value={Number(p.bgImageOpacity ?? 40)}
+                  onChange={(v) => up("bgImageOpacity", v, true)}
+                />
+              </Field>
+            </div>
 
             <Field label="Overlay Color">
               <ColorInput

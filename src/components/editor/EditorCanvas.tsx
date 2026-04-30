@@ -187,6 +187,7 @@ export default function EditorCanvas() {
           transition: "width 0.25s ease, background 0.3s ease",
           flexShrink: 0,
           position: "relative",
+          transform: "translate3d(0, 0, 0)", // Creates local containing block for fixed elements
         }}
         onClick={(e) => {
           if (e.target === e.currentTarget) {
@@ -526,7 +527,7 @@ const CanvasBlock = memo(function CanvasBlock({
   activeHeight: number;
   dropPosition: "before" | "after" | "inside" | "replace";
 }) {
-  const { selectedBlockId, hoveredBlockId, selectBlock, hoverBlock, deleteBlock, duplicateBlock, replaceBlock } =
+  const { selectedBlockId, hoveredBlockId, selectBlock, hoverBlock, deleteBlock, duplicateBlock, replaceBlock, page } =
     useEditorStore();
 
   const isSelected = selectedBlockId === block.id;
@@ -557,9 +558,16 @@ const CanvasBlock = memo(function CanvasBlock({
         ref={setNodeRef}
         id={block.id}
         style={{
-          position: "relative",
-          transform: CSS.Transform.toString(transform),
-          transition,
+          position: (block.type === "header" && (block.props.position === "fixed" || block.props.isFloating)) ? "fixed" : "relative",
+          top: (block.type === "header" && block.props.isFloating) ? ((block.props.floatingTop as string) || "40px") : (block.type === "header" && block.props.position === "fixed") ? 0 : undefined,
+          left: (block.type === "header" && block.props.isFloating) ? "50%" : (block.type === "header" && block.props.position === "fixed") ? 0 : undefined,
+          transform: (block.type === "header" && block.props.isFloating)
+            ? `translateX(-50%) ${CSS.Transform.toString(transform) || ""}`
+            : (CSS.Transform.toString(transform) || undefined),
+          width: (block.type === "header" && block.props.isFloating) ? ((block.props.floatingWidth as string) || "95%") : "100%",
+          maxWidth: (block.type === "header" && block.props.isFloating && block.props.layoutWidth !== "fluid") ? (block.props.layoutWidth === "narrow" ? "800px" : ((page?.theme?.layout?.maxWidth as string) || "1200px")) : "100%",
+          zIndex: isSelected ? 15000 : ((block.type === "header" && (block.props.position === "fixed" || block.props.isFloating)) ? 10000 : 1),
+          transition: transition || undefined,
           opacity: isDragging ? 0.25 : 1,
           boxShadow: isInside
             ? "inset 0 0 0 2px #6366f1, 0 0 15px rgba(99,102,241,0.2)"
@@ -568,7 +576,7 @@ const CanvasBlock = memo(function CanvasBlock({
               : showDropHighlight
                 ? "inset 0 0 0 2px rgba(99,102,241,0.25)"
                 : undefined,
-          borderRadius: isInside || isReplace ? 8 : 0,
+          borderRadius: block.props.isFloating ? ((block.props.floatingRadius as string) || "16px") : (isInside || isReplace ? 8 : 0),
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -647,7 +655,7 @@ const CanvasBlock = memo(function CanvasBlock({
               position: "absolute", inset: 0,
               border: isSelected ? "2.5px solid #6366f1" : "1.5px solid #94a3b8",
               boxShadow: isSelected ? "inset 0 0 0 1px rgba(99,102,241,0.15), 0 0 0 3px rgba(99,102,241,0.12)" : undefined,
-              zIndex: 9000, pointerEvents: "none",
+              zIndex: 11000, pointerEvents: "none",
             }}
           />
         )}
@@ -658,7 +666,7 @@ const CanvasBlock = memo(function CanvasBlock({
             background: "#6366f1", color: "#fff",
             fontSize: 9, fontWeight: 700, letterSpacing: "0.08em",
             padding: "2px 10px", borderRadius: "0 0 6px 6px",
-            zIndex: 9001, pointerEvents: "none", textTransform: "uppercase",
+            zIndex: 11001, pointerEvents: "none", textTransform: "uppercase",
             whiteSpace: "nowrap", boxShadow: "0 2px 6px rgba(99,102,241,0.4)",
           }}>
             {block.type}
@@ -667,7 +675,10 @@ const CanvasBlock = memo(function CanvasBlock({
 
         {/* Floating action bar — WHITE background for visibility on any block */}
         {showControls && (
-          <div className="absolute top-4 right-4 p-1 rounded-sm shadow-md bg-white z-100 space-x-1 flex items-center">
+          <div className="absolute right-4 p-1 rounded-sm shadow-md bg-white space-x-1 flex items-center" style={{
+            zIndex: 11002,
+            top: block.type === "header" ? "calc(100% + 10px)" : 120,
+          }}>
             <QuickLayoutChange block={block} />
 
             {/* Quick Media Change */}

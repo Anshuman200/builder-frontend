@@ -251,9 +251,9 @@ export function MediaInput({ value, onChange, placeholder, type = "image", varia
 
 // ─── Field ────────────────────────────────────────────────────────────────────
 
-export function Field({ label, children, description }: { label: string; children: React.ReactNode; description?: string }) {
+export function Field({ label, children, description, fullWidth }: { label: string; children: React.ReactNode; description?: string; fullWidth?: boolean }) {
     return (
-        <div style={{ marginBottom: 12 }}>
+        <div style={{ marginBottom: 12, gridColumn: fullWidth ? "span 2" : undefined }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
                 <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: PANEL_COLORS.muted, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</label>
             </div>
@@ -344,8 +344,8 @@ export function PanelInlineEditor({ value, onChange, onBlur, placeholder, multil
     );
 }
 // ─── TextInput With Unit Suffix ────────────────────────────────────────────────────────────────
-export function TextInputWithUnit({ value = "", onChange, placeholder, style }: { value: string; onChange: (v: string) => void; placeholder?: string; style?: React.CSSProperties }) {
-    const units = [
+export function TextInputWithUnit({ value = "", onChange, placeholder, style, type = "default" }: { value: string; onChange: (v: string) => void; placeholder?: string; style?: React.CSSProperties; type?: "width" | "height" | "default" }) {
+    let units = [
         { label: "px", value: "px" },
         { label: "rem", value: "rem" },
         { label: "em", value: "em" },
@@ -353,7 +353,14 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
         { label: "dvh", value: "dvh" },
         { label: "vw", value: "vw" },
         { label: "dvw", value: "dvw" },
+        { label: "%", value: "%" },
     ];
+
+    if (type === "width") {
+        units = units.filter(u => u.value !== "vh" && u.value !== "dvh");
+    } else if (type === "height") {
+        units = units.filter(u => u.value !== "vw" && u.value !== "dvw");
+    }
 
     // Robust parsing: extract leading number and whatever follows as unit
     const lastUnit = React.useRef("px");
@@ -1064,19 +1071,9 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10, background: "rgba(255,255,255,0.02)", padding: 12, borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)" }}>
                 {/* Type Selection */}
-                <div className="flex justify-between gap-4 mb-4 items-center">
+                <div className="flex justify-between gap-4 items-center">
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ fontSize: 10, color: PANEL_COLORS.muted, textTransform: "uppercase", fontWeight: 700 }}>Type</span>
-                        <PillSegmented
-                            value={type}
-                            onChange={(v) => update(v, deg, stops)}
-                            options={[
-                                { label: "Linear", value: "linear" },
-                                { label: "Radial", value: "radial" },
-                                { label: "Angular", value: "conic" },
-                            ]}
-                            size="small"
-                        />
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                         <AppToolTip title="Reverse Stops">
@@ -1108,7 +1105,18 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                         </AppToolTip>
                     </div>
                 </div>
-
+                <div className="border-y border-white/5 ">
+                    <PillSegmented
+                        value={type}
+                        onChange={(v) => update(v, deg, stops)}
+                        options={[
+                            { label: "Linear", value: "linear" },
+                            { label: "Radial", value: "radial" },
+                            { label: "Angular", value: "conic" },
+                        ]}
+                        size="small"
+                    />
+                </div>
                 {/* Visual Gradient Bar */}
                 <div style={{ height: 24, width: "100%", borderRadius: 6, background: value || "transparent", border: "1px solid rgba(255,255,255,0.1)", marginBottom: 4 }} />
 
@@ -1325,11 +1333,11 @@ export function VideoPlaybackOptions({
             }}>
                 {title}
             </div>
-            <div className="border border-divider-secondary overflow-hidden rounded-md bg-neutral-800">
+            <div className="border border-white/5 overflow-hidden rounded-md bg-neutral-800">
                 <div style={{ display: "flex", flexDirection: "column" }}>
                     {/* AutoPlay & Muted Row */}
-                    <div className="flex border-b border-divider-secondary">
-                        <div className="flex-1 p-3 border-r border-divider-secondary">
+                    <div className="flex border-b border-white/5">
+                        <div className="flex-1 p-3 border-r border-white/5">
                             <ToggleSwitch label="AutoPlay" value={autoPlay} onChange={onChangeAutoPlay} />
                         </div>
                         <div className="flex-1 p-3">
@@ -1339,7 +1347,7 @@ export function VideoPlaybackOptions({
 
                     {/* Loop & Optional Controls Row */}
                     <div className="flex">
-                        <div className="flex-1 p-3 border-r border-divider-secondary">
+                        <div className="flex-1 p-3 border-r border-white/5">
                             <ToggleSwitch label="Loop" value={loop} onChange={onChangeLoop} />
                         </div>
                         {onChangeControls !== undefined && (
@@ -1561,6 +1569,34 @@ export function AlignmentInput({ value, onChange, label, type = "horizontal", op
     );
 }
 
+export function DirectionInput({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
+    const options = [
+        { label: "Right", value: "to right", icon: "→" },
+        { label: "Bottom", value: "to bottom", icon: "↓" },
+        { label: "Left", value: "to left", icon: "←" },
+        { label: "Top Right", value: "to top right", icon: "↗" },
+        { label: "Bottom Right", value: "to bottom right", icon: "↘" },
+    ];
+
+    return (
+        <Field label={label || "Direction"}>
+            <div style={{ width: "100%" }}>
+                <PillSegmented
+                    value={options.some(o => o.value === value) ? value : "to right"}
+                    onChange={onChange}
+                    options={options.map(o => ({
+                        label: <span style={{ fontSize: 14, fontWeight: 700 }}>{o.icon}</span>,
+                        value: o.value,
+                        title: o.label
+                    }))}
+                    block
+                    size="small"
+                />
+            </div>
+        </Field>
+    );
+}
+
 // ─── PaddingInput ─────────────────────────────────────────────────────────────
 
 export function PaddingInput({ value, onChange, label, placeholder }: { value: string; onChange: (v: string) => void; label?: string; placeholder?: string }) {
@@ -1662,14 +1698,14 @@ export function Section({ title, children, focusKeys = [] }: { title: string; ch
                 paddingBottom: 8,
                 borderBottom: "1px solid rgba(255,255,255,0.03)"
             }}>
-                <p style={{
+                <p id={sectionId + "-heading"} style={{
                     margin: 0,
                     fontSize: 10,
                     fontWeight: 800,
                     textTransform: "uppercase",
                     letterSpacing: "0.05em",
                     color: isFocused ? PANEL_COLORS.primary : PANEL_COLORS.text,
-                    opacity: isFocused ? 1 : 0.5,
+                    opacity: 1,
                     transition: "all 0.3s"
                 }}>{title}</p>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -2175,32 +2211,15 @@ export function CardFields({ p, up, prefix = "card" }: PropertyGroupProps) {
 }
 
 export function ButtonFields({ p, up, prefix = "button", hideLabel = false, textKey: customTextKey }: PropertyGroupProps & { hideLabel?: boolean; textKey?: string }) {
+    // Resolve keys
     const textKey = customTextKey || (prefix === "button" ? "buttonText" : `${prefix}Text`);
-    const bgKey = `${prefix}Bg`;
-    const colorKey = `${prefix}TextColor`;
-    const radiusKey = `${prefix}BorderRadius`;
     const variantKey = `${prefix}Variant`;
+    const radiusKey = `${prefix}BorderRadius`;
+    const shadowKey = `${prefix}Shadow`;
+    const fontSizeKey = `${prefix}FontSize`;
+    const fontWeightKey = `${prefix}FontWeight`;
+    const letterSpacingKey = `${prefix}LetterSpacing`;
 
-
-    const variantOptions = [
-        { label: "Solid", value: "solid" },
-        { label: "Outline", value: "outline" },
-        { label: "Ghost", value: "ghost" },
-        { label: "Soft", value: "soft" },
-        { label: "Gradient", value: "gradient" },
-        { label: "Link", value: "link" },
-    ];
-
-    const sizeOptions = [
-        { label: "Small", value: "sm" },
-        { label: "Medium", value: "md" },
-        { label: "Large", value: "lg" },
-        { label: "Extra Large", value: "xl" },
-    ];
-
-    const variant = p[variantKey] || "solid";
-
-    // Helper to get the correct key for a property
     const getK = (suffix: string) => {
         const prefixed = `${prefix}${suffix.charAt(0).toUpperCase()}${suffix.slice(1)}`;
         if (p[prefixed] !== undefined) return prefixed;
@@ -2208,38 +2227,109 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
         return prefix === "button" ? suffix : prefixed;
     };
 
+    const variant = (p[variantKey] as string) || (p.variant as string) || "solid";
+
     return (
         <>
-            {!hideLabel && <Field label="Action Text"><TextInput value={p[textKey] || ""} onChange={(v) => up(textKey, v)} placeholder="Click Me" /></Field>}
-            <Field label="Variant"><SelectInput value={variant} onChange={(v) => up(variantKey, v)} options={variantOptions} /></Field>
-
-            <Field label="Button Size">
-                <SelectInput
-                    value={p[getK("size")] || "md"}
-                    onChange={(v) => up(getK("size"), v)}
-                    options={sizeOptions}
-                />
-            </Field>
-
-            <Field label="Background Color"><ColorInput value={p[bgKey] || (prefix === "button" ? "var(--primary)" : "")} onChange={(v) => up(bgKey, v)} onBlur={(v) => up(bgKey, v, true)} /></Field>
-            <Field label="Text Color"><ColorInput value={p[colorKey] || (prefix === "button" ? "var(--button-text)" : "")} onChange={(v) => up(colorKey, v)} onBlur={(v) => up(colorKey, v, true)} /></Field>
+            <Section title="Button Content">
+                {!hideLabel && <Field label="Action Text"><TextInput value={p[textKey] || ""} onChange={(v) => up(textKey, v)} placeholder="Click Me" /></Field>}
+                <Field label="Variant">
+                    <SelectInput
+                        value={variant}
+                        onChange={(v) => up(variantKey, v)}
+                        options={[
+                            { label: "Solid", value: "solid" },
+                            { label: "Outline", value: "outline" },
+                            { label: "Ghost", value: "ghost" },
+                            { label: "Gradient", value: "gradient" },
+                            { label: "Link", value: "link" },
+                        ]}
+                    />
+                </Field>
+                {variant !== "gradient" && (
+                    <Field label="Background Color">
+                        <ColorInput
+                            value={(p[getK("bg")] as string) || (p[`${prefix}Bg`] as string) || (prefix === "button" ? "var(--primary)" : "")}
+                            onChange={(v) => up(getK("bg"), v)}
+                            onBlur={(v) => up(getK("bg"), v, true)}
+                        />
+                    </Field>
+                )}
+                <Field label="Text Color">
+                    <ColorInput
+                        value={(p[getK("textColor")] as string) || (p[`${prefix}TextColor`] as string) || (prefix === "button" ? "var(--button-text)" : "")}
+                        onChange={(v) => up(getK("textColor"), v)}
+                        onBlur={(v) => up(getK("textColor"), v, true)}
+                    />
+                </Field>
+            </Section>
 
             {variant === "gradient" && (
-                <>
-                    <Field label="Gradient From"><ColorInput value={p[getK("gradientFrom")] || ""} onChange={(v) => up(getK("gradientFrom"), v)} onBlur={(v) => up(getK("gradientFrom"), v, true)} /></Field>
-                    <Field label="Gradient To"><ColorInput value={p[getK("gradientTo")] || ""} onChange={(v) => up(getK("gradientTo"), v)} onBlur={(v) => up(getK("gradientTo"), v, true)} /></Field>
-                    <Field label="Direction"><SelectInput value={p[getK("gradientDir")] || "to right"} onChange={(v) => up(getK("gradientDir"), v)} options={[{ label: "→ Right", value: "to right" }, { label: "← Left", value: "to left" }, { label: "↓ Bottom", value: "to bottom" }, { label: "↗ Top Right", value: "to top right" }, { label: "↘ Bottom Right", value: "to bottom right" }]} /></Field>
-                </>
+                <Section title="Button Gradient">
+                    <Field label="From Color"><ColorInput value={p[getK("gradientFrom")] || "#6366f1"} onChange={(v) => up(getK("gradientFrom"), v)} onBlur={(v) => up(getK("gradientFrom"), v, true)} /></Field>
+                    <Field label="To Color"><ColorInput value={p[getK("gradientTo")] || "#8b5cf6"} onChange={(v) => up(getK("gradientTo"), v)} onBlur={(v) => up(getK("gradientTo"), v, true)} /></Field>
+                    <DirectionInput value={p[getK("gradientDir")] || "to right"} onChange={(v) => up(getK("gradientDir"), v)} />
+                </Section>
             )}
 
-            <Field label="Radius"><BorderRadiusInput value={p[radiusKey] || "8px"} onChange={(v) => up(radiusKey, v)} /></Field>
-            <Field label="Shadow"><ShadowInput value={p[getK("shadow")] || "none"} onChange={(v) => up(getK("shadow"), v)} /></Field>
+            <Section title="Button Appearance">
+                <Field label="Size">
+                    <SelectInput
+                        value={p[getK("size")] || "md"}
+                        onChange={(v) => up(getK("size"), v)}
+                        options={[
+                            { label: "Small", value: "sm" },
+                            { label: "Medium", value: "md" },
+                            { label: "Large", value: "lg" },
+                            { label: "Extra Large", value: "xl" }
+                        ]}
+                    />
+                </Field>
+                <AlignmentInput label="Alignment" value={p[getK("align")] || "center"} onChange={(v) => up(getK("align"), v)} />
+                <ToggleSwitch value={!!(p[getK("fullWidth")])} onChange={(v) => up(getK("fullWidth"), v)} label="Full Width" />
+            </Section>
 
-            <div style={{ padding: "4px 0", display: "flex", flexDirection: "column", gap: 8 }}>
-                <p style={{ margin: 0, fontSize: 10, fontWeight: 700, opacity: 0.5, letterSpacing: "0.05em", color: "var(--text)" }}>ICONS</p>
+            <Section title="Button Shape & Shadow">
+                <Field label="Shadow">
+                    <SelectInput
+                        value={p[shadowKey] || "none"}
+                        onChange={(v) => up(shadowKey, v)}
+                        options={[
+                            { label: "None", value: "none" },
+                            { label: "Small", value: "sm" },
+                            { label: "Medium", value: "md" },
+                            { label: "Large", value: "lg" },
+                            { label: "Glow", value: "glow" }
+                        ]}
+                    />
+                </Field>
+                <Field label="Radius"><BorderRadiusInput value={p[radiusKey] || "8px"} onChange={(v) => up(radiusKey, v)} /></Field>
+                <Field label="Border Width"><TextInputWithUnit value={(p[getK("borderWidth")] as string) ?? ""} onChange={(v) => up(getK("borderWidth"), v)} placeholder="0px" /></Field>
+                <Field label="Border Color"><ColorInput value={(p[getK("borderColor")] as string) || ""} onChange={(v) => up(getK("borderColor"), v)} onBlur={(v) => up(getK("borderColor"), v, true)} /></Field>
+            </Section>
+
+            <Section title="Button Typography">
+                <Field label="Font Size override"><TextInputWithUnit value={(p[fontSizeKey] as string) ?? ""} onChange={(v) => up(fontSizeKey, v)} placeholder="auto" /></Field>
+                <Field label="Font Weight">
+                    <SelectInput
+                        value={(p[fontWeightKey] as string) || "700"}
+                        onChange={(v) => up(fontWeightKey, v)}
+                        options={[
+                            { label: "Normal (400)", value: "400" },
+                            { label: "Medium (500)", value: "500" },
+                            { label: "Semibold (600)", value: "600" },
+                            { label: "Bold (700)", value: "700" },
+                            { label: "Black (900)", value: "900" }
+                        ]}
+                    />
+                </Field>
+                <Field label="Letter Spacing"><TextInputWithUnit value={(p[letterSpacingKey] as string) ?? ""} onChange={(v) => up(letterSpacingKey, v)} placeholder="0.02em" /></Field>
+            </Section>
+
+            <Section title="Button Icons">
                 <Field label="Left Icon"><IconPicker value={p[getK("iconLeft")] || ""} onChange={(v) => up(getK("iconLeft"), v)} /></Field>
                 <Field label="Right Icon"><IconPicker value={p[getK("iconRight")] || ""} onChange={(v) => up(getK("iconRight"), v)} /></Field>
-            </div>
+            </Section>
         </>
     );
 }

@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove, PaddingFields, TextInputWithUnit, PanelInlineEditor } from "./shared";
+import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove, PaddingFields, TextInputWithUnit, PanelInlineEditor, BorderRadiusInput, DirectionInput } from "./shared";
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
@@ -13,39 +13,12 @@ export function ButtonPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
     const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
-    const variant = (p.variant as string) || "solid";
 
     return (
         <>
-            <Section title="Content">
-                <ButtonFields p={p} up={up} hideLabel={false} />
+            <ButtonFields p={p} up={up} hideLabel={false} />
+            <Section title="Link Settings">
                 <Field label="Link (href)"><LinkInput value={(p.href as string) || ""} onChange={(v) => up("href", v)} placeholder="#" /></Field>
-            </Section>
-            <Section title="Appearance">
-                <Field label="Size"><SelectInput value={(p.size as string) || "md"} onChange={(v) => up("size", v)} options={[{ label: "Small", value: "sm" }, { label: "Medium", value: "md" }, { label: "Large", value: "lg" }, { label: "Extra Large", value: "xl" }]} /></Field>
-                <AlignmentInput label="Alignment" value={(p.align as string) || "left"} onChange={(v) => up("align", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} />
-                <ToggleSwitch value={!!(p.fullWidth)} onChange={(v) => up("fullWidth", v)} label="Full Width" />
-            </Section>
-            {variant === "gradient" && (
-                <Section title="Gradient">
-                    <Field label="From Color"><ColorInput value={(p.gradientFrom as string) || "#6366f1"} onChange={(v) => up("gradientFrom", v)} onBlur={(v) => up("gradientFrom", v, true)} /></Field>
-                    <Field label="To Color"><ColorInput value={(p.gradientTo as string) || "#8b5cf6"} onChange={(v) => up("gradientTo", v)} onBlur={(v) => up("gradientTo", v, true)} /></Field>
-                    <Field label="Direction"><SelectInput value={(p.gradientDir as string) || "to right"} onChange={(v) => up("gradientDir", v)} options={[{ label: "→ Right", value: "to right" }, { label: "← Left", value: "to left" }, { label: "↓ Bottom", value: "to bottom" }, { label: "↗ Top Right", value: "to top right" }, { label: "↘ Bottom Right", value: "to bottom right" }]} /></Field>
-                </Section>
-            )}
-            <Section title="Shape & Shadow">
-                <Field label="Shadow"><SelectInput value={(p.shadow as string) || "none"} onChange={(v) => up("shadow", v)} options={[{ label: "None", value: "none" }, { label: "Small", value: "sm" }, { label: "Medium", value: "md" }, { label: "Large", value: "lg" }, { label: "Glow", value: "glow" }]} /></Field>
-                <Field label="Border Width"><TextInputWithUnit value={(p.borderWidth as string) ?? ""} onChange={(v) => up("borderWidth", v)} placeholder="2px" /></Field>
-                <Field label="Border Color"><ColorInput value={(p.borderColor as string) || ""} onChange={(v) => up("borderColor", v)} onBlur={(v) => up("borderColor", v, true)} /></Field>
-            </Section>
-            <Section title="Typography">
-                <Field label="Font Size override"><TextInputWithUnit value={(p.fontSize as string) ?? ""} onChange={(v) => up("fontSize", v)} placeholder="auto" /></Field>
-                <Field label="Font Weight"><SelectInput value={(p.fontWeight as string) || "700"} onChange={(v) => up("fontWeight", v)} options={[{ label: "Normal (400)", value: "400" }, { label: "Medium (500)", value: "500" }, { label: "Semibold (600)", value: "600" }, { label: "Bold (700)", value: "700" }, { label: "Black (900)", value: "900" }]} /></Field>
-                <Field label="Letter Spacing"><TextInputWithUnit value={(p.letterSpacing as string) ?? ""} onChange={(v) => up("letterSpacing", v)} placeholder="0.02em" /></Field>
-            </Section>
-            <Section title="Icons">
-                <Field label="Left Icon"><IconPicker value={(p.iconLeft as string) || ""} onChange={(v) => up("iconLeft", v)} /></Field>
-                <Field label="Right Icon"><IconPicker value={(p.iconRight as string) || ""} onChange={(v) => up("iconRight", v)} /></Field>
             </Section>
             <AnimationPanel block={block} />
         </>
@@ -61,16 +34,53 @@ export function HeaderPanel({ block }: { block: Block }) {
 
     return (
         <>
-            <Section title="Layout & Styling">
-                <Field label="Header Layout"><SelectInput value={(p.layout as string) || "standard"} onChange={(v) => updateProps({ layout: v })} options={[{ label: "Standard (Logo Left, Nav Right)", value: "standard" }, { label: "Centered (Logo Center)", value: "centered" }, { label: "Split (Nav Left, Logo Center)", value: "split" }]} /></Field>
-                <Field label="Header Width"><SelectInput value={(p.layoutWidth as string) || (p.fullWidth ? "fluid" : "centered")} onChange={(v) => updateProps({ layoutWidth: v, fullWidth: v === "fluid" })} options={[{ label: "Fluid / Edge-to-Edge", value: "fluid" }, { label: "Centered (Container)", value: "centered" }, { label: "Narrow Content (800px)", value: "narrow" }]} /></Field>
-                <Field label="Position"><SelectInput value={(p.position as string) || "static"} onChange={(v) => updateProps({ position: v })} options={[{ label: "Static (Normal flow)", value: "static" }, { label: "Sticky (Stays at top)", value: "sticky" }, { label: "Fixed (Overlays content)", value: "fixed" }]} /></Field>
-                <Field label="Background Style"><SelectInput value={(p.style as string) || "solid"} onChange={(v) => up("style", v)} options={[{ label: "Solid Color", value: "solid" }, { label: "Glassmorphism (Blur)", value: "glass" }, { label: "Transparent", value: "transparent" }]} /></Field>
-                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#1e293b"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
-            </Section>
-            <BackgroundPanel block={block} />
-            <Section title="Section Padding (Responsive)">
-                <PaddingFields p={p} up={up} />
+            <Section title="Header Layout">
+                <Field label="Logo Type">
+                    <SelectInput
+                        value={(p.logoType as string) || "text"}
+                        onChange={(v) => up("logoType", v)}
+                        options={[
+                            { label: "Text Logo", value: "text" },
+                            { label: "Image Logo", value: "image" },
+                        ]}
+                    />
+                </Field>
+                <Field label="Header Style">
+                    <SelectInput
+                        value={(p.style as string) || "solid"}
+                        onChange={(v) => up("style", v)}
+                        options={[
+                            { label: "Solid", value: "solid" },
+                            { label: "Transparent", value: "transparent" },
+                            { label: "Glassmorphism", value: "glass" },
+                        ]}
+                    />
+                </Field>
+                <Field label="Position">
+                    <SelectInput
+                        value={(p.position as string) || "static"}
+                        onChange={(v) => up("position", v)}
+                        options={[
+                            { label: "Standard (Scrolls)", value: "static" },
+                            { label: "Fixed (Sticky)", value: "fixed" },
+                        ]}
+                    />
+                </Field>
+                <Field label="Floating Mode">
+                    <ToggleSwitch
+                        value={!!p.isFloating}
+                        onChange={(v) => up("isFloating", v, true)}
+                        label="Floating Island"
+                    />
+                </Field>
+                {p.isFloating && (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 16px", marginTop: 12 }}>
+                        <Field label="Width" fullWidth><TextInputWithUnit type="width" value={(p.floatingWidth as string) || ""} onChange={(v) => up("floatingWidth", v)} placeholder="auto" /></Field>
+                        <Field label="Top Offset" fullWidth><TextInputWithUnit value={(p.floatingTop as string) || "20px"} onChange={(v) => up("floatingTop", v)} placeholder="20px" /></Field>
+                        <Field label="Side Offset" fullWidth><TextInputWithUnit value={(p.floatingSide as string) || ""} onChange={(v) => up("floatingSide", v)} placeholder="Same as Top" /></Field>
+                        <Field label="Border Radius" fullWidth><BorderRadiusInput value={(p.floatingRadius as string) || "16px"} onChange={(v) => up("floatingRadius", v)} placeholder="16px" /></Field>
+                    </div>
+                )}
             </Section>
             <Section title="Brand (Logo)">
                 <Field label="Logo Type"><SelectInput value={(p.logoType as string) || "text"} onChange={(v) => up("logoType", v)} options={[{ label: "Text Only", value: "text" }, { label: "Image", value: "image" }]} /></Field>
@@ -83,6 +93,11 @@ export function HeaderPanel({ block }: { block: Block }) {
                     <Field label="Logo Shape"><SelectInput value={(p.logoShape as string) || "square"} onChange={(v) => up("logoShape", v)} options={[{ label: "Square", value: "square" }, { label: "Circle", value: "circle" }, { label: "Rounded", value: "rounded" }]} /></Field>
                 </>)}
             </Section>
+            <BackgroundPanel block={block} />
+            <Section title="Section Padding (Responsive)">
+                <PaddingFields p={p} up={up} />
+            </Section>
+
             <Section title="Call to Action (CTA)">
                 <ToggleSwitch value={p.showCta !== false} onChange={(v) => up("showCta", v)} label="Show CTA Button" />
                 {p.showCta !== false && (
@@ -379,28 +394,28 @@ export function FooterPanel({ block }: { block: Block }) {
                         {((p.linkGroups as any[]) || []).map((group, gIdx) => (
                             <div key={group.id} style={{ padding: 12, border: "1px solid var(--border)", borderRadius: 10, background: "rgba(255,255,255,0.02)" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, alignItems: "center" }}>
-                                    <PanelInlineEditor 
-                                        value={group.heading} 
-                                        onChange={(v) => { const nG = [...(p.linkGroups as any[])]; nG[gIdx] = { ...nG[gIdx], heading: v }; up("linkGroups", nG); }} 
-                                        placeholder="Group Heading" 
-                                        style={{ fontWeight: 700, fontSize: 13, background: "transparent", border: "none", color: "var(--text)", outline: "none", width: "80%", padding: 0 }} 
+                                    <PanelInlineEditor
+                                        value={group.heading}
+                                        onChange={(v) => { const nG = [...(p.linkGroups as any[])]; nG[gIdx] = { ...nG[gIdx], heading: v }; up("linkGroups", nG); }}
+                                        placeholder="Group Heading"
+                                        style={{ fontWeight: 700, fontSize: 13, background: "transparent", border: "none", color: "var(--text)", outline: "none", width: "80%", padding: 0 }}
                                     />
                                     <button onClick={() => { const nG = (p.linkGroups as any[]).filter((_, i) => i !== gIdx); up("linkGroups", nG); }} style={{ background: "transparent", border: "none", color: "var(--error)", cursor: "pointer", fontSize: 18 }}>&times;</button>
                                 </div>
                                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
                                     {group.links.map((link: any, lIdx: number) => (
                                         <div key={link.id} style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                                            <PanelInlineEditor 
-                                                value={link.label} 
+                                            <PanelInlineEditor
+                                                value={link.label}
                                                 onChange={(v) => {
                                                     const nG = [...(p.linkGroups as any[])];
                                                     const nL = [...nG[gIdx].links];
                                                     nL[lIdx] = { ...nL[lIdx], label: v };
                                                     nG[gIdx] = { ...nG[gIdx], links: nL };
                                                     up("linkGroups", nG);
-                                                }} 
-                                                placeholder="Label" 
-                                                style={{ flex: 1 }} 
+                                                }}
+                                                placeholder="Label"
+                                                style={{ flex: 1 }}
                                             />
                                             <LinkInput value={link.url} onChange={(v) => {
                                                 const nG = [...(p.linkGroups as any[])];

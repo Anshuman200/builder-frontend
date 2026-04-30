@@ -727,7 +727,6 @@ export function ContactFormPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Spacing">
-                <BackgroundPanel block={block} />
                 <PaddingInput label="Section Padding" value={(p.sectionPadding as string) || "4rem 1rem"} onChange={(v) => up("sectionPadding", v)} placeholder="4rem 1rem" />
             </Section>
 
@@ -772,13 +771,12 @@ export function ContactFormPanel({ block }: { block: Block }) {
                 </div>
             </Section>
 
-            <Section title="Submit Button">
-                <ButtonFields p={p} up={up} prefix="button" textKey="submitLabel" />
-                <ToggleSwitch value={p.buttonFullWidth !== false} onChange={(v) => up("buttonFullWidth", v)} label="Full Width Button" />
-                {p.buttonFullWidth === false && (
+            <ButtonFields p={p} up={up} prefix="button" textKey="submitLabel" />
+            {p.buttonFullWidth === false && (
+                <Section title="Submit Button Alignment">
                     <AlignmentInput label="Alignment" value={(p.buttonAlign as string) || "right"} onChange={(v) => up("buttonAlign", v)} options={[{ label: "Left", value: "left" }, { label: "Center", value: "center" }, { label: "Right", value: "right" }]} />
-                )}
-            </Section>
+                </Section>
+            )}
 
             <Section title="Feedback Messages">
                 <Field label="Success"><TextInput value={(p.successMessage as string) || "Thanks! We'll get back to you shortly."} onChange={(v) => up("successMessage", v)} /></Field>
@@ -1312,9 +1310,7 @@ export function DeleteAccountPanel({ block }: { block: Block }) {
                 </Section>
             )}
 
-            <Section title="Submit Button">
-                <ButtonFields p={p} up={up} prefix="button" textKey="submitLabel" />
-            </Section>
+            <ButtonFields p={p} up={up} prefix="button" textKey="submitLabel" />
 
             <Section title="Style & Background">
                 <BackgroundPanel block={block} />

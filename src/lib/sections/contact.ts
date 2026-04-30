@@ -2,23 +2,9 @@
 import { makeBlock } from "../config/blocks";
 import type { SectionTemplate } from "@/types";
 
-// ─── Helper: build a frosted info card (container block) ────────────────────
-function infoCard(bgColor: string, iconName: string, iconColor: string, title: string, line1: string, line2: string) {
-  const card = makeBlock("container", {
-    bgColor, borderRadius: "16px", padding: "1.5rem",
-    align: "center",
-  });
-  card.props.childBlocks = [
-    makeBlock("icon", { iconName, size: "32", color: iconColor, align: "center", padding: "0" }),
-    makeBlock("text", { content: title, tag: "h4", fontSize: "1.1rem", bold: true, color: "var(--text)", align: "center", marginTop: "0.75rem" }),
-    makeBlock("text", { content: `${line1}\n${line2}`, tag: "p", fontSize: "0.9rem", color: "var(--text-muted)", align: "center", lineHeight: "1.5", marginTop: "0.25rem" }),
-  ];
-  return card;
-}
 
 export const contactSections: SectionTemplate[] = [
-  // ─── 8. Teal Simple Form + Icon Cards Below ───────────────────────────────────
-  // Inspired by screenshot 1: white top with email/name inputs → teal footer with 3 circle-icon cards
+  // ─── 1. Teal Simple Form + Icon Cards Below ───────────────────────────────────
   {
     id: "contact-teal-icon-cards",
     name: "Simple Form & Icon Cards",
@@ -69,7 +55,7 @@ export const contactSections: SectionTemplate[] = [
     },
   },
 
-  // ─── 4. Gradient Hero CTA with 3 info cards ──────────────────────────────────
+  // ─── 2. Gradient Hero CTA with 3 info cards ──────────────────────────────────
   {
     id: "contact-gradient-cta",
     name: "Gradient CTA with Cards",
@@ -117,7 +103,7 @@ export const contactSections: SectionTemplate[] = [
     },
   },
 
-  // ─── 5. Image Left + Contact Form Right ──────────────────────────────────────
+  // ─── 3. Image Left + Contact Form Right ──────────────────────────────────────
   {
     id: "contact-image-split",
     name: "Image Split Contact",
