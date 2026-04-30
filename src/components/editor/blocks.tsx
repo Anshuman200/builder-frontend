@@ -7,7 +7,7 @@ import React from "react";
 import { setBlockRenderer, BlockContext } from "./blocks/shared";
 
 // ─── Shared re-exports (backward compat) ─────────────────────────────────────
-export { PreviewContext, PreviewProvider, ChildBlockWrapper, DropZoneStrip, BlockContext } from "./blocks/shared";
+export { PreviewContext, PreviewProvider, ChildBlockWrapper, DropZoneStrip, BlockContext, WaveQuickEditor } from "./blocks/shared";
 export type { BlockProps } from "./blocks/shared";
 
 // ─── Per-block imports ────────────────────────────────────────────────────────

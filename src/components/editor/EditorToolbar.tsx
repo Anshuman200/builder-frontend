@@ -28,7 +28,8 @@ import {
   DocumentPlusIcon,
   CogIcon
 } from "@heroicons/react/24/outline";
-import { Popover, Dropdown, Drawer, Switch, ColorPicker } from "antd";
+import { Popover, Dropdown, Drawer, Switch } from "antd";
+import { AppColorPicker, PANEL_COLORS } from "./panels/shared";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEditorStore } from "@/stores/editorStore";
@@ -45,7 +46,6 @@ import MediaPicker from "@/components/editor/MediaPicker";
 import { DEFAULT_THEME } from "@/stores/editorStore";
 import NewPageWizard from "@/components/editor/NewPageWizard";
 import { ConfigProvider, theme as antdTheme } from "antd";
-import { PANEL_COLORS } from "./panels/shared";
 
 export default function EditorToolbar() {
   const {
@@ -919,10 +919,10 @@ export default function EditorToolbar() {
                       <p style={{ margin: '2px 0 0', fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>Site accent color</p>
                     </div>
                   </div>
-                  <ColorPicker
+                  <AppColorPicker
                     value={colors.primary}
-                    onChange={(v) => updateTheme({ colors: { ...colors, primary: v.toHexString() } })}
-                    onOpenChange={(open) => {
+                    onChange={(v: any) => updateTheme({ colors: { ...colors, primary: v.toHexString() } })}
+                    onOpenChange={(open: boolean) => {
                       if (!open) {
                         updateTheme({ colors: { ...colors, primary: colors.primary } }, true);
                         useEditorStore.getState().migrateThemeColors();

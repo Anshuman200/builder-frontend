@@ -82,10 +82,14 @@ interface EditorStore {
         onSelect: (url: string) => void;
         title?: string;
     };
+    waveEditorTrigger: number;
+    waveEditorPos: { x: number, y: number } | null;
     wizard: {
         open: boolean;
         blankMode: boolean;
     };
+
+    setWaveEditorPos: (pos: { x: number, y: number } | null) => void;
 
     // ─ Actions ────────────────────────────────────────────────────────────────
     setPage: (page: EditorPage) => void;
@@ -627,10 +631,14 @@ export const useEditorStore = create<EditorStore>()(
             onSelect: () => { },
             title: "Select Media",
         },
+        waveEditorTrigger: 0,
+        waveEditorPos: null,
         wizard: {
             open: false,
             blankMode: false,
         },
+
+        setWaveEditorPos: (pos) => set({ waveEditorPos: pos }),
 
         setPage: (page) =>
             set((state) => {
@@ -758,7 +766,13 @@ export const useEditorStore = create<EditorStore>()(
             s.selectBlockTick = (s.selectBlockTick || 0) + 1; 
         }),
         hoverBlock: (id) => set({ hoveredBlockId: id }),
-        focusSubItem: (blockId, index: number | string) => set({ subItemFocus: { blockId, index } }),
+        focusSubItem: (blockId, index: number | string) => set((s) => {
+            console.log("Focus Sub Item:", { blockId, index });
+            s.subItemFocus = { blockId, index };
+            if (index === "Wave Decoration") {
+                s.waveEditorTrigger = (s.waveEditorTrigger || 0) + 1;
+            }
+        }),
         setViewMode: (mode) => set({ viewMode: mode }),
         setIsSaving: (v) => set({ isSaving: v }),
         setActiveDrag: (drag: EditorStore["activeDrag"]) => set({ activeDrag: drag }),

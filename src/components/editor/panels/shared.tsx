@@ -12,7 +12,7 @@ import React from "react";
 import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 import { useEditorStore } from "@/stores/editorStore";
-import { ColorPicker, Dropdown, Input, Popover, Select, Space, Switch, Tooltip } from "antd";
+import { ColorPicker, ConfigProvider, Dropdown, Input, Popover, Select, Space, Switch, theme, Tooltip } from "antd";
 import MediaPicker from "../MediaPicker";
 import PillSegmented from "../../ui/PillSegmented";
 
@@ -23,6 +23,7 @@ import { Bars2Icon } from "@heroicons/react/20/solid";
 import { IconPicker } from "../IconPicker";
 import AppToolTip from "../../common/AppToolTip";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 export { arrayMove, rectSortingStrategy };
 
@@ -302,7 +303,7 @@ export function TextInput({ value, onChange, onBlur, placeholder, type = "text",
  */
 export function PanelInlineEditor({ value, onChange, onBlur, placeholder, multiline = false, style }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void; placeholder?: string; multiline?: boolean, style?: React.CSSProperties }) {
     const Component = multiline ? "textarea" : "input";
-    
+
     return (
         <Component
             value={value}
@@ -311,15 +312,15 @@ export function PanelInlineEditor({ value, onChange, onBlur, placeholder, multil
             spellCheck={false}
             rows={multiline ? 3 : undefined}
             style={{
-                width: "100%", 
+                width: "100%",
                 minHeight: multiline ? 60 : 34,
-                padding: "8px 12px", 
+                padding: "8px 12px",
                 fontSize: 12,
                 lineHeight: 1.5,
-                background: "rgba(255,255,255,0.03)", 
+                background: "rgba(255,255,255,0.03)",
                 border: `1px solid transparent`,
-                borderRadius: 8, 
-                color: PANEL_COLORS.text, 
+                borderRadius: 8,
+                color: PANEL_COLORS.text,
                 outline: "none",
                 transition: "all 0.2s ease",
                 cursor: "text",
@@ -426,16 +427,20 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
                 value={currentUnit}
                 size="small"
                 onChange={handleUnitChange}
+                className="dark-select-theme"
                 style={{
                     height: 30,
-                    width: 70,
+                    width: 65,
+                    background: PANEL_COLORS.inputBg,
+                    border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                    borderRadius: "0 6px 6px 0",
                 }}
                 dropdownStyle={{
                     background: "#18181b",
                     border: `1px solid ${PANEL_COLORS.inputBorder}`,
                 }}
                 options={units}
-                suffixIcon={<ChevronDownIcon style={{ width: 10, height: 10 }} />}
+                suffixIcon={<ChevronDownIcon style={{ width: 10, height: 10, color: PANEL_COLORS.muted }} />}
             />
         </div>
     );
@@ -802,28 +807,38 @@ function toHex(color: string, theme?: any): string {
 }
 
 // Test comment
-export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff", hideText = false }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void; placeholder?: string; hideText?: boolean }) {
-    const { page } = useEditorStore();
-    const theme = page?.theme;
-    const initialValue = value || placeholder;
-    const resolvedDisplayValue = resolveColor(initialValue, theme);
-    const isVariable = initialValue.startsWith("var(");
-
+// ─── Master AppColorPicker (DRY Source of Truth) ──────────────────────────
+export function AppColorPicker({ 
+    value, 
+    onChange, 
+    onChangeComplete,
+    children, 
+    showText,
+    ...props 
+}: { 
+    value: string; 
+    onChange: (color: any) => void; 
+    onChangeComplete?: (color: any) => void;
+    children: React.ReactNode; 
+    showText?: any;
+    [key: string]: any;
+}) {
     return (
-        <div style={{ display: "flex", gap: 4, width: "100%" }}>
+        <ConfigProvider
+            theme={{
+                algorithm: theme.darkAlgorithm,
+                token: {
+                    colorBgElevated: '#171717',
+                    colorBorder: '#262626',
+                    zIndexPopupBase: 11000,
+                }
+            }}
+        >
             <ColorPicker
-                value={isVariable ? resolvedDisplayValue : initialValue}
-                onChange={(color) => {
-                    onChange(color.toRgbString());
-                }}
-                onChangeComplete={(color) => {
-                    if (onBlur) onBlur(color.toRgbString());
-                }}
-                showText={hideText ? undefined : () => (
-                    <span style={{ fontSize: 10, color: PANEL_COLORS.muted }}>
-                        {toHex(initialValue)}
-                    </span>
-                )}
+                value={value}
+                onChange={onChange}
+                onChangeComplete={onChangeComplete}
+                showText={showText}
                 presets={[
                     {
                         label: 'Brand Colors',
@@ -838,6 +853,36 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff", h
                         colors: ["rgba(0,0,0,0)"],
                     }
                 ]}
+                {...props}
+            >
+                {children}
+            </ColorPicker>
+        </ConfigProvider>
+    );
+}
+
+export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff", hideText = false }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void; placeholder?: string; hideText?: boolean }) {
+    const { page } = useEditorStore();
+    const theme = page?.theme;
+    const initialValue = value || placeholder;
+    const resolvedDisplayValue = resolveColor(initialValue, theme);
+    const isVariable = initialValue.startsWith("var(");
+
+    return (
+        <div style={{ display: "flex", gap: 4, width: "100%" }}>
+            <AppColorPicker
+                value={isVariable ? resolvedDisplayValue : initialValue}
+                onChange={(color: any) => {
+                    onChange(color.toRgbString());
+                }}
+                onChangeComplete={(color: any) => {
+                    if (onBlur) onBlur(color.toRgbString());
+                }}
+                showText={hideText ? undefined : () => (
+                    <span style={{ fontSize: 10, color: PANEL_COLORS.muted }}>
+                        {toHex(initialValue)}
+                    </span>
+                )}
             >
                 <button
                     style={{
@@ -853,7 +898,7 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff", h
                     <div style={{ width: 16, height: 16, borderRadius: 4, background: resolvedDisplayValue, border: "1px solid rgba(255,255,255,0.15)", flexShrink: 0 }} />
                     {!hideText && <span style={{ flex: 1, textAlign: "left", fontFamily: "monospace", fontSize: 11, opacity: 0.9, overflow: "hidden", textOverflow: "ellipsis" }}>{isVariable ? `${toHex(value, theme)} (Theme)` : (toHex(value, theme) === "transparent" ? "Transparent" : toHex(value, theme))}</span>}
                 </button>
-            </ColorPicker>
+            </AppColorPicker>
 
             {!isVariable && !hideText && (
                 <AppToolTip title="Reset to Theme Variable">
@@ -1488,17 +1533,17 @@ export function PaddingInput({ value, onChange, label, placeholder }: { value: s
 
 export function Section({ title, children, hasPadding = true, focusKeys = [] }: { title: string; children: React.ReactNode, hasPadding?: boolean, focusKeys?: (string | number)[] }) {
     const { subItemFocus, selectedBlockId } = useEditorStore();
-    
+
     // Smart auto-focus matching for common patterns
     const autoFocusKeys = [...focusKeys];
     if (title.toLowerCase() === "content") autoFocusKeys.push("title", "subtitle");
     if (title.toLowerCase().includes("items") || title.toLowerCase().includes("members")) {
         // Auto-match indices 0-15 for list sections
-        for(let i=0; i<16; i++) autoFocusKeys.push(i);
+        for (let i = 0; i < 16; i++) autoFocusKeys.push(i);
     }
 
     const isFocused = subItemFocus?.blockId === selectedBlockId && (
-        subItemFocus?.index === title || 
+        subItemFocus?.index === title ||
         autoFocusKeys.includes(subItemFocus?.index as any)
     );
     const [isFlashing, setIsFlashing] = React.useState(false);
@@ -1531,8 +1576,8 @@ export function Section({ title, children, hasPadding = true, focusKeys = [] }: 
                 background: isFlashing ? "rgba(99, 102, 241, 0.2)" : isFocused ? "rgba(99, 102, 241, 0.12)" : "rgba(255,255,255,0.03)",
                 backdropFilter: isFocused ? "blur(8px)" : "none",
                 position: "relative",
-                boxShadow: isFocused 
-                    ? `0 8px 32px rgba(99, 102, 241, 0.2), inset 0 0 0 1px rgba(255,255,255,0.05)` 
+                boxShadow: isFocused
+                    ? `0 8px 32px rgba(99, 102, 241, 0.2), inset 0 0 0 1px rgba(255,255,255,0.05)`
                     : "0 4px 12px rgba(0,0,0,0.25)"
             }}
         >
@@ -1973,6 +2018,91 @@ export function InputFields({ p, up, prefix = "input" }: PropertyGroupProps) {
             <Field label="Height"><TextInputWithUnit value={p[heightKey] || ""} onChange={(v) => up(heightKey, v)} placeholder="48px" /></Field>
             <Field label="Border Radius"><BorderRadiusInput value={p[radiusKey] || ""} onChange={(v) => up(radiusKey, v)} placeholder="10px" /></Field>
         </>
+    );
+}
+
+export function WaveDecorationFields({ p, up }: PropertyGroupProps) {
+    const showWave = !!p.showWave;
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <Field label="Enable Wave">
+                <ToggleSwitch
+                    value={showWave}
+                    onChange={(v) => up("showWave", v, true)}
+                    label={showWave ? "Yes" : "No"}
+                />
+            </Field>
+
+            {showWave && (
+                <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    style={{ display: "flex", flexDirection: "column", gap: "12px", overflow: "hidden" }}
+                >
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                        <Field label="Position">
+                            <SelectInput
+                                value={(p.wavePosition as string) || "bottom"}
+                                onChange={(v) => up("wavePosition", v, true)}
+                                options={[
+                                    { label: "Bottom", value: "bottom" },
+                                    { label: "Top", value: "top" },
+                                ]}
+                            />
+                        </Field>
+                        <Field label="Style">
+                            <SelectInput
+                                value={(p.wavePattern as string) || "smooth"}
+                                onChange={(v) => up("wavePattern", v, true)}
+                                options={[
+                                    { label: "Smooth", value: "smooth" },
+                                    { label: "Sharp", value: "sharp" },
+                                    { label: "Steps", value: "stepped" },
+                                    { label: "Curve", value: "asymmetric" },
+                                ]}
+                            />
+                        </Field>
+                    </div>
+
+                    <Field label="Height">
+                        <TextInputWithUnit
+                            value={(p.waveHeight as string) || "120px"}
+                            onChange={(v) => up("waveHeight", v, true)}
+                            placeholder="120px"
+                        />
+                    </Field>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                        <Field label="Main Color">
+                            <ColorInput value={(p.waveColor as string) || "var(--primary)"} onChange={(v) => up("waveColor", v, true)} />
+                        </Field>
+                        <Field label="Grad End">
+                            <ColorInput value={(p.waveGradientEnd as string) || ""} onChange={(v) => up("waveGradientEnd", v, true)} />
+                        </Field>
+                    </div>
+
+                    <Field label="Layers (Depth)">
+                        <SliderInput min={1} max={3} value={Number(p.waveLayers ?? 3)} onChange={(v) => up("waveLayers", v, true)} />
+                    </Field>
+
+                    <div style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: "10px",
+                        background: "rgba(255,255,255,0.03)",
+                        padding: "10px",
+                        borderRadius: "8px",
+                        border: "1px solid rgba(255,255,255,0.05)"
+                    }}>
+                        <ToggleSwitch label="Animate" value={p.waveAnimated !== false} onChange={(v) => up("waveAnimated", v, true)} />
+                        <ToggleSwitch label="On Top" value={!!p.waveOnTop} onChange={(v) => up("waveOnTop", v, true)} />
+                        <ToggleSwitch label="Flip H" value={!!p.waveFlipH} onChange={(v) => up("waveFlipH", v, true)} />
+                        <ToggleSwitch label="Flip V" value={!!p.waveFlipV} onChange={(v) => up("waveFlipV", v, true)} />
+                    </div>
+                </motion.div>
+            )}
+        </div>
     );
 }
 

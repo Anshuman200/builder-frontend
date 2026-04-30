@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Section, Field, ColorInput, GradientInput, UnifiedBackgroundInput, MediaInput, SelectInput, SliderInput, VideoPlaybackOptions, ToggleInput, TextInputWithUnit, ToggleSwitch } from "./shared";
+import { Section, Field, ColorInput, GradientInput, UnifiedBackgroundInput, MediaInput, SelectInput, SliderInput, VideoPlaybackOptions, ToggleInput, TextInputWithUnit, ToggleSwitch, WaveDecorationFields } from "./shared";
 import { Block } from "@/types";
 import { useEditorStore } from "@/stores/editorStore";
 
@@ -121,55 +121,8 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
         </div>
 
         {!!p.showWave && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "12px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-              <Field label="Position">
-                <SelectInput
-                  value={(p.wavePosition as string) || "bottom"}
-                  onChange={(v) => up("wavePosition", v, true)}
-                  options={[
-                    { label: "Bottom", value: "bottom" },
-                    { label: "Top", value: "top" },
-                  ]}
-                />
-              </Field>
-              <Field label="Style">
-                <SelectInput
-                  value={(p.wavePattern as string) || "smooth"}
-                  onChange={(v) => up("wavePattern", v, true)}
-                  options={[
-                    { label: "Smooth", value: "smooth" },
-                    { label: "Sharp", value: "sharp" },
-                    { label: "Steps", value: "stepped" },
-                    { label: "Curve", value: "asymmetric" },
-                  ]}
-                />
-              </Field>
-            </div>
-
-            <Field label="Height">
-              <TextInputWithUnit value={(p.waveHeight as string) || "120px"} onChange={(v) => up("waveHeight", v, true)} placeholder="120px" />
-            </Field>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-              <Field label="Main Color">
-                <ColorInput value={(p.waveColor as string) || "var(--primary)"} onChange={(v) => up("waveColor", v, true)} />
-              </Field>
-              <Field label="Grad End">
-                <ColorInput value={(p.waveGradientEnd as string) || ""} onChange={(v) => up("waveGradientEnd", v, true)} />
-              </Field>
-            </div>
-
-            <Field label="Layers (Depth)">
-              <SliderInput min={1} max={3} value={Number(p.waveLayers ?? 3)} onChange={(v) => up("waveLayers", v, true)} />
-            </Field>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", background: "rgba(255,255,255,0.02)", padding: "8px", borderRadius: "6px" }}>
-              <ToggleSwitch label="Animate" value={p.waveAnimated !== false} onChange={(v) => up("waveAnimated", v, true)} />
-              <ToggleSwitch label="On Top" value={!!p.waveOnTop} onChange={(v) => up("waveOnTop", v, true)} />
-              <ToggleSwitch label="Flip H" value={!!p.waveFlipH} onChange={(v) => up("waveFlipH", v, true)} />
-              <ToggleSwitch label="Flip V" value={!!p.waveFlipV} onChange={(v) => up("waveFlipV", v, true)} />
-            </div>
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "12px" }}>
+            <WaveDecorationFields p={p} up={up} />
           </div>
         )}
       </Section>

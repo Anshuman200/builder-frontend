@@ -16,10 +16,11 @@ import {
   TrashIcon, Square2StackIcon, PlusIcon,
   Squares2X2Icon, ArrowsRightLeftIcon
 } from "@heroicons/react/24/outline";
-import { useEditorStore } from "@/stores/editorStore";
+import { useEditorStore, LIGHT_COLORS } from "@/stores/editorStore";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
-import { BlockRenderer } from "./blocks";
+import { BlockRenderer, WaveQuickEditor } from "./blocks";
 import { ActivePathContext, getBlockMediaInfo, QuickLayoutChange } from "./blocks/shared";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { IconButton } from "../ui/IconButton";
 import AppToolTip from "../common/AppToolTip";
 
@@ -50,10 +51,42 @@ const WaveIcon = ({ className, style }: { className?: string, style?: React.CSSP
 // ─── Main Canvas ──────────────────────────────────────────────────────────────
 
 export default function EditorCanvas() {
-  const { page, viewMode, selectBlock, updateTheme, activeRouteId } = useEditorStore();
+  const { page, viewMode, selectBlock, updateTheme, activeRouteId, waveEditorPos, setWaveEditorPos, selectedBlockId } = useEditorStore();
+  const dragControls = useDragControls();
 
   const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
   const routeBlocks = activeRoute?.content ?? [];
+
+  // Helper to find the currently selected block's data
+  const findBlock = (blocks: Block[], id: string): Block | null => {
+    for (const b of blocks) {
+      if (b.id === id) return b;
+      if (b.children) {
+        const found = findBlock(b.children, id);
+        if (found) return found;
+      }
+      // Check column props
+      const colProps = ["col0", "col1", "childBlocks"];
+      for (const p of colProps) {
+        if (Array.isArray(b.props[p])) {
+          const found = findBlock(b.props[p] as Block[], id);
+          if (found) return found;
+        }
+      }
+      // Check items array
+      if (Array.isArray(b.props.items)) {
+        for (const item of b.props.items as any[]) {
+          if (item.blocks) {
+            const found = findBlock(item.blocks, id);
+            if (found) return found;
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  const selectedBlock = selectedBlockId ? findBlock([...(page?.globalBlocks?.header ? [page.globalBlocks.header] : []), ...routeBlocks, ...(page?.globalBlocks?.footer ? [page.globalBlocks.footer] : [])], selectedBlockId) : null;
 
   const blocks = [
     ...(page?.globalBlocks?.header && !activeRoute?.hideHeader ? [page?.globalBlocks?.header] : []),
@@ -143,6 +176,34 @@ export default function EditorCanvas() {
         </ActivePathContext.Provider>
       </div>
 
+      <AnimatePresence>
+        {waveEditorPos && selectedBlock && (
+          <motion.div
+            key={`global-wave-editor`}
+            drag
+            dragControls={dragControls}
+            dragListener={false}
+            dragMomentum={false}
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 10 }}
+            style={{
+              position: "fixed",
+              left: Math.max(20, Math.min(waveEditorPos.x, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 320)),
+              top: Math.max(20, Math.min(waveEditorPos.y, (typeof window !== 'undefined' ? window.innerHeight : 800) - 450)),
+              zIndex: 1000,
+              pointerEvents: "auto"
+            }}
+          >
+            <WaveQuickEditor
+              p={selectedBlock.props}
+              blockId={selectedBlock.id}
+              onClose={() => setWaveEditorPos(null)}
+              dragControls={dragControls}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -420,8 +481,12 @@ const CanvasBlock = memo(function CanvasBlock({
         }}
         onClick={(e) => {
           e.stopPropagation();
+          const isAlreadySelected = useEditorStore.getState().selectedBlockId === block.id;
           selectBlock(block.id);
-          e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+          // Only scroll if we are selecting a NEW block to avoid jumpiness during minor edits
+          if (!isAlreadySelected) {
+            e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
         }}
         onMouseEnter={() => hoverBlock(block.id)}
         onMouseLeave={() => hoverBlock(null)}

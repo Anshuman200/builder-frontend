@@ -10,14 +10,15 @@ import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TrashIcon, EllipsisHorizontalIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon, ArrowPathIcon, SparklesIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 
 import { useEditorStore } from "@/stores/editorStore";
+import { PANEL_COLORS, SelectInput, ColorInput, SliderInput, Field, WaveDecorationFields } from "../panels/shared";
 import { IconButton } from "@/components/ui/IconButton";
 import AppToolTip from "@/components/common/AppToolTip";
 import { getIcon } from "@/lib/utils/icons";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
-import { Dropdown } from "antd";
+import { Dropdown, Popover as AntPopover } from "antd";
 
 import { getTemplatesForBlock, transformBlockToTemplate } from "@/lib/config/templates";
 
@@ -382,7 +383,15 @@ export function ChildBlockWrapper({
                 // while still avoiding the double-rendering flicker.
                 opacity: isDragging ? 0.2 : 1,
             }}
-            onClick={(e) => { e.stopPropagation(); selectBlock(block.id); }}
+            onClick={(e) => {
+                e.stopPropagation();
+                const isAlreadySelected = useEditorStore.getState().selectedBlockId === block.id;
+                selectBlock(block.id);
+                // Only scroll if we are selecting a NEW block to avoid jumpiness during minor edits
+                if (!isAlreadySelected) {
+                    e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+            }}
             onMouseEnter={() => hoverBlock(block.id)}
             onMouseLeave={() => hoverBlock(null)}
         >
@@ -842,85 +851,154 @@ function resolveCssColor(value: string): string {
     } catch { return value; }
 }
 
-function WaveQuickEditor({ p, blockId, onClose }: { p: Record<string, any>, blockId: string, onClose: () => void }) {
-    const { updateBlock } = useEditorStore();
-    const up = (key: string, val: any) => updateBlock(blockId, { [key]: val }, true);
+/**
+ * QuickPopoverEditor - A reusable, premium-dark floating editor chassis.
+ * Designed to match the sidebar's professional aesthetic exactly.
+ */
+import { ConfigProvider, theme } from "antd";
+
+/**
+ * QuickPopoverEditor - A reusable, premium-dark floating editor chassis.
+ * Designed to match the sidebar's professional aesthetic exactly.
+ */
+export function QuickPopoverEditor({ 
+    title, 
+    children, 
+    onClose, 
+    dragControls 
+}: { 
+    title: string, 
+    children: React.ReactNode, 
+    onClose: () => void, 
+    dragControls: any 
+}) {
+    return (
+        <ConfigProvider
+            theme={{
+                algorithm: theme.darkAlgorithm,
+                token: {
+                    colorPrimary: '#6366f1',
+                    borderRadius: 6,
+                    colorBgBase: '#000000',
+                    colorBgContainer: '#0a0a0a',
+                    colorBgElevated: '#171717',
+                    colorBorder: '#262626',
+                    fontSize: 12,
+                    zIndexPopupBase: 11000,
+                },
+                components: {
+                    Select: {
+                        controlHeight: 30,
+                        fontSize: 11,
+                    },
+                    Input: {
+                        controlHeight: 30,
+                        fontSize: 11,
+                    },
+                    ColorPicker: {
+                        controlHeight: 30,
+                    }
+                }
+            }}
+        >
+            <motion.div 
+                className="premium-dark-popover"
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                style={{
+                    background: "#050505",
+                    border: "1px solid rgba(255, 255, 255, 0.12)",
+                    borderRadius: "12px",
+                    padding: "16px",
+                    width: "320px",
+                    color: "#fff",
+                    pointerEvents: "auto",
+                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05)",
+                    overflow: "hidden"
+                }}
+            >
+                <style>{`
+                    /* Field Labels - Maintain Sidebar Style */
+                    .premium-dark-popover label {
+                        font-size: 10px !important;
+                        font-weight: 700 !important;
+                        color: #71717a !important;
+                        text-transform: uppercase !important;
+                        margin-bottom: 4px !important;
+                        display: block !important;
+                    }
+                `}</style>
+
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "16px",
+                        cursor: "grab",
+                        userSelect: "none"
+                    }}
+                    className="drag-handle"
+                    onPointerDown={(e) => dragControls.start(e)}
+                >
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 3, height: 14, background: "#6366f1", borderRadius: 1 }} />
+                        <span style={{ fontSize: "11px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "#6366f1" }}>{title}</span>
+                    </div>
+                    <button
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); onClose(); }}
+                        style={{ 
+                            background: "rgba(255,255,255,0.08)", 
+                            border: "none", 
+                            color: "rgba(255,255,255,0.6)", 
+                            cursor: "pointer", 
+                            width: 24, 
+                            height: 24, 
+                            borderRadius: "50%", 
+                            display: "flex", 
+                            alignItems: "center", 
+                            justifyContent: "center", 
+                            fontSize: 10, 
+                            transition: "all 0.2s" 
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.15)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.6)"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+                    >✕</button>
+                </div>
+
+                {children}
+            </motion.div>
+        </ConfigProvider>
+    );
+}
+
+export function WaveQuickEditor({ p, blockId, onClose, dragControls }: { p: Record<string, any>, blockId: string, onClose: () => void, dragControls: any }) {
+    const up = (key: string, val: any, commit = true) => {
+        useEditorStore.getState().updateBlock(blockId, { [key]: val }, commit);
+    };
 
     return (
-        <div style={{
-            position: "absolute",
-            zIndex: 100000,
-            background: "#1a1a1a",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: "12px",
-            padding: "16px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
-            width: "280px",
-            color: "#fff",
-            pointerEvents: "auto",
-            marginTop: "10px"
-        }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                <span style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.8 }}>Wave Editor</span>
-                <button onClick={onClose} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", opacity: 0.5 }}>✕</button>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                   <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                        <span style={{ fontSize: "10px", opacity: 0.6 }}>Style</span>
-                        <select 
-                            value={p.wavePattern || "smooth"} 
-                            onChange={(e) => up("wavePattern", e.target.value)}
-                            style={{ background: "#2a2a2a", border: "1px solid #3a3a3a", color: "#fff", fontSize: "11px", padding: "4px", borderRadius: "4px" }}
-                        >
-                            <option value="smooth">Smooth</option>
-                            <option value="sharp">Sharp</option>
-                            <option value="stepped">Steps</option>
-                            <option value="asymmetric">Curve</option>
-                        </select>
-                   </div>
-                   <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                        <span style={{ fontSize: "10px", opacity: 0.6 }}>Position</span>
-                        <select 
-                            value={p.wavePosition || "bottom"} 
-                            onChange={(e) => up("wavePosition", e.target.value)}
-                            style={{ background: "#2a2a2a", border: "1px solid #3a3a3a", color: "#fff", fontSize: "11px", padding: "4px", borderRadius: "4px" }}
-                        >
-                            <option value="bottom">Bottom</option>
-                            <option value="top">Top</option>
-                        </select>
-                   </div>
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                    <span style={{ fontSize: "10px", opacity: 0.6 }}>Color</span>
-                    <div style={{ display: "flex", gap: "8px" }}>
-                        <input type="color" value={resolveCssColor(p.waveColor || "#3b82f6")} onChange={(e) => up("waveColor", e.target.value)} style={{ background: "none", border: "none", width: "100%", height: "24px", cursor: "pointer" }} />
-                        <input type="color" value={resolveCssColor(p.waveGradientEnd || "#000000")} onChange={(e) => up("waveGradientEnd", e.target.value)} style={{ background: "none", border: "none", width: "100%", height: "24px", cursor: "pointer" }} />
-                    </div>
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        <span style={{ fontSize: "10px", opacity: 0.6 }}>Height</span>
-                        <span style={{ fontSize: "10px", opacity: 0.6 }}>{p.waveHeight || "120px"}</span>
-                    </div>
-                    <input 
-                        type="range" min="20" max="400" 
-                        value={parseInt(p.waveHeight || "120")} 
-                        onChange={(e) => up("waveHeight", `${e.target.value}px`)}
-                        style={{ width: "100%" }}
-                    />
-                </div>
-            </div>
-        </div>
+        <QuickPopoverEditor title="Wave Decoration" onClose={onClose} dragControls={dragControls}>
+            <WaveDecorationFields p={p} up={up} />
+        </QuickPopoverEditor>
     );
 }
 
 function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: string }) {
     const componentId = React.useId().replace(/:/g, "");
-    const [popoverPos, setPopoverPos] = React.useState<{ x: number, y: number } | null>(null);
+    
+    // Get persistent state from store
+    const isSelected = useEditorStore(s => s.selectedBlockId === blockId);
+    const triggerTick = useEditorStore(s => s.waveEditorTrigger);
+    const waveEditorPos = useEditorStore(s => s.waveEditorPos);
+    const setWaveEditorPos = useEditorStore(s => s.setWaveEditorPos);
+    
+    // Tracking ref to prevent auto-reopen loop
+    const lastTriggerRef = React.useRef(0);
+
     const pattern = (p.wavePattern as keyof typeof WAVE_PATHS) || "smooth";
     const layers = Number(p.waveLayers ?? 3);
     const position = p.wavePosition || "bottom";
@@ -934,7 +1012,6 @@ function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: strin
     const secondaryColor = resolveCssColor(p.waveSecondaryColor || "");
     const gradientEnd = resolveCssColor(p.waveGradientEnd || "");
 
-    // Stable ID for the gradient def
     const gradId = `wave-grad-${componentId}`;
 
     const transform = [
@@ -950,13 +1027,46 @@ function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: strin
         bottom: position === "bottom" ? 0 : "auto",
         top: position === "top" ? 0 : "auto",
         transform: transform || "none",
-        zIndex: waveOnTop ? 10 : 1,
+        zIndex: waveOnTop ? 25 : 15,
         pointerEvents: "none",
         transition: "all 0.3s ease"
     };
 
     let allPaths = WAVE_PATHS[pattern] || WAVE_PATHS["smooth"];
     const paths = allPaths.slice(allPaths.length - Math.min(layers, allPaths.length));
+
+    React.useEffect(() => {
+        // ONLY trigger if the triggerTick has actually changed AND we aren't currently open
+        // OR if this is a fresh selection and triggerTick is positive
+        if (isSelected && triggerTick > lastTriggerRef.current) {
+            console.log("Wave Editor Triggered from Sidebar/Store. Tick:", triggerTick);
+            lastTriggerRef.current = triggerTick;
+            
+            // If we don't have a position in the store, default to center-ish but higher
+            if (!waveEditorPos) {
+                setWaveEditorPos({
+                    x: (typeof window !== 'undefined' ? window.innerWidth : 1200) / 2 - 150,
+                    y: (typeof window !== 'undefined' ? window.innerHeight : 800) / 2 - 300
+                });
+            }
+        }
+    }, [triggerTick, isSelected, waveEditorPos, setWaveEditorPos]);
+
+    const handleWaveInteraction = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        // Offset y to prevent it spawning too low (open above the click)
+        const coords = { x: e.clientX, y: Math.max(50, e.clientY - 150) };
+        console.log("Wave Interaction Triggered:", coords);
+        
+        useEditorStore.getState().selectBlock(blockId);
+        setTimeout(() => {
+            useEditorStore.getState().focusSubItem(blockId, "Wave Decoration");
+        }, 30);
+        
+        setWaveEditorPos(coords);
+    };
 
     return (
         <svg viewBox="0 0 1440 320" preserveAspectRatio="none" style={svgStyle} xmlns="http://www.w3.org/2000/svg">
@@ -985,33 +1095,23 @@ function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: strin
                 const opacity = isTop ? 1 : 0.4 + (i * 0.15);
                 const fill = isTop ? (gradientEnd ? `url(#${gradId})` : fillColor) : (secondaryColor || fillColor);
                 return (
-                    <path 
-                        key={i} 
-                        d={d} 
-                        fill={fill} 
+                    <path
+                        key={i}
+                        d={d}
+                        fill={fill}
                         fillOpacity={opacity}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            useEditorStore.getState().selectBlock(blockId);
-                            useEditorStore.getState().focusSubItem(blockId, "Wave Decoration");
-                            setPopoverPos({ x: e.clientX, y: e.clientY });
-                        }}
-                        style={{ 
-                            cursor: "pointer",
+                        stroke="transparent"
+                        strokeWidth="20"
+                        onClick={handleWaveInteraction}
+                        style={{
+                            cursor: "crosshair",
                             pointerEvents: "auto",
                             animation: animated ? (isTop ? `int-wave-pulse 4s ease-in-out infinite alternate` : `int-wave-drift ${8 + i * 2}s linear infinite alternate`) : "none",
                             transformOrigin: position === "top" ? "top" : "bottom"
-                        }} 
+                        }}
                     />
                 );
             })}
-            {popoverPos && (
-                <foreignObject x="0" y="0" width="100%" height="100%" style={{ overflow: "visible" }}>
-                    <div style={{ position: "fixed", left: popoverPos.x, top: popoverPos.y, pointerEvents: "auto" }}>
-                        <WaveQuickEditor p={p} blockId={blockId} onClose={() => setPopoverPos(null)} />
-                    </div>
-                </foreignObject>
-            )}
         </svg>
     );
 }
