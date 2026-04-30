@@ -293,7 +293,6 @@ export function ImagePanel({ block }: { block: Block }) {
                     loop={!!p.loop} onChangeLoop={(v) => up("loop", v, true)}
                     muted={p.muted !== false} onChangeMuted={(v) => up("muted", v, true)}
                     controls={p.controls !== false} onChangeControls={(v) => up("controls", v, true)}
-                    hasPadding={false}
                 />
             )}
             <Section title="Dimensions">
@@ -463,7 +462,6 @@ export function VideoPanel({ block }: { block: Block }) {
                 loop={!!p.loop} onChangeLoop={(v) => up("loop", v, true)}
                 muted={p.muted !== false} onChangeMuted={(v) => up("muted", v, true)}
                 controls={p.controls !== false} onChangeControls={(v) => up("controls", v, true)}
-                hasPadding={false}
             />
             <Section title="Dimensions & Style">
                 <Field label="Width">

@@ -834,7 +834,7 @@ export function AppColorPicker({
                 }
             }}
         >
-            <ColorPicker
+            {/* <ColorPicker
                 value={value}
                 onChange={onChange}
                 onChangeComplete={onChangeComplete}
@@ -852,6 +852,49 @@ export function AppColorPicker({
                         label: 'Utilities',
                         colors: ["rgba(0,0,0,0)"],
                     }
+                ]}
+                {...props}
+            >
+                {children}
+            </ColorPicker> */}
+            <ColorPicker
+                value={value}
+                onChange={onChange}
+                onChangeComplete={onChangeComplete}
+                showText={showText}
+                presets={[
+                    {
+                        label: 'Utilities',
+                        colors: [
+                            "rgba(0,0,0,0)", // transparent
+                            "rgba(0,0,0,0.5)",
+                            "rgba(255,255,255,0.5)"
+                        ],
+                    },
+                    {
+                        label: 'Brand Colors',
+                        colors: [
+                            "#6366f1", "#4f46e5", "#3b82f6", "#0ea5e9",
+                            "#06b6d4", "#10b981", "#22c55e", "#84cc16",
+                            "#eab308", "#f59e0b", "#f97316", "#ef4444",
+                            "#ec4899", "#d946ef", "#a855f7", "#8b5cf6"
+                        ],
+                    },
+                    {
+                        label: 'Grayscale',
+                        colors: [
+                            "#ffffff", "#f8fafc", "#f1f5f9", "#e2e8f0",
+                            "#cbd5e1", "#94a3b8", "#64748b",
+                            "#475569", "#1e293b", "#0f172a", "#000000"
+                        ],
+                    },
+                    {
+                        label: 'Soft Pastels',
+                        colors: [
+                            "#fbcfe8", "#fecaca", "#fde68a", "#bbf7d0",
+                            "#a7f3d0", "#bfdbfe", "#c7d2fe", "#ddd6fe"
+                        ],
+                    },
                 ]}
                 {...props}
             >
@@ -1550,7 +1593,7 @@ export function PaddingInput({ value, onChange, label, placeholder }: { value: s
 
 // ─── Section ──────────────────────────────────────────────────────────────────
 
-export function Section({ title, children, hasPadding = true, focusKeys = [] }: { title: string; children: React.ReactNode, hasPadding?: boolean, focusKeys?: (string | number)[] }) {
+export function Section({ title, children, focusKeys = [] }: { title: string; children: React.ReactNode, focusKeys?: (string | number)[] }) {
     const { subItemFocus, selectedBlockId } = useEditorStore();
 
     // Smart auto-focus matching for common patterns
