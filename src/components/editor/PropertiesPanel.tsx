@@ -21,7 +21,7 @@ import { ConfigProvider, theme as antdTheme } from "antd";
 export { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, PANEL_COLORS } from "./panels/shared";
 
 // ─── Per-panel imports ────────────────────────────────────────────────────────
-import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPanel, VideoPanel, ColumnsPanel, WavePanel, GridPanel } from "./panels/BasicPanels";
+import { HeroPanel, TextPanel, ImagePanel, DividerPanel, ContainerPanel, IconPanel, VideoPanel, ColumnsPanel, WavePanel, WaveAccentPanel, GridPanel } from "./panels/BasicPanels";
 import { ButtonPanel, HeaderPanel, FooterPanel } from "./panels/LayoutPanels";
 import { FeaturesPanel, TeamPanel, PageSettingsPanel, ContactFormPanel, ContactInfoPanel, AccordionPanel, StatsPanel, ChartPanel, LegalPanel, DeleteAccountPanel } from "./panels/ContentPanels";
 import { GalleryPanel } from "./panels/GalleryPanel";
@@ -47,6 +47,7 @@ const BLOCK_LABEL_MAP: Record<string, string> = {
     accordion: "FAQ / Accordion Block",
     columns: "Columns Block",
     wave: "Wave Divider Block",
+    wave_accent: "Wave Accent Decor",
     masonry: "Masonry Gallery Block",
     stats: "Stats & KPIs Block",
     chart: "Data Chart Block",
@@ -252,6 +253,7 @@ export default function PropertiesPanel() {
                 {selectedBlock.type === "contactInfo" && <ContactInfoPanel block={selectedBlock} />}
                 {selectedBlock.type === "accordion" && <AccordionPanel block={selectedBlock} />}
                 {selectedBlock.type === "wave" && <WavePanel block={selectedBlock} />}
+                {selectedBlock.type === "wave_accent" && <WaveAccentPanel block={selectedBlock} />}
                 {selectedBlock.type === "grid" && <GridPanel block={selectedBlock} />}
                 {selectedBlock.type === "masonry" && <GalleryPanel block={selectedBlock} />}
                 {selectedBlock.type === "stats" && <StatsPanel block={selectedBlock} />}

@@ -632,6 +632,98 @@ export function WavePanel({ block }: { block: Block }) {
     );
 }
 
+export function WaveAccentPanel({ block }: { block: Block }) {
+    const { updateBlock } = useEditorStore();
+    const p = block.props;
+    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
+
+    return (
+        <>
+            <Section title="Accent Design">
+                <Field label="Pattern">
+                    <SelectInput
+                        value={(p.pattern as string) || "smooth"}
+                        onChange={(v) => up("pattern", v)}
+                        options={[
+                            { label: "Smooth Curve", value: "smooth" },
+                            { label: "Layered Depth", value: "layered" },
+                            { label: "Sharp & Jagged", value: "sharp" },
+                            { label: "Asymmetric Curve", value: "curve" },
+                            { label: "Swoosh", value: "swoosh" },
+                            { label: "Water Level", value: "water" },
+                            { label: "Blob Drop", value: "blob" },
+                            { label: "Deep Valley", value: "valley" },
+                            { label: "Deep Ocean", value: "deep" }
+                        ]}
+                    />
+                </Field>
+                <Field label="Density (Layers)">
+                    <input type="range" min={1} max={3} step={1} value={Number(p.layers || 1)} onChange={(e) => up("layers", parseInt(e.target.value))} style={{ width: "100%", accentColor: "var(--primary)" }} />
+                    <span style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center" }}>{String(p.layers ?? 1)}</span>
+                </Field>
+                <Field label="Primary Color"><ColorInput value={(p.fillColor as string) || "var(--primary)"} onChange={(v) => up("fillColor", v)} onBlur={(v) => up("fillColor", v, true)} /></Field>
+                <Field label="Gradient End Color"><ColorInput value={(p.fillGradientEnd as string) || ""} onChange={(v) => up("fillGradientEnd", v)} onBlur={(v) => up("fillGradientEnd", v, true)} /></Field>
+                <Field label="Secondary Color (Layers)"><ColorInput value={(p.secondaryColor as string) || ""} onChange={(v) => up("secondaryColor", v)} onBlur={(v) => up("secondaryColor", v, true)} /></Field>
+            </Section>
+
+            <Section title="Position & Size">
+                <Field label="Corner Position">
+                    <SelectInput
+                        value={(p.position as string) || "top-right"}
+                        onChange={(v) => up("position", v)}
+                        options={[
+                            { label: "Top Left", value: "top-left" },
+                            { label: "Top Right", value: "top-right" },
+                            { label: "Bottom Left", value: "bottom-left" },
+                            { label: "Bottom Right", value: "bottom-right" },
+                        ]}
+                    />
+                </Field>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <Field label="Width"><TextInputWithUnit value={(p.width as string) ?? ""} onChange={(v) => up("width", v)} placeholder="300px" /></Field>
+                    <Field label="Height"><TextInputWithUnit value={(p.height as string) ?? ""} onChange={(v) => up("height", v)} placeholder="200px" /></Field>
+                </div>
+                <Field label="Z-Index Layering">
+                   <input type="range" min={0} max={10} step={1} value={Number(p.zIndex ?? 1)} onChange={(e) => up("zIndex", parseInt(e.target.value))} style={{ width: "100%", accentColor: "var(--primary)" }} />
+                   <span style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center" }}>{String(p.zIndex ?? 1)}</span>
+                </Field>
+            </Section>
+
+            <Section title="Orientation & Animation">
+                <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+                    <button 
+                        onClick={() => {
+                            up("flipHorizontal", !p.flipHorizontal, true);
+                        }}
+                        style={{
+                            flex: 1, padding: "8px 12px", background: "rgba(59, 130, 246, 0.1)",
+                            border: `1px solid ${p.flipHorizontal ? "var(--primary)" : "rgba(59, 130, 246, 0.2)"}`,
+                            borderRadius: "8px", color: "#60a5fa", fontSize: "11px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s"
+                        }}
+                    >
+                        Flip Horizontal
+                    </button>
+                    <button 
+                        onClick={() => {
+                            up("flipVertical", !p.flipVertical, true);
+                        }}
+                        style={{
+                            flex: 1, padding: "8px 12px", background: "rgba(59, 130, 246, 0.1)",
+                            border: `1px solid ${p.flipVertical ? "var(--primary)" : "rgba(59, 130, 246, 0.2)"}`,
+                            borderRadius: "8px", color: "#60a5fa", fontSize: "11px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s"
+                        }}
+                    >
+                        Flip Vertical
+                    </button>
+                </div>
+                <Field label="Enable Animation">
+                    <ToggleInput value={p.animated !== false} onChange={(v) => up("animated", v)} />
+                </Field>
+            </Section>
+        </>
+    );
+}
+
 export function GridPanel({ block }: { block: Block }) {
     const { updateBlock } = useEditorStore();
     const p = block.props as any;

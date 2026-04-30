@@ -49,6 +49,7 @@ import { ContactFormBlock } from "./blocks/ContactFormBlock";
 import { ContactInfoBlock } from "./blocks/ContactInfoBlock";
 import AccordionBlock from "./blocks/AccordionBlock";
 import { WaveBlock } from "./blocks/WaveBlock";
+import { WaveAccentBlock } from "./blocks/WaveAccent";
 import { MasonryBlock } from "./blocks/MasonryBlock";
 import { MediaPickerBlock } from "./blocks/MediaPickerBlock";
 import { StatsBlock } from "./blocks/StatsBlock";
@@ -79,6 +80,7 @@ export function BlockRenderer({ block }: { block: Block }) {
     case "contactInfo": return <ContactInfoBlock block={block} />;
     case "accordion": return <AccordionBlock block={block} />;
     case "wave": return <WaveBlock block={block} />;
+    case "wave_accent": return <WaveAccentBlock block={block} />;
     case "masonry": return <MasonryBlock block={block} />;
     case "media-picker": return <MediaPickerBlock block={block} />;
     case "stats": return <StatsBlock block={block} />;

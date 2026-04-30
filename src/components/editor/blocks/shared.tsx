@@ -198,7 +198,7 @@ export function InlineTextEditor({
     const handleClick = (e: React.MouseEvent) => {
         if (isPreview) return;
         e.stopPropagation();
-        
+
         if (!isEditing) {
             e.preventDefault();
             selectBlock(blockId);
@@ -806,16 +806,126 @@ export function getBackgroundStyles(p: Record<string, any>, theme: any): React.C
     };
 }
 
+const WAVE_PATHS = {
+    smooth: [
+        "M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,197.3C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z",
+        "M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,106.7C672,117,768,171,864,176C960,181,1056,139,1152,122.7C1248,107,1344,117,1392,122.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z",
+        "M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+    ],
+    sharp: [
+        "M0,224L120,192L240,256L360,160L480,192L600,128L720,224L840,192L960,256L1080,160L1200,192L1320,128L1440,224L1440,320L1320,320L1200,320L1080,320L960,320L840,320L720,320L600,320L480,320L360,320L240,320L120,320L0,320Z",
+        "M0,160L120,192L240,128L360,224L480,160L600,192L720,128L840,224L960,160L1080,192L1200,128L1320,224L1440,160L1440,320L1320,320L1200,320L1080,320L960,320L840,320L720,320L600,320L480,320L360,320L240,320L120,320L0,320Z",
+        "M0,96L120,128L240,64L360,160L480,96L600,128L720,64L840,160L960,96L1080,128L1200,64L1320,160L1440,96L1440,320L1320,320L1200,320L1080,320L960,320L840,320L720,320L600,320L480,320L360,320L240,320L120,320L0,320Z"
+    ],
+    stepped: [
+        "M0,160L0,192L288,192L288,128L576,128L576,224L864,224L864,96L1152,96L1152,256L1440,256L1440,320L1152,320L1152,320L864,320L864,320L576,320L576,320L288,320L288,320L0,320L0,320Z",
+        "M0,96L0,128L288,128L288,64L576,64L576,160L864,160L864,32L1152,32L1152,192L1440,192L1440,320L1152,320L1152,320L864,320L864,320L576,320L576,320L288,320L288,320L0,320L0,320Z",
+        "M0,224L0,256L288,256L288,192L576,192L576,288L864,288L864,160L1152,160L1152,320L1440,320L1440,320L1152,320L1152,320L864,320L864,320L576,320L576,320L288,320L288,320L0,320L0,320Z"
+    ],
+    asymmetric: [
+        "M0,160L80,176C160,192,320,224,480,213.3C640,203,800,149,960,128C1120,107,1280,117,1360,122.7L1440,128L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z",
+        "M0,224L60,213.3C120,203,240,181,360,186.7C480,192,600,224,720,218.7C840,213,960,171,1080,154.7C1200,139,1320,149,1380,154.7L1440,160L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z",
+        "M0,96L120,117.3C240,139,480,181,720,186.7C960,192,1200,160,1320,144L1440,128L1440,320L1320,320C1200,320,960,320,720,320C480,320,240,320,120,320L0,320Z"
+    ]
+};
+
+function resolveCssColor(value: string): string {
+    if (!value || !value.startsWith("var(")) return value;
+    if (typeof window === "undefined" || !document?.documentElement) return value;
+    try {
+        const varName = value.replace(/^var\(/, "").replace(/\)$/, "").trim();
+        return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || value;
+    } catch { return value; }
+}
+
+function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: string }) {
+    const componentId = React.useId().replace(/:/g, "");
+    const pattern = (p.wavePattern as keyof typeof WAVE_PATHS) || "smooth";
+    const layers = Number(p.waveLayers ?? 3);
+    const position = p.wavePosition || "bottom";
+    const waveHeight = p.waveHeight || "120px";
+    const animated = p.waveAnimated !== false;
+    const waveOnTop = p.waveOnTop === true;
+    const flipH = !!p.waveFlipH;
+    const flipV = position === "top" ? !p.waveFlipV : !!p.waveFlipV;
+
+    const fillColor = resolveCssColor(p.waveColor || "var(--primary)");
+    const secondaryColor = resolveCssColor(p.waveSecondaryColor || "");
+    const gradientEnd = resolveCssColor(p.waveGradientEnd || "");
+
+    // Stable ID for the gradient def
+    const gradId = `wave-grad-${componentId}`;
+
+    const transform = [
+        flipH ? "scaleX(-1)" : "",
+        flipV ? "scaleY(-1)" : ""
+    ].filter(Boolean).join(" ");
+
+    const svgStyle: React.CSSProperties = {
+        position: "absolute",
+        left: animated ? "-100px" : 0,
+        width: animated ? "calc(100% + 200px)" : "100%",
+        height: waveHeight,
+        bottom: position === "bottom" ? 0 : "auto",
+        top: position === "top" ? 0 : "auto",
+        transform: transform || "none",
+        zIndex: waveOnTop ? 10 : 1,
+        pointerEvents: "none",
+        transition: "all 0.3s ease"
+    };
+
+    let allPaths = WAVE_PATHS[pattern] || WAVE_PATHS["smooth"];
+    const paths = allPaths.slice(allPaths.length - Math.min(layers, allPaths.length));
+
+    return (
+        <svg viewBox="0 0 1440 320" preserveAspectRatio="none" style={svgStyle} xmlns="http://www.w3.org/2000/svg">
+            {gradientEnd && (
+                <defs>
+                    <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor={fillColor} />
+                        <stop offset="100%" stopColor={gradientEnd} />
+                    </linearGradient>
+                </defs>
+            )}
+            {animated && (
+                <style>{`
+                    @keyframes int-wave-pulse {
+                        0% { transform: scaleY(1) ${transform}; }
+                        100% { transform: scaleY(1.1) ${transform}; }
+                    }
+                    @keyframes int-wave-drift {
+                        0% { transform: translateX(0); }
+                        100% { transform: translateX(80px); }
+                    }
+                `}</style>
+            )}
+            {paths.map((d, i) => {
+                const isTop = i === paths.length - 1;
+                const opacity = isTop ? 1 : 0.4 + (i * 0.15);
+                const fill = isTop ? (gradientEnd ? `url(#${gradId})` : fillColor) : (secondaryColor || fillColor);
+                return (
+                    <path key={i} d={d} fill={fill} fillOpacity={opacity}
+                        style={{
+                            animation: animated ? (isTop ? `int-wave-pulse 4s ease-in-out infinite alternate` : `int-wave-drift ${8 + i * 2}s linear infinite alternate`) : "none",
+                            transformOrigin: position === "top" ? "top" : "bottom"
+                        }}
+                    />
+                );
+            })}
+        </svg>
+    );
+}
+
 export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
     const bgImage = p.bgImage as string;
     const bgGradient = p.bgGradient as string;
-    const imageOpacity = Number(p.bgImageOpacity ?? 100) / 100;
+    const imageOpacity = Number(p.bgImageOpacity ?? 40) / 100;
     const fillOpacity = Number(p.bgFillOpacity ?? 50) / 100;
 
-    if (!bgImage && !bgGradient) return null;
+    if (!bgImage && !bgGradient && !p.showWave) return null;
 
     const isVideo = bgImage ? (
-        /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(bgImage) || 
+        /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(bgImage) ||
         bgImage.toLowerCase().includes("video")
     ) : false;
     const bgAutoPlay = p.bgAutoPlay !== false;
@@ -872,11 +982,14 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
                         inset: 0,
                         background: bgGradient,
                         opacity: fillOpacity,
-                        zIndex: 2,
+                        zIndex: 1,
                         pointerEvents: "none"
                     }}
                 />
             )}
+
+            {/* Integrated Wave Decoration */}
+            {p.showWave && <IntegratedWave p={p} blockId={p.id || "bg"} />}
         </>
     );
 }

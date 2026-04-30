@@ -11,8 +11,6 @@ export const pricingSections: SectionTemplate[] = [
     create: () => {
       const root = makeBlock("container", { bgColor: "#f8fafc", padding: "5rem 2rem" });
       root.props.childBlocks = [
-        makeBlock("text", { content: "Simple, Transparent Pricing", tag: "h2", fontSize: "2.5rem", bold: true, align: "center", color: "#0f172a" }),
-        makeBlock("text", { content: "No hidden fees. Cancel anytime.", tag: "p", fontSize: "1.125rem", color: "#64748b", align: "center", marginTop: "1rem" }),
         makeBlock("features", {
           bgColor: "transparent", padding: "3rem 0 0", columns: 3, title: "", subtitle: "",
           cardStyle: "raised", cardBg: "#ffffff", cardRadius: "20px",
