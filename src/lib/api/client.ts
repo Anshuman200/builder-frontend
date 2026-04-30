@@ -62,11 +62,19 @@ export async function request<T = any>(
             await new Promise<void>((resolve) => subscribeTokenRefresh(() => resolve()));
         }
  
-        // Retry with same options and pre-calculated headers
+        // CRITICAL: Clear any stale Authorization header
+        const retryHeaders = { ...headers };
+        delete retryHeaders["Authorization"];
+        delete retryHeaders["authorization"];
+
+        // GIVE THE BROWSER A BREATHER: Commit cookie store.
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        // Retry with same options and sanitized headers
         res = await fetch(`${API}${path}`, {
             ...opts,
             credentials: "include",
-            headers,
+            headers: retryHeaders,
         });
     }
 
@@ -263,4 +271,3 @@ export const formsApi = {
 export const proxyApi = {
     get: (url: string) => request(`/proxy?url=${encodeURIComponent(url)}`),
 };
-

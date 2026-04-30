@@ -31,14 +31,14 @@ const VIEWPORT_WIDTHS = {
 } as const;
 
 const WaveIcon = ({ className, style }: { className?: string, style?: React.CSSProperties }) => (
-  <svg 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className} 
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
     style={style}
   >
     <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" />
@@ -539,7 +539,7 @@ const CanvasBlock = memo(function CanvasBlock({
             })()}
 
             {/* Quick Wave Decoration Toggle */}
-            {(block.type !== "header" && block.type !== "footer") && (
+            {(block.type !== "header") && (
               <AppToolTip title={block.props.showWave ? "Change Wave Decoration" : "Add Wave Decoration"}>
                 <IconButton
                   className={block.props.showWave ? "text-indigo-600 bg-indigo-50" : ""}
@@ -547,7 +547,7 @@ const CanvasBlock = memo(function CanvasBlock({
                   onClick={(e) => {
                     e.stopPropagation();
                     const hasWave = !!block.props.showWave;
-                    useEditorStore.getState().updateBlock(block.id, { 
+                    useEditorStore.getState().updateBlock(block.id, {
                       showWave: !hasWave,
                       // Set sensible defaults if turning ON for the first time
                       ...(!hasWave ? {
@@ -559,7 +559,7 @@ const CanvasBlock = memo(function CanvasBlock({
                         waveHeight: block.props.waveHeight || "120px"
                       } : {})
                     }, true);
-                    
+
                     // If turning on, select the block so the user sees the options
                     if (!hasWave) {
                       selectBlock(block.id);

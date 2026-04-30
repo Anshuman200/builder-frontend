@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove, PaddingFields, TextInputWithUnit } from "./shared";
+import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove, PaddingFields, TextInputWithUnit, PanelInlineEditor } from "./shared";
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
@@ -74,7 +74,7 @@ export function HeaderPanel({ block }: { block: Block }) {
             </Section>
             <Section title="Brand (Logo)">
                 <Field label="Logo Type"><SelectInput value={(p.logoType as string) || "text"} onChange={(v) => up("logoType", v)} options={[{ label: "Text Only", value: "text" }, { label: "Image", value: "image" }]} /></Field>
-                <Field label="Logo Text"><TextInput value={(p.logoText as string) || "Solario Forge"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
+                <Field label="Logo Text"><PanelInlineEditor value={(p.logoText as string) || "Solario Forge"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
                 {p.logoType === "image" && (<>
                     <Field label="Logo Image"><MediaInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
                     <Field label="Image Width"><TextInputWithUnit value={(p.logoWidth as string) ?? ""} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
@@ -148,15 +148,14 @@ export function HeaderPanel({ block }: { block: Block }) {
                                     return (
                                         <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
                                             <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.5, letterSpacing: "0.05em" }}>CUSTOM LINK</span>
-                                            <input
+                                            <PanelInlineEditor
                                                 value={item.label}
-                                                onChange={(e) => {
+                                                onChange={(v) => {
                                                     const next = [...displayItems];
-                                                    next[idx] = { ...next[idx], label: e.target.value };
+                                                    next[idx] = { ...next[idx], label: v };
                                                     up("links", next);
                                                 }}
                                                 placeholder="Label"
-                                                style={{ fontSize: 11, fontWeight: 600, padding: "6px 8px", background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 6, outline: "none", color: "var(--text)" }}
                                             />
                                             <LinkInput
                                                 value={item.url}
@@ -267,7 +266,7 @@ export function FooterPanel({ block }: { block: Block }) {
             </Section>
             <Section title="Brand & Content">
                 <Field label="Logo Type"><SelectInput value={(p.logoType as string) || "text"} onChange={(v) => up("logoType", v)} options={[{ label: "Text Only", value: "text" }, { label: "Image", value: "image" }]} /></Field>
-                <Field label="Logo Text"><TextInput value={(p.logoText as string) || "Solario Forge"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
+                <Field label="Logo Text"><PanelInlineEditor value={(p.logoText as string) || "Solario Forge"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
                 {p.logoType === "image" && (<>
                     <Field label="Logo Image"><MediaInput value={(p.logoImage as string) || ""} onChange={(v) => up("logoImage", v)} placeholder="https://..." /></Field>
                     <Field label="Image Width"><TextInputWithUnit value={(p.logoWidth as string) ?? ""} onChange={(v) => up("logoWidth", v)} placeholder="120px" /></Field>
@@ -275,10 +274,10 @@ export function FooterPanel({ block }: { block: Block }) {
                     <Field label="Object Fit"><SelectInput value={(p.logoObjectFit as string) || "cover"} onChange={(v) => up("logoObjectFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
                     <Field label="Logo Shape"><SelectInput value={(p.logoShape as string) || "square"} onChange={(v) => up("logoShape", v)} options={[{ label: "Square", value: "square" }, { label: "Circle", value: "circle" }, { label: "Rounded", value: "rounded" }]} /></Field>
                 </>)}
-                <Field label="Description"><TextareaInput value={(p.description as string) || ""} onChange={(v) => up("description", v)} rows={3} placeholder="Brief company description..." /></Field>
+                <Field label="Description"><PanelInlineEditor multiline value={(p.description as string) || ""} onChange={(v) => up("description", v)} placeholder="Brief company description..." /></Field>
             </Section>
             <Section title="Copyright">
-                <Field label="Copyright"><TextInput value={(p.copyright as string) || ""} onChange={(v) => up("copyright", v)} placeholder="© 2026 Company" /></Field>
+                <Field label="Copyright"><PanelInlineEditor value={(p.copyright as string) || ""} onChange={(v) => up("copyright", v)} placeholder="© 2026 Company" /></Field>
             </Section>
             <Section title="Footer Links">
                 <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)", marginBottom: 8 }}>Pages set to "Show in Footer" and custom links. Drag to reorder.</div>
@@ -336,15 +335,14 @@ export function FooterPanel({ block }: { block: Block }) {
                                     return (
                                         <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%" }}>
                                             <span style={{ fontSize: 10, fontWeight: 700, opacity: 0.5, letterSpacing: "0.05em" }}>CUSTOM LINK</span>
-                                            <input
+                                            <PanelInlineEditor
                                                 value={item.label}
-                                                onChange={(e) => {
+                                                onChange={(v) => {
                                                     const next = [...displayItems];
-                                                    next[idx] = { ...next[idx], label: e.target.value };
+                                                    next[idx] = { ...next[idx], label: v };
                                                     up("links", next);
                                                 }}
                                                 placeholder="Label"
-                                                style={{ fontSize: 11, fontWeight: 600, padding: "6px 8px", background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 6, outline: "none", color: "var(--text)" }}
                                             />
                                             <LinkInput
                                                 value={item.url}
@@ -379,21 +377,31 @@ export function FooterPanel({ block }: { block: Block }) {
                 <Section title="Column Link Groups">
                     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                         {((p.linkGroups as any[]) || []).map((group, gIdx) => (
-                            <div key={group.id} style={{ padding: 10, border: "1px solid var(--border)", borderRadius: 8, background: "var(--surface)" }}>
-                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                                    <input value={group.heading} onChange={(e) => { const nG = [...(p.linkGroups as any[])]; nG[gIdx] = { ...nG[gIdx], heading: e.target.value }; up("linkGroups", nG); }} placeholder="Group Heading" style={{ fontWeight: 700, fontSize: 12, background: "transparent", border: "none", borderBottom: "1px solid var(--border)", color: "var(--text)", outline: "none", width: "80%" }} />
-                                    <button onClick={() => { const nG = (p.linkGroups as any[]).filter((_, i) => i !== gIdx); up("linkGroups", nG); }} style={{ background: "transparent", border: "none", color: "var(--error)", cursor: "pointer" }}>&times;</button>
+                            <div key={group.id} style={{ padding: 12, border: "1px solid var(--border)", borderRadius: 10, background: "rgba(255,255,255,0.02)" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, alignItems: "center" }}>
+                                    <PanelInlineEditor 
+                                        value={group.heading} 
+                                        onChange={(v) => { const nG = [...(p.linkGroups as any[])]; nG[gIdx] = { ...nG[gIdx], heading: v }; up("linkGroups", nG); }} 
+                                        placeholder="Group Heading" 
+                                        style={{ fontWeight: 700, fontSize: 13, background: "transparent", border: "none", color: "var(--text)", outline: "none", width: "80%", padding: 0 }} 
+                                    />
+                                    <button onClick={() => { const nG = (p.linkGroups as any[]).filter((_, i) => i !== gIdx); up("linkGroups", nG); }} style={{ background: "transparent", border: "none", color: "var(--error)", cursor: "pointer", fontSize: 18 }}>&times;</button>
                                 </div>
                                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
                                     {group.links.map((link: any, lIdx: number) => (
-                                        <div key={link.id} style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                                            <input value={link.label} onChange={(e) => {
-                                                const nG = [...(p.linkGroups as any[])];
-                                                const nL = [...nG[gIdx].links];
-                                                nL[lIdx] = { ...nL[lIdx], label: e.target.value };
-                                                nG[gIdx] = { ...nG[gIdx], links: nL };
-                                                up("linkGroups", nG);
-                                            }} placeholder="Label" style={{ flex: 1, fontSize: 11, padding: "4px 6px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--text)" }} />
+                                        <div key={link.id} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                            <PanelInlineEditor 
+                                                value={link.label} 
+                                                onChange={(v) => {
+                                                    const nG = [...(p.linkGroups as any[])];
+                                                    const nL = [...nG[gIdx].links];
+                                                    nL[lIdx] = { ...nL[lIdx], label: v };
+                                                    nG[gIdx] = { ...nG[gIdx], links: nL };
+                                                    up("linkGroups", nG);
+                                                }} 
+                                                placeholder="Label" 
+                                                style={{ flex: 1 }} 
+                                            />
                                             <LinkInput value={link.url} onChange={(v) => {
                                                 const nG = [...(p.linkGroups as any[])];
                                                 const nL = [...nG[gIdx].links];

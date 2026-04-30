@@ -10,7 +10,8 @@ import {
     InputFields,
     ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove,
     TextInputWithUnit, useSubItemFocus, PrefixInput,
-    IconFields
+    IconFields,
+    PanelInlineEditor
 } from "./shared";
 import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, PlusIcon, GlobeAltIcon, Squares2X2Icon, ListBulletIcon, Bars3BottomLeftIcon, Bars3Icon, Bars3BottomRightIcon } from "@heroicons/react/24/outline";
 import { AnimationPanel } from "./AnimationPanel";
@@ -92,8 +93,8 @@ export function FeaturesPanel({ block }: { block: Block }) {
                                     <span style={{ fontSize: 10, fontWeight: 700, color: "#fff", marginLeft: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{feature.title || "New Feature"}</span>
                                 </div>
                                 <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
-                                    <input value={feature.title} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], title: e.target.value }; up("features", nF); }} placeholder="Feature Title" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
-                                    <textarea value={feature.description} onChange={(e) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], description: e.target.value }; up("features", nF); }} placeholder="Feature Description" rows={2} style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)", resize: "vertical" }} />
+                                    <PanelInlineEditor value={feature.title} onChange={(v) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], title: v }; up("features", nF); }} placeholder="Feature Title" />
+                                    <PanelInlineEditor multiline value={feature.description} onChange={(v) => { const nF = [...((p.features as any[]) || [])]; nF[idx] = { ...nF[idx], description: v }; up("features", nF); }} placeholder="Feature Description" />
                                     <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
                                         <div style={{ flex: 1 }}>
                                             <SelectInput
@@ -235,9 +236,9 @@ export function TeamPanel({ block }: { block: Block }) {
                                     <span style={{ fontSize: 9, color: "#666", marginLeft: "auto" }}>ROLE: {member.role || "—"}</span>
                                 </div>
                                 <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
-                                    <TextInput value={member.name} onChange={(v) => up("members", p.members.map((m: any, i: number) => i === idx ? { ...m, name: v } : m))} placeholder="Name" />
-                                    <TextInput value={member.role} onChange={(v) => up("members", p.members.map((m: any, i: number) => i === idx ? { ...m, role: v } : m))} placeholder="Role" />
-                                    <TextareaInput value={member.description} onChange={(v) => up("members", p.members.map((m: any, i: number) => i === idx ? { ...m, description: v } : m))} placeholder="Bio" rows={2} />
+                                    <PanelInlineEditor value={member.name} onChange={(v) => up("members", p.members.map((m: any, i: number) => i === idx ? { ...m, name: v } : m))} placeholder="Name" />
+                                    <PanelInlineEditor value={member.role} onChange={(v) => up("members", p.members.map((m: any, i: number) => i === idx ? { ...m, role: v } : m))} placeholder="Role" />
+                                    <PanelInlineEditor multiline value={member.description} onChange={(v) => up("members", p.members.map((m: any, i: number) => i === idx ? { ...m, description: v } : m))} placeholder="Bio" />
                                     <MediaInput value={member.image} onChange={(v) => up("members", p.members.map((m: any, i: number) => i === idx ? { ...m, image: v } : m))} />
 
                                     <div style={{ marginTop: 4, paddingTop: 8, borderTop: "1px solid #333" }}>
@@ -838,8 +839,8 @@ export function AccordionPanel({ block }: { block: Block }) {
                                     <span style={{ fontSize: 10, fontWeight: 700, color: "#fff", marginLeft: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title || "New Item"}</span>
                                 </div>
                                 <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
-                                    <input value={item.title} onChange={(e) => { const nT = [...((p.items as any[]) || [])]; nT[idx] = { ...nT[idx], title: e.target.value }; up("items", nT); }} placeholder="Question / Title" style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)" }} />
-                                    <textarea value={item.content} onChange={(e) => { const nT = [...((p.items as any[]) || [])]; nT[idx] = { ...nT[idx], content: e.target.value }; up("items", nT); }} placeholder="Answer / Content" rows={3} style={{ fontSize: 11, padding: "4px 8px", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 4, outline: "none", color: "var(--text)", resize: "vertical" }} />
+                                    <PanelInlineEditor value={item.title} onChange={(v) => { const nT = [...((p.items as any[]) || [])]; nT[idx] = { ...nT[idx], title: v }; up("items", nT); }} placeholder="Question / Title" />
+                                    <PanelInlineEditor multiline value={item.content} onChange={(v) => { const nT = [...((p.items as any[]) || [])]; nT[idx] = { ...nT[idx], content: v }; up("items", nT); }} placeholder="Answer / Content" />
                                 </div>
                             </div>
                         )}
@@ -978,11 +979,11 @@ export function StatsPanel({ block }: { block: Block }) {
                                 </div>
                                 <div style={{ padding: "8px 10px", display: "flex", flexDirection: "column", gap: 6 }}>
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                                        <TextInput value={item.value} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], value: v }; up("items", nI); }} placeholder="Value" />
-                                        <TextInput value={item.unit} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], unit: v }; up("items", nI); }} placeholder="Unit" />
+                                        <PanelInlineEditor value={item.value} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], value: v }; up("items", nI); }} placeholder="Value" />
+                                        <PanelInlineEditor value={item.unit} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], unit: v }; up("items", nI); }} placeholder="Unit" />
                                     </div>
-                                    <TextInput value={item.label} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], label: v }; up("items", nI); }} placeholder="Label" />
-                                    <TextareaInput value={item.description} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], description: v }; up("items", nI); }} placeholder="Description" rows={2} />
+                                    <PanelInlineEditor value={item.label} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], label: v }; up("items", nI); }} placeholder="Label" />
+                                    <PanelInlineEditor multiline value={item.description} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], description: v }; up("items", nI); }} placeholder="Description" />
                                     <IconPicker value={item.icon || "Zap"} onChange={(v) => { const nI = [...((p.items as any[]) || [])]; nI[idx] = { ...nI[idx], icon: v }; up("items", nI); }} />
                                 </div>
                             </div>

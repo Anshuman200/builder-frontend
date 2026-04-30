@@ -274,21 +274,68 @@ export function TextInput({ value, onChange, onBlur, placeholder, type = "text",
             placeholder={placeholder}
             spellCheck={false}
             style={{
-                width: "100%", height: 30, padding: "0 10px", fontSize: 11,
+                width: "100%", height: 34, padding: "0 12px", fontSize: 12,
                 background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`,
-                borderRadius: 6, color: PANEL_COLORS.text, outline: "none",
-                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)", ...style
+                borderRadius: 8, color: PANEL_COLORS.text, outline: "none",
+                transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)", ...style
             }}
-            onMouseEnter={(e) => { if (document.activeElement !== e.currentTarget) { e.currentTarget.style.borderColor = "#52525b"; e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; } }}
+            onMouseEnter={(e) => { if (document.activeElement !== e.currentTarget) { e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; } }}
             onMouseLeave={(e) => { if (document.activeElement !== e.currentTarget) { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; e.currentTarget.style.background = PANEL_COLORS.inputBg; } }}
             onFocus={(e) => {
-                e.currentTarget.style.background = "#09090b";
+                e.currentTarget.style.background = "#000";
                 e.currentTarget.style.borderColor = PANEL_COLORS.primary;
-                e.currentTarget.style.boxShadow = `0 0 0 2px rgba(0, 153, 255, 0.15)`;
+                e.currentTarget.style.boxShadow = `0 0 0 3px rgba(99, 102, 241, 0.2)`;
             }}
             onBlur={(e) => {
                 e.currentTarget.style.background = PANEL_COLORS.inputBg;
                 e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder;
+                e.currentTarget.style.boxShadow = "none";
+                onBlur?.(e.target.value);
+            }}
+        />
+    );
+}
+
+/**
+ * PanelInlineEditor
+ * A seamless, premium input that feels like a text element until focused.
+ */
+export function PanelInlineEditor({ value, onChange, onBlur, placeholder, multiline = false, style }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void; placeholder?: string; multiline?: boolean, style?: React.CSSProperties }) {
+    const Component = multiline ? "textarea" : "input";
+    
+    return (
+        <Component
+            value={value}
+            onChange={(e: any) => onChange(e.target.value)}
+            placeholder={placeholder}
+            spellCheck={false}
+            rows={multiline ? 3 : undefined}
+            style={{
+                width: "100%", 
+                minHeight: multiline ? 60 : 34,
+                padding: "8px 12px", 
+                fontSize: 12,
+                lineHeight: 1.5,
+                background: "rgba(255,255,255,0.03)", 
+                border: `1px solid transparent`,
+                borderRadius: 8, 
+                color: PANEL_COLORS.text, 
+                outline: "none",
+                transition: "all 0.2s ease",
+                cursor: "text",
+                resize: multiline ? "vertical" : "none",
+                ...style
+            }}
+            onMouseEnter={(e: any) => { if (document.activeElement !== e.currentTarget) { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; } }}
+            onMouseLeave={(e: any) => { if (document.activeElement !== e.currentTarget) { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.borderColor = "transparent"; } }}
+            onFocus={(e: any) => {
+                e.currentTarget.style.background = "#000";
+                e.currentTarget.style.borderColor = PANEL_COLORS.primary;
+                e.currentTarget.style.boxShadow = `0 0 0 3px rgba(99, 102, 241, 0.2)`;
+            }}
+            onBlur={(e: any) => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                e.currentTarget.style.borderColor = "transparent";
                 e.currentTarget.style.boxShadow = "none";
                 onBlur?.(e.target.value);
             }}
@@ -433,19 +480,21 @@ export function TextareaInput({ value, onChange, onBlur, rows = 3, placeholder }
             placeholder={placeholder}
             spellCheck={false}
             style={{
-                width: "100%", padding: "8px 10px", fontSize: 11,
+                width: "100%", padding: "10px 12px", fontSize: 12,
                 background: PANEL_COLORS.inputBg, border: `1px solid ${PANEL_COLORS.inputBorder}`,
-                borderRadius: 6, color: PANEL_COLORS.text, outline: "none", resize: "vertical",
-                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)", lineHeight: 1.5
+                borderRadius: 8, color: PANEL_COLORS.text, outline: "none", resize: "vertical",
+                transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)", lineHeight: 1.5
             }}
+            onMouseEnter={(e) => { if (document.activeElement !== e.currentTarget) { e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; e.currentTarget.style.background = PANEL_COLORS.inputHoverBg; } }}
+            onMouseLeave={(e) => { if (document.activeElement !== e.currentTarget) { e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder; e.currentTarget.style.background = PANEL_COLORS.inputBg; } }}
             onFocus={(e) => {
                 e.currentTarget.style.borderColor = PANEL_COLORS.primary;
-                e.currentTarget.style.background = "#09090b";
-                e.currentTarget.style.boxShadow = `0 0 0 2px rgba(0, 153, 255, 0.15)`;
+                e.currentTarget.style.background = "#000";
+                e.currentTarget.style.boxShadow = `0 0 0 3px rgba(99, 102, 241, 0.2)`;
             }}
             onBlur={(e) => {
-                e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder;
                 e.currentTarget.style.background = PANEL_COLORS.inputBg;
+                e.currentTarget.style.borderColor = PANEL_COLORS.inputBorder;
                 e.currentTarget.style.boxShadow = "none";
                 onBlur?.(e.target.value);
             }}
@@ -1665,8 +1714,8 @@ export function TypographyFields({ p, up, prefix = "", showSubtitle = true }: Pr
 
     return (
         <>
-            <Field label="Title"><TextInput value={p[finalTitleKey] || "Title"} onChange={(v) => up(finalTitleKey, v)} /></Field>
-            {showSubtitle && <Field label="Subtitle"><TextInput value={p[finalSubtitleKey] || ""} onChange={(v) => up(finalSubtitleKey, v)} /></Field>}
+            <Field label="Title"><PanelInlineEditor value={p[finalTitleKey] || "Title"} onChange={(v) => up(finalTitleKey, v)} /></Field>
+            {showSubtitle && <Field label="Subtitle"><PanelInlineEditor multiline value={p[finalSubtitleKey] || ""} onChange={(v) => up(finalSubtitleKey, v)} /></Field>}
             <Field label="Title Color"><ColorInput value={p[titleColorKey] || "var(--text)"} onChange={(v) => up(titleColorKey, v)} onBlur={(v) => up(titleColorKey, v, true)} /></Field>
             {showSubtitle && <Field label="Subtitle Color"><ColorInput value={p[subtitleColorKey] || "var(--text-muted)"} onChange={(v) => up(subtitleColorKey, v)} onBlur={(v) => up(subtitleColorKey, v, true)} /></Field>}
         </>
