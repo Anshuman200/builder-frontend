@@ -120,16 +120,16 @@ export function ContactInfoBlock({ block }: BlockProps) {
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        width: iconSize * 2,
-                                        height: iconSize * 2,
-                                        borderRadius: "50%",
-                                        background: `${item.color}15`,
-                                        color: item.color,
+                                        width: (p.iconWrapperSize as string) || `${iconSize * 2}px`,
+                                        height: (p.iconWrapperSize as string) || `${iconSize * 2}px`,
+                                        borderRadius: (p.iconRadius as string) || "50%",
+                                        background: (p.iconBg as string) || `${item.color}15`,
+                                        color: (p.iconColor as string) || item.color,
                                         flexShrink: 0,
                                         transition: "transform 0.3s ease",
                                     }}
                                 >
-                                    <Icon style={{ width: iconSize, height: iconSize, strokeWidth: 2.5 }} />
+                                    <Icon style={{ width: (p.iconSize as string) || `${iconSize}px`, height: (p.iconSize as string) || `${iconSize}px`, strokeWidth: 2.5 }} />
                                 </div>
                             )}
                             <div style={{ flex: 1 }}>

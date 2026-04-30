@@ -1,7 +1,8 @@
 import type { Block } from "@/types";
 // components/editor/blocks/AccordionBlock.tsx
 import React, { useState } from "react";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, Square2StackIcon } from "@heroicons/react/24/outline";
+import { getIcon } from "@/lib/utils/icons";
 import { ChildBlockWrapper, PreviewContext, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
@@ -28,6 +29,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
     const descSize = (block.props.descSize as string) || "15px";
 
     // Icon
+    const showIcons = block.props.showIcons !== false;
     const iconStyle = (block.props.iconStyle as string) || "chevron"; // chevron, plus
     const iconSize = (block.props.iconSize as string) || "20px";
 
@@ -105,7 +107,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
             <div style={{ width, maxWidth, position: "relative", zIndex: 2 }}>
                 {items.map((item: any, index: number) => {
                     const isOpen = !!openItems[item.id];
-                    const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === index;
+                    const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index == index;
                     const focusedStyle = isFocused ? {
                         boxShadow: "0 0 0 2px #6366f1, 0 0 20px rgba(99,102,241,0.4)",
                         zIndex: 10,
@@ -115,7 +117,13 @@ export default function AccordionBlock({ block }: { block: Block }) {
 
                     return (
                         <div key={item.id} style={{ ...getVariantStyles(index, items.length), ...focusedStyle }}
-                            onClick={() => !isPreview && focusSubItem(block.id, index)}
+                            onClick={(e) => {
+                            if (isPreview) return;
+                            e.stopPropagation();
+                            const store = useEditorStore.getState();
+                            store.selectBlock(block.id);
+                            store.focusSubItem(block.id, index);
+                        }}
                         >
                             {/* Header (Clickable) */}
                             <div
@@ -129,8 +137,29 @@ export default function AccordionBlock({ block }: { block: Block }) {
                                     userSelect: "none",
                                 }}
                             >
-                                <div style={{ fontWeight: Number(titleWeight) || 600, color: titleColor, fontSize: titleSize }}>
-                                    {item.title}
+                                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                                    {showIcons && item.icon && (
+                                        <div style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            width: (block.props.iconWrapperSize as string) || "40px",
+                                            height: (block.props.iconWrapperSize as string) || "40px",
+                                            borderRadius: (block.props.iconRadius as string) || "8px",
+                                            background: (block.props.iconBg as string) || "rgba(var(--primary-rgb), 0.1)",
+                                            color: (block.props.iconColor as string) || iconColor,
+                                            flexShrink: 0
+                                        }}>
+                                            {(() => {
+                                                const IconCmp = getIcon(item.icon);
+                                                const C = IconCmp || Square2StackIcon;
+                                                return <C style={{ width: (block.props.iconSize as string) || "20px", height: (block.props.iconSize as string) || "20px" }} />;
+                                            })()}
+                                        </div>
+                                    )}
+                                    <div style={{ fontWeight: Number(titleWeight) || 600, color: titleColor, fontSize: titleSize }}>
+                                        {item.title}
+                                    </div>
                                 </div>
                                 {iconStyle === "plus" ? (
                                     <div style={{ position: "relative", width: iconSize, height: iconSize, }}>

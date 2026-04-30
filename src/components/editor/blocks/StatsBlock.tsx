@@ -63,7 +63,7 @@ export function StatsBlock({ block }: BlockProps) {
       )}>
         {items.map((item, idx) => {
           const IconCmp = getIcon(item.icon);
-          const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+          const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index == idx;
           
           const cardBase = getCardStyles({
             props: p,
@@ -77,7 +77,13 @@ export function StatsBlock({ block }: BlockProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              onClick={() => !isPreview && focusSubItem(block.id, idx)}
+              onClick={(e) => {
+                  if (isPreview) return;
+                  e.stopPropagation();
+                  const store = useEditorStore.getState();
+                  store.selectBlock(block.id);
+                  store.focusSubItem(block.id, idx);
+              }}
               className={cn(
                 "flex flex-col relative group transition-all duration-300",
                 layout === "kpi" ? "items-start text-left" : "items-center text-center",
@@ -93,15 +99,21 @@ export function StatsBlock({ block }: BlockProps) {
               
               {item.icon && (
                 <div className={cn(
-                  "mb-6 flex items-center justify-center rounded-2xl transition-transform group-hover:scale-110 duration-500",
-                  layout === "kpi" ? "w-10 h-10 lg:w-12 lg:h-12 bg-primary/10 text-primary" : "w-14 h-14 lg:w-16 lg:h-16 bg-accentColor text-white shadow-lg",
-                  layout === "strip" && "mb-0 mr-4 w-10 h-10"
+                  "mb-6 flex items-center justify-center transition-transform group-hover:scale-110 duration-500",
+                  layout === "kpi" ? "" : "shadow-lg",
+                  layout === "strip" && "mb-0 mr-4"
                 )}
-                style={{ backgroundColor: layout !== "kpi" ? accentColor : undefined }}>
+                style={{ 
+                  backgroundColor: (p.iconBg as string) || (layout !== "kpi" ? accentColor : "rgba(var(--primary-rgb), 0.1)"),
+                  color: (p.iconColor as string) || (layout === "kpi" ? accentColor : "#fff"),
+                  width: (p.iconWrapperSize as string) || (layout === "strip" ? "40px" : layout === "kpi" ? "48px" : "64px"),
+                  height: (p.iconWrapperSize as string) || (layout === "strip" ? "40px" : layout === "kpi" ? "48px" : "64px"),
+                  borderRadius: (p.iconRadius as string) || "1rem"
+                }}>
                   {IconCmp ? (
-                    <IconCmp style={{ width: 24, height: 24 }} className="lg:w-7 lg:h-7" />
+                    <IconCmp style={{ width: (p.iconSize as string) || "24px", height: (p.iconSize as string) || "24px" }} />
                   ) : (
-                    <Square2StackIcon style={{ width: 24, height: 24 }} className="lg:w-7 lg:h-7" />
+                    <Square2StackIcon style={{ width: (p.iconSize as string) || "24px", height: (p.iconSize as string) || "24px" }} />
                   )}
                 </div>
               )}

@@ -102,7 +102,15 @@ export function WaveAccentBlock({ block }: BlockProps) {
   const paths = allPaths.slice(allPaths.length - maxLayers);
 
   return (
-    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: zIndex }}>
+    <div style={{
+      position: "absolute",
+      inset: 0,
+      height: 0,
+      width: 0,
+      pointerEvents: "none",
+      zIndex: zIndex,
+      overflow: "visible"
+    }}>
       <svg
         viewBox="0 0 1440 320"
         preserveAspectRatio="none"
@@ -120,7 +128,7 @@ export function WaveAccentBlock({ block }: BlockProps) {
         {animated && (
           <style>
             {`
-              @keyframes wave-accent-drift {
+              @keyframes wave-accent-drift-${block.id} {
                 0% { transform: translateX(0); }
                 100% { transform: translateX(40px); }
               }
@@ -139,7 +147,7 @@ export function WaveAccentBlock({ block }: BlockProps) {
               fillOpacity={opacity}
               d={d}
               style={{
-                animation: animated && !isTopLayer ? `wave-accent-drift ${10 + i * 3}s linear infinite alternate` : "none",
+                animation: animated && !isTopLayer ? `wave-accent-drift-${block.id} ${10 + i * 3}s linear infinite alternate` : "none",
                 transformOrigin: "center"
               }}
             />

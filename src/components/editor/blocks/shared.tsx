@@ -24,6 +24,8 @@ import { getTemplatesForBlock, transformBlockToTemplate } from "@/lib/config/tem
 // ─── Preview context ──────────────────────────────────────────────────────────
 
 export const PreviewContext = React.createContext(false);
+export const BlockContext = React.createContext<string | null>(null);
+
 export function PreviewProvider({ children }: { children: React.ReactNode }) {
     return <PreviewContext.Provider value={true}>{children}</PreviewContext.Provider>;
 }
@@ -158,7 +160,8 @@ export function QuickLayoutChange({ block }: { block: Block }) {
 
 
 export function BlockRendererRef({ block }: { block: Block }) {
-    return <_BlockRenderer block={block} />;
+    const Renderer = React.useMemo(() => _BlockRenderer, []);
+    return Renderer ? <Renderer block={block} /> : null;
 }
 
 // ─── ChildBlockWrapper ────────────────────────────────────────────────────────
@@ -838,8 +841,85 @@ function resolveCssColor(value: string): string {
     } catch { return value; }
 }
 
+function WaveQuickEditor({ p, blockId, onClose }: { p: Record<string, any>, blockId: string, onClose: () => void }) {
+    const { updateBlock } = useEditorStore();
+    const up = (key: string, val: any) => updateBlock(blockId, { [key]: val }, true);
+
+    return (
+        <div style={{
+            position: "absolute",
+            zIndex: 100000,
+            background: "#1a1a1a",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "12px",
+            padding: "16px",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)",
+            width: "280px",
+            color: "#fff",
+            pointerEvents: "auto",
+            marginTop: "10px"
+        }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                <span style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.8 }}>Wave Editor</span>
+                <button onClick={onClose} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", opacity: 0.5 }}>✕</button>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                   <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                        <span style={{ fontSize: "10px", opacity: 0.6 }}>Style</span>
+                        <select 
+                            value={p.wavePattern || "smooth"} 
+                            onChange={(e) => up("wavePattern", e.target.value)}
+                            style={{ background: "#2a2a2a", border: "1px solid #3a3a3a", color: "#fff", fontSize: "11px", padding: "4px", borderRadius: "4px" }}
+                        >
+                            <option value="smooth">Smooth</option>
+                            <option value="sharp">Sharp</option>
+                            <option value="stepped">Steps</option>
+                            <option value="asymmetric">Curve</option>
+                        </select>
+                   </div>
+                   <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                        <span style={{ fontSize: "10px", opacity: 0.6 }}>Position</span>
+                        <select 
+                            value={p.wavePosition || "bottom"} 
+                            onChange={(e) => up("wavePosition", e.target.value)}
+                            style={{ background: "#2a2a2a", border: "1px solid #3a3a3a", color: "#fff", fontSize: "11px", padding: "4px", borderRadius: "4px" }}
+                        >
+                            <option value="bottom">Bottom</option>
+                            <option value="top">Top</option>
+                        </select>
+                   </div>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <span style={{ fontSize: "10px", opacity: 0.6 }}>Color</span>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                        <input type="color" value={resolveCssColor(p.waveColor || "#3b82f6")} onChange={(e) => up("waveColor", e.target.value)} style={{ background: "none", border: "none", width: "100%", height: "24px", cursor: "pointer" }} />
+                        <input type="color" value={resolveCssColor(p.waveGradientEnd || "#000000")} onChange={(e) => up("waveGradientEnd", e.target.value)} style={{ background: "none", border: "none", width: "100%", height: "24px", cursor: "pointer" }} />
+                    </div>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ fontSize: "10px", opacity: 0.6 }}>Height</span>
+                        <span style={{ fontSize: "10px", opacity: 0.6 }}>{p.waveHeight || "120px"}</span>
+                    </div>
+                    <input 
+                        type="range" min="20" max="400" 
+                        value={parseInt(p.waveHeight || "120")} 
+                        onChange={(e) => up("waveHeight", `${e.target.value}px`)}
+                        style={{ width: "100%" }}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: string }) {
     const componentId = React.useId().replace(/:/g, "");
+    const [popoverPos, setPopoverPos] = React.useState<{ x: number, y: number } | null>(null);
     const pattern = (p.wavePattern as keyof typeof WAVE_PATHS) || "smooth";
     const layers = Number(p.waveLayers ?? 3);
     const position = p.wavePosition || "bottom";
@@ -904,19 +984,39 @@ function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: strin
                 const opacity = isTop ? 1 : 0.4 + (i * 0.15);
                 const fill = isTop ? (gradientEnd ? `url(#${gradId})` : fillColor) : (secondaryColor || fillColor);
                 return (
-                    <path key={i} d={d} fill={fill} fillOpacity={opacity}
-                        style={{
+                    <path 
+                        key={i} 
+                        d={d} 
+                        fill={fill} 
+                        fillOpacity={opacity}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            useEditorStore.getState().selectBlock(blockId);
+                            useEditorStore.getState().focusSubItem(blockId, "Wave Decoration");
+                            setPopoverPos({ x: e.clientX, y: e.clientY });
+                        }}
+                        style={{ 
+                            cursor: "pointer",
+                            pointerEvents: "auto",
                             animation: animated ? (isTop ? `int-wave-pulse 4s ease-in-out infinite alternate` : `int-wave-drift ${8 + i * 2}s linear infinite alternate`) : "none",
                             transformOrigin: position === "top" ? "top" : "bottom"
-                        }}
+                        }} 
                     />
                 );
             })}
+            {popoverPos && (
+                <foreignObject x="0" y="0" width="100%" height="100%" style={{ overflow: "visible" }}>
+                    <div style={{ position: "fixed", left: popoverPos.x, top: popoverPos.y, pointerEvents: "auto" }}>
+                        <WaveQuickEditor p={p} blockId={blockId} onClose={() => setPopoverPos(null)} />
+                    </div>
+                </foreignObject>
+            )}
         </svg>
     );
 }
 
 export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
+    const blockId = React.useContext(BlockContext) || "bg";
     const bgImage = p.bgImage as string;
     const bgGradient = p.bgGradient as string;
     const imageOpacity = Number(p.bgImageOpacity ?? 40) / 100;
@@ -950,10 +1050,10 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
                             inset: 0,
                             width: "100%",
                             height: "100%",
-                            objectFit: (p.bgSize as string) === "contain" ? "contain" : "cover",
-                            objectPosition: (p.bgPosition as string) || "center",
+                            objectFit: (p.bgImageSize as any) || "cover",
+                            objectPosition: (p.bgImagePosition as string) || "center",
                             opacity: imageOpacity,
-                            zIndex: 1,
+                            zIndex: 0,
                             pointerEvents: bgControls ? "auto" : "none"
                         }}
                     />
@@ -963,11 +1063,11 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
                             position: "absolute",
                             inset: 0,
                             backgroundImage: `url("${bgImage}")`,
-                            backgroundSize: (p.bgSize as string) || "cover",
-                            backgroundPosition: (p.bgPosition as string) || "center",
-                            backgroundRepeat: (p.bgRepeat as string) || "no-repeat",
+                            backgroundSize: (p.bgImageSize as any) || "cover",
+                            backgroundPosition: (p.bgImagePosition as string) || "center",
+                            backgroundRepeat: (p.bgImageRepeat as any) || "no-repeat",
                             opacity: imageOpacity,
-                            zIndex: 1,
+                            zIndex: 0,
                             pointerEvents: "none"
                         }}
                     />
@@ -989,7 +1089,7 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
             )}
 
             {/* Integrated Wave Decoration */}
-            {p.showWave && <IntegratedWave p={p} blockId={p.id || "bg"} />}
+            {p.showWave && <IntegratedWave p={p} blockId={blockId} />}
         </>
     );
 }

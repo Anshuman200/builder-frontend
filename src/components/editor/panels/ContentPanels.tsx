@@ -9,7 +9,8 @@ import {
     TypographyFields, LayoutFields, CardFields, ButtonFields, ImageFields, PaddingFields,
     InputFields,
     ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove,
-    TextInputWithUnit, useSubItemFocus, PrefixInput
+    TextInputWithUnit, useSubItemFocus, PrefixInput,
+    IconFields
 } from "./shared";
 import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, PlusIcon, GlobeAltIcon, Squares2X2Icon, ListBulletIcon } from "@heroicons/react/24/outline";
 import { AnimationPanel } from "./AnimationPanel";
@@ -50,11 +51,7 @@ export function FeaturesPanel({ block }: { block: Block }) {
                 <Field label="Card Description Size"><TextInputWithUnit value={(p.cardDescSize as string) ?? ""} placeholder="0.95rem" onChange={(v) => up("cardDescSize", v)} /></Field>
             </Section>
             <Section title="Icon Styling">
-                <Field label="Icon Size"><TextInputWithUnit value={String(p.iconSize ?? "")} placeholder="24" onChange={(v) => up("iconSize", v)} /></Field>
-                <Field label="Icon Color"><ColorInput value={(p.iconColor as string) || "var(--primary)"} onChange={(v) => up("iconColor", v)} onBlur={(v) => up("iconColor", v, true)} /></Field>
-                <Field label="Wrapper Size"><TextInputWithUnit value={String(p.iconWrapperSize ?? "")} placeholder="52" onChange={(v) => up("iconWrapperSize", v)} /></Field>
-                <Field label="Wrapper Radius"><BorderRadiusInput value={(p.iconRadius as string) || "14px"} onChange={(v) => up("iconRadius", v)} /></Field>
-                <Field label="Wrapper Background"><ColorInput value={(p.iconBg as string) || "rgba(var(--primary-rgb), 0.15)"} onChange={(v) => up("iconBg", v)} onBlur={(v) => up("iconBg", v, true)} /></Field>
+                <IconFields p={p} up={up} />
             </Section>
             <Section title="Section Padding (Responsive)">
                 <PaddingFields p={p} up={up} />
@@ -196,10 +193,7 @@ export function TeamPanel({ block }: { block: Block }) {
                 <Field label="Description Text"><ColorInput value={(p.descColor as string) || "#475569"} onChange={(v) => up("descColor", v)} /></Field>
             </Section>
             <Section title="Social Links Styling">
-                <Field label="Social Links Color"><ColorInput value={(p.socialColor as string) || "#94a3b8"} onChange={(v) => up("socialColor", v)} /></Field>
-                <Field label="Social Icon Size">
-                    <TextInputWithUnit value={String(p.socialIconSize || "")} onChange={(v) => up("socialIconSize", v)} placeholder="18" />
-                </Field>
+                <IconFields p={p} up={up} prefix="social" />
             </Section>
             <Section title="Team Members">
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -396,10 +390,7 @@ export function ContactInfoPanel({ block }: { block: Block }) {
             <Section title="Icon Styling">
                 <ToggleSwitch value={p.showIcons !== false} onChange={(v) => up("showIcons", v)} label="Show Icons" />
                 {p.showIcons !== false && (
-                    <>
-                        <Field label="Icon Size"><TextInputWithUnit value={String(p.iconSize ?? "")} onChange={(v) => up("iconSize", v)} placeholder="24" /></Field>
-                        <Field label="Icon Color"><ColorInput value={(p.iconColor as string) || "var(--primary)"} onChange={(v) => up("iconColor", v)} /></Field>
-                    </>
+                    <IconFields p={p} up={up} />
                 )}
             </Section>
 
@@ -917,6 +908,10 @@ export function StatsPanel({ block }: { block: Block }) {
 
             <Section title="Card Styling">
                 <CardFields p={p} up={up} />
+            </Section>
+
+            <Section title="Icon Styling">
+                <IconFields p={p} up={up} />
             </Section>
 
             <Section title="Metric Items">

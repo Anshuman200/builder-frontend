@@ -749,7 +749,12 @@ export const useEditorStore = create<EditorStore>()(
             get().pushHistory();
         }),
 
-        selectBlock: (id) => set((s) => { s.selectedBlockId = id; s.selectBlockTick = (s.selectBlockTick || 0) + 1; }),
+        selectBlock: (id) => set((s) => { 
+            s.selectedBlockId = id; 
+            s.selectBlockTick = (s.selectBlockTick || 0) + 1; 
+            // Clear specific sub-item focus (like Wave Decoration) when selecting a block normally
+            s.subItemFocus = null;
+        }),
         hoverBlock: (id) => set({ hoveredBlockId: id }),
         focusSubItem: (blockId, index: number | string) => set({ subItemFocus: { blockId, index } }),
         setViewMode: (mode) => set({ viewMode: mode }),

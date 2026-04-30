@@ -302,7 +302,9 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style }: 
         { label: "rem", value: "rem" },
         { label: "em", value: "em" },
         { label: "vh", value: "vh" },
+        { label: "dvh", value: "dvh" },
         { label: "vw", value: "vw" },
+        { label: "dvw", value: "dvw" },
     ];
 
     // Robust parsing: extract leading number and whatever follows as unit
@@ -1650,6 +1652,52 @@ export function LayoutFields({ p, up, options = {} }: PropertyGroupProps & { opt
             {showCols && <Field label="Columns"><SelectInput value={String(p.columns || "3")} onChange={(v) => up("columns", Number(v))} options={[{ label: "1 Column", value: "1" }, { label: "2 Columns", value: "2" }, { label: "3 Columns", value: "3" }, { label: "4 Columns", value: "4" }]} /></Field>}
             {showGap && <Field label="Gap"><TextInputWithUnit value={p.gap || "2rem"} onChange={(v) => up("gap", v)} placeholder="2rem" /></Field>}
             {showAlign && <AlignmentInput value={(p.align as string) || "center"} onChange={(v) => up("align", v)} />}
+        </>
+    );
+}
+
+export function IconFields({ p, up, prefix = "" }: PropertyGroupProps) {
+    const getK = (suffix: string) => {
+        if (!prefix) return suffix;
+        return `${prefix}${suffix.charAt(0).toUpperCase()}${suffix.slice(1)}`;
+    };
+
+    return (
+        <>
+            <Field label="Icon Size">
+                <TextInputWithUnit 
+                    value={String(p[getK("iconSize")] ?? "")} 
+                    placeholder="24" 
+                    onChange={(v) => up(getK("iconSize"), v)} 
+                />
+            </Field>
+            <Field label="Icon Color">
+                <ColorInput 
+                    value={(p[getK("iconColor")] as string) || "var(--primary)"} 
+                    onChange={(v) => up(getK("iconColor"), v)} 
+                    onBlur={(v) => up(getK("iconColor"), v, true)} 
+                />
+            </Field>
+            <Field label="Wrapper Size">
+                <TextInputWithUnit 
+                    value={String(p[getK("iconWrapperSize")] ?? "")} 
+                    placeholder="52" 
+                    onChange={(v) => up(getK("iconWrapperSize"), v)} 
+                />
+            </Field>
+            <Field label="Wrapper Background">
+                <ColorInput 
+                    value={(p[getK("iconBg")] as string) || "rgba(var(--primary-rgb), 0.15)"} 
+                    onChange={(v) => up(getK("iconBg"), v)} 
+                    onBlur={(v) => up(getK("iconBg"), v, true)} 
+                />
+            </Field>
+            <Field label="Wrapper Radius">
+                <BorderRadiusInput 
+                    value={(p[getK("iconRadius")] as string) || "14px"} 
+                    onChange={(v) => up(getK("iconRadius"), v)} 
+                />
+            </Field>
         </>
     );
 }

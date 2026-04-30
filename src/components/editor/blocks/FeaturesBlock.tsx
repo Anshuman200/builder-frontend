@@ -55,7 +55,7 @@ export function FeaturesBlock({ block }: BlockProps) {
     const editorCols = viewMode === "mobile" ? 1 : viewMode === "tablet" ? Math.min(2, columns) : columns;
 
     const getBaseCardStyle = (idx: number, isHovered?: boolean): React.CSSProperties => {
-        const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+        const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index == idx;
         
         const base = getCardStyles({
             props: p,
@@ -107,7 +107,13 @@ export function FeaturesBlock({ block }: BlockProps) {
                 {features.map((feat, idx) => {
                     return (
                         <div key={feat.id || idx} style={getBaseCardStyle(idx)}
-                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                            onClick={(e) => {
+                                if (isPreview) return;
+                                e.stopPropagation();
+                                const store = useEditorStore.getState();
+                                store.selectBlock(block.id);
+                                store.focusSubItem(block.id, idx);
+                            }}
                             onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx, true))}
                             onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx))}
                         >
@@ -143,7 +149,13 @@ export function FeaturesBlock({ block }: BlockProps) {
                             }}
                             onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, { ...getBaseCardStyle(idx, true), flexDirection: even ? "row" : "row-reverse" })}
                             onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, { ...getBaseCardStyle(idx), flexDirection: even ? "row" : "row-reverse" })}
-                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                            onClick={(e) => {
+                                if (isPreview) return;
+                                e.stopPropagation();
+                                const store = useEditorStore.getState();
+                                store.selectBlock(block.id);
+                                store.focusSubItem(block.id, idx);
+                            }}
                         >
                             <div style={{ flexShrink: 0 }}>
                                 <div style={{ width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, color: iconColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -176,7 +188,13 @@ export function FeaturesBlock({ block }: BlockProps) {
                             }}
                             onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx, true))}
                             onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx))}
-                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                            onClick={(e) => {
+                                if (isPreview) return;
+                                e.stopPropagation();
+                                const store = useEditorStore.getState();
+                                store.selectBlock(block.id);
+                                store.focusSubItem(block.id, idx);
+                            }}
                         >
                             <IconWrapper feature={feat} />
                             <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "1rem 0 0.5rem 0" }}>{feat.title}</h3>
@@ -202,7 +220,13 @@ export function FeaturesBlock({ block }: BlockProps) {
                         }}
                         onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, { ...getBaseCardStyle(idx, true), flexDirection: "row" })}
                         onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, { ...getBaseCardStyle(idx), flexDirection: "row" })}
-                        onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                        onClick={(e) => {
+                            if (isPreview) return;
+                            e.stopPropagation();
+                            const store = useEditorStore.getState();
+                            store.selectBlock(block.id);
+                            store.focusSubItem(block.id, idx);
+                        }}
                     >
                         <div style={{ flexShrink: 0, width: iconWrapperSize, height: iconWrapperSize, borderRadius: iconRadius, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center", color: iconColor }}>
                             {(() => { const C = getIcon(feat.icon); return C ? <C width={iconSize} height={iconSize} /> : <Square2StackIcon width={iconSize} height={iconSize} />; })()}
@@ -237,7 +261,13 @@ export function FeaturesBlock({ block }: BlockProps) {
                             }}
                             onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx, true))}
                             onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx))}
-                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                            onClick={(e) => {
+                                if (isPreview) return;
+                                e.stopPropagation();
+                                const store = useEditorStore.getState();
+                                store.selectBlock(block.id);
+                                store.focusSubItem(block.id, idx);
+                            }}
                         >
                             <div style={{ position: "absolute", top: "1.5rem", left: "1.5rem" }}><IconWrapper feature={feat} /></div>
                             <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.4rem 0" }}>{feat.title}</h3>

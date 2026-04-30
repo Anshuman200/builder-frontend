@@ -30,6 +30,23 @@ const VIEWPORT_WIDTHS = {
   mobile: "390px",
 } as const;
 
+const WaveIcon = ({ className, style }: { className?: string, style?: React.CSSProperties }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className} 
+    style={style}
+  >
+    <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" />
+    <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" />
+    <path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" />
+  </svg>
+);
+
 // ─── Main Canvas ──────────────────────────────────────────────────────────────
 
 export default function EditorCanvas() {
@@ -520,6 +537,40 @@ const CanvasBlock = memo(function CanvasBlock({
                 </AppToolTip>
               );
             })()}
+
+            {/* Quick Wave Decoration Toggle */}
+            {(block.type !== "header" && block.type !== "footer") && (
+              <AppToolTip title={block.props.showWave ? "Change Wave Decoration" : "Add Wave Decoration"}>
+                <IconButton
+                  className={block.props.showWave ? "text-indigo-600 bg-indigo-50" : ""}
+                  icon={<WaveIcon style={{ width: 14, height: 14 }} />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const hasWave = !!block.props.showWave;
+                    useEditorStore.getState().updateBlock(block.id, { 
+                      showWave: !hasWave,
+                      // Set sensible defaults if turning ON for the first time
+                      ...(!hasWave ? {
+                        wavePattern: block.props.wavePattern || "smooth",
+                        wavePosition: block.props.wavePosition || "bottom",
+                        waveColor: block.props.waveColor || "var(--primary)",
+                        waveLayers: block.props.waveLayers ?? 3,
+                        waveAnimated: block.props.waveAnimated !== false,
+                        waveHeight: block.props.waveHeight || "120px"
+                      } : {})
+                    }, true);
+                    
+                    // If turning on, select the block so the user sees the options
+                    if (!hasWave) {
+                      selectBlock(block.id);
+                    }
+
+                    // Auto-focus and scroll to the Wave Decoration section
+                    useEditorStore.getState().focusSubItem(block.id, "Wave Decoration");
+                  }}
+                />
+              </AppToolTip>
+            )}
 
             {block.type === "wave" && (
               <AppToolTip title="Flip Orientation">

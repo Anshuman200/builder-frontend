@@ -23,7 +23,7 @@ const BRAND_ICONS: Record<string, React.ReactNode> = {
 
 type SocialValue = string | { url?: string; icon?: string };
 
-function SocialLinks({ socials, color, justify, size = 18, blockId, isPreview }: { socials: Record<string, SocialValue>; color: string; justify: string; size?: number | string; blockId?: string; isPreview?: boolean }) {
+function SocialLinks({ socials, color, justify, size = 18, blockId, isPreview, iconProps = {} }: { socials: Record<string, SocialValue>; color: string; justify: string; size?: number | string; blockId?: string; isPreview?: boolean; iconProps?: any }) {
     const entries = Object.entries(socials);
     if (!entries.length) return null;
     return (
@@ -38,7 +38,18 @@ function SocialLinks({ socials, color, justify, size = 18, blockId, isPreview }:
                         href={href}
                         target="_blank"
                         rel="noreferrer"
-                        style={{ color, transition: "opacity 0.2s", display: "flex", alignItems: "center" }}
+                        style={{ 
+                            color: iconProps.iconColor || color, 
+                            background: iconProps.iconBg || "transparent",
+                            width: iconProps.iconWrapperSize || "auto",
+                            height: iconProps.iconWrapperSize || "auto",
+                            borderRadius: iconProps.iconRadius || "0",
+                            display: "flex", 
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: iconProps.iconBg ? "8px" : "0",
+                            transition: "all 0.2s" 
+                        }}
                         onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.65"; }}
                         onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
                         onClick={(e) => {
@@ -52,12 +63,12 @@ function SocialLinks({ socials, color, justify, size = 18, blockId, isPreview }:
                         }}
                     >
                         {customIcon
-                            ? <img src={customIcon} alt={key} style={{ width: size, height: size, borderRadius: 2, objectFit: "contain" }} />
+                            ? <img src={customIcon} alt={key} style={{ width: iconProps.iconSize || size, height: iconProps.iconSize || size, borderRadius: 2, objectFit: "contain" }} />
                             : (() => {
                                 const baseKey = key.includes("-") ? key.split("-")[0] : key;
                                 const icon = BRAND_ICONS[baseKey] || BRAND_ICONS.website;
                                 return React.cloneElement(icon as React.ReactElement<any>, {
-                                    style: { width: size, height: size }
+                                    style: { width: iconProps.iconSize || size, height: iconProps.iconSize || size }
                                 });
                             })()
                         }
@@ -118,7 +129,7 @@ export function TeamBlock({ block }: BlockProps) {
     const mobilePadding = (p.mobilePadding as string) || "32px 16px";
 
     const getBaseCardStyle = (idx: number): React.CSSProperties => {
-        const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+        const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index == idx;
         const isFloat = imageStyle === "float";
 
         const base = getCardStyles({
@@ -227,12 +238,18 @@ export function TeamBlock({ block }: BlockProps) {
                     {layout === "compact" && (
                         <div className={`team-grid-container-${block.id}`}>
                             {members.map((member: any, idx: number) => {
-                                const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index === idx;
+                                const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index == idx;
                                 const baseStyle = getBaseCardStyle(idx);
 
                                 return (
                                     <div key={`mc-${idx}`} style={{ ...baseStyle, display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", cursor: "pointer" }}
-                                        onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                        onClick={(e) => {
+                                            if (isPreview) return;
+                                            e.stopPropagation();
+                                            const store = useEditorStore.getState();
+                                            store.selectBlock(block.id);
+                                            store.focusSubItem(block.id, idx);
+                                        }}
                                     >
                                         {member.image && (
                                             <div style={{ width: 56, height: 56, borderRadius: "50%", overflow: "hidden", position: "relative", flexShrink: 0 }}>
@@ -249,7 +266,21 @@ export function TeamBlock({ block }: BlockProps) {
                                             <p style={{ margin: "0 0 0.15rem", fontWeight: 700, fontSize: "0.95rem", color: nameColor, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{member.name}</p>
                                             <p style={{ margin: "0 0 0.4rem", fontSize: "0.75rem", color: roleColor, opacity: 0.8, textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 600 }}>{member.role}</p>
                                             {member.socials && (
-                                                <SocialLinks socials={member.socials as Record<string, SocialValue>} color={socialColor} justify="flex-start" size={socialIconSize} blockId={block.id} isPreview={isPreview} />
+                                                <SocialLinks 
+                                                    socials={member.socials as Record<string, SocialValue>} 
+                                                    color={socialColor} 
+                                                    justify="flex-start" 
+                                                    size={socialIconSize} 
+                                                    blockId={block.id} 
+                                                    isPreview={isPreview}
+                                                    iconProps={{
+                                                        iconSize: p.socialIconSize,
+                                                        iconColor: p.socialIconColor,
+                                                        iconWrapperSize: p.socialIconWrapperSize,
+                                                        iconRadius: p.socialIconRadius,
+                                                        iconBg: p.socialIconBg,
+                                                    }}
+                                                />
                                             )}
                                         </div>
                                     </div>
@@ -270,7 +301,13 @@ export function TeamBlock({ block }: BlockProps) {
                                             gap: "3rem",
                                             alignItems: "center",
                                         }}
-                                        onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                        onClick={(e) => {
+                                            if (isPreview) return;
+                                            e.stopPropagation();
+                                            const store = useEditorStore.getState();
+                                            store.selectBlock(block.id);
+                                            store.focusSubItem(block.id, idx);
+                                        }}
                                     >
                                         {member.image && (
                                             <div style={{ width: 160, height: 160, borderRadius: imageRadius, overflow: "hidden", position: "relative", flexShrink: 0 }}>
@@ -288,7 +325,21 @@ export function TeamBlock({ block }: BlockProps) {
                                             <p style={{ margin: "0 0 1rem", fontWeight: 600, fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "0.05em", color: roleColor }}>{member.role}</p>
                                             {member.description && <p style={{ margin: "0 0 1rem", color: descColor, lineHeight: 1.7, fontSize: "0.95rem" }}>{member.description}</p>}
                                             {member.socials && (
-                                                <SocialLinks socials={member.socials as Record<string, SocialValue>} color={socialColor} justify="inherit" size={socialIconSize} blockId={block.id} isPreview={isPreview} />
+                                                <SocialLinks 
+                                                    socials={member.socials as Record<string, SocialValue>} 
+                                                    color={socialColor} 
+                                                    justify="inherit" 
+                                                    size={socialIconSize} 
+                                                    blockId={block.id} 
+                                                    isPreview={isPreview}
+                                                    iconProps={{
+                                                        iconSize: p.socialIconSize,
+                                                        iconColor: p.socialIconColor,
+                                                        iconWrapperSize: p.socialIconWrapperSize,
+                                                        iconRadius: p.socialIconRadius,
+                                                        iconBg: p.socialIconBg,
+                                                    }}
+                                                />
                                             )}
                                         </div>
                                     </div>
@@ -306,7 +357,13 @@ export function TeamBlock({ block }: BlockProps) {
                                 return (
                                     <div key={`ms-${idx}`}
                                         style={{ ...baseStyle, alignItems: "center", textAlign: "center" }}
-                                        onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                        onClick={(e) => {
+                                            if (isPreview) return;
+                                            e.stopPropagation();
+                                            const store = useEditorStore.getState();
+                                            store.selectBlock(block.id);
+                                            store.focusSubItem(block.id, idx);
+                                        }}
                                     >
                                         <div style={{ width: 140, height: 140, borderRadius: "50%", overflow: "hidden", border: `4px solid #e2e8f0`, marginBottom: "1rem", position: "relative" }}>
                                             {member.image ? (
@@ -324,7 +381,21 @@ export function TeamBlock({ block }: BlockProps) {
                                         <h3 style={{ margin: "0 0 0.25rem", fontSize: "1.1rem", fontWeight: 700, color: nameColor }}>{member.name}</h3>
                                         <p style={{ margin: "0 0 0.75rem", fontSize: "0.82rem", color: roleColor, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>{member.role}</p>
                                         {member.socials && (
-                                            <SocialLinks socials={member.socials as Record<string, SocialValue>} color={socialColor} justify="center" size={socialIconSize} blockId={block.id} isPreview={isPreview} />
+                                                <SocialLinks 
+                                                    socials={member.socials as Record<string, SocialValue>} 
+                                                    color={socialColor} 
+                                                    justify="center" 
+                                                    size={socialIconSize} 
+                                                    blockId={block.id} 
+                                                    isPreview={isPreview}
+                                                    iconProps={{
+                                                        iconSize: p.socialIconSize,
+                                                        iconColor: p.socialIconColor,
+                                                        iconWrapperSize: p.socialIconWrapperSize,
+                                                        iconRadius: p.socialIconRadius,
+                                                        iconBg: p.socialIconBg,
+                                                    }}
+                                                />
                                         )}
                                     </div>
                                 );
@@ -405,6 +476,13 @@ export function TeamBlock({ block }: BlockProps) {
                                                 size={socialIconSize}
                                                 blockId={block.id}
                                                 isPreview={isPreview}
+                                                iconProps={{
+                                                    iconSize: p.socialIconSize,
+                                                    iconColor: p.socialIconColor,
+                                                    iconWrapperSize: p.socialIconWrapperSize,
+                                                    iconRadius: p.socialIconRadius,
+                                                    iconBg: p.socialIconBg,
+                                                }}
                                             />
                                         )}
                                     </div>
@@ -413,14 +491,26 @@ export function TeamBlock({ block }: BlockProps) {
                                 if (isFloat) {
                                     return (
                                         <div key={`member-${idx}`} style={{ paddingTop: `calc(${imageSize} / 2)`, display: "flex", flexDirection: "column" }}
-                                            onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                            onClick={(e) => {
+                                            if (isPreview) return;
+                                            e.stopPropagation();
+                                            const store = useEditorStore.getState();
+                                            store.selectBlock(block.id);
+                                            store.focusSubItem(block.id, idx);
+                                        }}
                                         >
                                             <div style={{ ...resolvedCardStyle, flex: 1 }}>{imageEl}{contentEl}</div>
                                         </div>
                                     );
                                 }
                                 return (<div key={`member-${idx}`} style={resolvedCardStyle}
-                                    onClick={() => !isPreview && focusSubItem(block.id, idx)}
+                                    onClick={(e) => {
+                            if (isPreview) return;
+                            e.stopPropagation();
+                            const store = useEditorStore.getState();
+                            store.selectBlock(block.id);
+                            store.focusSubItem(block.id, idx);
+                        }}
                                 >{imageEl}{contentEl}</div>);
                             })}
                         </div>
