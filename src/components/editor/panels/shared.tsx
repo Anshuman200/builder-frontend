@@ -784,7 +784,7 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff", h
                     },
                     {
                         label: 'Utilities',
-                        colors: ["transparent"],
+                        colors: ["rgba(0,0,0,0)"],
                     }
                 ]}
             >

@@ -14,7 +14,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   TrashIcon, Square2StackIcon, PlusIcon,
-  Squares2X2Icon
+  Squares2X2Icon, ArrowsRightLeftIcon
 } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
@@ -520,6 +520,22 @@ const CanvasBlock = memo(function CanvasBlock({
                 </AppToolTip>
               );
             })()}
+
+            {block.type === "wave" && (
+              <AppToolTip title="Flip Orientation">
+                <IconButton
+                  icon={<ArrowsRightLeftIcon style={{ width: 14, height: 14 }} />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const p = block.props;
+                    useEditorStore.getState().updateBlock(block.id, {
+                      flipHorizontal: !p.flipHorizontal,
+                      flipVertical: !p.flipVertical
+                    }, true);
+                  }}
+                />
+              </AppToolTip>
+            )}
 
             {/* Drag, Duplicate & Delete*/}
             {(block.type !== "header" && block.type !== "footer") &&

@@ -36,7 +36,7 @@ export function WaveBlock({ block }: BlockProps) {
   // Extract props with new customization defaults
   const childBlocks = (props.childBlocks as Block[]) || [];
   const pattern = (props.pattern as keyof typeof WAVE_PATHS) || "smooth";
-  const layers = (props.layers as number) ?? 1; // 1 to 3
+  const layers = (props.layers as number) ?? 3; // 1 to 3
 
   const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
   const defaultPrimary = theme.colors?.primary || "#6366f1";
@@ -52,11 +52,12 @@ export function WaveBlock({ block }: BlockProps) {
   const secondaryColor = secondaryColorRaw ? resolveCssColor(secondaryColorRaw) : "";
 
   const bgStyles = getBackgroundStyles(props, theme);
-  const height = (props.height as string) || "150px";
-  const flipHorizontal = props.flipHorizontal as boolean ?? false;
-  const flipVertical = props.flipVertical as boolean ?? false;
-  const animated = props.animated as boolean ?? false;
-  const waveOnTop = props.waveOnTop as boolean ?? false;
+  const minHeight = (props.height as string) || "450px";
+  const waveHeight = (props.waveHeight as string) || "150px";
+  const flipHorizontal = props.flipHorizontal as boolean ?? true;
+  const flipVertical = props.flipVertical as boolean ?? true;
+  const animated = props.animated as boolean ?? true;
+  const waveOnTop = props.waveOnTop as boolean ?? true;
 
   // Unique IDs per block for SVG defs
   const gradientId = `wave-grad-${block.id}`;
@@ -86,7 +87,7 @@ export function WaveBlock({ block }: BlockProps) {
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
-    minHeight: height,
+    minHeight: minHeight,
   };
 
   // To flip the SVG visually
@@ -97,11 +98,11 @@ export function WaveBlock({ block }: BlockProps) {
 
   const svgStyle: React.CSSProperties = {
     position: "absolute",
-    left: 0,
+    left: animated ? "-100px" : 0,
     bottom: flipVertical ? "auto" : 0,
     top: flipVertical ? 0 : "auto",
-    width: "100%",
-    height: height,
+    width: animated ? "calc(100% + 200px)" : "100%",
+    height: waveHeight,
     transform: transform || "none",
     transition: "fill 0.3s ease, height 0.3s ease",
     animation: animated ? "wave-pulse 4s ease-in-out infinite alternate" : "none",
@@ -109,79 +110,81 @@ export function WaveBlock({ block }: BlockProps) {
     pointerEvents: "none"
   };
 
-    const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
-    const isSelected = selectedBlockId === block.id;
+  const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
+  const isSelected = selectedBlockId === block.id;
 
-    return (
-        <div style={style}>
-            <BackgroundOverlay p={props} />
-            <svg
-                viewBox="0 0 1440 320"
-                preserveAspectRatio="none"
-                style={svgStyle}
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <defs>
-                    {useGradient && (
-                        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor={fillColor} />
-                            <stop offset="100%" stopColor={fillGradientEnd} />
-                        </linearGradient>
-                    )}
-                </defs>
-                <style>
-                    {`
+  return (
+    <div style={style}>
+      <BackgroundOverlay p={props} />
+      <svg
+        viewBox="0 0 1440 320"
+        preserveAspectRatio="none"
+        style={svgStyle}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          {useGradient && (
+            <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={fillColor} />
+              <stop offset="100%" stopColor={fillGradientEnd} />
+            </linearGradient>
+          )}
+        </defs>
+        <style>
+          {`
             @keyframes wave-pulse {
               0% { transform: scaleY(1) ${transform}; }
               100% { transform: scaleY(1.1) ${transform}; }
             }
             @keyframes wave-drift {
               0% { transform: translateX(0); }
-              100% { transform: translateX(-50px); }
+              100% { transform: translateX(80px); }
             }
           `}
-                </style>
-                {paths.map((d, i) => {
-                    // Bottom-most layer = index 0, top-most = last index
-                    const isTopLayer = i === paths.length - 1;
-                    // Layers behind gradually fade
-                    const opacity = isTopLayer ? 1 : Math.max(0.25, 0.4 + (i * 0.15));
-                    let currentFill = isTopLayer ? (useGradient ? `url(#${gradientId})` : fillColor) : (secondaryColor || fillColor);
+        </style>
+        {paths.map((d, i) => {
+          // Bottom-most layer = index 0, top-most = last index
+          const isTopLayer = i === paths.length - 1;
+          // Layers behind gradually fade
+          const opacity = isTopLayer ? 1 : Math.max(0.25, 0.4 + (i * 0.15));
+          let currentFill = isTopLayer ? (useGradient ? `url(#${gradientId})` : fillColor) : (secondaryColor || fillColor);
 
-                    return (
-                        <path
-                            key={`${pattern}-${i}`}
-                            fill={currentFill}
-                            fillOpacity={opacity}
-                            d={d}
-                            style={{
-                                animation: animated && !isTopLayer ? `wave-drift ${8 + i * 2}s linear infinite alternate` : "none",
-                                transformOrigin: "bottom"
-                            }}
-                        />
-                    );
-                })}
-            </svg>
+          return (
+            <path
+              key={`${pattern}-${i}`}
+              fill={currentFill}
+              fillOpacity={opacity}
+              d={d}
+              style={{
+                animation: animated && !isTopLayer ? `wave-drift ${8 + i * 2}s linear infinite alternate` : "none",
+                transformOrigin: "bottom"
+              }}
+            />
+          );
+        })}
+      </svg>
 
-            <div style={{
-                position: "relative",
-                zIndex: 2,
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                flex: 1,
-                gap: (props.contentGap as string) || "1rem"
-            }}>
-                <SortableBlockGroup blocks={childBlocks}>
-                    {childBlocks.map((child: Block) => (
-                        <ChildBlockWrapper key={child.id} block={child} />
-                    ))}
-                </SortableBlockGroup>
-                {!isPreview && (isSelected || childBlocks.length === 0) && (
-                    <DropZoneStrip zoneId={`wave-${block.id}`} hasChildren={childBlocks.length > 0} emptyLabel="Drag blocks inside the wave layer" />
-                )}
-            </div>
-        </div>
+      <div style={{
+        position: "relative",
+        zIndex: 2,
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: (props.contentAlignY as string) || "center",
+        alignItems: (props.contentAlignX as string) || "center",
+        flex: 1,
+        gap: (props.contentGap as string) || "1rem"
+      }}>
+        <SortableBlockGroup blocks={childBlocks}>
+          {childBlocks.map((child: Block) => (
+            <ChildBlockWrapper key={child.id} block={child} />
+          ))}
+        </SortableBlockGroup>
+        {!isPreview && (isSelected || childBlocks.length === 0) && (
+          <DropZoneStrip zoneId={`wave-${block.id}`} hasChildren={childBlocks.length > 0} emptyLabel="Drag blocks inside the wave layer" />
+        )}
+      </div>
+    </div>
   );
 }
 

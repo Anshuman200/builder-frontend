@@ -562,18 +562,69 @@ export function WavePanel({ block }: { block: Block }) {
                 <Field label="Primary Color"><ColorInput value={(p.fillColor as string) || "var(--primary)"} onChange={(v) => up("fillColor", v)} onBlur={(v) => up("fillColor", v, true)} /></Field>
                 <Field label="Gradient End Color"><ColorInput value={(p.fillGradientEnd as string) || ""} onChange={(v) => up("fillGradientEnd", v)} onBlur={(v) => up("fillGradientEnd", v, true)} /></Field>
                 <Field label="Secondary Color (Layers)"><ColorInput value={(p.secondaryColor as string) || ""} onChange={(v) => up("secondaryColor", v)} onBlur={(v) => up("secondaryColor", v, true)} /></Field>
-                <Field label="Height"><TextInputWithUnit value={(p.height as string) ?? ""} onChange={(v) => up("height", v)} placeholder="150px or 15vw" /></Field>
+                <Field label="Section Min Height"><TextInputWithUnit value={(p.height as string) ?? ""} onChange={(v) => up("height", v)} placeholder="450px" /></Field>
+                <Field label="Wave SVG Height"><TextInputWithUnit value={(p.waveHeight as string) ?? ""} onChange={(v) => up("waveHeight", v)} placeholder="150px" /></Field>
                 <Field label="Background Context Color"><ColorInput value={(p.bgColor as string) || "transparent"} onChange={(v) => up("bgColor", v)} onBlur={(v) => up("bgColor", v, true)} /></Field>
-                <Field label="Content Gap"><TextInputWithUnit value={(p.contentGap as string) ?? ""} onChange={(v) => up("contentGap", v)} placeholder="1rem" /></Field>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "8px" }}>
+                    <Field label="Align Content (V)">
+                        <SelectInput 
+                            value={(p.contentAlignY as string) || "center"} 
+                            onChange={(v) => up("contentAlignY", v)}
+                            options={[
+                                { label: "Top", value: "flex-start" },
+                                { label: "Center", value: "center" },
+                                { label: "Bottom", value: "flex-end" }
+                            ]}
+                        />
+                    </Field>
+                    <Field label="Align Content (H)">
+                        <SelectInput
+                            value={(p.contentAlignX as string) || "center"} 
+                            onChange={(v) => up("contentAlignX", v)}
+                            options={[
+                                { label: "Left", value: "flex-start" },
+                                { label: "Center", value: "center" },
+                                { label: "Right", value: "flex-end" }
+                            ]}
+                        />
+                    </Field>
+                </div>
+                <Field label="Item Spacing (Gap)"><TextInputWithUnit value={(p.contentGap as string) ?? ""} onChange={(v) => up("contentGap", v)} placeholder="1rem" /></Field>
             </Section>
             <Section title="Orientation & Animation">
+                <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+                    <button 
+                        onClick={() => {
+                            up("flipHorizontal", !p.flipHorizontal, true);
+                            up("flipVertical", !p.flipVertical, true);
+                        }}
+                        style={{
+                            flex: 1,
+                            padding: "8px 12px",
+                            background: "rgba(59, 130, 246, 0.1)",
+                            border: "1px solid rgba(59, 130, 246, 0.2)",
+                            borderRadius: "8px",
+                            color: "#60a5fa",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "6px",
+                            transition: "all 0.2s"
+                        }}
+                    >
+                        Flip Orientation
+                    </button>
+                </div>
                 <PaddingInput label="Padding Top" value={(p.paddingTop as string) || ""} onChange={(v) => up("paddingTop", v)} placeholder="e.g., 5rem" />
                 <PaddingInput label="Padding Bottom" value={(p.paddingBottom as string) || ""} onChange={(v) => up("paddingBottom", v)} placeholder="e.g., 2rem" />
                 <PaddingInput label="Global Padding" value={(p.padding as string) || "24px"} onChange={(v) => up("padding", v)} placeholder="24px" />
-                <ToggleSwitch label="Flip Horizontal" value={!!p.flipHorizontal} onChange={(v: boolean) => up("flipHorizontal", v)} />
-                <ToggleSwitch label="Flip Vertical" value={!!p.flipVertical} onChange={(v: boolean) => up("flipVertical", v)} />
-                <ToggleSwitch label="Wave on Top" value={!!p.waveOnTop} onChange={(v: boolean) => up("waveOnTop", v)} />
-                <ToggleSwitch label="CSS Drift Animation" value={!!p.animated} onChange={(v: boolean) => up("animated", v)} />
+                <ToggleSwitch label="Flip Horizontal" value={p.flipHorizontal !== false} onChange={(v: boolean) => up("flipHorizontal", v, true)} />
+                <ToggleSwitch label="Flip Vertical" value={p.flipVertical !== false} onChange={(v: boolean) => up("flipVertical", v, true)} />
+                <ToggleSwitch label="Wave on Top" value={p.waveOnTop !== false} onChange={(v: boolean) => up("waveOnTop", v, true)} />
+                <ToggleSwitch label="CSS Drift Animation" value={p.animated !== false} onChange={(v: boolean) => up("animated", v, true)} />
             </Section>
             <BackgroundPanel block={block} />
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}

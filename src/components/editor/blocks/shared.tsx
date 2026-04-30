@@ -9,7 +9,7 @@ import React from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { TrashIcon, EllipsisHorizontalIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon, ArrowPathIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, EllipsisHorizontalIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon, ArrowPathIcon, SparklesIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
 import { useEditorStore } from "@/stores/editorStore";
@@ -424,6 +424,22 @@ export function ChildBlockWrapper({
                             </AppToolTip>
                         );
                     })()}
+
+                    {block.type === "wave" && (
+                        <AppToolTip title="Flip Orientation">
+                            <IconButton
+                                icon={<ArrowsRightLeftIcon style={{ width: 13, height: 13 }} />}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    const p = block.props;
+                                    useEditorStore.getState().updateBlock(block.id, {
+                                        flipHorizontal: !p.flipHorizontal,
+                                        flipVertical: !p.flipVertical
+                                    }, true);
+                                }}
+                            />
+                        </AppToolTip>
+                    )}
 
                     <AppToolTip title="Drag to reorder">
                         <IconButton
