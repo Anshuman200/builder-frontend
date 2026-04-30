@@ -808,18 +808,18 @@ function toHex(color: string, theme?: any): string {
 
 // Test comment
 // ─── Master AppColorPicker (DRY Source of Truth) ──────────────────────────
-export function AppColorPicker({ 
-    value, 
-    onChange, 
+export function AppColorPicker({
+    value,
+    onChange,
     onChangeComplete,
-    children, 
+    children,
     showText,
-    ...props 
-}: { 
-    value: string; 
-    onChange: (color: any) => void; 
+    ...props
+}: {
+    value: string;
+    onChange: (color: any) => void;
     onChangeComplete?: (color: any) => void;
-    children: React.ReactNode; 
+    children: React.ReactNode;
     showText?: any;
     [key: string]: any;
 }) {
@@ -1262,33 +1262,52 @@ export function VideoPlaybackOptions({
     muted, onChangeMuted,
     controls, onChangeControls,
     title = "Playback Options",
-    hasPadding = false
 }: {
     autoPlay: boolean; onChangeAutoPlay: (v: boolean) => void;
     loop: boolean; onChangeLoop: (v: boolean) => void;
     muted: boolean; onChangeMuted: (v: boolean) => void;
-    controls: boolean; onChangeControls: (v: boolean) => void;
+    controls?: boolean; onChangeControls?: (v: boolean) => void;
     title?: string;
-    hasPadding?: boolean;
 }) {
     return (
-        <Section title={title} hasPadding={hasPadding}>
+        <div style={{ marginTop: 12 }}>
             <div style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "10px 24px",
-                padding: "12px",
-                background: "rgba(255,255,255,0.02)",
-                borderRadius: "10px",
-                border: "1px solid rgba(255,255,255,0.04)",
-                marginTop: "4px"
+                fontSize: 10,
+                fontWeight: 800,
+                color: "rgba(255,255,255,0.3)",
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                marginBottom: 8,
+                paddingLeft: 4
             }}>
-                <ToggleSwitch label="AutoPlay" value={autoPlay} onChange={onChangeAutoPlay} />
-                <ToggleSwitch label="Muted" value={muted} onChange={onChangeMuted} />
-                <ToggleSwitch label="Loop" value={loop} onChange={onChangeLoop} />
-                <ToggleSwitch label="Show Controls" value={controls} onChange={onChangeControls} />
+                {title}
             </div>
-        </Section>
+            <div className="border border-divider-secondary overflow-hidden rounded-md bg-neutral-800">
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                    {/* AutoPlay & Muted Row */}
+                    <div className="flex border-b border-divider-secondary">
+                        <div className="flex-1 p-3 border-r border-divider-secondary">
+                            <ToggleSwitch label="AutoPlay" value={autoPlay} onChange={onChangeAutoPlay} />
+                        </div>
+                        <div className="flex-1 p-3">
+                            <ToggleSwitch label="Muted" value={muted} onChange={onChangeMuted} />
+                        </div>
+                    </div>
+
+                    {/* Loop & Optional Controls Row */}
+                    <div className="flex">
+                        <div className="flex-1 p-3 border-r border-divider-secondary">
+                            <ToggleSwitch label="Loop" value={loop} onChange={onChangeLoop} />
+                        </div>
+                        {onChangeControls !== undefined && (
+                            <div className="flex-1 p-3">
+                                <ToggleSwitch label="Controls" value={!!controls} onChange={onChangeControls} />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -1571,7 +1590,7 @@ export function Section({ title, children, hasPadding = true, focusKeys = [] }: 
                 border: isFocused ? `1px solid ${PANEL_COLORS.primary}` : `1px solid rgba(255,255,255,0.08)`,
                 borderRadius: 12,
                 margin: "14px 16px",
-                padding: hasPadding ? "16px 20px" : "0px",
+                padding: "16px 20px",
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                 background: isFlashing ? "rgba(99, 102, 241, 0.2)" : isFocused ? "rgba(99, 102, 241, 0.12)" : "rgba(255,255,255,0.03)",
                 backdropFilter: isFocused ? "blur(8px)" : "none",

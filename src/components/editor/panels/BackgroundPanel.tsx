@@ -57,9 +57,7 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
                 autoPlay={!!p.bgAutoPlay} onChangeAutoPlay={(v) => up("bgAutoPlay", v, true)}
                 loop={!!p.bgLoop} onChangeLoop={(v) => up("bgLoop", v, true)}
                 muted={p.bgMuted !== false} onChangeMuted={(v) => up("bgMuted", v, true)}
-                controls={p.bgControls !== false} onChangeControls={(v) => up("bgControls", v, true)}
                 title="Background Video Options"
-                hasPadding={false}
               />
             )}
             <Field label="Media Opacity">
