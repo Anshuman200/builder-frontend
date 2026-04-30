@@ -33,7 +33,7 @@ export function FeaturesPanel({ block }: { block: Block }) {
 
     return (
         <>
-            <Section title="Content" focusKeys={["title", "subtitle"]}>
+            <Section title="Text Content" focusKeys={["title", "subtitle"]}>
                 <TypographyFields p={p} up={up} />
             </Section>
             <Section title="Layout & Style" focusKeys={["layout", "columns", "align"]}>
@@ -41,14 +41,12 @@ export function FeaturesPanel({ block }: { block: Block }) {
                     layouts: [{ label: "Card Grid", value: "grid" }, { label: "Alternating Row (Icon + Text)", value: "alternating" }, { label: "Horizontal List", value: "horizontal" }, { label: "Icon-Only Grid", value: "icon-grid" }, { label: "Bento / Asymmetric", value: "bento" }]
                 }} />
                 <BackgroundPanel block={block} />
-                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#1e293b"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
             </Section>
             <Section title="Card Styling" focusKeys={["cardStyle", "cardBg", "cardRadius"]}>
                 <CardFields p={p} up={up} />
             </Section>
             <Section title="Typography" focusKeys={["titleSize", "subtitleSize", "cardTitleSize", "cardDescSize"]}>
-                <Field label="Section Title Size"><TextInputWithUnit value={(p.titleSize as string) ?? ""} placeholder="2.25rem" onChange={(v) => up("titleSize", v)} /></Field>
-                <Field label="Section Subtitle Size"><TextInputWithUnit value={(p.subtitleSize as string) ?? ""} placeholder="1.125rem" onChange={(v) => up("subtitleSize", v)} /></Field>
+                <TypographyFields p={p} up={up} />
                 <Field label="Card Title Size"><TextInputWithUnit value={(p.cardTitleSize as string) ?? ""} placeholder="1.2rem" onChange={(v) => up("cardTitleSize", v)} /></Field>
                 <Field label="Card Description Size"><TextInputWithUnit value={(p.cardDescSize as string) ?? ""} placeholder="0.95rem" onChange={(v) => up("cardDescSize", v)} /></Field>
             </Section>
@@ -164,7 +162,7 @@ export function TeamPanel({ block }: { block: Block }) {
 
     return (
         <>
-            <Section title="Content" focusKeys={["title", "subtitle"]}>
+            <Section title="Text Content" focusKeys={["title", "subtitle"]}>
                 <TypographyFields p={p} up={up} />
             </Section>
             <Section title="Layout & Grid" focusKeys={["layout", "columns", "align"]}>
@@ -189,10 +187,11 @@ export function TeamPanel({ block }: { block: Block }) {
                 {p.imageStyle === "cover" && (<Field label="Gradient Overlay"><ColorInput value={(p.coverGradientBottom as string) || "rgba(0,0,0,0.9)"} onChange={(v) => up("coverGradientBottom", v)} /></Field>)}
             </Section>
             <BackgroundPanel block={block} />
-            <Section title="Colors" focusKeys={["nameColor", "roleColor", "descColor"]}>
-                <Field label="Name Text"><ColorInput value={(p.nameColor as string) || "#0f172a"} onChange={(v) => up("nameColor", v)} /></Field>
-                <Field label="Role Text"><ColorInput value={(p.roleColor as string) || "#64748b"} onChange={(v) => up("roleColor", v)} /></Field>
-                <Field label="Description Text"><ColorInput value={(p.descColor as string) || "#475569"} onChange={(v) => up("descColor", v)} /></Field>
+            <Section title="Typography" focusKeys={["nameColor", "roleColor", "descColor"]}>
+                <TypographyFields p={p} up={up} />
+                <Field label="Name Text Color"><ColorInput value={(p.nameColor as string) || "#0f172a"} onChange={(v) => up("nameColor", v)} /></Field>
+                <Field label="Role Text Color"><ColorInput value={(p.roleColor as string) || "#64748b"} onChange={(v) => up("roleColor", v)} /></Field>
+                <Field label="Description Text Color"><ColorInput value={(p.descColor as string) || "#475569"} onChange={(v) => up("descColor", v)} /></Field>
             </Section>
             <Section title="Social Links Styling" focusKeys={["socialIconSize", "socialIconColor", "socialIconBg", "socialIconRadius"]}>
                 <IconFields p={p} up={up} prefix="social" />
@@ -861,9 +860,8 @@ export function AccordionPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Typography">
-                <Field label="Title Size"><TextInputWithUnit value={(p.titleSize as string) ?? ""} onChange={(v) => up("titleSize", v)} placeholder="16px" /></Field>
-                <Field label="Title Weight"><SelectInput value={(p.titleWeight as string) || "600"} onChange={(v) => up("titleWeight", v)} options={[{ label: "Normal (400)", value: "400" }, { label: "Medium (500)", value: "500" }, { label: "Semibold (600)", value: "600" }, { label: "Bold (700)", value: "700" }]} /></Field>
-                <Field label="Description Size"><TextInputWithUnit value={(p.descSize as string) ?? ""} onChange={(v) => up("descSize", v)} placeholder="15px" /></Field>
+                <TypographyFields p={p} up={up} prefix="title" />
+                <TypographyFields p={p} up={up} prefix="desc" />
             </Section>
 
             <Section title="Icon">
@@ -877,8 +875,8 @@ export function AccordionPanel({ block }: { block: Block }) {
                 <BackgroundPanel block={block} />
                 <Field label="Item Background"><ColorInput value={(p.itemBgColor as string) || "#ffffff"} onChange={(v) => up("itemBgColor", v)} /></Field>
                 <Field label="Item Border"><ColorInput value={(p.itemBorderColor as string) || "#e2e8f0"} onChange={(v) => up("itemBorderColor", v)} /></Field>
-                <Field label="Title Color"><ColorInput value={(p.titleColor as string) || "#0f172a"} onChange={(v) => up("titleColor", v)} /></Field>
-                <Field label="Content Color"><ColorInput value={(p.contentColor as string) || "#475569"} onChange={(v) => up("contentColor", v)} /></Field>
+                <TypographyFields p={p} up={up} prefix="title" />
+                <TypographyFields p={p} up={up} prefix="content" />
             </Section>
 
             <Section title="Container Padding">
@@ -908,7 +906,7 @@ export function StatsPanel({ block }: { block: Block }) {
                     layouts: [{ label: "Grid", value: "grid" }, { label: "Strip", value: "strip" }, { label: "KPI Cards", value: "kpi" }]
                 }} />
                 <BackgroundPanel block={block} />
-                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "var(--text)"} onChange={(v) => up("textColor", v)} /></Field>
+                <TypographyFields p={p} up={up} />
                 <Field label="Accent Color"><ColorInput value={(p.accentColor as string) || "var(--primary)"} onChange={(v) => up("accentColor", v)} /></Field>
             </Section>
 
@@ -917,10 +915,7 @@ export function StatsPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Typography" focusKeys={["titleSize", "subtitleSize", "descSize", "descColor"]}>
-                <Field label="Value Size"><TextInputWithUnit value={(p.titleSize as string) || "2.25rem"} onChange={(v) => up("titleSize", v)} /></Field>
-                <Field label="Label Size"><TextInputWithUnit value={(p.subtitleSize as string) || "1rem"} onChange={(v) => up("subtitleSize", v)} /></Field>
-                <Field label="Description Size"><TextInputWithUnit value={(p.descSize as string) || "0.9rem"} onChange={(v) => up("descSize", v)} /></Field>
-                <Field label="Description Color"><ColorInput value={(p.descColor as string) || "var(--text-subtle)"} onChange={(v) => up("descColor", v)} /></Field>
+                <TypographyFields p={p} up={up} />
             </Section>
 
             <Section title="Item Spacing" focusKeys={["gap"]}>

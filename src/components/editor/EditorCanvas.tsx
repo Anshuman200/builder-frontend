@@ -18,7 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useEditorStore, LIGHT_COLORS } from "@/stores/editorStore";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
-import { BlockRenderer, WaveQuickEditor } from "./blocks";
+import { BlockRenderer, WaveQuickEditor, TextQuickEditor } from "./blocks";
 import { ActivePathContext, getBlockMediaInfo, QuickLayoutChange } from "./blocks/shared";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { IconButton } from "../ui/IconButton";
@@ -51,7 +51,7 @@ const WaveIcon = ({ className, style }: { className?: string, style?: React.CSSP
 // ─── Main Canvas ──────────────────────────────────────────────────────────────
 
 export default function EditorCanvas() {
-  const { page, viewMode, selectBlock, updateTheme, activeRouteId, waveEditorPos, setWaveEditorPos, selectedBlockId } = useEditorStore();
+  const { page, viewMode, selectBlock, updateTheme, activeRouteId, waveEditorPos, setWaveEditorPos, textEditorPos, setTextEditorPos, selectedBlockId } = useEditorStore();
   const dragControls = useDragControls();
 
   const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
@@ -101,6 +101,34 @@ export default function EditorCanvas() {
 
 
   const canvasRef = React.useRef<HTMLDivElement>(null);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [dragBounds, setDragBounds] = React.useState({ left: 20, top: 20, right: 20, bottom: 20 });
+
+  // Update drag boundaries based on the scroll container's viewport position
+  React.useEffect(() => {
+    const updateBounds = () => {
+      if (scrollRef.current) {
+        const rect = scrollRef.current.getBoundingClientRect();
+        // Constraints are relative to the viewport for position: fixed
+        // We subtract the editor's width/height roughly to keep the whole box inside
+        setDragBounds({
+          left: rect.left,
+          top: rect.top,
+          right: rect.right - 340, // 340 is the editor width
+          bottom: rect.bottom - 450 // 450 is a safe height estimate
+        });
+      }
+    };
+
+    updateBounds();
+    window.addEventListener("resize", updateBounds);
+    // Also update when blocks or selection changes as it might affect layout
+    const timer = setTimeout(updateBounds, 100);
+    return () => {
+      window.removeEventListener("resize", updateBounds);
+      clearTimeout(timer);
+    };
+  }, [selectedBlockId, waveEditorPos, textEditorPos]);
 
   // Apply theme object to CSS variables on mount and whenever theme changes
   React.useEffect(() => {
@@ -112,6 +140,7 @@ export default function EditorCanvas() {
     // Outer scroll area
     <div
       id="editor-scroll-container"
+      ref={scrollRef}
       style={{
         flex: 1,
         overflow: "auto",
@@ -158,7 +187,6 @@ export default function EditorCanvas() {
           transition: "width 0.25s ease, background 0.3s ease",
           flexShrink: 0,
           position: "relative",
-          transform: "translateZ(0)", // Confines position:fixed children to canvas bounds
         }}
         onClick={(e) => {
           if (e.target === e.currentTarget) {
@@ -170,7 +198,6 @@ export default function EditorCanvas() {
           <DropZone
             blocks={blocks}
             routeBlocksLength={routeBlocks.length}
-            headerId={page?.globalBlocks?.header?.id}
             footerId={page?.globalBlocks?.footer?.id}
           />
         </ActivePathContext.Provider>
@@ -183,15 +210,34 @@ export default function EditorCanvas() {
             drag
             dragControls={dragControls}
             dragListener={false}
-            dragMomentum={false}
-            initial={{ opacity: 0, scale: 0.9, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
+            dragMomentum={true}
+            dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
+            dragConstraints={dragBounds}
+            dragElastic={0}
+            onDragEnd={(_, info) => {
+              // The delta movement is added to the previous state
+              const newX = waveEditorPos.x + info.offset.x;
+              const newY = waveEditorPos.y + info.offset.y;
+              setWaveEditorPos({ x: newX, y: newY });
+            }}
+            initial={{
+              opacity: 0,
+              scale: 0.9,
+              x: waveEditorPos.x,
+              y: waveEditorPos.y + 10
+            }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              x: waveEditorPos.x,
+              y: waveEditorPos.y
+            }}
             exit={{ opacity: 0, scale: 0.9, y: 10 }}
             style={{
               position: "fixed",
-              left: Math.max(20, Math.min(waveEditorPos.x, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 320)),
-              top: Math.max(20, Math.min(waveEditorPos.y, (typeof window !== 'undefined' ? window.innerHeight : 800) - 450)),
-              zIndex: 1000,
+              left: 0,
+              top: 0,
+              zIndex: 10000,
               pointerEvents: "auto"
             }}
           >
@@ -199,6 +245,51 @@ export default function EditorCanvas() {
               p={selectedBlock.props}
               blockId={selectedBlock.id}
               onClose={() => setWaveEditorPos(null)}
+              dragControls={dragControls}
+            />
+          </motion.div>
+        )}
+
+        {textEditorPos && selectedBlock && (
+          <motion.div
+            key={`global-text-editor`}
+            drag
+            dragControls={dragControls}
+            dragListener={false}
+            dragMomentum={true}
+            dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
+            dragConstraints={dragBounds}
+            dragElastic={0}
+            onDragEnd={(_, info) => {
+              const newX = textEditorPos.x + info.offset.x;
+              const newY = textEditorPos.y + info.offset.y;
+              setTextEditorPos({ x: newX, y: newY });
+            }}
+            initial={{
+              opacity: 0,
+              scale: 0.9,
+              x: textEditorPos.x,
+              y: textEditorPos.y + 10
+            }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              x: textEditorPos.x,
+              y: textEditorPos.y
+            }}
+            exit={{ opacity: 0, scale: 0.9, y: 10 }}
+            style={{
+              position: "fixed",
+              left: 0,
+              top: 0,
+              zIndex: 10000,
+              pointerEvents: "auto"
+            }}
+          >
+            <TextQuickEditor
+              p={selectedBlock.props}
+              blockId={selectedBlock.id}
+              onClose={() => setTextEditorPos(null)}
               dragControls={dragControls}
             />
           </motion.div>
@@ -556,7 +647,7 @@ const CanvasBlock = memo(function CanvasBlock({
               position: "absolute", inset: 0,
               border: isSelected ? "2.5px solid #6366f1" : "1.5px solid #94a3b8",
               boxShadow: isSelected ? "inset 0 0 0 1px rgba(99,102,241,0.15), 0 0 0 3px rgba(99,102,241,0.12)" : undefined,
-              zIndex: 9998, pointerEvents: "none",
+              zIndex: 9000, pointerEvents: "none",
             }}
           />
         )}
@@ -567,7 +658,7 @@ const CanvasBlock = memo(function CanvasBlock({
             background: "#6366f1", color: "#fff",
             fontSize: 9, fontWeight: 700, letterSpacing: "0.08em",
             padding: "2px 10px", borderRadius: "0 0 6px 6px",
-            zIndex: 9999, pointerEvents: "none", textTransform: "uppercase",
+            zIndex: 9001, pointerEvents: "none", textTransform: "uppercase",
             whiteSpace: "nowrap", boxShadow: "0 2px 6px rgba(99,102,241,0.4)",
           }}>
             {block.type}

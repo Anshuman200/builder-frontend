@@ -45,7 +45,7 @@ export const heroSections: SectionTemplate[] = [
             root.props.childBlocks = [
                 makeBlock("text", { content: "Design Everything.", tag: "h1", fontSize: "4.5rem", color: "#ffffff", bold: true, align: "center", lineHeight: "1.1" }),
                 makeBlock("text", { content: "The most powerful builder for modern creative teams to launch fast.", tag: "p", fontSize: "1.5rem", color: "#e2e8f0", align: "center", marginTop: "1.5rem" }),
-                makeBlock("button", { label: "Start for free", variant: "gradient", gradientFrom: "#000", gradientTo: "#0000ff", textColor: "#ffffff", size: "xl", align: "center", marginTop: "3rem", fullWidth: false, borderRadius: "9999px" }),
+                makeBlock("button", { label: "Start for free", variant: "gradient", gradientFrom: "#000", gradientTo: "#0000ff", textColor: "#ffffff", size: "xl", align: "center", marginTop: "3rem", fullWidth: false, borderRadius: "8px" }),
             ];
             return root;
         },
@@ -58,7 +58,7 @@ export const heroSections: SectionTemplate[] = [
         create: () => {
             const root = makeBlock("hero", { align: "right", bgColor: "#1e293b", bgImage: "https://d1xyjpr3hmv834.cloudfront.net/uploads/1776851692839_j02e4jwr_AI&Automation.png", bgOverlay: "rgba(15,23,42,0.95)", textColor: "#ffffff", padding: "8rem 2rem", minHeight: "80vh" });
             const columns = makeBlock("columns", { leftWidth: "50", gap: "2rem", align: "center" });
-            columns.props.col0 = [makeBlock("image", { src: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1200&q=80", alt: "Hero", borderRadius: "16px", aspectRatio: "4/3" })];
+            columns.props.col0 = [makeBlock("image", { src: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1200&q=80", alt: "Hero", borderRadius: "8px", aspectRatio: "4/3" })];
             columns.props.col1 = [
                 makeBlock("text", { content: "Track your growth", tag: "h1", fontSize: "3.5rem", color: "#ffffff", bold: true }),
                 makeBlock("text", {
@@ -90,7 +90,7 @@ export const heroSections: SectionTemplate[] = [
             root.props.childBlocks = [
                 makeBlock("text", { content: "Experience the Future", tag: "h1", fontSize: "3rem", color: "#ffffff", bold: true, align: "center" }),
                 makeBlock("text", { content: "A new way to build web applications without the complexity.", tag: "p", fontSize: "1.2rem", color: "#fff", align: "center", marginTop: "1rem" }),
-                makeBlock("image", { src: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80", alt: "Hero", borderRadius: "12px", aspectRatio: "16/7", marginTop: "3rem" }),
+                makeBlock("image", { src: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80", alt: "Hero", borderRadius: "8px", aspectRatio: "16/7", marginTop: "3rem" }),
             ];
             return root;
         },

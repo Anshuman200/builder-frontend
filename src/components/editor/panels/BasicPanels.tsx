@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, ToggleSwitch, AlignmentInput, PaddingInput, TextInputWithUnit, VideoPlaybackOptions, AspectPicker, SliderInput } from "./shared";
+import { Section, Field, TextInput, SelectInput, ColorInput, BorderRadiusInput, ToggleInput, MediaInput, ToggleSwitch, AlignmentInput, PaddingInput, TextInputWithUnit, VideoPlaybackOptions, AspectPicker, SliderInput, TypographyFields } from "./shared";
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { Input as AntInput } from "antd";
@@ -82,10 +82,11 @@ export function HeroPanel({ block }: { block: Block }) {
                         placeholder="Select Template"
                     />
                 </Field>
-                <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#ffffff"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
                 <Field label="Min Height"><TextInputWithUnit value={(p.minHeight as string) ?? ""} onChange={(v) => up("minHeight", v)} placeholder="480px" /></Field>
-                <AlignmentInput label="Content Alignment" value={(p.align as string) || "center"} onChange={(v) => up("align", v)} />
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "0px"} onChange={(v) => up("borderRadius", v)} /></Field>
+            </Section>
+            <Section title="Typography">
+                <TypographyFields p={p} up={up} />
             </Section>
             <Section title="Padding (Responsive)">
                 <PaddingInput label="Desktop" value={(p.padding as string) || ""} onChange={(v) => up("padding", v)} placeholder="4rem 2rem" />
@@ -247,18 +248,7 @@ export function TextPanel({ block }: { block: Block }) {
                 </div>
             </Section>
             <Section title="Typography">
-                <AlignmentInput value={(p.align as string) || "left"} onChange={(v) => up("align", v)} />
-                <Field label="Color"><ColorInput value={(p.color as string) || "#0f172a"} onChange={(v) => up("color", v)} onBlur={(v) => up("color", v, true)} /></Field>
-                <Field label="Font Weight"><SelectInput value={(p.fontWeight as string) || "400"} onChange={(v) => up("fontWeight", v)} options={[{ label: "Thin (100)", value: "100" }, { label: "Light (300)", value: "300" }, { label: "Regular (400)", value: "400" }, { label: "Medium (500)", value: "500" }, { label: "Semibold (600)", value: "600" }, { label: "Bold (700)", value: "700" }, { label: "Extrabold (800)", value: "800" }, { label: "Black (900)", value: "900" }]} /></Field>
-                <Field label="Font Style">
-                    <div className="w-full" style={{ display: "flex", gap: 6 }}>
-                        {[["B", "bold", "Bold"], ["I", "italic", "Italic"], ["U", "underline", "Underline"], ["S", "strikethrough", "Strikethrough"]].map(([label, key, title]) => (
-                            <button key={key} title={title} onClick={() => up(key, !p[key])} style={{ flex: 1, padding: "5px 0", fontSize: 13, fontWeight: label === "B" ? 800 : 400, fontStyle: label === "I" ? "italic" : "normal", textDecoration: label === "U" ? "underline" : label === "S" ? "line-through" : "none", background: p[key] ? "#ff0000" : "#2a2a2a", color: p[key] ? "#fff" : "#aaa", border: "none", borderRadius: 4, cursor: "pointer", transition: "all 0.15s" }}>{label}</button>
-                        ))}
-                    </div>
-                </Field>
-                <Field label="Line Height"><TextInputWithUnit value={(p.lineHeight as string) ?? ""} onChange={(v) => up("lineHeight", v)} placeholder="1.6" /></Field>
-                <Field label="Letter Spacing"><TextInputWithUnit value={(p.letterSpacing as string) ?? ""} onChange={(v) => up("letterSpacing", v)} placeholder="0em" /></Field>
+                <TypographyFields p={p} up={up} />
             </Section>
             <Section title="Font Size (Responsive)">
                 <Field label="Desktop"><TextInputWithUnit value={(p.fontSize as string) ?? ""} onChange={(v) => up("fontSize", v)} placeholder="1rem" /></Field>
@@ -628,98 +618,6 @@ export function WavePanel({ block }: { block: Block }) {
             </Section>
             <BackgroundPanel block={block} />
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
-        </>
-    );
-}
-
-export function WaveAccentPanel({ block }: { block: Block }) {
-    const { updateBlock } = useEditorStore();
-    const p = block.props;
-    const up = (key: string, val: unknown, commit?: boolean) => updateBlock(block.id, { [key]: val }, commit);
-
-    return (
-        <>
-            <Section title="Accent Design">
-                <Field label="Pattern">
-                    <SelectInput
-                        value={(p.pattern as string) || "smooth"}
-                        onChange={(v) => up("pattern", v)}
-                        options={[
-                            { label: "Smooth Curve", value: "smooth" },
-                            { label: "Layered Depth", value: "layered" },
-                            { label: "Sharp & Jagged", value: "sharp" },
-                            { label: "Asymmetric Curve", value: "curve" },
-                            { label: "Swoosh", value: "swoosh" },
-                            { label: "Water Level", value: "water" },
-                            { label: "Blob Drop", value: "blob" },
-                            { label: "Deep Valley", value: "valley" },
-                            { label: "Deep Ocean", value: "deep" }
-                        ]}
-                    />
-                </Field>
-                <Field label="Density (Layers)">
-                    <input type="range" min={1} max={3} step={1} value={Number(p.layers || 1)} onChange={(e) => up("layers", parseInt(e.target.value))} style={{ width: "100%", accentColor: "var(--primary)" }} />
-                    <span style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center" }}>{String(p.layers ?? 1)}</span>
-                </Field>
-                <Field label="Primary Color"><ColorInput value={(p.fillColor as string) || "var(--primary)"} onChange={(v) => up("fillColor", v)} onBlur={(v) => up("fillColor", v, true)} /></Field>
-                <Field label="Gradient End Color"><ColorInput value={(p.fillGradientEnd as string) || ""} onChange={(v) => up("fillGradientEnd", v)} onBlur={(v) => up("fillGradientEnd", v, true)} /></Field>
-                <Field label="Secondary Color (Layers)"><ColorInput value={(p.secondaryColor as string) || ""} onChange={(v) => up("secondaryColor", v)} onBlur={(v) => up("secondaryColor", v, true)} /></Field>
-            </Section>
-
-            <Section title="Position & Size">
-                <Field label="Corner Position">
-                    <SelectInput
-                        value={(p.position as string) || "top-right"}
-                        onChange={(v) => up("position", v)}
-                        options={[
-                            { label: "Top Left", value: "top-left" },
-                            { label: "Top Right", value: "top-right" },
-                            { label: "Bottom Left", value: "bottom-left" },
-                            { label: "Bottom Right", value: "bottom-right" },
-                        ]}
-                    />
-                </Field>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                    <Field label="Width"><TextInputWithUnit value={(p.width as string) ?? ""} onChange={(v) => up("width", v)} placeholder="300px" /></Field>
-                    <Field label="Height"><TextInputWithUnit value={(p.height as string) ?? ""} onChange={(v) => up("height", v)} placeholder="200px" /></Field>
-                </div>
-                <Field label="Z-Index Layering">
-                   <input type="range" min={0} max={10} step={1} value={Number(p.zIndex ?? 1)} onChange={(e) => up("zIndex", parseInt(e.target.value))} style={{ width: "100%", accentColor: "var(--primary)" }} />
-                   <span style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center" }}>{String(p.zIndex ?? 1)}</span>
-                </Field>
-            </Section>
-
-            <Section title="Orientation & Animation">
-                <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
-                    <button 
-                        onClick={() => {
-                            up("flipHorizontal", !p.flipHorizontal, true);
-                        }}
-                        style={{
-                            flex: 1, padding: "8px 12px", background: "rgba(59, 130, 246, 0.1)",
-                            border: `1px solid ${p.flipHorizontal ? "var(--primary)" : "rgba(59, 130, 246, 0.2)"}`,
-                            borderRadius: "8px", color: "#60a5fa", fontSize: "11px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s"
-                        }}
-                    >
-                        Flip Horizontal
-                    </button>
-                    <button 
-                        onClick={() => {
-                            up("flipVertical", !p.flipVertical, true);
-                        }}
-                        style={{
-                            flex: 1, padding: "8px 12px", background: "rgba(59, 130, 246, 0.1)",
-                            border: `1px solid ${p.flipVertical ? "var(--primary)" : "rgba(59, 130, 246, 0.2)"}`,
-                            borderRadius: "8px", color: "#60a5fa", fontSize: "11px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s"
-                        }}
-                    >
-                        Flip Vertical
-                    </button>
-                </div>
-                <Field label="Enable Animation">
-                    <ToggleInput value={p.animated !== false} onChange={(v) => up("animated", v)} />
-                </Field>
-            </Section>
         </>
     );
 }

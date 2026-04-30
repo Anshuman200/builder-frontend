@@ -929,7 +929,9 @@ export default function EditorToolbar() {
                       }
                     }}
                     size="small"
-                  />
+                  >
+                    <div style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: colors.primary, border: '2px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: 'transform 0.2s' }} />
+                  </AppColorPicker>
                 </div>
               </div>
 

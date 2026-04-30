@@ -9,7 +9,7 @@ import type { Block, EditorPage } from "@/types";
  */
 
 import React from "react";
-import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, CheckIcon, SwatchIcon, PhotoIcon, TrashIcon, VideoCameraIcon, ArrowPathIcon, LinkIcon, ArrowDownIcon, ArrowDownOnSquareIcon, ArrowDownTrayIcon, PlusIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 
 import { useEditorStore } from "@/stores/editorStore";
 import { ColorPicker, ConfigProvider, Dropdown, Input, Popover, Select, Space, Switch, theme, Tooltip } from "antd";
@@ -1629,8 +1629,38 @@ export function Section({ title, children, hasPadding = true, focusKeys = [] }: 
                     opacity: isFocused ? 1 : 0.5,
                     transition: "all 0.3s"
                 }}>{title}</p>
-                <div style={{ color: PANEL_COLORS.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 16, height: 16, opacity: 0.3 }}>
-                    <PlusIcon style={{ width: 12, height: 12 }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    {(title === "Typography" || title === "Wave Decoration") && (
+                        <Tooltip title={`Open Floating ${title} Editor`}>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (selectedBlockId) {
+                                        useEditorStore.getState().focusSubItem(selectedBlockId, title);
+                                    }
+                                }}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    padding: 0,
+                                    cursor: "pointer",
+                                    color: PANEL_COLORS.muted,
+                                    opacity: 0.4,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    transition: "all 0.2s"
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.opacity = "1"}
+                                onMouseLeave={e => e.currentTarget.style.opacity = "0.4"}
+                            >
+                                <ArrowTopRightOnSquareIcon style={{ width: 12, height: 12 }} />
+                            </button>
+                        </Tooltip>
+                    )}
+                    <div style={{ color: PANEL_COLORS.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: 16, height: 16, opacity: 0.3 }}>
+                        <PlusIcon style={{ width: 12, height: 12 }} />
+                    </div>
                 </div>
             </div>
             {children}
@@ -1766,25 +1796,214 @@ export interface PropertyGroupProps {
     prefix?: string;
 }
 
-export function TypographyFields({ p, up, prefix = "", showSubtitle = true }: PropertyGroupProps & { showSubtitle?: boolean }) {
-    const titleKey = prefix ? (prefix === "title" ? "titleText" : `${prefix}Title`) : "title";
-    const subtitleKey = prefix ? (prefix === "title" ? "subtitleText" : `${prefix}Subtitle`) : "subtitle";
-    const titleColorKey = prefix ? `${prefix}Color` : "titleColor";
-    const subtitleColorKey = prefix ? (prefix === "title" ? "subtitleColor" : `${prefix}SubtitleColor`) : "subtitleColor";
+/**
+ * TypographyFields - Unified component for text editing.
+ * Used in both the sidebar and floating quick editors.
+ */
+export function TypographyFields({
+    p, up,
+    prefix = "",
+    showSubtitle = true,
+    variant = "standard"
+}: PropertyGroupProps & {
+    showSubtitle?: boolean;
+    variant?: "standard" | "quick";
+}) {
+    // Helper to resolve keys based on prefix and common patterns
+    const getK = (base: string) => {
+        if (!prefix) {
+            if (base === "color" && p.textColor !== undefined) return "textColor";
+            if (base === "fontSize" && p.size !== undefined) return "size";
+            return base;
+        }
+        // Prefixed logic (e.g. title -> titleColor, titleSize, titleWeight)
+        const camel = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+        if (base === "color") return p[`${prefix}Color`] !== undefined ? `${prefix}Color` : (p[`${prefix}TextColor`] !== undefined ? `${prefix}TextColor` : "color");
+        if (base === "fontSize") return p[`${prefix}Size`] !== undefined ? `${prefix}Size` : "fontSize";
+        if (base === "fontWeight") return p[`${prefix}Weight`] !== undefined ? `${prefix}Weight` : "fontWeight";
+        return `${prefix}${base.charAt(0).toUpperCase() + base.slice(1)}`;
+    };
 
-    // Backward compatibility / convenience for 'title' prefix
-    const finalTitleKey = (prefix === "title" && p.titleText === undefined && p.title !== undefined) ? "title" : titleKey;
-    const finalSubtitleKey = (prefix === "title" && p.subtitleText === undefined && p.subtitle !== undefined) ? "subtitle" : subtitleKey;
+    // ─── Quick Variant (Popover) ─────────────────────────────────────────────
+    if (variant === "quick") {
+        return (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {!prefix && p.content !== undefined && (
+                    <Field label="Content">
+                        <PanelInlineEditor
+                            multiline
+                            value={p.content || ""}
+                            onChange={(v) => up("content", v)}
+                        />
+                    </Field>
+                )}
 
+                {/* Section Level Sizes (Responsive) */}
+                {(p.titleSize !== undefined || p.subtitleSize !== undefined || p.descSize !== undefined) && (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                        {p.titleSize !== undefined && (
+                            <Field label="Title Size">
+                                <TextInputWithUnit value={p.titleSize || ""} onChange={(v) => up("titleSize", v)} placeholder="2.5rem" />
+                            </Field>
+                        )}
+                        {p.subtitleSize !== undefined && (
+                            <Field label="Subtitle Size">
+                                <TextInputWithUnit value={p.subtitleSize || ""} onChange={(v) => up("subtitleSize", v)} placeholder="1.2rem" />
+                            </Field>
+                        )}
+                        {p.descSize !== undefined && (
+                            <Field label="Desc Size">
+                                <TextInputWithUnit value={p.descSize || ""} onChange={(v) => up("descSize", v)} placeholder="0.9rem" />
+                            </Field>
+                        )}
+                    </div>
+                )}
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <Field label="Color">
+                        <ColorInput
+                            value={p[getK("color")] || "inherit"}
+                            onChange={(v) => up(getK("color"), v)}
+                            onBlur={(v) => up(getK("color"), v, true)}
+                            hideText
+                        />
+                    </Field>
+                    <Field label="Font Size">
+                        <TextInputWithUnit
+                            value={p[getK("fontSize")] || ""}
+                            onChange={(v) => up(getK("fontSize"), v)}
+                            placeholder="16px"
+                        />
+                    </Field>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <Field label="Weight">
+                        <SelectInput
+                            value={String(p[getK("fontWeight")] || "400")}
+                            onChange={(v) => up(getK("fontWeight"), v)}
+                            options={[
+                                { label: "Regular", value: "400" },
+                                { label: "Medium", value: "500" },
+                                { label: "SemiBold", value: "600" },
+                                { label: "Bold", value: "700" },
+                                { label: "Black", value: "900" }
+                            ]}
+                        />
+                    </Field>
+                    <Field label="Alignment">
+                        <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "6px", padding: "2px" }}>
+                            <AlignmentInput
+                                value={(p[getK("align")] as string) || "left"}
+                                onChange={(v) => up(getK("align"), v)}
+                            />
+                        </div>
+                    </Field>
+                </div>
+            </div>
+        );
+    }
+
+    // ─── Standard Variant (Sidebar) ──────────────────────────────────────────
+
+    // Resolve keys for title/subtitle with backward compatibility
+    const titleKey = (p.titleText !== undefined) ? "titleText" : "title";
+    const subtitleKey = (p.subtitleText !== undefined) ? "subtitleText" : "subtitle";
+
+    // If we have a 'title' or 'subtitle' prop explicitly, or we're using a prefix
+    const hasTitle = !prefix && p[titleKey] !== undefined;
+    const hasSubtitle = !prefix && p[subtitleKey] !== undefined;
+    const showContent = prefix === "title" || prefix === "subtitle" || (!prefix && p.content !== undefined);
     return (
         <>
-            <Field label="Title"><PanelInlineEditor value={p[finalTitleKey] || "Title"} onChange={(v) => up(finalTitleKey, v)} /></Field>
-            {showSubtitle && <Field label="Subtitle"><PanelInlineEditor multiline value={p[finalSubtitleKey] || ""} onChange={(v) => up(finalSubtitleKey, v)} /></Field>}
-            <Field label="Title Color"><ColorInput value={p[titleColorKey] || "var(--text)"} onChange={(v) => up(titleColorKey, v)} onBlur={(v) => up(titleColorKey, v, true)} /></Field>
-            {showSubtitle && <Field label="Subtitle Color"><ColorInput value={p[subtitleColorKey] || "var(--text-muted)"} onChange={(v) => up(subtitleColorKey, v)} onBlur={(v) => up(subtitleColorKey, v, true)} /></Field>}
+            {showContent && (
+                <Field label={prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1)) : "Content"}>
+                    <PanelInlineEditor
+                        multiline={prefix === "subtitle" || !prefix}
+                        value={p[prefix || "content"] || ""}
+                        onChange={(v) => up(prefix || "content", v)}
+                    />
+                </Field>
+            )}
+
+            {hasTitle && (
+                <Field label="Title">
+                    <PanelInlineEditor
+                        value={String(p[titleKey] || "")}
+                        onChange={(v) => up(titleKey, v)}
+                    />
+                </Field>
+            )}
+
+            {hasSubtitle && showSubtitle && (
+                <Field label="Subtitle">
+                    <PanelInlineEditor
+                        multiline
+                        value={String(p[subtitleKey] || "")}
+                        onChange={(v) => up(subtitleKey, v)}
+                    />
+                </Field>
+            )}
+
+            {p[getK("align")] !== undefined && <AlignmentInput value={(p[getK("align")] as string) || "left"} onChange={(v) => up(getK("align"), v)} />}
+
+            <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Color`}>
+                <ColorInput
+                    value={(p[getK("color")] || "#0f172a") as string}
+                    onChange={(v) => up(getK("color"), v)}
+                    onBlur={(v) => up(getK("color"), v, true)}
+                />
+            </Field>
+
+            {p[getK("fontSize")] !== undefined && (
+                <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Size`}>
+                    <TextInputWithUnit value={p[getK("fontSize")] || ""} onChange={(v) => up(getK("fontSize"), v)} placeholder="1rem" />
+                </Field>
+            )}
+
+            {/* Responsive Sizes (Section Level) */}
+            {p.titleSize !== undefined && <Field label="Title Size"><TextInputWithUnit value={p.titleSize || ""} onChange={(v) => up("titleSize", v)} placeholder="2.5rem" /></Field>}
+            {p.subtitleSize !== undefined && <Field label="Subtitle Size"><TextInputWithUnit value={p.subtitleSize || ""} onChange={(v) => up("subtitleSize", v)} placeholder="1.25rem" /></Field>}
+            {p.descSize !== undefined && <Field label="Desc Size"><TextInputWithUnit value={p.descSize || ""} onChange={(v) => up("descSize", v)} placeholder="0.9rem" /></Field>}
+
+            {p[getK("fontWeight")] !== undefined && (
+                <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Weight`}>
+                    <SelectInput
+                        value={String(p[getK("fontWeight")] || "400")}
+                        onChange={(v) => up(getK("fontWeight"), v)}
+                        options={[
+                            { label: "Thin (100)", value: "100" },
+                            { label: "Light (300)", value: "300" },
+                            { label: "Regular (400)", value: "400" },
+                            { label: "Medium (500)", value: "500" },
+                            { label: "Semibold (600)", value: "600" },
+                            { label: "Bold (700)", value: "700" },
+                            { label: "Extrabold (800)", value: "800" },
+                            { label: "Black (900)", value: "900" }
+                        ]}
+                    />
+                </Field>
+            )}
+
+            {p[getK("bold")] !== undefined && (
+                <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Style`}>
+                    <div className="w-full" style={{ display: "flex", gap: 6 }}>
+                        {[["B", "bold", "Bold"], ["I", "italic", "Italic"], ["U", "underline", "Underline"], ["S", "strikethrough", "Strikethrough"]].map(([label, key, title]) => {
+                            const fullKey = getK(key);
+                            return (
+                                <button key={key} title={title} onClick={() => up(fullKey, !p[fullKey])} style={{ flex: 1, padding: "5px 0", fontSize: 13, fontWeight: label === "B" ? 800 : 400, fontStyle: label === "I" ? "italic" : "normal", textDecoration: label === "U" ? "underline" : label === "S" ? "line-through" : "none", background: p[fullKey] ? "#ff0000" : "#2a2a2a", color: p[fullKey] ? "#fff" : "#aaa", border: "none", borderRadius: 4, cursor: "pointer", transition: "all 0.15s" }}>{label}</button>
+                            );
+                        })}
+                    </div>
+                </Field>
+            )}
+
+            {p[getK("lineHeight")] !== undefined && <Field label="Line Height"><TextInputWithUnit value={(p[getK("lineHeight")] as string) ?? ""} onChange={(v) => up(getK("lineHeight"), v)} placeholder="1.6" /></Field>}
+            {p[getK("letterSpacing")] !== undefined && <Field label="Letter Spacing"><TextInputWithUnit value={(p[getK("letterSpacing")] as string) ?? ""} onChange={(v) => up(getK("letterSpacing"), v)} placeholder="0em" /></Field>}
         </>
     );
 }
+
 
 export function LayoutFields({ p, up, options = {} }: PropertyGroupProps & { options?: { layouts?: { label: string, value: string }[], showCols?: boolean, showGap?: boolean, showAlign?: boolean } }) {
     const { layouts, showCols = true, showGap = true, showAlign = true } = options;

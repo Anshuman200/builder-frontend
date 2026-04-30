@@ -13,7 +13,7 @@ import { TrashIcon, EllipsisHorizontalIcon, PhotoIcon, VideoCameraIcon, ViewColu
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 
 import { useEditorStore } from "@/stores/editorStore";
-import { PANEL_COLORS, SelectInput, ColorInput, SliderInput, Field, WaveDecorationFields } from "../panels/shared";
+import { PANEL_COLORS, SelectInput, ColorInput, SliderInput, Field, WaveDecorationFields, TypographyFields } from "../panels/shared";
 import { IconButton } from "@/components/ui/IconButton";
 import AppToolTip from "@/components/common/AppToolTip";
 import { getIcon } from "@/lib/utils/icons";
@@ -861,16 +861,16 @@ import { ConfigProvider, theme } from "antd";
  * QuickPopoverEditor - A reusable, premium-dark floating editor chassis.
  * Designed to match the sidebar's professional aesthetic exactly.
  */
-export function QuickPopoverEditor({ 
-    title, 
-    children, 
-    onClose, 
-    dragControls 
-}: { 
-    title: string, 
-    children: React.ReactNode, 
-    onClose: () => void, 
-    dragControls: any 
+export function QuickPopoverEditor({
+    title,
+    children,
+    onClose,
+    dragControls
+}: {
+    title: string,
+    children: React.ReactNode,
+    onClose: () => void,
+    dragControls: any
 }) {
     return (
         <ConfigProvider
@@ -901,21 +901,23 @@ export function QuickPopoverEditor({
                 }
             }}
         >
-            <motion.div 
+            <motion.div
                 className="premium-dark-popover"
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 style={{
-                    background: "#050505",
-                    border: "1px solid rgba(255, 255, 255, 0.12)",
-                    borderRadius: "12px",
-                    padding: "16px",
-                    width: "320px",
+                    background: "rgba(15, 15, 15, 0.82)",
+                    backdropFilter: "blur(24px) saturate(160%)",
+                    WebkitBackdropFilter: "blur(24px) saturate(160%)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    borderRadius: "16px",
+                    padding: "18px",
+                    width: "340px",
                     color: "#fff",
                     pointerEvents: "auto",
-                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05)",
+                    boxShadow: "0 30px 60px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.02)",
                     overflow: "hidden"
                 }}
             >
@@ -936,37 +938,46 @@ export function QuickPopoverEditor({
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        marginBottom: "16px",
+                        marginBottom: "18px",
                         cursor: "grab",
-                        userSelect: "none"
+                        userSelect: "none",
+                        paddingBottom: "12px",
+                        borderBottom: "1px solid rgba(255, 255, 255, 0.06)"
                     }}
                     className="drag-handle"
                     onPointerDown={(e) => dragControls.start(e)}
                 >
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ width: 3, height: 14, background: "#6366f1", borderRadius: 1 }} />
-                        <span style={{ fontSize: "11px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "#6366f1" }}>{title}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        {/* 6-dot drag indicator */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px", opacity: 0.5 }}>
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} style={{ width: 3, height: 3, background: "#fff", borderRadius: "50%" }} />
+                            ))}
+                        </div>
+                        <span style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.02em", color: "rgba(255,255,255,0.9)" }}>{title}</span>
                     </div>
                     <button
                         onPointerDown={(e) => e.stopPropagation()}
                         onClick={(e) => { e.stopPropagation(); onClose(); }}
-                        style={{ 
-                            background: "rgba(255,255,255,0.08)", 
-                            border: "none", 
-                            color: "rgba(255,255,255,0.6)", 
-                            cursor: "pointer", 
-                            width: 24, 
-                            height: 24, 
-                            borderRadius: "50%", 
-                            display: "flex", 
-                            alignItems: "center", 
-                            justifyContent: "center", 
-                            fontSize: 10, 
-                            transition: "all 0.2s" 
+                        style={{
+                            background: "rgba(255,255,255,0.06)",
+                            border: "1px solid rgba(255,255,255,0.05)",
+                            color: "rgba(255,255,255,0.5)",
+                            cursor: "pointer",
+                            width: 22,
+                            height: 22,
+                            borderRadius: "6px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 10,
+                            transition: "all 0.2s"
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.15)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.6)"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-                    >✕</button>
+                        onMouseEnter={e => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }}
+                    >
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                 </div>
 
                 {children}
@@ -987,15 +998,91 @@ export function WaveQuickEditor({ p, blockId, onClose, dragControls }: { p: Reco
     );
 }
 
-function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: string }) {
-    const componentId = React.useId().replace(/:/g, "");
-    
+export function TextQuickEditor({ p, blockId, onClose, dragControls }: { p: Record<string, any>, blockId: string, onClose: () => void, dragControls: any }) {
+    const up = (key: string, val: any, commit = true) => {
+        useEditorStore.getState().updateBlock(blockId, { [key]: val }, commit);
+    };
+
+    return (
+        <QuickPopoverEditor title="Text Settings" onClose={onClose} dragControls={dragControls}>
+            <TypographyFields p={p} up={up} variant="quick" />
+        </QuickPopoverEditor>
+    );
+}
+
+/**
+ * IntegratedTextEditor - Wraps any text element to add floating editor capabilities.
+ */
+export function IntegratedTextEditor({
+    p,
+    blockId,
+    children
+}: {
+    p: Record<string, any>,
+    blockId: string,
+    children: React.ReactNode
+}) {
     // Get persistent state from store
     const isSelected = useEditorStore(s => s.selectedBlockId === blockId);
-    const triggerTick = useEditorStore(s => s.waveEditorTrigger);
+    const triggerTick = useEditorStore(s => s.textEditorTrigger);
+    const textEditorPos = useEditorStore(s => s.textEditorPos);
+    const setTextEditorPos = useEditorStore(s => s.setTextEditorPos);
+
+    // Tracking ref to prevent auto-reopen loop
+    const lastTriggerRef = React.useRef(0);
+
+    const subItemFocus = useEditorStore(s => s.subItemFocus);
+
+    React.useEffect(() => {
+        // We only care about the index here; isSelected already filters for the correct block
+        const isTriggered = subItemFocus?.index === "Typography";
+
+        if (isTriggered && isSelected && triggerTick > lastTriggerRef.current) {
+            lastTriggerRef.current = triggerTick;
+
+            if (!textEditorPos) {
+                setTextEditorPos({
+                    x: (typeof window !== 'undefined' ? window.innerWidth : 1200) / 2 - 150,
+                    y: (typeof window !== 'undefined' ? window.innerHeight : 800) / 2 - 300
+                });
+            }
+        }
+    }, [triggerTick, isSelected, textEditorPos, setTextEditorPos, subItemFocus]);
+
+    const handleTextInteraction = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        
+        // Safety: Ensure it doesn't spawn in the sidebar
+        const sidebarWidth = document.getElementById("editor-scroll-container")?.getBoundingClientRect().left || 0;
+        const coords = { 
+            x: Math.max(sidebarWidth + 20, e.clientX - 170), 
+            y: Math.max(60, e.clientY - 140) 
+        };
+
+        useEditorStore.getState().selectBlock(blockId);
+        setTextEditorPos(coords);
+        
+        setTimeout(() => {
+            useEditorStore.getState().focusSubItem(blockId, "Typography");
+        }, 10);
+    };
+
+    return (
+        <div style={{ position: "relative", cursor: "text" }} onClick={handleTextInteraction}>
+            {children}
+        </div>
+    );
+}
+
+function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: string }) {
+    const componentId = React.useId().replace(/:/g, "");
+
+    // Get persistent state from store
+    const isSelected = useEditorStore(s => s.selectedBlockId === blockId);
+    const triggerTick = useEditorStore((s: any) => s.waveEditorTrigger);
     const waveEditorPos = useEditorStore(s => s.waveEditorPos);
     const setWaveEditorPos = useEditorStore(s => s.setWaveEditorPos);
-    
+
     // Tracking ref to prevent auto-reopen loop
     const lastTriggerRef = React.useRef(0);
 
@@ -1035,14 +1122,17 @@ function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: strin
     let allPaths = WAVE_PATHS[pattern] || WAVE_PATHS["smooth"];
     const paths = allPaths.slice(allPaths.length - Math.min(layers, allPaths.length));
 
+    const subItemFocus = useEditorStore(s => s.subItemFocus);
+
     React.useEffect(() => {
         // ONLY trigger if the triggerTick has actually changed AND we aren't currently open
         // OR if this is a fresh selection and triggerTick is positive
-        if (isSelected && triggerTick > lastTriggerRef.current) {
+        const isTriggered = subItemFocus?.index === "Wave Decoration";
+
+        if (isTriggered && isSelected && triggerTick > lastTriggerRef.current) {
             console.log("Wave Editor Triggered from Sidebar/Store. Tick:", triggerTick);
             lastTriggerRef.current = triggerTick;
-            
-            // If we don't have a position in the store, default to center-ish but higher
+
             if (!waveEditorPos) {
                 setWaveEditorPos({
                     x: (typeof window !== 'undefined' ? window.innerWidth : 1200) / 2 - 150,
@@ -1050,22 +1140,25 @@ function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: strin
                 });
             }
         }
-    }, [triggerTick, isSelected, waveEditorPos, setWaveEditorPos]);
+    }, [triggerTick, isSelected, waveEditorPos, setWaveEditorPos, subItemFocus]);
 
     const handleWaveInteraction = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        
-        // Offset y to prevent it spawning too low (open above the click)
-        const coords = { x: e.clientX, y: Math.max(50, e.clientY - 150) };
-        console.log("Wave Interaction Triggered:", coords);
-        
+
+        // Safety: Ensure it doesn't spawn in the sidebar
+        const sidebarWidth = document.getElementById("editor-scroll-container")?.getBoundingClientRect().left || 0;
+        const coords = { 
+            x: Math.max(sidebarWidth + 20, e.clientX - 170), 
+            y: Math.max(60, e.clientY - 140) 
+        };
+
         useEditorStore.getState().selectBlock(blockId);
+        setWaveEditorPos(coords);
+
         setTimeout(() => {
             useEditorStore.getState().focusSubItem(blockId, "Wave Decoration");
-        }, 30);
-        
-        setWaveEditorPos(coords);
+        }, 10);
     };
 
     return (
@@ -1120,8 +1213,13 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
     const blockId = React.useContext(BlockContext) || "bg";
     const bgImage = p.bgImage as string;
     const bgGradient = p.bgGradient as string;
-    const imageOpacity = Number(p.bgImageOpacity ?? 40) / 100;
+    const imageOpacity = Number(p.bgImageOpacity ?? 100) / 100;
     const fillOpacity = Number(p.bgFillOpacity ?? 50) / 100;
+    const bgOpacity = Number(p.bgOpacity ?? p.bgImageOpacity ?? 0); // Handle both old and new opacity keys
+    const bgOverlayColor = (p.bgOverlayColor as string) || "#000000";
+    const bgPosition = (p.bgPosition as string) || (p.bgImagePosition as string) || "center";
+    const bgSize = (p.bgSize as string) || (p.bgImageSize as string) || "cover";
+    const bgRepeat = (p.bgRepeat as string) || (p.bgImageRepeat as string) || "no-repeat";
 
     if (!bgImage && !bgGradient && !p.showWave) return null;
 
@@ -1151,8 +1249,8 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
                             inset: 0,
                             width: "100%",
                             height: "100%",
-                            objectFit: (p.bgImageSize as any) || "cover",
-                            objectPosition: (p.bgImagePosition as string) || "center",
+                            objectFit: bgSize as any,
+                            objectPosition: bgPosition,
                             opacity: imageOpacity,
                             zIndex: 0,
                             pointerEvents: bgControls ? "auto" : "none"
@@ -1164,15 +1262,29 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
                             position: "absolute",
                             inset: 0,
                             backgroundImage: `url("${bgImage}")`,
-                            backgroundSize: (p.bgImageSize as any) || "cover",
-                            backgroundPosition: (p.bgImagePosition as string) || "center",
-                            backgroundRepeat: (p.bgImageRepeat as any) || "no-repeat",
+                            backgroundSize: bgSize as any,
+                            backgroundPosition: bgPosition,
+                            backgroundRepeat: bgRepeat as any,
                             opacity: imageOpacity,
                             zIndex: 0,
                             pointerEvents: "none"
                         }}
                     />
                 )
+            )}
+
+            {/* Tint Overlay Layer (Middle) */}
+            {bgImage && bgOpacity > 0 && (
+                <div 
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        backgroundColor: bgOverlayColor,
+                        opacity: bgOpacity / 100,
+                        zIndex: 1,
+                        pointerEvents: "none"
+                    }}
+                />
             )}
 
             {/* Fill Layer (Top / Overlay) */}
@@ -1183,7 +1295,7 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
                         inset: 0,
                         background: bgGradient,
                         opacity: fillOpacity,
-                        zIndex: 1,
+                        zIndex: 2,
                         pointerEvents: "none"
                     }}
                 />

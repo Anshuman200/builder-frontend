@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getBackgroundStyles, BackgroundOverlay, InlineTextEditor } from "./shared";
+import { PreviewContext, BlockProps, getBackgroundStyles, BackgroundOverlay, InlineTextEditor, IntegratedTextEditor } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function TextBlock({ block }: BlockProps) {
@@ -63,14 +63,16 @@ export function TextBlock({ block }: BlockProps) {
     return (
         <div id={(p.sectionId as string) || `block-${block.id}`} style={wrapperStyle}>
             <BackgroundOverlay p={p} />
-            <InlineTextEditor
-                blockId={block.id}
-                propName="content"
-                content={rawContent}
-                tagName={tag as any}
-                style={tagStyle}
-                multiline={true}
-            />
+            <IntegratedTextEditor p={p} blockId={block.id}>
+                <InlineTextEditor
+                    blockId={block.id}
+                    propName="content"
+                    content={rawContent}
+                    tagName={tag as any}
+                    style={tagStyle}
+                    multiline={true}
+                />
+            </IntegratedTextEditor>
         </div>
     );
 }

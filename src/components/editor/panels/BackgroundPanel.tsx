@@ -67,6 +67,13 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
               />
             </Field>
 
+            <Field label="Overlay Color">
+              <ColorInput
+                value={(p.bgOverlayColor as string) || "#000000"}
+                onChange={(v) => up("bgOverlayColor", v, true)}
+              />
+            </Field>
+
             <Field label="Media Size">
               <SelectInput
                 value={(p.bgSize as string) || "cover"}

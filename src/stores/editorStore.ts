@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-import type { Block, BlockStyle, AnimationConfig, ThemeConfig, MetaConfig, EditorPage } from "@/types";
+import type { Block, BlockStyle, AnimationConfig, ThemeConfig, MetaConfig, EditorPage, RouteConfig } from "@/types";
 
 // ─── Default Theme ───────────────────────────────────────────────────────────
 export const LIGHT_COLORS = {
@@ -24,7 +24,7 @@ export const DEFAULT_THEME: ThemeConfig = {
     borderRadius: "md",
     spacing: "normal",
     layout: {
-        maxWidth: "1200px",
+        maxWidth: "100dvw",
         paddingX: "32px",
         tabletPaddingX: "24px",
         mobilePaddingX: "16px",
@@ -82,20 +82,25 @@ interface EditorStore {
         onSelect: (url: string) => void;
         title?: string;
     };
-    waveEditorTrigger: number;
     waveEditorPos: { x: number, y: number } | null;
+    waveEditorTrigger: number;
+    textEditorTrigger: number;
+    textEditorPos: { x: number, y: number } | null;
     wizard: {
         open: boolean;
         blankMode: boolean;
     };
 
     setWaveEditorPos: (pos: { x: number, y: number } | null) => void;
+    setTextEditorPos: (pos: { x: number, y: number } | null) => void;
+    triggerWaveEditor: () => void;
+    triggerTextEditor: () => void;
 
     // ─ Actions ────────────────────────────────────────────────────────────────
     setPage: (page: EditorPage) => void;
     setActiveRoute: (routeId: string) => void;
     addRoute: (route: { path: string; name: string, hideHeader?: boolean, hideFooter?: boolean, showInHeader?: boolean, showInFooter?: boolean }) => void;
-    updateRoute: (routeId: string, updates: Partial<Pick<import("@/types").RouteConfig, "path" | "name" | "hideHeader" | "hideFooter" | "showInHeader" | "showInFooter">>) => void;
+    updateRoute: (routeId: string, updates: Partial<Pick<RouteConfig, "path" | "name" | "hideHeader" | "hideFooter" | "showInHeader" | "showInFooter">>) => void;
     deleteRoute: (routeId: string) => void;
 
     selectBlock: (id: string | null) => void;
@@ -141,6 +146,7 @@ interface EditorStore {
     markClean: () => void;
     openWizard: (blankMode?: boolean) => void;
     closeWizard: () => void;
+    _mergeBlockProps: (oldBlock: Block | null, newBlock: Block) => Block["props"];
 }
 
 function updateColProps(b: Block, id: string, updater: (b: Block) => Block): Block {
@@ -633,12 +639,33 @@ export const useEditorStore = create<EditorStore>()(
         },
         waveEditorTrigger: 0,
         waveEditorPos: null,
+        textEditorTrigger: 0,
+        textEditorPos: null,
         wizard: {
             open: false,
             blankMode: false,
         },
 
         setWaveEditorPos: (pos) => set({ waveEditorPos: pos }),
+        setTextEditorPos: (pos) => set({ textEditorPos: pos }),
+        triggerWaveEditor: () => set((s) => {
+            s.waveEditorTrigger = (s.waveEditorTrigger || 0) + 1;
+            if (!s.waveEditorPos) {
+                s.waveEditorPos = {
+                    x: (typeof window !== 'undefined' ? window.innerWidth : 1200) / 2 - 150,
+                    y: (typeof window !== 'undefined' ? window.innerHeight : 800) / 2 - 300
+                };
+            }
+        }),
+        triggerTextEditor: () => set((s) => {
+            s.textEditorTrigger = (s.textEditorTrigger || 0) + 1;
+            if (!s.textEditorPos) {
+                s.textEditorPos = {
+                    x: (typeof window !== 'undefined' ? window.innerWidth : 1200) / 2 - 150,
+                    y: (typeof window !== 'undefined' ? window.innerHeight : 800) / 2 - 300
+                };
+            }
+        }),
 
         setPage: (page) =>
             set((state) => {
@@ -678,7 +705,7 @@ export const useEditorStore = create<EditorStore>()(
                     // 1. Try URL param first
                     const params = new URLSearchParams(window.location.search);
                     const queryRouteId = params.get("route");
-                    
+
                     if (queryRouteId && page.routes?.some(r => r.id === queryRouteId)) {
                         fallbackRouteId = queryRouteId;
                     } else {
@@ -757,13 +784,13 @@ export const useEditorStore = create<EditorStore>()(
             get().pushHistory();
         }),
 
-        selectBlock: (id) => set((s) => { 
+        selectBlock: (id) => set((s) => {
             // Only clear sub-item focus if we are switching to a DIFFERENT block
             if (s.selectedBlockId !== id) {
                 s.subItemFocus = null;
             }
-            s.selectedBlockId = id; 
-            s.selectBlockTick = (s.selectBlockTick || 0) + 1; 
+            s.selectedBlockId = id;
+            s.selectBlockTick = (s.selectBlockTick || 0) + 1;
         }),
         hoverBlock: (id) => set({ hoveredBlockId: id }),
         focusSubItem: (blockId, index: number | string) => set((s) => {
@@ -771,6 +798,21 @@ export const useEditorStore = create<EditorStore>()(
             s.subItemFocus = { blockId, index };
             if (index === "Wave Decoration") {
                 s.waveEditorTrigger = (s.waveEditorTrigger || 0) + 1;
+                if (!s.waveEditorPos) {
+                    s.waveEditorPos = {
+                        x: (typeof window !== 'undefined' ? window.innerWidth : 1200) / 2 - 150,
+                        y: (typeof window !== 'undefined' ? window.innerHeight : 800) / 2 - 300
+                    };
+                }
+            }
+            if (index === "Typography") {
+                s.textEditorTrigger = (s.textEditorTrigger || 0) + 1;
+                if (!s.textEditorPos) {
+                    s.textEditorPos = {
+                        x: (typeof window !== 'undefined' ? window.innerWidth : 1200) / 2 - 150,
+                        y: (typeof window !== 'undefined' ? window.innerHeight : 800) / 2 - 300
+                    };
+                }
             }
         }),
         setViewMode: (mode) => set({ viewMode: mode }),
@@ -809,12 +851,12 @@ export const useEditorStore = create<EditorStore>()(
 
         openBlockPicker: (target, preferredTab = "sections") => set({ blockPicker: { open: true, target, preferredTab } }),
         closeBlockPicker: () => set({ blockPicker: { open: false, target: null } }),
-        
+
         _mergeBlockProps: (oldBlock: Block | null, newBlock: Block) => {
             if (!oldBlock) return newBlock.props;
             const op = oldBlock.props || {};
             const np = newBlock.props || {};
-            
+
             // Map common properties that users likely want to keep
             const keysToPreserve = [
                 "logo", "logoUrl", "title", "brandName", "projectName",
@@ -825,7 +867,7 @@ export const useEditorStore = create<EditorStore>()(
                 "buttonText", "ctaText", "buttonLink", "ctaLink",
                 "phone", "email", "address"
             ];
-            
+
             const merged = { ...np };
             keysToPreserve.forEach(key => {
                 if (op[key] !== undefined && op[key] !== null) {
@@ -847,14 +889,14 @@ export const useEditorStore = create<EditorStore>()(
                         if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
                         if (s.page.globalBlocks.header) {
                             if (!window.confirm("A Header already exists. Replace it and keep your current logo/links?")) return;
-                            freshBlock.props = (get() as any)._mergeBlockProps(s.page.globalBlocks.header, freshBlock);
+                            freshBlock.props = s._mergeBlockProps(s.page.globalBlocks.header, freshBlock);
                         }
                         s.page.globalBlocks.header = freshBlock;
                     } else if (freshBlock.type === "footer") {
                         if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
                         if (s.page.globalBlocks.footer) {
                             if (!window.confirm("A Footer already exists. Replace it and keep your current content?")) return;
-                            freshBlock.props = (get() as any)._mergeBlockProps(s.page.globalBlocks.footer, freshBlock);
+                            freshBlock.props = s._mergeBlockProps(s.page.globalBlocks.footer, freshBlock);
                         }
                         s.page.globalBlocks.footer = freshBlock;
                     } else {
@@ -1106,7 +1148,7 @@ export const useEditorStore = create<EditorStore>()(
             });
             get().pushHistory();
         },
-        
+
         replaceBlock: (id, newBlock) => set((s) => {
             if (!s.page) return;
             applyUpdaterDeep(s.page, s.activeRouteId, (blocks) => {
@@ -1176,7 +1218,7 @@ export const useEditorStore = create<EditorStore>()(
                 if (overId === "canvas-root") {
                     // Append to end of route content
                     activeRoute.content = activeRoute.content.filter(b => b.id !== activeId);
-                    
+
                     if (removed.type === "header") {
                         if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
                         s.page.globalBlocks.header = removed;
