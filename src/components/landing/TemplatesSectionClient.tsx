@@ -5,6 +5,7 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { Template } from "@/types/templates";
 import { TemplateCard } from "@/components/templates/TemplateCard";
 import { CommonContainer } from "@/components/layout/CommonContainer";
+import { Button } from "antd";
 
 interface TemplatesSectionClientProps {
     templates: Template[];
@@ -18,10 +19,9 @@ export function TemplatesSectionClient({ templates }: TemplatesSectionClientProp
     const router = useRouter();
 
     if (!templates || templates.length === 0) return null;
-    console.log('TemplatesSectionClient templates >>>> ', templates)
 
     return (
-        <section className="py-24 px-6 bg-[#09090b]">
+        <section className="py-5 md:py-24 px-6 bg-[#09090b]">
             <CommonContainer>
                 {/* Section Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
@@ -35,12 +35,12 @@ export function TemplatesSectionClient({ templates }: TemplatesSectionClientProp
                         </p>
                     </div>
 
-                    <button
+                    <Button
                         onClick={() => router.push("/explore")}
-                        className="group flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white font-bold transition-all hover:bg-white/10 hover:border-indigo-500/30 hover:scale-105 active:scale-95"
+                        className="!h-10 !rounded-full"
                     >
-                        View All <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </button>
+                        View All <ArrowRightIcon className="w-5 h-5" />
+                    </Button>
                 </div>
 
                 {/* Templates Grid - Standardized count for curated feel */}

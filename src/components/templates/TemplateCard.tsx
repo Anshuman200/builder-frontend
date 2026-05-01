@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRightIcon, ClockIcon, ArrowTopRightOnSquareIcon, GlobeAltIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon, ClockIcon, ArrowTopRightOnSquareIcon, EyeIcon, GlobeAltIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { Template } from "@/types/templates";
 import { getGradient } from "@/lib/utils/gradients";
@@ -18,6 +18,7 @@ interface TemplateCardProps {
         updatedAt?: string;
     };
     onClick: () => void;
+    onPreview?: () => void;
     index?: number;
     useMotion?: boolean;
     variant?: "public" | "admin" | "dashboard";
@@ -38,6 +39,7 @@ interface TemplateCardProps {
 export function TemplateCard({
     template,
     onClick,
+    onPreview,
     index = 0,
     useMotion = false,
     variant = "public",
@@ -50,6 +52,25 @@ export function TemplateCard({
 }: TemplateCardProps) {
     const isLive = !!template.isLive;
     const isLocked = template.isLocked;
+    const templateMeta = template as any;
+    const thumbnail =
+        template.thumbnail ||
+        templateMeta.thumbnailUrl ||
+        templateMeta.screenshot ||
+        templateMeta.screenshotUrl ||
+        (Array.isArray(templateMeta.thumbnails) ? templateMeta.thumbnails.find(Boolean) : undefined);
+    const previewHref = `/preview/${template._id}`;
+    const handlePreview = (event: React.MouseEvent) => {
+        event.stopPropagation();
+        if (onPreview) {
+            event.preventDefault();
+            onPreview();
+            return;
+        }
+        if (typeof window !== "undefined") {
+            window.open(previewHref, "_blank", "noopener,noreferrer");
+        }
+    };
 
     const cardContent = (
         <>
@@ -60,19 +81,25 @@ export function TemplateCard({
                     variant === "public" ? "h-[220px] sm:h-[280px]" : "h-32 sm:h-40",
                     isLocked ? "bg-linear-to-br from-zinc-800 to-zinc-900" : ""
                 )}
-                style={!isLocked && !(template as any).thumbnail ? { background: getGradient(template.title) } : {}}
+                style={!isLocked && !thumbnail ? { background: getGradient(template.title) } : {}}
             >
                 {/* Actual Page Screenshot */}
-                {!isLocked && (template as any).thumbnail ? (
-                    <div className="absolute inset-0 bg-neutral-950 flex items-center justify-center p-1">
+                {!isLocked && thumbnail ? (
+                    <div className="absolute inset-0 bg-neutral-950">
                         <img
-                            src={(template as any).thumbnail}
+                            src={thumbnail}
                             alt={template.title}
-                            className="max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-105"
+                            className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                             loading="lazy"
                         />
+                        <div className="absolute left-3 right-3 top-3 flex h-6 items-center gap-1.5 rounded-full border border-white/10 bg-black/35 px-3 backdrop-blur-md">
+                            <span className="h-2 w-2 rounded-full bg-red-400/80" />
+                            <span className="h-2 w-2 rounded-full bg-amber-300/80" />
+                            <span className="h-2 w-2 rounded-full bg-emerald-400/80" />
+                            <span className="ml-2 h-1.5 flex-1 rounded-full bg-white/15" />
+                        </div>
                         {/* Subtle gradient overlay for text readability */}
-                        <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/5 to-black/20 pointer-events-none" />
                     </div>
                 ) : isLocked ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-zinc-950/40 backdrop-blur-sm group-hover:bg-zinc-950/20 transition-all duration-700">
@@ -136,10 +163,11 @@ export function TemplateCard({
                         </div>
                     )}
                 </div>
+
             </div>
 
             {/* Content / Metadata Section */}
-            <div className="p-2 sm:p-4 flex flex-col flex-1 relative bg-zinc-900/50">
+            <div className="p-4 flex flex-col flex-1 relative bg-zinc-950/90">
                 <div className="flex justify-between items-start gap-3">
                     <div className="flex-1 min-w-0">
                         {isRenaming && setRenameValue && onRenameSubmit ? (
@@ -155,7 +183,7 @@ export function TemplateCard({
                         ) : (
                         <div className="flex items-center gap-2 mb-1.5 min-w-0">
                             <h3 className={cn(
-                                "font-bold text-white leading-tight transition-colors group-hover:text-indigo-400 truncate",
+                                "font-bold text-white leading-tight transition-colors group-hover:text-white truncate",
                                 variant === "public" ? "text-lg sm:text-2xl" : "text-sm sm:text-base"
                             )}>
                                 {template.title || "Untitled"}
@@ -192,8 +220,26 @@ export function TemplateCard({
                 </div>
 
                 {variant === "public" && (
-                    <div className="mt-auto pt-4 flex items-center gap-2 text-indigo-400 font-black text-[10px] uppercase tracking-widest group-hover:gap-4 transition-all duration-300 group-hover:text-white">
-                        Use Template <ArrowRightIcon className="w-4 h-4" />
+                    <div className="mt-auto grid grid-cols-[0.9fr_1.1fr] gap-2 pt-5">
+                        <button
+                            type="button"
+                            onClick={handlePreview}
+                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 text-[10px] font-black uppercase tracking-widest text-white/65 transition-all hover:border-white/25 hover:bg-white/10 hover:text-white"
+                        >
+                            <EyeIcon className="h-4 w-4" />
+                            Preview
+                        </button>
+                        <button
+                            type="button"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                onClick();
+                            }}
+                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-indigo-500 px-3 text-[10px] font-black uppercase tracking-widest text-white shadow-[0_14px_28px_-18px_rgba(99,102,241,0.95)] transition-all hover:bg-indigo-400 hover:shadow-[0_18px_34px_-18px_rgba(99,102,241,1)]"
+                        >
+                            Use Template
+                            <ArrowRightIcon className="h-4 w-4" />
+                        </button>
                     </div>
                 )}
             </div>
@@ -201,7 +247,7 @@ export function TemplateCard({
     );
 
     const commonClasses = cn(
-        "group bg-zinc-950 border border-white/5 rounded-xl overflow-hidden cursor-pointer flex flex-col transition-all duration-500 hover:translate-y-[-8px] hover:bg-zinc-900 hover:border-indigo-500/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)] transform-gpu will-change-transform",
+        "group bg-zinc-950 border border-white/8 rounded-2xl overflow-hidden cursor-pointer flex flex-col transition-all duration-500 hover:translate-y-[-6px] hover:bg-zinc-900 hover:border-indigo-500/30 hover:shadow-[0_24px_50px_-22px_rgba(0,0,0,0.9)] transform-gpu will-change-transform",
         isLocked ? "opacity-70 blur-[0.5px]" : "opacity-100"
     );
 

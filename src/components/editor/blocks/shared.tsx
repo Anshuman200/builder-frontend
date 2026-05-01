@@ -609,7 +609,9 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
     const sizeStyle = BTN_SIZES[size] || BTN_SIZES.md;
     const shadow = BTN_SHADOWS[(p[`${prefix}Shadow`] as string) || (p.shadow as string) || "none"] || "none";
     const radius = (p[`${prefix}BorderRadius`] as string) || (p.buttonBorderRadius as string) || (p.borderRadius as string) || "8px";
-    const bWidth = (p[`${prefix}BorderWidth`] as string) || (p.borderWidth as string) || "1px";
+    const borderWidthProp = (p[`${prefix}BorderWidth`] as string) || (p.borderWidth as string);
+    const borderColorProp = (p[`${prefix}BorderColor`] as string) || (p.borderColor as string);
+    const bWidth = borderWidthProp || "1px";
 
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
     const defaultPrimary = theme.colors?.primary || "#6366f1";
@@ -619,6 +621,8 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
     let background = defaultPrimary, color = defaultText, border = "none";
     const finalBg = (p[`${prefix}Bg`] as string) || (p[`${prefix}BgColor`] as string) || (p.buttonBg as string) || (p.bgColor as string);
     const finalText = (p[`${prefix}TextColor`] as string) || (p.buttonTextColor as string) || (p.textColor as string);
+    const resolvedBorderColor = borderColorProp || finalBg || defaultPrimary;
+    const hasExplicitBorder = !!borderWidthProp && borderWidthProp !== "0px" && borderWidthProp !== "0";
 
     switch (variant) {
         case "solid":
@@ -647,6 +651,10 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
             background = "transparent";
             color = finalText || finalBg || defaultPrimary;
             break;
+    }
+
+    if (hasExplicitBorder && variant !== "outline" && variant !== "soft") {
+        border = `${borderWidthProp} solid ${resolvedBorderColor}`;
     }
 
     const IconLeft = (p[`${prefix}IconLeft`] as string) || (p.iconLeft as string) ? getIcon((p[`${prefix}IconLeft`] as string) || (p.iconLeft as string)) : null;
@@ -822,9 +830,10 @@ export function getCardStyles({ props: p, isFocused, isHovered, primaryColor = "
 
 export function getBackgroundStyles(p: Record<string, any>, theme: any): React.CSSProperties {
     const bgColor = (p.bgColor as string) || (p.sectionBg as string) || "transparent";
+    const hasManagedBackground = bgColor && bgColor !== "transparent";
 
     return {
-        background: bgColor,
+        background: hasManagedBackground ? "transparent" : bgColor,
         position: "relative",
         overflow: "hidden",
     };
@@ -1223,16 +1232,17 @@ function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: strin
 export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
     const blockId = React.useContext(BlockContext) || "bg";
     const bgImage = p.bgImage as string;
+    const bgColor = ((p.bgColor as string) || (p.sectionBg as string) || "").trim();
     const bgGradient = p.bgGradient as string;
-    const imageOpacity = Number(p.bgImageOpacity ?? 100) / 100;
-    const fillOpacity = Number(p.bgFillOpacity ?? 50) / 100;
-    const bgOpacity = Number(p.bgOpacity ?? p.bgImageOpacity ?? 0); // Handle both old and new opacity keys
+    const backgroundOpacity = Number(p.bgFillOpacity ?? p.bgImageOpacity ?? 100) / 100;
+    const bgOpacity = Number(p.bgOpacity ?? 0);
     const bgOverlayColor = (p.bgOverlayColor as string) || "#000000";
     const bgPosition = (p.bgPosition as string) || (p.bgImagePosition as string) || "center";
     const bgSize = (p.bgSize as string) || (p.bgImageSize as string) || "cover";
     const bgRepeat = (p.bgRepeat as string) || (p.bgImageRepeat as string) || "no-repeat";
+    const hasColorFill = !!bgColor && bgColor !== "transparent";
 
-    if (!bgImage && !bgGradient && !p.showWave) return null;
+    if (!bgImage && !bgGradient && !hasColorFill && !p.showWave) return null;
 
     const isVideo = bgImage ? (
         /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(bgImage) ||
@@ -1262,7 +1272,7 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
                             height: "100%",
                             objectFit: bgSize as any,
                             objectPosition: bgPosition,
-                            opacity: imageOpacity,
+                            opacity: backgroundOpacity,
                             zIndex: 0,
                             pointerEvents: bgControls ? "auto" : "none"
                         }}
@@ -1276,7 +1286,7 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
                             backgroundSize: bgSize as any,
                             backgroundPosition: bgPosition,
                             backgroundRepeat: bgRepeat as any,
-                            opacity: imageOpacity,
+                            opacity: backgroundOpacity,
                             zIndex: 0,
                             pointerEvents: "none"
                         }}
@@ -1299,13 +1309,13 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
             )}
 
             {/* Fill Layer (Top / Overlay) */}
-            {bgGradient && (
+            {(bgGradient || hasColorFill) && (
                 <div
                     style={{
                         position: "absolute",
                         inset: 0,
-                        background: bgGradient,
-                        opacity: fillOpacity,
+                        background: bgGradient || bgColor,
+                        opacity: backgroundOpacity,
                         zIndex: 2,
                         pointerEvents: "none"
                     }}

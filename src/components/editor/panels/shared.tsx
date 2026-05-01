@@ -1168,6 +1168,7 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                                         const nS = stops.map(st => st.id === s.id ? { ...st, offset: v } : st);
                                         update(type, deg, nS);
                                     }}
+                                    showValue={false}
                                 />
                             </div>
                             {stops.length > 2 && (
@@ -1422,9 +1423,9 @@ export function AspectPicker({ value, onChange, options }: { value: string; onCh
 }
 
 // ─── SliderInput ──────────────────────────────────────────────────────────────
-export function SliderInput({ value, onChange, min = 0, max = 100, step = 1, unit = "" }: { value: number; onChange: (v: number) => void; min?: number; max?: number; step?: number; unit?: string }) {
+export function SliderInput({ value, onChange, min = 0, max = 100, step = 1, unit = "", showValue = true }: { value: number; onChange: (v: number) => void; min?: number; max?: number; step?: number; unit?: string; showValue?: boolean }) {
     return (
-        <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", height: 30 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", minWidth: 0, height: 30 }}>
             <style>{`
                 .ag-slider-input::-webkit-slider-thumb {
                     -webkit-appearance: none;
@@ -1469,7 +1470,7 @@ export function SliderInput({ value, onChange, min = 0, max = 100, step = 1, uni
                     cursor: "pointer",
                 }}
             />
-            <div style={{
+            {showValue && <div style={{
                 minWidth: 45,
                 fontSize: 10,
                 fontWeight: 700,
@@ -1482,7 +1483,7 @@ export function SliderInput({ value, onChange, min = 0, max = 100, step = 1, uni
                 border: `1px solid ${PANEL_COLORS.inputBorder}`
             }}>
                 {value}{unit}
-            </div>
+            </div>}
         </div>
     );
 }
@@ -2218,7 +2219,7 @@ export function CardFields({ p, up, prefix = "card" }: PropertyGroupProps) {
 
 export function ButtonFields({ p, up, prefix = "button", hideLabel = false, textKey: customTextKey, hasMargin=true }: PropertyGroupProps & { hideLabel?: boolean; textKey?: string, hasMargin?: boolean }) {
     // Resolve keys
-    const textKey = customTextKey || (prefix === "button" ? "buttonText" : `${prefix}Text`);
+    const textKey = customTextKey || (prefix === "button" ? (p.label !== undefined ? "label" : "buttonText") : `${prefix}Text`);
     const variantKey = `${prefix}Variant`;
     const radiusKey = `${prefix}BorderRadius`;
     const shadowKey = `${prefix}Shadow`;
@@ -2228,6 +2229,10 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
 
     const getK = (suffix: string) => {
         const prefixed = `${prefix}${suffix.charAt(0).toUpperCase()}${suffix.slice(1)}`;
+        if (prefix === "button" && suffix === "bg") {
+            if (p.buttonBg !== undefined) return "buttonBg";
+            return "bgColor";
+        }
         if (p[prefixed] !== undefined) return prefixed;
         if (p[suffix] !== undefined) return suffix;
         return prefix === "button" ? suffix : prefixed;

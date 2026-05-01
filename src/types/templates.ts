@@ -15,6 +15,7 @@ export interface Template {
     category: string;
     description?: string;
     thumbnail?: string;
+    thumbnails?: string[];
     author: Author;
     createdAt: string;
     updatedAt: string;

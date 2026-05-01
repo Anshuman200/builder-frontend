@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Section, Field, ColorInput, GradientInput, UnifiedBackgroundInput, MediaInput, SelectInput, SliderInput, VideoPlaybackOptions, ToggleInput, TextInputWithUnit, ToggleSwitch, WaveDecorationFields } from "./shared";
+import { Section, Field, UnifiedBackgroundInput, MediaInput, SelectInput, SliderInput, VideoPlaybackOptions, ToggleSwitch, WaveDecorationFields } from "./shared";
 import { Block } from "@/types";
 import { useEditorStore } from "@/stores/editorStore";
 
@@ -16,10 +16,20 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
     updateBlock(block.id, { [key]: val }, commit);
 
   const bgImage = (p.bgImage as string) || "";
+  const hasFill = !!p.bgColor || !!p.bgGradient || !!p.sectionBg;
+  const hasBackground = hasFill || !!bgImage;
+  const backgroundOpacity = Number(p.bgFillOpacity ?? p.bgImageOpacity ?? 100);
   const isVideo = bgImage ? (
     /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(bgImage) ||
     bgImage.toLowerCase().includes("video")
   ) : false;
+
+  const updateBackgroundOpacity = (value: number) => {
+    updateBlock(block.id, {
+      bgFillOpacity: value,
+      bgImageOpacity: value,
+    }, true);
+  };
 
   return (
     <>
@@ -33,11 +43,11 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
           />
         </Field>
 
-        {(!!p.bgColor || !!p.bgGradient) && (
-          <Field label="Fill Opacity">
+        {hasBackground && (
+          <Field label="Background Opacity">
             <SliderInput
-              value={Number(p.bgFillOpacity ?? 50)}
-              onChange={(v) => up("bgFillOpacity", v, true)}
+              value={backgroundOpacity}
+              onChange={updateBackgroundOpacity}
             />
           </Field>
         )}
@@ -60,22 +70,6 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
                 title="Background Video Options"
               />
             )}
-            <div className="mt-4">
-              <Field label="Media Opacity">
-                <SliderInput
-                  value={Number(p.bgImageOpacity ?? 40)}
-                  onChange={(v) => up("bgImageOpacity", v, true)}
-                />
-              </Field>
-            </div>
-
-            <Field label="Overlay Color">
-              <ColorInput
-                value={(p.bgOverlayColor as string) || "#000000"}
-                onChange={(v) => up("bgOverlayColor", v, true)}
-              />
-            </Field>
-
             <Field label="Media Size">
               <SelectInput
                 value={(p.bgSize as string) || "cover"}
