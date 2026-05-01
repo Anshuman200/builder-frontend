@@ -441,7 +441,7 @@ export default function EditorToolbar() {
             trigger="click"
             placement="bottomLeft"
             arrow={false}
-            overlayInnerStyle={{ padding: 0, background: "transparent", boxShadow: "none" }}
+            styles={{ container: { padding: 0, background: "transparent", boxShadow: "none" } }}
             content={
               <div style={{
                 width: 240,
@@ -771,7 +771,7 @@ export default function EditorToolbar() {
           onClose={() => setDrawerOpen(false)}
           open={drawerOpen}
           zIndex={100}
-          height="80%"
+          size="80%"
           styles={{
             body: {
               padding: 0,

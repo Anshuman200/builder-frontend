@@ -51,49 +51,55 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
         }
     };
 
+    const triggerStyle: React.CSSProperties = {
+        display: "flex", alignItems: "center", gap: 6,
+        minWidth: 0, flex: 1, height: 26, padding: "0 8px",
+        fontSize: 11, background: "transparent",
+        border: "none", color: "#ededed",
+        outline: "none", cursor: "pointer",
+        textAlign: "left",
+    };
+
     return (
-        <button
-            ref={btnRef}
-            type="button"
-            title="Pick an icon"
-            onClick={handleClick}
+        <div
             style={{
-                display: "flex", alignItems: "center", gap: 6,
-                width: "100%", height: 26, padding: "0 8px",
-                fontSize: 11, background: "#222222",
+                display: "flex", alignItems: "center",
+                width: "100%", height: 26,
+                background: "#222222",
                 border: "1px solid transparent",
                 borderRadius: 4, color: "#ededed",
-                outline: "none", cursor: "pointer",
                 transition: "background 0.15s",
             }}
             onMouseEnter={e => (e.currentTarget.style.background = "#2a2a2a")}
             onMouseLeave={e => (e.currentTarget.style.background = "#222222")}
         >
-            {CurrentIcon ? (
-                <CurrentIcon style={{ width: 14, height: 14, flexShrink: 0, color: "#818cf8" }} />
-            ) : (
-                <SwatchIcon style={{ width: 14, height: 14, flexShrink: 0, color: "#555" }} />
-            )}
-            <span style={{ flex: 1, textAlign: "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {value || "None"}
-            </span>
-            {value ? (
+            <button
+                ref={btnRef}
+                type="button"
+                title="Pick an icon"
+                onClick={handleClick}
+                style={triggerStyle}
+            >
+                {CurrentIcon ? (
+                    <CurrentIcon style={{ width: 14, height: 14, flexShrink: 0, color: "#818cf8" }} />
+                ) : (
+                    <SwatchIcon style={{ width: 14, height: 14, flexShrink: 0, color: "#555" }} />
+                )}
+                <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {value || "None"}
+                </span>
+                {!value && <MagnifyingGlassIcon style={{ width: 14, height: 14, flexShrink: 0, color: "#71717a" }} />}
+            </button>
+            {value && (
                 <IconButton
                     icon={<XMarkIcon />}
                     variant="ghost"
                     size="sm"
+                    className="h-[24px] w-[24px] shrink-0 rounded"
                     tooltip="Clear icon"
                     onClick={(e) => { e.stopPropagation(); onChange(""); }}
                 />
-            ) : (
-                <IconButton
-                    icon={<MagnifyingGlassIcon />}
-                    variant="ghost"
-                    size="sm"
-                    tooltip="Pick an icon"
-                    onClick={(e) => { e.stopPropagation(); onChange(""); }}
-                />
             )}
-        </button>
+        </div>
     );
 }

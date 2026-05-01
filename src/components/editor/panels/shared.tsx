@@ -442,9 +442,13 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style, ty
                     border: `1px solid ${PANEL_COLORS.inputBorder}`,
                     borderRadius: "0 6px 6px 0",
                 }}
-                dropdownStyle={{
-                    background: "#18181b",
-                    border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                styles={{
+                    popup: {
+                        root: {
+                            background: "#18181b",
+                            border: `1px solid ${PANEL_COLORS.inputBorder}`,
+                        },
+                    },
                 }}
                 options={units}
                 suffixIcon={<ChevronDownIcon style={{ width: 10, height: 10, color: PANEL_COLORS.muted }} />}
@@ -1629,7 +1633,7 @@ export function PaddingInput({ value, onChange, label, placeholder }: { value: s
 
 // ─── Section ──────────────────────────────────────────────────────────────────
 
-export function Section({ title, children, focusKeys = [] }: { title: string; children: React.ReactNode, focusKeys?: (string | number)[] }) {
+export function Section({ title, children, focusKeys = [], hasMargin = true }: { title: string; children: React.ReactNode, focusKeys?: (string | number)[], hasMargin?: boolean }) {
     const { subItemFocus, selectedBlockId } = useEditorStore();
 
     // Smart auto-focus matching for common patterns
@@ -1668,7 +1672,7 @@ export function Section({ title, children, focusKeys = [] }: { title: string; ch
             style={{
                 border: isFocused ? `1px solid ${PANEL_COLORS.primary}` : `1px solid rgba(255,255,255,0.08)`,
                 borderRadius: 12,
-                margin: "14px 16px",
+                margin: hasMargin ? "14px 16px" : undefined,
                 padding: "16px 20px",
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                 background: isFlashing ? "rgba(99, 102, 241, 0.2)" : isFocused ? "rgba(99, 102, 241, 0.12)" : "rgba(255,255,255,0.03)",
@@ -2210,7 +2214,7 @@ export function CardFields({ p, up, prefix = "card" }: PropertyGroupProps) {
     );
 }
 
-export function ButtonFields({ p, up, prefix = "button", hideLabel = false, textKey: customTextKey }: PropertyGroupProps & { hideLabel?: boolean; textKey?: string }) {
+export function ButtonFields({ p, up, prefix = "button", hideLabel = false, textKey: customTextKey, hasMargin=true }: PropertyGroupProps & { hideLabel?: boolean; textKey?: string, hasMargin?: boolean }) {
     // Resolve keys
     const textKey = customTextKey || (prefix === "button" ? "buttonText" : `${prefix}Text`);
     const variantKey = `${prefix}Variant`;
@@ -2230,8 +2234,8 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
     const variant = (p[variantKey] as string) || (p.variant as string) || "solid";
 
     return (
-        <>
-            <Section title="Button Content">
+        <div className="p-0">
+            <Section hasMargin={hasMargin} title="Button Content">
                 {!hideLabel && <Field label="Action Text"><TextInput value={p[textKey] || ""} onChange={(v) => up(textKey, v)} placeholder="Click Me" /></Field>}
                 <Field label="Variant">
                     <SelectInput
@@ -2272,7 +2276,7 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
                 </Section>
             )}
 
-            <Section title="Button Appearance">
+            <Section hasMargin={hasMargin} title="Button Appearance">
                 <Field label="Size">
                     <SelectInput
                         value={p[getK("size")] || "md"}
@@ -2289,7 +2293,7 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
                 <ToggleSwitch value={!!(p[getK("fullWidth")])} onChange={(v) => up(getK("fullWidth"), v)} label="Full Width" />
             </Section>
 
-            <Section title="Button Shape & Shadow">
+            <Section hasMargin={hasMargin} title="Button Shape & Shadow">
                 <Field label="Shadow">
                     <SelectInput
                         value={p[shadowKey] || "none"}
@@ -2303,12 +2307,22 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
                         ]}
                     />
                 </Field>
-                <Field label="Radius"><BorderRadiusInput value={p[radiusKey] || "8px"} onChange={(v) => up(radiusKey, v)} /></Field>
-                <Field label="Border Width"><TextInputWithUnit value={(p[getK("borderWidth")] as string) ?? ""} onChange={(v) => up(getK("borderWidth"), v)} placeholder="0px" /></Field>
-                <Field label="Border Color"><ColorInput value={(p[getK("borderColor")] as string) || ""} onChange={(v) => up(getK("borderColor"), v)} onBlur={(v) => up(getK("borderColor"), v, true)} /></Field>
+                <BorderPropertyInput
+                    radius={p[radiusKey] || "8px"}
+                    width={(p[getK("borderWidth")] as string) || "0px"}
+                    color={(p[getK("borderColor")] as string) || ""}
+                    onChange={({ radius, width, color }) => {
+                        up(radiusKey, radius);
+                        up(getK("borderWidth"), width);
+                        up(getK("borderColor"), color);
+                    }}
+                    placeholderRadius="8px"
+                    placeholderWidth="0px"
+                    placeholderColor=""
+                />
             </Section>
 
-            <Section title="Button Typography">
+            <Section hasMargin={hasMargin} title="Button Typography">
                 <Field label="Font Size override"><TextInputWithUnit value={(p[fontSizeKey] as string) ?? ""} onChange={(v) => up(fontSizeKey, v)} placeholder="auto" /></Field>
                 <Field label="Font Weight">
                     <SelectInput
@@ -2326,11 +2340,11 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
                 <Field label="Letter Spacing"><TextInputWithUnit value={(p[letterSpacingKey] as string) ?? ""} onChange={(v) => up(letterSpacingKey, v)} placeholder="0.02em" /></Field>
             </Section>
 
-            <Section title="Button Icons">
+            <Section hasMargin={hasMargin} title="Button Icons">
                 <Field label="Left Icon"><IconPicker value={p[getK("iconLeft")] || ""} onChange={(v) => up(getK("iconLeft"), v)} /></Field>
                 <Field label="Right Icon"><IconPicker value={p[getK("iconRight")] || ""} onChange={(v) => up(getK("iconRight"), v)} /></Field>
             </Section>
-        </>
+        </div>
     );
 }
 
@@ -2477,5 +2491,48 @@ export function WaveDecorationFields({ p, up }: PropertyGroupProps) {
     );
 }
 
-// ─── Export constants / types ──────────────────────────────────────────────────
-// AnimationPanel should be imported directly from ./AnimationPanel.tsx to avoid circular deps
+// ─── BorderPropertyInput ─────────────────────────────────────────────────────
+/**
+ * BorderPropertyInput
+ * Combines Border Radius, Border Width, and Border Color controls in one row.
+ * Usage: <BorderPropertyInput radius={...} width={...} color={...} onChange={...} />
+ */
+export function BorderPropertyInput({
+    radius,
+    width,
+    color,
+    onChange,
+    radiusLabel = "Border Radius",
+    widthLabel = "Border Width",
+    colorLabel = "Border Color",
+    placeholderRadius = "16px",
+    placeholderWidth = "1px",
+    fullWidth = true,
+    placeholderColor = "#e2e8f0"
+}: {
+    radius: string;
+    width: string;
+    color: string;
+    onChange: (vals: { radius: string; width: string; color: string }) => void;
+    radiusLabel?: string;
+    widthLabel?: string;
+    colorLabel?: string;
+    placeholderRadius?: string;
+    placeholderWidth?: string;
+    fullWidth?: boolean;
+    placeholderColor?: string;
+}) {
+    return (
+        <>
+            <Field label={radiusLabel} fullWidth>
+                <BorderRadiusInput value={radius} onChange={v => onChange({ radius: v, width, color })} placeholder={placeholderRadius} />
+            </Field>
+            <Field label={widthLabel} fullWidth>
+                <TextInputWithUnit value={width} onChange={v => onChange({ radius, width: v, color })} placeholder={placeholderWidth} />
+            </Field>
+            <Field label={colorLabel} fullWidth>
+                <ColorInput value={color} onChange={v => onChange({ radius, width, color: v })} placeholder={placeholderColor} />
+            </Field>
+        </>
+    );
+}

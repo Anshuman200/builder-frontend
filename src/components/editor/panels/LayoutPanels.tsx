@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove, PaddingFields, TextInputWithUnit, PanelInlineEditor, BorderRadiusInput, DirectionInput } from "./shared";
+import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove, PaddingFields, TextInputWithUnit, PanelInlineEditor, BorderRadiusInput, DirectionInput, ShadowInput, BorderPropertyInput } from "./shared";
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
@@ -77,8 +77,24 @@ export function HeaderPanel({ block }: { block: Block }) {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 16px", marginTop: 12 }}>
                         <Field label="Width" fullWidth><TextInputWithUnit type="width" value={(p.floatingWidth as string) || ""} onChange={(v) => up("floatingWidth", v)} placeholder="auto" /></Field>
                         <Field label="Top Offset" fullWidth><TextInputWithUnit value={(p.floatingTop as string) || "20px"} onChange={(v) => up("floatingTop", v)} placeholder="20px" /></Field>
-                        <Field label="Side Offset" fullWidth><TextInputWithUnit value={(p.floatingSide as string) || ""} onChange={(v) => up("floatingSide", v)} placeholder="Same as Top" /></Field>
-                        <Field label="Border Radius" fullWidth><BorderRadiusInput value={(p.floatingRadius as string) || "16px"} onChange={(v) => up("floatingRadius", v)} placeholder="16px" /></Field>
+                        <Field label="Border" fullWidth>
+                            <BorderPropertyInput
+                                radius={p.floatingRadius || "16px"}
+                                width={p.floatingBorderWidth || "1px"}
+                                color={p.floatingBorderColor || "rgba(255,255,255,0.1)"}
+                                onChange={({ radius, width, color }) => {
+                                    up("floatingRadius", radius);
+                                    up("floatingBorderWidth", width);
+                                    up("floatingBorderColor", color);
+                                }}
+                                placeholderRadius="16px"
+                                placeholderWidth="1px"
+                                placeholderColor="rgba(255,255,255,0.1)"
+                            />
+                        </Field>
+                        <Field label="Header Shadow" fullWidth>
+                            <ShadowInput value={p.floatingShadow || "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"} onChange={(v) => up("floatingShadow", v)} />
+                        </Field>
                     </div>
                 )}
             </Section>
@@ -99,11 +115,15 @@ export function HeaderPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Call to Action (CTA)">
-                <ToggleSwitch value={p.showCta !== false} onChange={(v) => up("showCta", v)} label="Show CTA Button" />
+                <section className="mb-3">
+                    <ToggleSwitch value={p.showCta !== false} onChange={(v) => up("showCta", v)} label="Show CTA Button" />
+                </section>
                 {p.showCta !== false && (
                     <>
-                        <ButtonFields p={p} up={up} prefix="cta" textKey="ctaText" />
-                        <Field label="Button URL"><LinkInput value={(p.ctaUrl as string) || "#"} onChange={(v) => up("ctaUrl", v)} placeholder="https://..." /></Field>
+                        <ButtonFields p={p} up={up} prefix="cta" textKey="ctaText" hasMargin={false} />
+                        <section className="mt-3">
+                            <Field label="Button URL"><LinkInput value={(p.ctaUrl as string) || "#"} onChange={(v) => up("ctaUrl", v)} placeholder="https://..." /></Field>
+                        </section>
                     </>
                 )}
             </Section>

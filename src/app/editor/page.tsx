@@ -20,7 +20,7 @@ export default function NewEditorPage() {
   return (
     <div style={{
       display: "flex", alignItems: "center", justifyContent: "center",
-      height: "100vh", flexDirection: "column", gap: "1rem",
+      height: "100dvh", flexDirection: "column", gap: "1rem",
       color: "var(--text-muted)",
     }}>
       <ArrowPathIcon style={{ width: 32, height: 32, animation: "spin 1s linear infinite" }} />

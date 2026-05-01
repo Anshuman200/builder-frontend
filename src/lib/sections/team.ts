@@ -62,7 +62,7 @@ export const teamSections: SectionTemplate[] = [
     previewImage: "/previews/team/team-elegant.png",
     create: () => {
       return makeBlock("team", {
-        title: "Meet Our Team", subtitle: "",
+        title: "Meet Our Team", subtitle: "Leading the industry forward",
         bgColor: "#e2e8f0", padding: "6rem 2rem",
         layout: "grid", columns: 4, gap: "1.5rem",
         cardStyle: "raised", cardBg: "#ffffff", cardRadius: "12px",
@@ -95,7 +95,7 @@ export const teamSections: SectionTemplate[] = [
     previewImage: "/previews/team/team-red-gradient.png",
     create: () => {
       return makeBlock("team", {
-        title: "MEET THE TEAM", subtitle: "", bgColor: "transparent",
+        title: "MEET THE TEAM", subtitle: "Leading the industry forward", bgColor: "transparent",
         layout: "grid", columns: 3, gap: "1.5rem",
         cardStyle: "raised", align: "center", cardHeight: "450px",
         imageStyle: "cover", imageSize: "400px", imageRadius: "24px",
@@ -112,7 +112,7 @@ export const teamSections: SectionTemplate[] = [
     previewImage: "/previews/team/team-alternating.png",
     create: () => {
       return makeBlock("team", {
-        title: "MEET OUR TEAM", subtitle: "",
+        title: "MEET OUR TEAM", subtitle: "Leading the industry forward",
         bgColor: "#ffffff", padding: "4rem 2rem",
         layout: "list", columns: 1, gap: "1.5rem",
         cardStyle: "filled", align: "left", cardRadius: "16px", cardBg: "#0f172a",

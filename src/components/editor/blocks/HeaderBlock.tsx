@@ -65,6 +65,9 @@ export function HeaderBlock({ block }: BlockProps) {
     const floatingWidth = (p.floatingWidth as string) || "95%";
     const floatingTop = (p.floatingTop as string) || "20px";
     const floatingRadius = (p.floatingRadius as string) || "16px";
+    const floatingShadow = (p.floatingShadow as string) || "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)";
+    const floatingBorderWidth = (p.floatingBorderWidth as string) || "1px";
+    const floatingBorderColor = (p.floatingBorderColor as string) || "rgba(255,255,255,0.1)";
 
     const layoutWidth = (p.layoutWidth as string) || "fluid";
     const innerMaxWidth = layoutWidth === "fluid" ? "100%" : (layoutWidth === "narrow" ? "800px" : layoutObj.maxWidth);
@@ -80,12 +83,12 @@ export function HeaderBlock({ block }: BlockProps) {
         backgroundColor: style === "transparent" ? "transparent" : background,
         backdropFilter,
         borderBottom: isFloating ? "none" : borderBottom,
-        border: isFloating && style !== "transparent" ? "1px solid rgba(255,255,255,0.1)" : undefined,
+        border: isFloating && style !== "transparent" ? `${floatingBorderWidth} solid ${floatingBorderColor}` : undefined,
         borderRadius: isFloating ? floatingRadius : undefined,
         color: textColor,
         width: isPreview ? (isFloating ? floatingWidth : "100%") : "100%",
         maxWidth: isPreview ? (isFloating ? innerMaxWidth : "100%") : "100%",
-        boxShadow: isFloating ? "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)" : undefined,
+        boxShadow: isFloating ? floatingShadow : undefined,
         transition: "all 0.3s ease"
     };
     const ctaStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "8px 20px", borderRadius: "9999px", fontWeight: 600, fontSize: "0.9rem", textDecoration: "none", cursor: isPreview ? "pointer" : "default", transition: "opacity 0.2s", background: ctaVariant === "solid" ? ctaBgColor : "transparent", color: ctaVariant === "solid" ? ctaTextColor : ctaBgColor, border: ctaVariant === "outline" ? `2px solid ${ctaBgColor}` : "none" };

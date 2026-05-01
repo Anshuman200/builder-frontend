@@ -566,7 +566,7 @@ const CanvasBlock = memo(function CanvasBlock({
             : (CSS.Transform.toString(transform) || undefined),
           width: (block.type === "header" && block.props.isFloating) ? ((block.props.floatingWidth as string) || "95%") : "100%",
           maxWidth: (block.type === "header" && block.props.isFloating && block.props.layoutWidth !== "fluid") ? (block.props.layoutWidth === "narrow" ? "800px" : ((page?.theme?.layout?.maxWidth as string) || "1200px")) : "100%",
-          zIndex: isSelected ? 15000 : ((block.type === "header" && (block.props.position === "fixed" || block.props.isFloating)) ? 10000 : 1),
+          zIndex: isSelected ? 150 : ((block.type === "header" && (block.props.position === "fixed" || block.props.isFloating)) ? 10000 : 1),
           transition: transition || undefined,
           opacity: isDragging ? 0.25 : 1,
           boxShadow: isInside
