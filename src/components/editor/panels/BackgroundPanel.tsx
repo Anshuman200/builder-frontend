@@ -3,12 +3,14 @@ import React from "react";
 import { Section, Field, UnifiedBackgroundInput, MediaInput, SelectInput, SliderInput, VideoPlaybackOptions, ToggleSwitch, WaveDecorationFields } from "./shared";
 import { Block } from "@/types";
 import { useEditorStore } from "@/stores/editorStore";
+import { cn } from "@/lib/utils";
 
 interface BackgroundPanelProps {
   block: Block;
+  hasMargin?:boolean;
 }
 
-export function BackgroundPanel({ block }: BackgroundPanelProps) {
+export function BackgroundPanel({ block, hasMargin=true }: BackgroundPanelProps) {
   const { updateBlock } = useEditorStore();
   const p = block.props;
 
@@ -32,8 +34,8 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
   };
 
   return (
-    <>
-      <Section title="Background">
+    <div className={cn("w-full", !hasMargin && "space-y-5")}>
+      <Section title="Background" hasMargin={hasMargin}>
         <Field label="Fill">
           <UnifiedBackgroundInput
             bgColor={(p.bgColor as string) || (p.sectionBg as string) || "transparent"}
@@ -115,18 +117,17 @@ export function BackgroundPanel({ block }: BackgroundPanelProps) {
         )}
       </Section>
 
-      <Section title="Wave Decoration">
+      <Section title="Wave Decoration" hasMargin={hasMargin}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: !!p.showWave ? "12px" : "0" }}>
           <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text)" }}>Enable Wave</span>
           <ToggleSwitch value={!!p.showWave} onChange={(v) => up("showWave", v, true)} />
         </div>
-
         {!!p.showWave && (
           <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "12px" }}>
             <WaveDecorationFields p={p} up={up} />
           </div>
         )}
       </Section>
-    </>
+    </div>
   );
 }

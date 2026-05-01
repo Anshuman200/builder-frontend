@@ -1890,10 +1890,12 @@ export function TypographyFields({
     p, up,
     prefix = "",
     showSubtitle = true,
-    variant = "standard"
+    variant = "standard",
+    showContentField=true
 }: PropertyGroupProps & {
     showSubtitle?: boolean;
     variant?: "standard" | "quick";
+    showContentField?: boolean;
 }) {
     // Helper to resolve keys based on prefix and common patterns
     const getK = (base: string) => {
@@ -2002,7 +2004,7 @@ export function TypographyFields({
     const showContent = prefix === "title" || prefix === "subtitle" || (!prefix && p.content !== undefined);
     return (
         <>
-            {showContent && (
+            {showContentField && showContent && (
                 <Field label={prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1)) : "Content"}>
                     <PanelInlineEditor
                         multiline={prefix === "subtitle" || !prefix}

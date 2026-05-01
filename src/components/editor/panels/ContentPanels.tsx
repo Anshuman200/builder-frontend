@@ -1209,7 +1209,7 @@ export function LegalPanel({ block }: { block: Block }) {
                 <ToggleSwitch label="Show Title" value={p.showTitle !== false} onChange={(v) => up("showTitle", v)} />
                 {p.showTitle !== false && (
                     <>
-                        <TypographyFields p={p} up={up} />
+                        <TypographyFields p={p} up={up} showContentField={false} />
                         <Field label="Title Alignment">
                             <SelectInput
                                 value={(p.titleAlign as string) || "left"}
@@ -1238,12 +1238,13 @@ export function LegalPanel({ block }: { block: Block }) {
             </Section>
 
             <Section title="Section Styling">
-                <BackgroundPanel block={block} />
+                <BackgroundPanel block={block} hasMargin={false} />
+                <div className="mt-2" />
                 <Field label="Text Color">
                     <ColorInput value={(p.textColor as string) || "var(--text)"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} />
                 </Field>
                 <PaddingInput label="Section Padding" value={(p.padding as string) || "64px 24px"} onChange={(v) => up("padding", v)} placeholder="64px 24px" />
-                <AnimationPanel block={block} />
+                <AnimationPanel block={block} hasMargin={false} />
             </Section>
         </>
     );

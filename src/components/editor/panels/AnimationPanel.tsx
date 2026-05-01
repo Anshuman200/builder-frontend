@@ -8,9 +8,10 @@ import { Section, SelectInput, TextInput, Field } from "./shared";
 
 interface AnimationPanelProps {
     block: Block;
+    hasMargin?:boolean;
 }
 
-export function AnimationPanel({ block }: AnimationPanelProps) {
+export function AnimationPanel({ block, hasMargin=true }: AnimationPanelProps) {
     const { updateBlock } = useEditorStore();
     const p = block.props;
 
@@ -20,7 +21,7 @@ export function AnimationPanel({ block }: AnimationPanelProps) {
     const animationPlayback = (p.animationPlayback as string) || "once";
 
     return (
-        <Section title="Animation">
+        <Section title="Animation" hasMargin={hasMargin}>
             <Field label="Type">
                 <SelectInput
                     value={animationType}
