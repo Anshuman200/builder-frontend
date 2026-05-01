@@ -38,6 +38,41 @@ export const useDeleteSitePage = () => {
     });
 };
 
+// ******************************************** Page Tags ********************************************
+export const useAdminPageTags = () => {
+    return useQuery({
+        queryKey: ["admin", "page-tags"],
+        queryFn: async () => {
+            const { data } = await adminApi.listPageTags();
+            return (data as any).tags || [];
+        },
+    });
+};
+
+export const useCreatePageTag = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (body: any) => adminApi.createPageTag(body),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "page-tags"] }),
+    });
+};
+
+export const useUpdatePageTag = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, ...body }: { id: string } & any) => adminApi.updatePageTag(id, body),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "page-tags"] }),
+    });
+};
+
+export const useDeletePageTag = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => adminApi.deletePageTag(id),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "page-tags"] }),
+    });
+};
+
 // ******************************************** Inquiries ********************************************
 export const useAdminInquiries = () => {
     return useQuery({

@@ -15,7 +15,7 @@ import {
   UserIcon,
   GlobeAltIcon
 } from "@heroicons/react/24/outline";
-import { Dropdown } from "antd";
+import { Button, Dropdown } from "antd";
 import { Logo } from "@/components/shared/Logo";
 
 interface DashboardHeaderProps {
@@ -70,13 +70,13 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
 
         <div className="flex items-center gap-3 lg:gap-4 shrink-0">
           {onCreatePage && (
-            <button
+            <Button
               onClick={onCreatePage}
-              className="hidden lg:flex items-center gap-2 bg-white text-black px-6 py-2.5 rounded-md font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-xl shadow-white/10"
+              className="hidden lg:flex items-center gap-2 !h-11 bg-white text-black rounded-md font-black text-xs uppercase hover:bg-indigo-50 transition-all shadow-xl shadow-white/10"
             >
               <PlusIcon className="w-4 h-4" />
-              New Page
-            </button>
+              New Project
+            </Button>
           )}
 
           <div className="h-8 w-px bg-white/10 hidden lg:block" />

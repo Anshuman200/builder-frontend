@@ -98,6 +98,7 @@ export interface EditorPage {
     isPublic?: boolean;
     isLocked?: boolean;
     category?: string;
+    tags?: string[];
     thumbnail?: string | null;
     thumbnails?: string[];
 }

@@ -168,6 +168,7 @@ export function TeamPanel({ block }: { block: Block }) {
                     <AlignmentInput value={(p.textAlign as string) || "center"} onChange={(v) => up("textAlign", v)} />
                 </Field>
             </Section>
+            <BackgroundPanel block={block} />
             <Section title="Layout & Grid" focusKeys={["layout", "columns", "align"]}>
                 <LayoutFields p={p} up={up} options={{
                     layouts: [{ label: "Card Grid", value: "grid" }, { label: "Horizontal List (Photo Left)", value: "list" }, { label: "Large Cards (1 per row)", value: "large" }, { label: "Compact Row (Mini Cards)", value: "compact" }, { label: "Circular Spotlight", value: "spotlight" }]
@@ -193,7 +194,6 @@ export function TeamPanel({ block }: { block: Block }) {
                     <Field label="Image Fit"><SelectInput value={(p.imageFit as string) || "cover"} onChange={(v) => up("imageFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
                 </>)}
             </Section>
-            <BackgroundPanel block={block} />
             <Section title="Typography" focusKeys={["nameColor", "roleColor", "descColor"]}>
                 <TypographyFields p={p} up={up} />
                 <Field label="Name Text Color"><ColorInput value={(p.nameColor as string) || "#0f172a"} onChange={(v) => up("nameColor", v)} /></Field>

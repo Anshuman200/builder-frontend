@@ -28,7 +28,7 @@ import {
   DocumentPlusIcon,
   CogIcon
 } from "@heroicons/react/24/outline";
-import { Popover, Dropdown, Drawer, Switch } from "antd";
+import { Popover, Dropdown, Drawer, Switch, Select } from "antd";
 import { AppColorPicker, PANEL_COLORS } from "./panels/shared";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -40,7 +40,7 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { pagesApi } from "@/lib/api/client";
 import { clearLocalDraft } from "@/lib/utils/storage";
 import { useToasts } from "@/hooks/useToasts";
-import { useUpdatePage, useCreatePage, usePublishPage } from "@/lib/api/queries";
+import { useUpdatePage, useCreatePage, usePublishPage, usePageTags } from "@/lib/api/queries";
 import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
 import BlockPalette from "./BlockPalette";
 import MediaPicker from "@/components/editor/MediaPicker";
@@ -60,6 +60,7 @@ function buildEditorPagePayload(page: any, thumbnailUrl?: string | null) {
     theme: page.theme || DEFAULT_THEME,
     meta: page.meta || {},
     category: page.category || "Other",
+    tags: page.tags || [],
     status: page.status || "DRAFT",
   };
 
@@ -79,6 +80,7 @@ export default function EditorToolbar() {
     activeRouteId, setActiveRoute, addRoute,
     openTemplatePicker, openWizard,
   } = useEditorToolbarState();
+  const { data: tags = [] } = usePageTags();
   const { pageId } = useParams<{ pageId: string }>() ?? {};
   const router = useRouter();
 
@@ -957,6 +959,23 @@ export default function EditorToolbar() {
                   </button>
                 </div>
               </div>
+            </div>
+
+            {/* Section 4: Page Tags */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+              <h3 style={{ color: 'rgba(165,163,255,0.6)', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: 8, margin: 0 }}>Page Tags</h3>
+              <DarkSettingField label="Tags">
+                <Select
+                  mode="multiple"
+                  allowClear
+                  value={page?.tags || []}
+                  onChange={(value) => updatePageData({ tags: value as string[] })}
+                  options={tags.map((tag: any) => ({ label: tag.name, value: tag.slug || tag.name }))}
+                  placeholder="Select tags"
+                  style={{ width: '100%' }}
+                />
+              </DarkSettingField>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1.5, margin: 0 }}>Organize your page with tags. Tags are managed in the <a href="/admin/page-tags" target="_blank" rel="noopener noreferrer" style={{ color: '#818cf8', textDecoration: 'none' }}>Page Tags admin panel</a>.</p>
             </div>
           </div>
         </Drawer>

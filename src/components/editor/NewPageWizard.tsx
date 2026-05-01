@@ -10,6 +10,8 @@ import {
   Squares2X2Icon,
   ListBulletIcon,
 } from "@heroicons/react/24/outline";
+import { Input, Select } from "antd";
+import { usePageTags } from "@/lib/api/queries";
 
 // ─── Section definitions shown in Step 2  ─────────────────────────────────────
 
@@ -192,7 +194,7 @@ const WIZARD_SECTIONS: SectionType[] = [
 interface NewPageWizardProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (title: string, slug: string, selectedSections: string[], showInHeader: boolean, showInFooter: boolean) => Promise<void>;
+  onSubmit: (title: string, slug: string, selectedSections: string[], showInHeader: boolean, showInFooter: boolean, tags: string[]) => Promise<void>;
   isSubmitting?: boolean;
   closable?: boolean;
   /** Skip straight to the section picker step */
@@ -251,8 +253,11 @@ export default function NewPageWizard({
   );
   const [showInHeader, setShowInHeader] = useState(true);
   const [showInFooter, setShowInFooter] = useState(true);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [titleError, setTitleError] = useState("");
   const [slugError, setSlugError] = useState("");
+
+  const { data: tags = [] } = usePageTags();
 
   const handleClose = useCallback(() => {
     if (!closable) return;
@@ -333,7 +338,7 @@ export default function NewPageWizard({
 
   const handleFinishWithSections = async (sections: string[]) => {
     const finalSlug = slug || slugify(title) || `page-${Date.now().toString().slice(-4)}`;
-    await onSubmit(title.trim(), finalSlug, sections, showInHeader, showInFooter);
+    await onSubmit(title.trim(), finalSlug, sections, showInHeader, showInFooter, selectedTags);
   };
 
   const handleFinish = async () => {
@@ -350,6 +355,56 @@ export default function NewPageWizard({
         @keyframes wizard-in { from{opacity:0;transform:scale(0.96) translateY(16px)} to{opacity:1;transform:scale(1) translateY(0)} }
         @keyframes wizard-bg { from{opacity:0} to{opacity:1} }
         @keyframes slide-left { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
+        
+        /* Custom styles for Ant Design Select in our dark theme */
+        .custom-wizard-select .ant-select-selector {
+          background-color: rgba(255, 255, 255, 0.03) !important;
+          border: 1px solid rgba(255, 255, 255, 0.05) !important;
+          border-radius: 16px !important;
+          min-height: 48px !important;
+          display: flex !important;
+          align-items: center !important;
+          color: white !important;
+        }
+        .custom-wizard-select .ant-select-selection-placeholder {
+          color: rgba(255, 255, 255, 0.15) !important;
+          font-weight: 500 !important;
+        }
+        .custom-wizard-select .ant-select-selection-item {
+          background: rgba(99, 102, 241, 0.1) !important;
+          border: 1px solid rgba(99, 102, 241, 0.2) !important;
+          color: #818cf8 !important;
+          border-radius: 8px !important;
+          font-weight: 700 !important;
+          font-size: 10px !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.05em !important;
+        }
+        .custom-wizard-select .ant-select-selection-item-remove {
+          color: #818cf8 !important;
+        }
+        .ant-select-dropdown {
+          background-color: #0a0a0a !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          border-radius: 16px !important;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+          padding: 4px !important;
+        }
+        .ant-select-item {
+          border-radius: 8px !important;
+          color: rgba(255, 255, 255, 0.7) !important;
+          margin: 2px 0 !important;
+          font-weight: 600 !important;
+          font-size: 12px !important;
+        }
+        .ant-select-item-option-active {
+          background-color: rgba(255, 255, 255, 0.05) !important;
+          color: white !important;
+        }
+        .ant-select-item-option-selected {
+          background-color: rgba(99, 102, 241, 0.15) !important;
+          color: #818cf8 !important;
+        }
       `}</style>
 
       {/* Backdrop */}
@@ -380,7 +435,7 @@ export default function NewPageWizard({
                 <BoltIcon className="w-5 h-5 text-indigo-400" />
               </div>
               <div>
-                <h2 className="text-base font-black text-white tracking-tight">Create New Page</h2>
+                <h2 className="text-base font-black text-white tracking-tight">Create New Project</h2>
                 <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
                   {initialStep === 2 ? "Pick sections to pre-fill" : step === 1 ? "Name your Project" : "Choose sections to pre-fill"}
                 </p>
@@ -398,7 +453,7 @@ export default function NewPageWizard({
 
           {/* Step bar — hidden in section-only mode */}
           {initialStep !== 2 && (
-            <div className="px-6 pb-2 shrink-0">
+            <div className="pb-2 shrink-0">
               <StepBar step={step} />
             </div>
           )}
@@ -409,14 +464,14 @@ export default function NewPageWizard({
             {/* ── Step 1: Basic Info ── */}
             {step === 1 && (
               <div style={{ animation: "slide-left 0.25s ease" }} className="flex flex-col gap-5">
-                <div className="p-5 bg-white/3 rounded-2xl border border-white/5">
-                  <label className="block text-xs font-black text-white/50 uppercase tracking-widest mb-2">Page Name *</label>
-                  <input
+                <div className="p-2 bg-white/3 rounded-2xl border border-white/5">
+                  <label className="block text-xs font-black text-white/50 uppercase tracking-widest mb-2">Project Name *</label>
+                  <Input
                     autoFocus
                     value={title}
                     onChange={(e) => handleTitleChange(e.target.value)}
                     placeholder="e.g. SaaS Landing Page"
-                    className={`w-full bg-transparent text-xl font-black text-white placeholder:text-white/15 border-none outline-none resize-none leading-snug py-1 ${titleError ? "placeholder:text-red-400/50" : ""}`}
+                    className={`w-full bg-transparent text-xl font-black text-white placeholder:text-white/15 border-none !outline-none resize-none leading-snug py-1 ${titleError ? "placeholder:text-red-400/50" : ""}`}
                   />
                   {titleError && (
                     <p className="text-red-400 text-[10px] font-bold uppercase tracking-widest mt-2 flex items-center gap-1.5">
@@ -426,11 +481,11 @@ export default function NewPageWizard({
                   )}
                 </div>
 
-                <div className={`p-4 bg-white/3 rounded-2xl border transition-colors ${slugError ? "border-red-500/30 bg-red-500/5" : "border-white/5"}`}>
+                <div className={`p-2 bg-white/3 rounded-2xl border transition-colors ${slugError ? "border-red-500/30 bg-red-500/5" : "border-white/5"}`}>
                   <label className="block text-xs font-black text-white/50 uppercase tracking-widest mb-2">URL Slug</label>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-white/20 font-mono shrink-0">/</span>
-                    <input
+                    <Input
                       value={slug}
                       onChange={(e) => handleSlugChange(e.target.value)}
                       placeholder="auto-generated"
@@ -451,21 +506,44 @@ export default function NewPageWizard({
                     className={`flex-1 h-12 rounded-2xl border flex items-center justify-center gap-3 transition-all duration-300 ${showInHeader ? "bg-indigo-500/10 border-indigo-500/40 text-white" : "bg-white/3 border-white/5 text-white/20 hover:text-white/40 hover:bg-white/5"}`}
                   >
                     <Squares2X2Icon className={`w-5 h-5 transition-transform duration-500 ${showInHeader ? "scale-110" : "scale-100 opacity-40"}`} />
-                    <span className="text-[11px] font-black uppercase tracking-[0.1em]">Header</span>
+                    <span className="text-[11px] font-black uppercase tracking-[0.1em]">Show in Header</span>
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => setShowInFooter(!showInFooter)}
                     className={`flex-1 h-12 rounded-2xl border flex items-center justify-center gap-3 transition-all duration-300 ${showInFooter ? "bg-indigo-500/10 border-indigo-500/40 text-white" : "bg-white/3 border-white/5 text-white/20 hover:text-white/40 hover:bg-white/5"}`}
                   >
                     <ListBulletIcon className={`w-5 h-5 transition-transform duration-500 ${showInFooter ? "scale-110" : "scale-100 opacity-40"}`} />
-                    <span className="text-[11px] font-black uppercase tracking-[0.1em]">Footer</span>
-                  </button>
+                    <span className="text-[11px] font-black uppercase tracking-[0.1em]">Show in Footer</span>
+                  </button> */}
                 </div>
 
-                <div className="px-1">
-                  <p className="text-white/25 text-[10px] font-medium leading-relaxed uppercase tracking-wider">
-                    Build your page from ground up with premium components.
-                  </p>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-black text-white/50 uppercase tracking-widest mb-2">Project Tags</label>
+                    <Select
+                      mode="multiple"
+                      allowClear
+                      value={selectedTags}
+                      onChange={(value) => setSelectedTags(value as string[])}
+                      options={tags.map((tag: any) => ({
+                        label: (
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tag.color || '#6366f1' }} />
+                            <span>{tag.name}</span>
+                          </div>
+                        ),
+                        value: tag.slug || tag.name
+                      }))}
+                      placeholder="Choose tags"
+                      className="w-full custom-wizard-select"
+                      popupMatchSelectWidth={false}
+                    />
+                  </div>
+                  <div className="px-1">
+                    <p className="text-white/25 text-[10px] font-medium leading-relaxed uppercase tracking-wider">
+                      Build your page from ground up with premium components.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

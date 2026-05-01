@@ -154,7 +154,7 @@ interface EditorStore {
     updateMeta: (meta: Partial<MetaConfig>) => void;
     updateSlug: (slug: string) => void;
     updateTitle: (title: string) => void;
-    updatePageData: (data: Partial<Pick<EditorPage, "isTemplate" | "isPublic" | "isLocked" | "category" | "thumbnail" | "thumbnails" | "routes">>, commit?: boolean) => void;
+    updatePageData: (data: Partial<Pick<EditorPage, "isTemplate" | "isPublic" | "isLocked" | "category" | "tags" | "thumbnail" | "thumbnails" | "routes">>, commit?: boolean) => void;
     migrateThemeColors: () => void;
     pushHistory: () => void;
 

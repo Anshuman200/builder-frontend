@@ -27,6 +27,16 @@ export const useTemplates = () => {
     });
 };
 
+export const usePageTags = () => {
+    return useQuery({
+        queryKey: ["page-tags"],
+        queryFn: async () => {
+            const { data } = await pagesApi.getTags();
+            return (data as any).tags || [];
+        },
+    });
+};
+
 export const useInfinitePublicTemplates = (params?: Record<string, string | number>) => {
     return useInfiniteQuery({
         queryKey: ["templates", "infinite", params],

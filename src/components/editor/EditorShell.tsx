@@ -437,7 +437,7 @@ export default function EditorShell() {
         blankMode={wizard.blankMode}
         excludeSections={["header", "footer"]}
         existingRoutes={page?.routes || []}
-        onSubmit={async (title, slug, selectedSections, showInHeader, showInFooter) => {
+        onSubmit={async (title, slug, selectedSections, showInHeader, showInFooter, tags) => {
           setIsCreatingPage(true);
           try {
             const finalPath = slug.startsWith("/") ? slug : `/${slug}`;

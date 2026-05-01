@@ -69,7 +69,7 @@ export default function DashboardLayout({
     setWizardOpen(true);
   }, []);
 
-  const handleWizardSubmit = useCallback(async (title: string, slug: string, selectedSections: string[]) => {
+  const handleWizardSubmit = useCallback(async (title: string, slug: string, selectedSections: string[], showInHeader: boolean, showInFooter: boolean, tags: string[]) => {
     try {
       const content = buildContentFromSections(selectedSections);
       const payload = {
@@ -79,6 +79,7 @@ export default function DashboardLayout({
         isPublic: false,
         visibility: 'PUBLIC',
         content,
+        tags,
         meta: {}
       };
       const res = await createMutation.mutateAsync(payload) as any;

@@ -118,7 +118,7 @@ export const pagesApi = {
         return request(`/pages/templates${qs ? `?${qs}` : ""}`);
     },
 
-    create: (body: { title: string, content?: any, meta?: any }) =>
+    create: (body: { title: string, content?: any, meta?: any, tags?: string[] }) =>
         request("/pages", { method: "POST", body: JSON.stringify(body) }),
 
     get: (id: string) => request(`/pages/${id}`),
@@ -137,6 +137,8 @@ export const pagesApi = {
 
     unpublish: (id: string) =>
         request(`/pages/${id}/unpublish`, { method: "POST", body: "{}" }),
+
+    getTags: () => request(`/page-tags`),
 
     goLive: (id: string) =>
         request(`/pages/${id}/go-live`, { method: "POST", body: "{}" }),
@@ -257,6 +259,12 @@ export const adminApi = {
     createSitePage: (body: any) => request("/admin/site-pages", { method: "POST", body: JSON.stringify(body) }),
     updateSitePage: (id: string, body: any) => request(`/admin/site-pages/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
     deleteSitePage: (id: string) => request(`/admin/site-pages/${id}`, { method: "DELETE" }),
+
+    // Page Tag Management
+    listPageTags: () => request("/admin/page-tags"),
+    createPageTag: (body: any) => request("/admin/page-tags", { method: "POST", body: JSON.stringify(body) }),
+    updatePageTag: (id: string, body: any) => request(`/admin/page-tags/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+    deletePageTag: (id: string) => request(`/admin/page-tags/${id}`, { method: "DELETE" }),
 
     // Inquiries
     listInquiries: () => request("/admin/inquiries"),

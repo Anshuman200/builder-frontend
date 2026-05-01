@@ -23,6 +23,7 @@ const NAV = [
     { key: "/admin/media", label: "Media", icon: PhotoIcon },
     { key: "/admin/templates", label: "Templates", icon: DocumentDuplicateIcon },
     { key: "/admin/site-pages", label: "Site Pages", icon: DocumentDuplicateIcon },
+    { key: "/admin/page-tags", label: "Page Tags", icon: DocumentDuplicateIcon },
     { key: "/admin/inquiries", label: "Inquiries", icon: DocumentDuplicateIcon },
 ];
 
