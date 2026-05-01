@@ -111,6 +111,7 @@ export function TeamBlock({ block }: BlockProps) {
     const imageStyle = (p.imageStyle as string) || "circle";
     const imageSize = (p.imageSize as string) || "120px";
     const imageRadius = (p.imageRadius as string) || "50%";
+    const imageFit = (p.imageFit as React.CSSProperties["objectFit"]) || "cover";
 
     const rawNameColor = (p.nameColor as string) || "#0f172a";
     const rawRoleColor = (p.roleColor as string) || "#64748b";
@@ -265,7 +266,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     alt={member.name}
                                                     fill
                                                     sizes="56px"
-                                                    style={{ objectFit: "cover" }}
+                                                    style={{ objectFit: imageFit }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
                                             </div>
@@ -324,7 +325,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     alt={member.name}
                                                     fill
                                                     sizes="160px"
-                                                    style={{ objectFit: "cover" }}
+                                                    style={{ objectFit: imageFit }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
                                                 />
                                             </div>
@@ -381,7 +382,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     alt={member.name}
                                                     fill
                                                     sizes="140px"
-                                                    style={{ objectFit: "cover" }}
+                                                    style={{ objectFit: imageFit }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
                                             ) : (
@@ -441,7 +442,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     alt={member.name}
                                                     fill
                                                     sizes={imageSize}
-                                                    style={{ objectFit: "cover", objectPosition: iPosition }}
+                                                    style={{ objectFit: imageFit, objectPosition: iPosition }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
                                             </div>
@@ -455,7 +456,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     alt={member.name}
                                                     fill
                                                     sizes="(max-width: 768px) 100vw, 33vw"
-                                                    style={{ objectFit: "cover", objectPosition: iPosition }}
+                                                    style={{ objectFit: imageFit, objectPosition: iPosition }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
                                                 <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, ${(p.coverGradientBottom as string) || "#000000e6"} 0%, transparent 60%)` }} />
@@ -469,7 +470,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                 alt={member.name}
                                                 fill
                                                 sizes={imageStyle === "square" ? "(max-width: 768px) 100vw, 33vw" : imageSize}
-                                                style={{ objectFit: "cover", objectPosition: iPosition }}
+                                                style={{ objectFit: imageFit, objectPosition: iPosition }}
                                                 unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
                                             />
                                         </div>

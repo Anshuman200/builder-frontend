@@ -176,15 +176,19 @@ export function TeamPanel({ block }: { block: Block }) {
                 <PaddingInput label="Card Padding" value={(p.cardPadding as string) || "2rem 1.75rem"} onChange={(v) => up("cardPadding", v)} />
                 <PaddingInput label="Text Padding" value={(p.cardContentPadding as string) || "1rem 1.25rem"} onChange={(v) => up("cardContentPadding", v)} />
             </Section>
-            <Section title="Image Styling" focusKeys={["imageStyle", "imageSize", "imageHeight", "imageRadius", "imagePosition"]}>
+            <Section title="Image Styling" focusKeys={["imageStyle", "imageSize", "imageHeight", "imageRadius", "imagePosition", "imageFit"]}>
                 <Field label="Image Style"><SelectInput value={(p.imageStyle as string) || "circle"} onChange={(v) => up("imageStyle", v)} options={[{ label: "Circle", value: "circle" }, { label: "Square", value: "square" }, { label: "Floating Cutout", value: "float" }, { label: "Card Cover", value: "cover" }]} /></Field>
                 {p.imageStyle !== "cover" && (<>
                     <Field label="Image Size"><TextInputWithUnit value={(p.imageSize as string) ?? ""} onChange={(v) => up("imageSize", v)} placeholder="120" /></Field>
                     {p.imageStyle === "square" && (<Field label="Image Height"><TextInputWithUnit value={(p.imageHeight as string) ?? ""} onChange={(v) => up("imageHeight", v)} placeholder="240" /></Field>)}
                     <Field label="Image Radius"><BorderRadiusInput value={(p.imageRadius as string) || "50%"} onChange={(v) => up("imageRadius", v)} /></Field>
                     <Field label="Image Position"><SelectInput value={(p.imagePosition as string) || "center"} onChange={(v) => up("imagePosition", v)} options={[{ label: "Center", value: "center" }, { label: "Top", value: "top" }, { label: "Bottom", value: "bottom" }]} /></Field>
+                    <Field label="Image Fit"><SelectInput value={(p.imageFit as string) || "cover"} onChange={(v) => up("imageFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
                 </>)}
-                {p.imageStyle === "cover" && (<Field label="Gradient Overlay"><ColorInput value={(p.coverGradientBottom as string) || "rgba(0,0,0,0.9)"} onChange={(v) => up("coverGradientBottom", v)} /></Field>)}
+                {p.imageStyle === "cover" && (<>
+                    <Field label="Gradient Overlay"><ColorInput value={(p.coverGradientBottom as string) || "rgba(0,0,0,0.9)"} onChange={(v) => up("coverGradientBottom", v)} /></Field>
+                    <Field label="Image Fit"><SelectInput value={(p.imageFit as string) || "cover"} onChange={(v) => up("imageFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
+                </>)}
             </Section>
             <BackgroundPanel block={block} />
             <Section title="Typography" focusKeys={["nameColor", "roleColor", "descColor"]}>

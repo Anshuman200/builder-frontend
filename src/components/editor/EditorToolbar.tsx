@@ -1026,7 +1026,7 @@ function MediaPreview({
   onChoose,
   onClear,
   label,
-  allowRemove = true
+  allowRemove = false
 }: {
   url?: string;
   onChoose: () => void;

@@ -209,7 +209,7 @@ export function MediaInput({ value, onChange, placeholder, type = "image", varia
                                 <ArrowPathIcon style={{ width: 14, height: 14 }} />
                                 Change
                             </button>
-                            {variant !== "compact" && (
+                            {/* {variant !== "compact" && (
                                 <button
                                     onClick={() => onChange("")}
                                     style={{
@@ -229,7 +229,7 @@ export function MediaInput({ value, onChange, placeholder, type = "image", varia
                                     <TrashIcon style={{ width: 14, height: 14 }} />
                                     Remove
                                 </button>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 </div>
