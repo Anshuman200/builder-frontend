@@ -24,6 +24,7 @@ import { ActivePathContext, getBlockMediaInfo, QuickLayoutChange } from "./block
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { IconButton } from "../ui/IconButton";
 import AppToolTip from "../common/AppToolTip";
+import { cn } from "@/lib/utils";
 
 // Viewport widths per mode
 const VIEWPORT_WIDTHS = {
@@ -200,6 +201,7 @@ export default function EditorCanvas() {
           <DropZone
             blocks={blocks}
             routeBlocksLength={routeBlocks.length}
+            headerId={page?.globalBlocks?.header && !activeRoute?.hideHeader ? page.globalBlocks.header.id : undefined}
             footerId={page?.globalBlocks?.footer?.id}
           />
         </ActivePathContext.Provider>
@@ -845,23 +847,18 @@ function AddSectionInvitation({ isOver, isFirst }: { isOver: boolean, isFirst?: 
       onClick={() =>
         openBlockPicker({ id: "canvas-root", position: "after" }, "sections")
       }
-      className={`
-    mx-6 ${isFirst ? 'mt-4' : 'mt-10'} mb-10 p-6
-    flex flex-col items-center justify-center gap-2
-    rounded-xl border-2 border-dashed cursor-pointer
-    transition-all duration-200
-
-    ${isOver
-          ? "border-indigo-500 bg-indigo-500/5 rotate-0 scale-[1.02]"
-          : "border-[rgba(150,150,150,0.2)] bg-transparent"
-        }
-
-    hover:border-indigo-500 hover:bg-indigo-500/5 hover:scale-[1.01]
-  `}
+      className={cn(
+        "flex flex-col items-center h-56 mx-5 justify-center gap-2 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200",
+        isFirst ? "mt-4" : "mt-10",
+        isOver
+          ? "border-indigo-500 bg-indigo-500/5 scale-[1.02]"
+          : "border-[rgba(150,150,150,0.2)] bg-transparent",
+        "hover:border-indigo-500 hover:bg-indigo-500/5 hover:scale-[1.01]"
+      )}
     >
-      <PlusIcon className={`w-5 h-5 ${isOver ? "text-indigo-500" : "text-slate-400"}`} />
-      <span className={`text-[13px] font-semibold tracking-[0.02em] ${isOver ? "text-indigo-500" : "text-slate-500"}`}>
-        {isFirst ? "Add your first section" : "Add more sections"}
+      <PlusIcon className={cn( "w-10 h-10 bg-slate-600 rounded-full p-1", isOver ? "text-indigo-500" : "text-white" )} />
+      <span className={cn( "text-[13px] font-semibold tracking-[0.02em]", isOver ? "text-indigo-500" : "text-slate-500")}>
+        {isFirst ? "Starting your page...." : "Add a new section"}
       </span>
     </div>
   );

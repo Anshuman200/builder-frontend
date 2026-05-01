@@ -1891,11 +1891,13 @@ export function TypographyFields({
     prefix = "",
     showSubtitle = true,
     variant = "standard",
-    showContentField=true
+    showContentField = true,
+    showAlign = true,
 }: PropertyGroupProps & {
     showSubtitle?: boolean;
     variant?: "standard" | "quick";
     showContentField?: boolean;
+    showAlign?: boolean;
 }) {
     // Helper to resolve keys based on prefix and common patterns
     const getK = (base: string) => {
@@ -1965,29 +1967,31 @@ export function TypographyFields({
                     </Field>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                    <Field label="Weight">
-                        <SelectInput
-                            value={String(p[getK("fontWeight")] || "400")}
-                            onChange={(v) => up(getK("fontWeight"), v)}
-                            options={[
-                                { label: "Regular", value: "400" },
-                                { label: "Medium", value: "500" },
-                                { label: "SemiBold", value: "600" },
-                                { label: "Bold", value: "700" },
-                                { label: "Black", value: "900" }
-                            ]}
-                        />
-                    </Field>
-                    <Field label="Alignment">
-                        <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "6px", padding: "2px" }}>
-                            <AlignmentInput
-                                value={(p[getK("align")] as string) || "left"}
-                                onChange={(v) => up(getK("align"), v)}
+                {showAlign && (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                        <Field label="Weight">
+                            <SelectInput
+                                value={String(p[getK("fontWeight")] || "400")}
+                                onChange={(v) => up(getK("fontWeight"), v)}
+                                options={[
+                                    { label: "Regular", value: "400" },
+                                    { label: "Medium", value: "500" },
+                                    { label: "SemiBold", value: "600" },
+                                    { label: "Bold", value: "700" },
+                                    { label: "Black", value: "900" }
+                                ]}
                             />
-                        </div>
-                    </Field>
-                </div>
+                        </Field>
+                        <Field label="Alignment">
+                            <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "6px", padding: "2px" }}>
+                                <AlignmentInput
+                                    value={(p[getK("align")] as string) || "left"}
+                                    onChange={(v) => up(getK("align"), v)}
+                                />
+                            </div>
+                        </Field>
+                    </div>
+                )}
             </div>
         );
     }
@@ -2033,7 +2037,7 @@ export function TypographyFields({
                 </Field>
             )}
 
-            {p[getK("align")] !== undefined && <AlignmentInput value={(p[getK("align")] as string) || "left"} onChange={(v) => up(getK("align"), v)} />}
+            {showAlign && p[getK("align")] !== undefined && <AlignmentInput value={(p[getK("align")] as string) || "left"} onChange={(v) => up(getK("align"), v)} />}
 
             <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Color`}>
                 <ColorInput

@@ -93,6 +93,7 @@ export function TeamBlock({ block }: BlockProps) {
     const title = typeof p.title === "string" ? p.title : "Meet Our Team";
     const subtitle = typeof p.subtitle === "string" ? p.subtitle : "The people behind the magic";
     const align = (p.align as string) || "center";
+    const textAlign = (p.textAlign as React.CSSProperties["textAlign"]) || align;
     const layout = (p.layout as string) || "grid";
     const columns = Number(p.columns) || 3;
     const gap = (p.gap as string) || "2rem";
@@ -234,7 +235,7 @@ export function TeamBlock({ block }: BlockProps) {
                     <div
                         onClick={() => !isPreview && focusSubItem(block.id, "Text Content")}
                         style={{
-                            textAlign: align as React.CSSProperties["textAlign"],
+                            textAlign: textAlign as React.CSSProperties["textAlign"],
                             cursor: "pointer",
                             transition: "all 0.4s ease-in-out"
                         }}

@@ -163,7 +163,10 @@ export function TeamPanel({ block }: { block: Block }) {
     return (
         <>
             <Section title="Text Content" focusKeys={["title", "subtitle"]}>
-                <TypographyFields p={p} up={up} />
+                <TypographyFields p={p} up={up} showAlign={false} />
+                <Field label="Text Alignment">
+                    <AlignmentInput value={(p.textAlign as string) || "center"} onChange={(v) => up("textAlign", v)} />
+                </Field>
             </Section>
             <Section title="Layout & Grid" focusKeys={["layout", "columns", "align"]}>
                 <LayoutFields p={p} up={up} options={{

@@ -36,7 +36,8 @@ export const contactSections: SectionTemplate[] = [
       // Bottom — teal/light section with 3 icon cards
       const bottomSection = makeBlock("container", { bgColor: "#e0f7fa", padding: "4rem 2rem" });
       const infoTeam = makeBlock("team", {
-        title: "", subtitle: "", bgColor: "transparent",
+        title: "", subtitle: "", bgColor: "#e0f7fa",
+        padding: "4rem 2rem", minHeight: "auto",
         layout: "grid", columns: 3, gap: "2rem",
         cardStyle: "raised", cardBg: "#f5feff", cardRadius: "12px",
         cardPadding: "2rem 1.5rem", cardShadow: "0 2px 16px rgba(0,188,212,0.12)",
@@ -50,7 +51,7 @@ export const contactSections: SectionTemplate[] = [
       });
       bottomSection.props.childBlocks = [infoTeam];
 
-      root.props.childBlocks = [topSection, bottomSection];
+      root.props.childBlocks = [topSection, infoTeam];
       return root;
     },
   },
