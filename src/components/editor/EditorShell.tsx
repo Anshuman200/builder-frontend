@@ -16,6 +16,7 @@ import {
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
 import { useEditorStore } from "@/stores/editorStore";
+import { useEditorShellState } from "@/stores/editor/selectors";
 import { createBlock, injectProjectName } from "@/lib/config/blocks";
 import { SECTION_TEMPLATES } from "@/lib/config/sections";
 import EditorToolbar from "./EditorToolbar";
@@ -39,7 +40,7 @@ export default function EditorShell() {
     history, addBlock, moveBlock, selectBlock, updateBlock,
     activeDrag, setActiveDrag, activeRouteId,
     wizard, closeWizard, addRoute
-  } = useEditorStore();
+  } = useEditorShellState();
   const [isCreatingPage, setIsCreatingPage] = useState(false);
 
   const [draggedWidth, setDraggedWidth] = useState<number | string>("auto");

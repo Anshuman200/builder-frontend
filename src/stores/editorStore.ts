@@ -2,6 +2,23 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
 import type { Block, BlockStyle, AnimationConfig, ThemeConfig, MetaConfig, EditorPage, RouteConfig } from "@/types";
+import {
+    applyUpdaterDeep as applyBlockUpdaterDeep,
+    findAndDelete as deleteBlockFromTree,
+    findAndRemoveBlock as removeBlockFromTree,
+    findAndUpdate as updateBlockInTree,
+    insertBlockDeep as insertBlockInTree,
+    recursiveClone,
+    duplicateBlockDeep as duplicateBlockTree,
+} from "./editor/blockTree";
+import { clonePage as cloneEditorPage, createHistory, pushHistorySnapshot } from "./editor/history";
+import {
+    forceLightModeMigration as enforceLightMode,
+    migrateBlockColors as migrateEditorBlockColors,
+    migratePageBlocks as migrateEditorPageBlocks,
+} from "./editor/themeMigration";
+
+export { recursiveClone };
 
 // ─── Default Theme ───────────────────────────────────────────────────────────
 export const LIGHT_COLORS = {
@@ -149,460 +166,6 @@ interface EditorStore {
     _mergeBlockProps: (oldBlock: Block | null, newBlock: Block) => Block["props"];
 }
 
-function updateColProps(b: Block, id: string, updater: (b: Block) => Block): Block {
-    const p = b.props;
-    let changed = false;
-    const newProps = { ...p };
-
-    // Common array props
-    for (const key of ["col0", "col1", "childBlocks"]) {
-        const arr = p[key] as Block[] | undefined;
-        if (arr) {
-            const next = findAndUpdate(arr, id, updater);
-            if (next !== arr) {
-                newProps[key] = next;
-                changed = true;
-            }
-        }
-    }
-
-    // Grid items array
-    const items = p.items as { id: string, blocks: Block[] }[] | undefined;
-    if (items) {
-        const nextItems = items.map(item => {
-            const nextBlocks = findAndUpdate(item.blocks || [], id, updater);
-            if (nextBlocks !== item.blocks) {
-                changed = true;
-                return { ...item, blocks: nextBlocks };
-            }
-            return item;
-        });
-        if (changed) newProps.items = nextItems;
-    }
-
-    return changed ? { ...b, props: newProps } : b;
-}
-
-function deleteColProps(b: Block, id: string): Block {
-    const p = b.props;
-    let changed = false;
-    const newProps = { ...p };
-
-    for (const key of ["col0", "col1", "childBlocks"]) {
-        const arr = p[key] as Block[] | undefined;
-        if (arr) {
-            const next = findAndDelete(arr, id);
-            if (next !== arr) {
-                newProps[key] = next;
-                changed = true;
-            }
-        }
-    }
-
-    const items = p.items as { id: string, blocks: Block[] }[] | undefined;
-    if (items) {
-        const nextItems = items.map(item => {
-            const nextBlocks = findAndDelete(item.blocks || [], id);
-            if (nextBlocks !== item.blocks) {
-                changed = true;
-                return { ...item, blocks: nextBlocks };
-            }
-            return item;
-        });
-        if (changed) newProps.items = nextItems;
-    }
-
-    return changed ? { ...b, props: newProps } : b;
-}
-
-function findAndUpdate(blocks: Block[], id: string, updater: (b: Block) => Block): Block[] {
-    return blocks.map((b) => {
-        if (b.id === id) return updater(b);
-        if (b.children?.length) return { ...b, children: findAndUpdate(b.children, id, updater) };
-        // Also search inside column props (col0 / col1)
-        return updateColProps(b, id, updater);
-    });
-}
-
-function findAndDelete(blocks: Block[], id: string): Block[] {
-    return blocks.filter((b) => b.id !== id).map((b) => {
-        let updated = b.children ? { ...b, children: findAndDelete(b.children, id) } : b;
-        updated = deleteColProps(updated, id);
-        return updated;
-    });
-}
-
-function applyUpdaterDeep(page: EditorPage, activeRouteId: string | null, updater: (blocks: Block[]) => Block[]): void {
-    if (page.globalBlocks) {
-        if (page.globalBlocks.header) {
-            page.globalBlocks.header = updater([page.globalBlocks.header])[0] || null;
-        }
-        if (page.globalBlocks.footer) {
-            page.globalBlocks.footer = updater([page.globalBlocks.footer])[0] || null;
-        }
-    }
-    if (page.routes && activeRouteId) {
-        const route = page.routes.find(r => r.id === activeRouteId);
-        if (route) {
-            route.content = updater(route.content);
-        }
-    }
-}
-
-function findAndRemoveBlock(blocks: Block[], id: string): { newBlocks: Block[], removed: Block | null } {
-    let removed: Block | null = null;
-    const newBlocks = blocks.filter(b => {
-        if (b.id === id) { removed = b; return false; }
-        return true;
-    }).map(b => {
-        const updated = { ...b };
-        if (updated.children && !removed) {
-            const res = findAndRemoveBlock(updated.children, id);
-            if (res.removed) { removed = res.removed; updated.children = res.newBlocks; }
-        }
-        const col0 = updated.props.col0 as Block[] | undefined;
-        if (col0 && !removed) {
-            const res = findAndRemoveBlock(col0, id);
-            if (res.removed) { removed = res.removed; updated.props = { ...updated.props, col0: res.newBlocks }; }
-        }
-        const col1 = updated.props.col1 as Block[] | undefined;
-        if (col1 && !removed) {
-            const res = findAndRemoveBlock(col1, id);
-            if (res.removed) { removed = res.removed; updated.props = { ...updated.props, col1: res.newBlocks }; }
-        }
-        const childBlocks = updated.props.childBlocks as Block[] | undefined;
-        if (childBlocks && !removed) {
-            const res = findAndRemoveBlock(childBlocks, id);
-            if (res.removed) { removed = res.removed; updated.props = { ...updated.props, childBlocks: res.newBlocks }; }
-        }
-        const items = updated.props.items as { id: string, blocks: Block[] }[] | undefined;
-        if (items && !removed) {
-            const nextItems = items.map(item => {
-                if (removed || !item.blocks) return item;
-                const res = findAndRemoveBlock(item.blocks, id);
-                if (res.removed) {
-                    removed = res.removed;
-                    return { ...item, blocks: res.newBlocks };
-                }
-                return item;
-            });
-            if (removed) updated.props = { ...updated.props, items: nextItems };
-        }
-        return updated;
-    });
-    return { newBlocks, removed };
-}
-
-function insertBlockDeep(
-    blocks: Block[], insertBlock: Block, targetId: string,
-    position: "before" | "after" | "inside" = "after", childProp?: string
-): { newBlocks: Block[], inserted: boolean } {
-    let inserted = false;
-    const newBlocks: Block[] = [];
-    for (const b of blocks) {
-        if (b.id === targetId) {
-            if (position === "before") {
-                newBlocks.push(insertBlock, b);
-                inserted = true;
-            } else if (position === "after") {
-                newBlocks.push(b, insertBlock);
-                inserted = true;
-            } else if (position === "inside" && childProp) {
-                const updated = { ...b };
-                if (childProp === "children") {
-                    updated.children = [...(updated.children || []), insertBlock];
-                    inserted = true;
-                } else if (childProp === "col0" || childProp === "col1" || childProp === "childBlocks") {
-                    updated.props = { ...updated.props, [childProp]: [...((updated.props[childProp] as Block[]) || []), insertBlock] };
-                    inserted = true;
-                } else {
-                    // Try to find the slot in items array if it exists (for Grid, Columns, etc)
-                    const items = updated.props.items as any[] | undefined;
-                    if (Array.isArray(items)) {
-                        const slotIdx = items.findIndex(s => s.id === childProp);
-                        if (slotIdx !== -1) {
-                            const newItems = [...items];
-                            newItems[slotIdx] = {
-                                ...newItems[slotIdx],
-                                blocks: [...(newItems[slotIdx].blocks || []), insertBlock]
-                            };
-                            updated.props = { ...updated.props, items: newItems };
-                            inserted = true;
-                        }
-                    }
-                }
-                newBlocks.push(updated);
-            } else {
-                newBlocks.push(b);
-            }
-        } else {
-            const updated = { ...b };
-            if (updated.children && !inserted) {
-                const res = insertBlockDeep(updated.children, insertBlock, targetId, position, childProp);
-                if (res.inserted) { updated.children = res.newBlocks; inserted = true; }
-            }
-            if (!inserted) {
-                const col0 = updated.props.col0 as Block[] | undefined;
-                if (col0 && !inserted) {
-                    const res = insertBlockDeep(col0, insertBlock, targetId, position, childProp);
-                    if (res.inserted) { updated.props = { ...updated.props, col0: res.newBlocks }; inserted = true; }
-                }
-                const col1 = updated.props.col1 as Block[] | undefined;
-                if (col1 && !inserted) {
-                    const res = insertBlockDeep(col1, insertBlock, targetId, position, childProp);
-                    if (res.inserted) { updated.props = { ...updated.props, col1: res.newBlocks }; inserted = true; }
-                }
-                const childBlocks = updated.props.childBlocks as Block[] | undefined;
-                if (childBlocks && !inserted) {
-                    const res = insertBlockDeep(childBlocks, insertBlock, targetId, position, childProp);
-                    if (res.inserted) { updated.props = { ...updated.props, childBlocks: res.newBlocks }; inserted = true; }
-                }
-                const items = updated.props.items as { id: string, blocks: Block[] }[] | undefined;
-                if (items && !inserted) {
-                    const nextItems = items.map(item => {
-                        if (inserted || !item.blocks) return item;
-                        const res = insertBlockDeep(item.blocks, insertBlock, targetId, position, childProp);
-                        if (res.inserted) { inserted = true; return { ...item, blocks: res.newBlocks }; }
-                        return item;
-                    });
-                    if (inserted) { updated.props = { ...updated.props, items: nextItems }; }
-                }
-            }
-            newBlocks.push(updated);
-        }
-    }
-    return { newBlocks, inserted };
-}
-
-/**
- * Ensures a page is strictly in light mode. Resets mode and base background/text colors if they were dark.
- */
-function forceLightModeMigration(page: EditorPage): boolean {
-    let changed = false;
-
-    // Ensure theme exists
-    if (!page.theme) {
-        page.theme = JSON.parse(JSON.stringify(DEFAULT_THEME));
-        changed = true;
-    }
-
-    if (page.theme.mode !== "light") {
-        page.theme.mode = "light";
-        changed = true;
-    }
-
-    const c = page.theme.colors;
-    const DARK_BGS = ["#020617", "#09090b", "#000000", "#111827", "#18181b"];
-    const LIGHT_TEXTS = ["#f8fafc", "#ffffff", "#f1f5f9", "#cbd5e1"];
-    const DARK_SURFACES = ["#0f172a", "#1e293b", "#1a1a1a", "#27272a"];
-
-    if (DARK_BGS.includes(c.background) || c.background === "var(--background)") {
-        c.background = "#ffffff";
-        changed = true;
-    }
-    if (LIGHT_TEXTS.includes(c.text) || c.text === "var(--text)") {
-        c.text = "#0f172a";
-        changed = true;
-    }
-    if (DARK_SURFACES.includes(c.surface) || c.surface === "var(--surface)") {
-        c.surface = "#f8fafc";
-        changed = true;
-    }
-
-    return changed;
-}
-
-/**
- * Recursively migrates hardcoded old default hex colors to CSS variables.
- */
-function migrateBlockColors(blocks: Block[]): Block[] {
-    const COLOR_MAP: Record<string, string> = {
-        // Pure Lights
-        // "#ffffff": "var(--background)",
-        // "#f8fafc": "var(--surface)",
-        // Theme Colors (only map if they were defaults)
-        "#6366f1": "var(--primary)",
-        "#818cf8": "var(--primary)",
-        "#8b5cf6": "var(--secondary)",
-        "#f59e0b": "var(--accent)",
-    };
-
-    const TEXT_PROPS = ["textColor", "color", "labelColor", "titleColor", "subtitleColor", "descColor", "nameColor", "roleColor", "ctaTextColor", "buttonTextColor", "inputTextColor"];
-    const BG_PROPS = ["bgColor", "cardBg", "itemBg", "itemBgColor", "inputBg", "ctaBgColor", "buttonBg", "fillColor"];
-    const ACCENT_PROPS = ["accentColor", "secondaryColor", "iconColor", "bulletColor"];
-    const BORDER_PROPS = ["borderColor", "itemBorderColor", "inputBorderColor"];
-
-    return blocks.map(b => {
-        const p = { ...b.props };
-        let changed = false;
-
-        Object.keys(p).forEach(key => {
-            const val = p[key];
-            if (typeof val === 'string') {
-                const hex = val.toLowerCase();
-
-                // Specific mapping based on property type
-                if (TEXT_PROPS.includes(key)) {
-                    if (hex === "#ffffff" || hex === "#fff" || hex === "#f8fafc" || hex === "#fafafa") {
-                        // EXCLUSION: Don't migrate white text for heros/containers with images
-                        const hasBgImage = !!p.bgImage || !!p.backgroundImage;
-                        if (b.type === "hero" || (b.type === "container" && hasBgImage)) {
-                            // Keep as white
-                        } else {
-                            p[key] = "var(--text)";
-                            changed = true;
-                        }
-                    } else if (hex === "#000000" || hex === "#000" || hex === "#09090b") {
-                        p[key] = "var(--text)";
-                        changed = true;
-                    } else if (val === "var(--text)" && b.type === "hero") {
-                        // REVERT: If it's a hero and was previously migrated to var(--text), set it back to white
-                        p[key] = "#ffffff";
-                        changed = true;
-                    }
-                } else if (BG_PROPS.includes(key)) {
-                    if (hex === "#ffffff" || hex === "#fff" || hex === "#fafafa") {
-                        // EXCLUSION: Don't migrate bgColor for heros with images
-                        if (b.type === "hero" && (!!p.bgImage || !!p.backgroundImage)) {
-                            // Keep original
-                        } else if (b.type === "stats" || b.type === "chart") {
-                            p[key] = "var(--surface)";
-                            changed = true;
-                        } else {
-                            p[key] = "var(--background)";
-                            changed = true;
-                        }
-                    } else if (hex === "#000000" || hex === "#09090b" || hex === "#111827" || hex === "#18181b" || hex === "#1a1a1a") {
-                        p[key] = "var(--surface)";
-                        changed = true;
-                    } else if (val === "var(--background)" && b.type === "hero" && (!!p.bgImage || !!p.backgroundImage)) {
-                        // REVERT: If it's a hero with an image and was migrated to var(--background), set it back to original (transparent/white)
-                        p[key] = "transparent";
-                        changed = true;
-                    }
-                } else if (ACCENT_PROPS.includes(key) && (hex === "#6366f1" || hex === "#8b5cf6" || hex === "#818cf8")) {
-                    p[key] = (hex === "#6366f1" || hex === "#818cf8") ? "var(--primary)" : "var(--secondary)";
-                    changed = true;
-                } else if (BORDER_PROPS.includes(key) && (hex === "#e2e8f0" || hex === "#cbd5e1" || hex === "#e5e7eb" || hex === "#27272a")) {
-                    p[key] = "var(--border)";
-                    changed = true;
-                } else if (COLOR_MAP[hex]) {
-                    p[key] = COLOR_MAP[hex];
-                    changed = true;
-                }
-            }
-            // Recurse into array props (cols, items, features, members)
-            if (Array.isArray(val) && val.length > 0) {
-                if ((val[0] as any)?.id && typeof (val[0] as any)?.type === "string") {
-                    // Array of blocks
-                    const migratedArr = migrateBlockColors(val as Block[]);
-                    if (migratedArr !== val) { p[key] = migratedArr; changed = true; }
-                } else if (typeof val[0] === 'object') {
-                    // Array of items (like stats items or features)
-                    let itemsChanged = false;
-                    const migratedItems = val.map(item => {
-                        const newItem = { ...item };
-                        Object.keys(newItem).forEach(k => {
-                            if (typeof newItem[k] === 'string' && COLOR_MAP[newItem[k].toLowerCase()]) {
-                                newItem[k] = COLOR_MAP[newItem[k].toLowerCase()];
-                                itemsChanged = true;
-                            }
-                        });
-                        return newItem;
-                    });
-                    if (itemsChanged) { p[key] = migratedItems; changed = true; }
-                }
-            }
-        });
-
-        const updatedBlock = changed ? { ...b, props: p } : b;
-        if (updatedBlock.children) {
-            const migratedChildren = migrateBlockColors(updatedBlock.children);
-            if (migratedChildren !== updatedBlock.children) {
-                return { ...updatedBlock, children: migratedChildren };
-            }
-        }
-        return updatedBlock;
-    });
-}
-
-export function recursiveClone(block: Block): Block {
-    const newId = crypto.randomUUID();
-    const newProps = { ...block.props };
-
-    if (Array.isArray(newProps.childBlocks)) {
-        newProps.childBlocks = newProps.childBlocks.map(recursiveClone);
-    }
-    if (Array.isArray(newProps.col0)) {
-        newProps.col0 = newProps.col0.map(recursiveClone);
-    }
-    if (Array.isArray(newProps.col1)) {
-        newProps.col1 = newProps.col1.map(recursiveClone);
-    }
-    if (Array.isArray(newProps.items)) {
-        newProps.items = (newProps.items as any[]).map(item => ({
-            ...item,
-            id: `slot-${crypto.randomUUID()}`,
-            blocks: Array.isArray(item.blocks) ? item.blocks.map(recursiveClone) : []
-        }));
-    }
-
-    // Generic nested objects with IDs (e.g. Accordion items, sub-features)
-    for (const key in newProps) {
-        const val = newProps[key];
-        if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'object' && val[0] !== null && 'id' in (val[0] as any)) {
-            newProps[key] = (val as any[]).map(v => ({ ...v, id: crypto.randomUUID() }));
-        }
-    }
-
-    return { ...block, id: newId, props: newProps };
-}
-
-function duplicateBlockDeep(blocks: Block[], targetId: string): { newBlocks: Block[], clonedId: string | null } {
-    let clonedId: string | null = null;
-    const items = blocks.flatMap(b => {
-        if (b.id === targetId) {
-            const clone = recursiveClone(b);
-            clonedId = clone.id;
-            return [b, clone]; // Insert after
-        }
-
-        let changed = false;
-        const newProps = { ...b.props };
-
-        ["childBlocks", "col0", "col1"].forEach(prop => {
-            if (Array.isArray(b.props[prop])) {
-                const res = duplicateBlockDeep(b.props[prop] as Block[], targetId);
-                if (res.clonedId) {
-                    newProps[prop] = res.newBlocks;
-                    clonedId = res.clonedId;
-                    changed = true;
-                }
-            }
-        });
-
-        // Search inside grid items
-        if (Array.isArray(b.props.items) && !changed) {
-            const items = b.props.items as any[];
-            const newItems = items.map(item => {
-                if (changed || !Array.isArray(item.blocks)) return item;
-                const res = duplicateBlockDeep(item.blocks, targetId);
-                if (res.clonedId) {
-                    clonedId = res.clonedId;
-                    changed = true;
-                    return { ...item, blocks: res.newBlocks };
-                }
-                return item;
-            });
-            if (changed) newProps.items = newItems;
-        }
-
-        if (changed) return [{ ...b, props: newProps }];
-        return [b];
-    });
-    return { newBlocks: items, clonedId };
-}
-
 export const useEditorStore = create<EditorStore>()(
     immer((set, get) => ({
         page: null,
@@ -667,8 +230,10 @@ export const useEditorStore = create<EditorStore>()(
             }
         }),
 
-        setPage: (page) =>
+        setPage: (incomingPage) =>
             set((state) => {
+                const page = cloneEditorPage(incomingPage);
+
                 // Multi-page migration check
                 if (!page.routes || page.routes.length === 0) {
                     const header = page.content?.find(b => b.type === "header") || null;
@@ -721,13 +286,12 @@ export const useEditorStore = create<EditorStore>()(
                 state.activeRouteId = fallbackRouteId;
                 state.isDirty = false;
 
-                // Run migrations
-                const themeChanged = forceLightModeMigration(page);
-                const blocksMigratedArr = migrateBlockColors(page.routes[0]?.content || []); // Initial pass
-                // Note: full deep migration happens on setPage as well
+                enforceLightMode(page, DEFAULT_THEME);
+                migrateEditorPageBlocks(page);
 
-                state.history = [JSON.parse(JSON.stringify(page))];
-                state.historyIndex = 0;
+                const nextHistory = createHistory(page);
+                state.history = nextHistory.history;
+                state.historyIndex = nextHistory.historyIndex;
             }),
 
         setActiveRoute: (routeId) => set((s) => {
@@ -757,32 +321,36 @@ export const useEditorStore = create<EditorStore>()(
                 s.page.routes.push(newRoute);
                 s.activeRouteId = newRoute.id;
                 s.isDirty = true;
-                get().pushHistory();
             });
-        },
-        updateRoute: (routeId, updates) => set((s) => {
-            if (!s.page || !s.page.routes) return;
-            const r = s.page.routes.find(x => x.id === routeId);
-            if (r) {
-                if (updates.name !== undefined) r.name = updates.name;
-                if (updates.path !== undefined) r.path = updates.path;
-                if (updates.hideHeader !== undefined) r.hideHeader = updates.hideHeader;
-                if (updates.hideFooter !== undefined) r.hideFooter = updates.hideFooter;
-                if (updates.showInHeader !== undefined) r.showInHeader = updates.showInHeader;
-                if (updates.showInFooter !== undefined) r.showInFooter = updates.showInFooter;
-                s.isDirty = true;
-                get().pushHistory();
-            }
-        }),
-        deleteRoute: (routeId) => set((s) => {
-            if (!s.page || !s.page.routes) return;
-            s.page.routes = s.page.routes.filter(x => x.id !== routeId);
-            if (s.activeRouteId === routeId) {
-                s.activeRouteId = s.page.routes[0]?.id || null;
-            }
-            s.isDirty = true;
             get().pushHistory();
-        }),
+        },
+        updateRoute: (routeId, updates) => {
+            set((s) => {
+                if (!s.page || !s.page.routes) return;
+                const r = s.page.routes.find(x => x.id === routeId);
+                if (r) {
+                    if (updates.name !== undefined) r.name = updates.name;
+                    if (updates.path !== undefined) r.path = updates.path;
+                    if (updates.hideHeader !== undefined) r.hideHeader = updates.hideHeader;
+                    if (updates.hideFooter !== undefined) r.hideFooter = updates.hideFooter;
+                    if (updates.showInHeader !== undefined) r.showInHeader = updates.showInHeader;
+                    if (updates.showInFooter !== undefined) r.showInFooter = updates.showInFooter;
+                    s.isDirty = true;
+                }
+            });
+            get().pushHistory();
+        },
+        deleteRoute: (routeId) => {
+            set((s) => {
+                if (!s.page || !s.page.routes) return;
+                s.page.routes = s.page.routes.filter(x => x.id !== routeId);
+                if (s.activeRouteId === routeId) {
+                    s.activeRouteId = s.page.routes[0]?.id || null;
+                }
+                s.isDirty = true;
+            });
+            get().pushHistory();
+        },
 
         selectBlock: (id) => set((s) => {
             // Only clear sub-item focus if we are switching to a DIFFERENT block
@@ -910,7 +478,7 @@ export const useEditorStore = create<EditorStore>()(
                         ...(s.page.globalBlocks?.footer ? [s.page.globalBlocks.footer] : []),
                     ];
 
-                    const { newBlocks: afterInsert, inserted } = insertBlockDeep(
+                    const { newBlocks: afterInsert, inserted } = insertBlockInTree(
                         roots, freshBlock, target.id, target.position, target.childProp
                     );
 
@@ -972,7 +540,7 @@ export const useEditorStore = create<EditorStore>()(
                 const activeRoute = s.page.routes.find(r => r.id === s.activeRouteId);
 
                 if (parentId) {
-                    applyUpdaterDeep(s.page, s.activeRouteId, (blocks) => findAndUpdate(blocks, parentId, (b) => ({
+                    applyBlockUpdaterDeep(s.page, s.activeRouteId, (blocks) => updateBlockInTree(blocks, parentId, (b) => ({
                         ...b, children: [...(b.children ?? []), freshBlock]
                     })));
                 } else {
@@ -1003,7 +571,7 @@ export const useEditorStore = create<EditorStore>()(
         updateBlock: (id, props, commit) => {
             set((s) => {
                 if (!s.page) return;
-                applyUpdaterDeep(s.page, s.activeRouteId, (blocks) => findAndUpdate(blocks, id, (b) => ({
+                applyBlockUpdaterDeep(s.page, s.activeRouteId, (blocks) => updateBlockInTree(blocks, id, (b) => ({
                     ...b, props: { ...b.props, ...props }
                 })));
                 s.isDirty = true;
@@ -1014,7 +582,7 @@ export const useEditorStore = create<EditorStore>()(
         updateBlockStyle: (id, style, commit) => {
             set((s) => {
                 if (!s.page) return;
-                applyUpdaterDeep(s.page, s.activeRouteId, (blocks) => findAndUpdate(blocks, id, (b) => ({
+                applyBlockUpdaterDeep(s.page, s.activeRouteId, (blocks) => updateBlockInTree(blocks, id, (b) => ({
                     ...b, style: { ...b.style, ...style }
                 })));
                 s.isDirty = true;
@@ -1027,16 +595,30 @@ export const useEditorStore = create<EditorStore>()(
                 if (!s.page) return;
                 const activeRoute = s.page.routes?.find(r => r.id === s.activeRouteId);
 
-                // Regular route content duplication
                 if (activeRoute) {
-                    const { newBlocks, clonedId } = duplicateBlockDeep(activeRoute.content, id);
+                    if (s.page.globalBlocks?.header?.id === id || s.page.globalBlocks?.footer?.id === id) return;
+
+                    const roots = [
+                        ...(s.page.globalBlocks?.header ? [s.page.globalBlocks.header] : []),
+                        ...activeRoute.content,
+                        ...(s.page.globalBlocks?.footer ? [s.page.globalBlocks.footer] : []),
+                    ];
+                    const { newBlocks, clonedId } = duplicateBlockTree(roots, id);
                     if (clonedId) {
-                        activeRoute.content = newBlocks;
+                        const newHeader = newBlocks.find(b => b.type === "header") || null;
+                        const newFooter = newBlocks.find(b => b.type === "footer") || null;
+                        const newContent = newBlocks.filter(b => b.type !== "header" && b.type !== "footer");
+
+                        if (s.page.globalBlocks) {
+                            s.page.globalBlocks.header = newHeader;
+                            s.page.globalBlocks.footer = newFooter;
+                        }
+                        activeRoute.content = newContent;
                         s.selectedBlockId = clonedId; // Auto-select clone
                         s.isDirty = true;
                     }
                 } else if (s.page.content) {
-                    const { newBlocks, clonedId } = duplicateBlockDeep(s.page.content, id);
+                    const { newBlocks, clonedId } = duplicateBlockTree(s.page.content, id);
                     if (clonedId) {
                         s.page.content = newBlocks;
                         s.selectedBlockId = clonedId;
@@ -1049,7 +631,7 @@ export const useEditorStore = create<EditorStore>()(
         deleteBlock: (id) => {
             set((s) => {
                 if (!s.page) return;
-                applyUpdaterDeep(s.page, s.activeRouteId, (blocks) => findAndDelete(blocks, id));
+                applyBlockUpdaterDeep(s.page, s.activeRouteId, (blocks) => deleteBlockFromTree(blocks, id));
                 if (s.selectedBlockId === id) s.selectedBlockId = null;
                 s.isDirty = true;
             });
@@ -1143,53 +725,56 @@ export const useEditorStore = create<EditorStore>()(
                     return changedAny ? nextBlocks : blocks;
                 }
 
-                applyUpdaterDeep(s.page, s.activeRouteId, swapWalk);
+                applyBlockUpdaterDeep(s.page, s.activeRouteId, swapWalk);
                 s.isDirty = true;
             });
             get().pushHistory();
         },
 
-        replaceBlock: (id, newBlock) => set((s) => {
-            if (!s.page) return;
-            applyUpdaterDeep(s.page, s.activeRouteId, (blocks) => {
-                const updater = (list: Block[]): Block[] => {
-                    return list.map(b => {
-                        if (b.id === id) return { ...newBlock, id }; // Keep original ID to preserve position
-                        const next = { ...b };
-                        let changed = false;
-                        if (next.children) {
-                            const res = updater(next.children);
-                            if (res !== next.children) { next.children = res; changed = true; }
-                        }
-                        ["col0", "col1", "childBlocks"].forEach(key => {
-                            if (Array.isArray(next.props[key])) {
-                                const res = updater(next.props[key] as Block[]);
-                                if (res !== next.props[key]) {
-                                    next.props = { ...next.props, [key]: res };
-                                    changed = true;
-                                }
+        replaceBlock: (id, newBlock) => {
+            set((s) => {
+                if (!s.page) return;
+                applyBlockUpdaterDeep(s.page, s.activeRouteId, (blocks) => {
+                    const updater = (list: Block[]): Block[] => {
+                        return list.map(b => {
+                            if (b.id === id) return { ...newBlock, id }; // Keep original ID to preserve position
+                            const next = { ...b };
+                            let changed = false;
+                            if (next.children) {
+                                const res = updater(next.children);
+                                if (res !== next.children) { next.children = res; changed = true; }
                             }
-                        });
-                        if (Array.isArray(next.props.items)) {
-                            const nextItems = (next.props.items as any[]).map(item => {
-                                if (!item.blocks) return item;
-                                const res = updater(item.blocks);
-                                if (res !== item.blocks) { changed = true; return { ...item, blocks: res }; }
-                                return item;
+                            ["col0", "col1", "childBlocks"].forEach(key => {
+                                if (Array.isArray(next.props[key])) {
+                                    const res = updater(next.props[key] as Block[]);
+                                    if (res !== next.props[key]) {
+                                        next.props = { ...next.props, [key]: res };
+                                        changed = true;
+                                    }
+                                }
                             });
-                            if (changed) next.props = { ...next.props, items: nextItems };
-                        }
-                        return next;
-                    });
-                };
-                return updater(blocks);
+                            if (Array.isArray(next.props.items)) {
+                                const nextItems = (next.props.items as any[]).map(item => {
+                                    if (!item.blocks) return item;
+                                    const res = updater(item.blocks);
+                                    if (res !== item.blocks) { changed = true; return { ...item, blocks: res }; }
+                                    return item;
+                                });
+                                if (changed) next.props = { ...next.props, items: nextItems };
+                            }
+                            return next;
+                        });
+                    };
+                    return updater(blocks);
+                });
+                s.isDirty = true;
             });
-            s.isDirty = true;
             get().pushHistory();
-        }),
+        },
 
 
-        moveBlock: (activeId, overId, position = "after", childProp?) =>
+        moveBlock: (activeId, overId, position = "after", childProp?) => {
+            let moved = false;
             set((s) => {
                 if (!s.page || !s.activeRouteId) return;
 
@@ -1207,7 +792,7 @@ export const useEditorStore = create<EditorStore>()(
                     ...(s.page.globalBlocks?.footer ? [s.page.globalBlocks.footer] : []),
                 ];
 
-                const { newBlocks: afterRemove, removed } = findAndRemoveBlock(roots, activeId);
+                const { newBlocks: afterRemove, removed } = removeBlockFromTree(roots, activeId);
                 if (!removed) return;
 
                 if (removed.type === "header" || removed.type === "footer") {
@@ -1217,19 +802,18 @@ export const useEditorStore = create<EditorStore>()(
 
                 if (overId === "canvas-root") {
                     // Append to end of route content
-                    activeRoute.content = activeRoute.content.filter(b => b.id !== activeId);
+                    const newHeader = afterRemove.find(b => b.type === "header") || null;
+                    const newFooter = afterRemove.find(b => b.type === "footer") || null;
+                    const newContent = afterRemove.filter(b => b.type !== "header" && b.type !== "footer");
 
-                    if (removed.type === "header") {
-                        if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
-                        s.page.globalBlocks.header = removed;
-                    } else if (removed.type === "footer") {
-                        if (!s.page.globalBlocks) s.page.globalBlocks = { header: null, footer: null };
-                        s.page.globalBlocks.footer = removed;
-                    } else {
-                        activeRoute.content.push(removed);
+                    if (s.page.globalBlocks) {
+                        s.page.globalBlocks.header = newHeader;
+                        s.page.globalBlocks.footer = newFooter;
                     }
+                    activeRoute.content = [...newContent, removed];
+                    moved = true;
                 } else {
-                    const { newBlocks: afterInsert, inserted } = insertBlockDeep(afterRemove, removed, overId, position, childProp);
+                    const { newBlocks: afterInsert, inserted } = insertBlockInTree(afterRemove, removed, overId, position, childProp);
 
                     if (inserted) {
                         // Extract back header/footer and assign route content
@@ -1244,11 +828,14 @@ export const useEditorStore = create<EditorStore>()(
                             if (newFooter) s.page.globalBlocks.footer = newFooter;
                         }
                         activeRoute.content = newContent;
+                        moved = true;
                     }
                 }
 
-                s.isDirty = true;
-            }),
+                if (moved) s.isDirty = true;
+            });
+            if (moved) get().pushHistory();
+        },
 
         updateTheme: (theme, commit) => {
             set((s: any) => {
@@ -1271,7 +858,7 @@ export const useEditorStore = create<EditorStore>()(
                     s.page.theme.colors.text = "#0f172a";
                 }
 
-                applyUpdaterDeep(s.page, s.activeRouteId, migrateBlockColors);
+                applyBlockUpdaterDeep(s.page, s.activeRouteId, migrateEditorBlockColors);
                 s.isDirty = true;
             });
             if (commit) get().pushHistory();
@@ -1286,7 +873,7 @@ export const useEditorStore = create<EditorStore>()(
             if (s.page.theme.colors.background === "#020617" || s.page.theme.colors.background === "#09090b") {
                 s.page.theme.colors.background = "#ffffff";
             }
-            applyUpdaterDeep(s.page, s.activeRouteId, migrateBlockColors);
+            applyBlockUpdaterDeep(s.page, s.activeRouteId, migrateEditorBlockColors);
             s.isDirty = true;
         }),
 
@@ -1324,7 +911,7 @@ export const useEditorStore = create<EditorStore>()(
             set((s) => {
                 if (s.historyIndex <= 0) return;
                 s.historyIndex--;
-                s.page = JSON.parse(JSON.stringify(s.history[s.historyIndex]));
+                s.page = cloneEditorPage(s.history[s.historyIndex]);
                 s.isDirty = true;
             }),
 
@@ -1332,7 +919,7 @@ export const useEditorStore = create<EditorStore>()(
             set((s) => {
                 if (s.historyIndex >= s.history.length - 1) return;
                 s.historyIndex++;
-                s.page = JSON.parse(JSON.stringify(s.history[s.historyIndex]));
+                s.page = cloneEditorPage(s.history[s.historyIndex]);
                 s.isDirty = true;
             }),
 
@@ -1341,19 +928,10 @@ export const useEditorStore = create<EditorStore>()(
         // ─ Internal Helper ──────────────────────────────────────────────────────
         pushHistory: () => set((s) => {
             if (!s.page) return;
-            const snapshot = JSON.parse(JSON.stringify(s.page));
-            // Only push if content/theme actually changed from the last history entry
-            const last = s.history[s.historyIndex];
-            if (last && JSON.stringify(last) === JSON.stringify(snapshot)) return;
-
-            s.history = s.history.slice(0, s.historyIndex + 1);
-            s.history.push(snapshot);
-            // Limit history to 50 states
-            if (s.history.length > 50) {
-                s.history.shift();
-            } else {
-                s.historyIndex++;
-            }
+            const next = pushHistorySnapshot(s.history, s.historyIndex, s.page);
+            if (!next.changed) return;
+            s.history = next.history;
+            s.historyIndex = next.historyIndex;
             s.isDirty = true;
         }),
 
@@ -1361,7 +939,7 @@ export const useEditorStore = create<EditorStore>()(
             if (!s.page) return;
 
             // 1. Migrate Blocks
-            applyUpdaterDeep(s.page, s.activeRouteId, migrateBlockColors);
+            applyBlockUpdaterDeep(s.page, s.activeRouteId, migrateEditorBlockColors);
 
             // 2. Migrate Theme Colors (if any are hardcoded to old values)
             const c = s.page.theme.colors;

@@ -8,6 +8,7 @@ import { Container } from "@/components/ui/Container";
 
 export default function SitePageClient({ pageContent }: { pageContent: any }) {
     const router = useRouter();
+    const trustedBackendHtml = pageContent?.content || "";
 
     useEffect(() => {
         if (!pageContent) {
@@ -34,7 +35,10 @@ export default function SitePageClient({ pageContent }: { pageContent: any }) {
                     <div
                         className="prose prose-invert max-w-none"
                         style={{ color: "rgba(255,255,255,0.8)", lineHeight: 1.8 }}
-                        dangerouslySetInnerHTML={{ __html: pageContent.content }}
+                        // Public site pages currently store authored HTML from the backend.
+                        // Keep output unchanged here; sanitization belongs at the write/API boundary
+                        // so saved pages are cleaned consistently before every frontend consumes them.
+                        dangerouslySetInnerHTML={{ __html: trustedBackendHtml }}
                     />
                 </Container>
             </main>

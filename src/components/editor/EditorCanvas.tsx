@@ -17,6 +17,7 @@ import {
   Squares2X2Icon, ArrowsRightLeftIcon
 } from "@heroicons/react/24/outline";
 import { useEditorStore, LIGHT_COLORS } from "@/stores/editorStore";
+import { useEditorCanvasState } from "@/stores/editor/selectors";
 import { applyThemeToElement, DEFAULT_THEME } from "@/lib/utils/theme";
 import { BlockRenderer, WaveQuickEditor, TextQuickEditor } from "./blocks";
 import { ActivePathContext, getBlockMediaInfo, QuickLayoutChange } from "./blocks/shared";
@@ -51,7 +52,7 @@ const WaveIcon = ({ className, style }: { className?: string, style?: React.CSSP
 // ─── Main Canvas ──────────────────────────────────────────────────────────────
 
 export default function EditorCanvas() {
-  const { page, viewMode, selectBlock, updateTheme, activeRouteId, waveEditorPos, setWaveEditorPos, textEditorPos, setTextEditorPos, selectedBlockId } = useEditorStore();
+  const { page, viewMode, selectBlock, updateTheme, activeRouteId, waveEditorPos, setWaveEditorPos, textEditorPos, setTextEditorPos, selectedBlockId } = useEditorCanvasState();
   const dragControls = useDragControls();
 
   const activeRoute = page?.routes?.find(r => r.id === activeRouteId);
@@ -314,7 +315,7 @@ const DropZone = memo(function DropZone({
   footerId?: string
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas-root" });
-  const { selectBlock } = useEditorStore();
+  const selectBlock = useEditorStore((s) => s.selectBlock);
   const blockIds = blocks.map((b) => b.id);
 
   // Track which block is being hovered over
@@ -677,7 +678,7 @@ const CanvasBlock = memo(function CanvasBlock({
         {showControls && (
           <div className="absolute right-4 p-1 rounded-sm shadow-md bg-white space-x-1 flex items-center" style={{
             zIndex: 11002,
-            top: block.type === "header" ? "calc(100% + 10px)" : 120,
+            top: block.type === "header" || block.type === "hero" ? 80 : 10,
           }}>
             <QuickLayoutChange block={block} />
 

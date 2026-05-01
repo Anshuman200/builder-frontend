@@ -2,32 +2,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: [],
+   reactStrictMode: true,
   images: {
+    qualities: [75, 90, 100],
+
+    // Device breakpoints (tuned for most apps)
+    deviceSizes: [320, 420, 768, 1024, 1200, 1600],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 's3.ap-south-1.amazonaws.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'solario-web-builder.s3.ap-south-1.amazonaws.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'd1xyjpr3hmv834.cloudfront.net',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'solidappmaker-pagecraft.s3.ap-south-1.amazonaws.com',
-        port: '',
-        pathname: '/**',
-      },
       {
         protocol: 'https',
         hostname: 'd1xyjpr3hmv834.cloudfront.net',
@@ -39,15 +22,13 @@ const nextConfig: NextConfig = {
         hostname: 'images.unsplash.com',
         port: '',
         pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.pexels.com',
-        port: '',
-        pathname: '/**',
       }
-    ]
+    ],
+
+    // Cache optimized images at the edge
+    minimumCacheTTL: 60 * 60 * 24 * 7, // 7 days
   },
+  poweredByHeader: false,
 };
 
 export default nextConfig;

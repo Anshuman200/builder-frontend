@@ -59,7 +59,7 @@ export function VerifyOtpForm({ handleVerify, error, setTab, redirectOnSuccess }
     <div style={{ display: "flex", flexDirection: "column", gap: 16, alignItems: "center", padding: "24px 0" }}>
       {verifying ? (
         <>
-          <Spin indicator={<LoadingOutlined style={{ fontSize: 48, color: "#6366f1" }} spin />} />
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 48, color: "var(--auth-link)" }} spin />} />
           <FormHeading
             title="Verifying your email..."
             subtitle="Please wait while we securely verify your account."

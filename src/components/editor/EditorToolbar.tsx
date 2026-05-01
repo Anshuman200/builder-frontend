@@ -33,6 +33,7 @@ import { AppColorPicker, PANEL_COLORS } from "./panels/shared";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEditorStore } from "@/stores/editorStore";
+import { useEditorToolbarState } from "@/stores/editor/selectors";
 import { slugify } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -47,6 +48,28 @@ import { DEFAULT_THEME } from "@/stores/editorStore";
 import NewPageWizard from "@/components/editor/NewPageWizard";
 import { ConfigProvider, theme as antdTheme } from "antd";
 
+function buildEditorPagePayload(page: any, thumbnailUrl?: string | null) {
+  if (!page) return null;
+
+  const payload: any = {
+    title: page.title,
+    slug: page.slug,
+    content: page.content || [],
+    routes: page.routes || [],
+    globalBlocks: page.globalBlocks || { header: null, footer: null },
+    theme: page.theme || DEFAULT_THEME,
+    meta: page.meta || {},
+    category: page.category || "Other",
+    status: page.status || "DRAFT",
+  };
+
+  if (thumbnailUrl !== undefined) {
+    payload.thumbnail = thumbnailUrl;
+  }
+
+  return payload;
+}
+
 export default function EditorToolbar() {
   const {
     page, viewMode, isDirty,
@@ -55,7 +78,7 @@ export default function EditorToolbar() {
     updateTitle, updateSlug, updateMeta, updateTheme, updatePageData, markClean,
     activeRouteId, setActiveRoute, addRoute,
     openTemplatePicker, openWizard,
-  } = useEditorStore();
+  } = useEditorToolbarState();
   const { pageId } = useParams<{ pageId: string }>() ?? {};
   const router = useRouter();
 
@@ -82,31 +105,13 @@ export default function EditorToolbar() {
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
-  // Helper to format payload for backend
-  const getPlainPayload = (thumbnailUrl?: string | null) => {
-    if (!page) return null;
-
-    const payload: any = {
-      title: page.title,
-      slug: page.slug,
-      content: page.content || [],
-      routes: page.routes || [],
-      globalBlocks: page.globalBlocks || { header: null, footer: null },
-      theme: page.theme || DEFAULT_THEME,
-      meta: page.meta || {},
-      category: page.category || 'Other',
-      status: page.status || 'DRAFT'
-    };
-
-    if (thumbnailUrl !== undefined) {
-      payload.thumbnail = thumbnailUrl;
-    }
-
-    return payload;
-  };
+  const getPlainPayload = useCallback(
+    (thumbnailUrl?: string | null) => buildEditorPagePayload(page, thumbnailUrl),
+    [page],
+  );
 
   // Fire-and-forget: keep preview cache in sync with every save
-  const pushPreviewCache = (payload?: any) => {
+  const pushPreviewCache = useCallback((payload?: any) => {
     const data = payload || (page ? { ...page } : null);
     if (!data || !pageId || pageId.length < 24) return;
     fetch(`/api/preview/${pageId}`, {
@@ -114,7 +119,7 @@ export default function EditorToolbar() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     }).catch(() => { });
-  };
+  }, [page, pageId]);
 
   // Handle thumbnail selection from capture or media library
   const handleUpdateThumbnails = async (newThumbnails: string[], active: string | null) => {
@@ -159,7 +164,7 @@ export default function EditorToolbar() {
     }, 800);
 
     return () => clearTimeout(timeoutId);
-  }, [page, user, pageId, isDirty, isSaving, markClean]);
+  }, [page, user, pageId, isDirty, isSaving, getPlainPayload, markClean, pushPreviewCache, updateMutation]);
 
   // Keyboard shortcuts for Undo/Redo
   useEffect(() => {

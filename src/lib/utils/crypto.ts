@@ -9,6 +9,15 @@ const ITERATIONS = 100000;
 // Shared key for public templates (Gallery)
 // The server still only see opaque blobs, but any user can decrypt a "Public" template.
 const GALLERY_SECRET = "PAGECRAFT-PUBLIC-GALLERY-V1";
+let inMemorySessionSecret: string | null = null;
+
+export function setSessionSecret(secret: string | null) {
+    inMemorySessionSecret = secret;
+}
+
+export function hasSessionSecret() {
+    return !!inMemorySessionSecret;
+}
 
 /**
  * Derives a CryptoKey from a raw password string
@@ -37,15 +46,17 @@ export async function deriveKeyFromPassword(password: string, algo: "AES-GCM" | 
 }
 
 /**
- * Gets the current active session key from sessionStorage
+ * Gets the current active session key.
+ * The raw login password intentionally stays in memory only; persisting it in
+ * sessionStorage made the legacy encryption bridge available after refreshes,
+ * but also exposed a credential-equivalent secret to any same-origin script.
  */
 async function getSessionKey(algo: "AES-GCM" | "AES-CBC"): Promise<CryptoKey> {
-    const pwd = sessionStorage.getItem("pagecraft_session_key");
-    if (!pwd) {
+    if (!inMemorySessionSecret) {
         // Fallback to gallery secret if no session key exists (for public templates)
         return deriveKeyFromPassword(GALLERY_SECRET, algo);
     }
-    return deriveKeyFromPassword(pwd, algo);
+    return deriveKeyFromPassword(inMemorySessionSecret, algo);
 }
 
 /**

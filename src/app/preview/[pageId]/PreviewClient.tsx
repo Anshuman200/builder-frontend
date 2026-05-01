@@ -14,13 +14,9 @@ import { useLiveHead } from "@/hooks/useLiveHead";
 import React from "react";
 
 export default function PreviewClient({ pageId, initialData, initialPath = "/" }: { pageId: string, initialData?: any, initialPath?: string }) {
-    const { page, setPage } = useEditorStore();
+    const page = useEditorStore((s) => s.page);
+    const setPage = useEditorStore((s) => s.setPage);
     const [loading, setLoading] = useState(!page && !initialData);
-
-    // Hydrate store from server data if not already present
-    if (initialData && !page) {
-        setPage(initialData);
-    }
     const mainRef = React.useRef<HTMLDivElement>(null);
     const [currentPath, setCurrentPath] = useState(initialPath);
 
@@ -28,8 +24,15 @@ export default function PreviewClient({ pageId, initialData, initialPath = "/" }
     useLiveHead(page);
 
     useEffect(() => {
+        if (!initialData || page) return;
+        setPage(initialData);
+        setLoading(false);
+    }, [initialData, page, setPage]);
+
+    useEffect(() => {
         async function load() {
             if (!pageId) return;
+            if (initialData && !page) return;
 
             try {
                 // ── 1. Try the preview cache (holds current unsaved editor state) ──
@@ -73,7 +76,7 @@ export default function PreviewClient({ pageId, initialData, initialPath = "/" }
             }
         }
         load();
-    }, [pageId, setPage]);
+    }, [initialData, page, pageId, setPage]);
 
     useEffect(() => {
         if (mainRef.current) {

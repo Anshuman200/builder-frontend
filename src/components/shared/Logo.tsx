@@ -21,7 +21,7 @@ export const Logo = ({ className = "w-8 h-8", src = "/logo.png" }: LogoProps) =>
           sizes="(max-width: 768px) 100vw, 33vw"
           className="relative z-10 object-contain drop-shadow-xl rounded-xl"
           priority
-          quality={100}
+          quality={90}
         />
       </div>
     </div>

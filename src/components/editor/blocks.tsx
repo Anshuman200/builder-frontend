@@ -38,50 +38,53 @@ import { GridBlock } from "./blocks/GridBlock";
 import { QRCodeBlock } from "./blocks/QRCodeBlock";
  
 // ─── Block Renderer dispatch ──────────────────────────────────────────────────
+
+type BlockComponent = React.ComponentType<{ block: Block }>;
+
+const blockRegistry: Record<string, BlockComponent> = {
+  header: HeaderBlock,
+  "header-2": HeaderBlock,
+  hero: HeroBlock,
+  container: ContainerBlock,
+  text: TextBlock,
+  image: ImageBlock,
+  video: VideoBlock,
+  icon: IconBlock,
+  button: ButtonBlock,
+  divider: DividerBlock,
+  features: FeaturesBlock,
+  team: TeamBlock,
+  columns: ColumnsBlock,
+  contactForm: ContactFormBlock,
+  contactInfo: ContactInfoBlock,
+  accordion: AccordionBlock,
+  wave: WaveBlock,
+  masonry: MasonryBlock,
+  "media-picker": MediaPickerBlock,
+  stats: StatsBlock,
+  chart: ChartBlock,
+  grid: GridBlock,
+  qrcode: QRCodeBlock,
+  deleteAccount: DeleteAccountBlock,
+  tos: LegalBlock,
+  privacy: LegalBlock,
+  about: LegalBlock,
+  footer: FooterBlock,
+  "footer-2": FooterBlock,
+};
  
 export function BlockRenderer({ block }: { block: Block }) {
-  const renderBlock = () => {
-    switch (block.type) {
-      case "header":
-      case "header-2": return <HeaderBlock block={block} />;
-      case "hero": return <HeroBlock block={block} />;
-      case "container": return <ContainerBlock block={block} />;
-      case "text": return <TextBlock block={block} />;
-      case "image": return <ImageBlock block={block} />;
-      case "video": return <VideoBlock block={block} />;
-      case "icon": return <IconBlock block={block} />;
-      case "button": return <ButtonBlock block={block} />;
-      case "divider": return <DividerBlock block={block} />;
-      case "features": return <FeaturesBlock block={block} />;
-      case "team": return <TeamBlock block={block} />;
-      case "columns": return <ColumnsBlock block={block} />;
-      case "contactForm": return <ContactFormBlock block={block} />;
-      case "contactInfo": return <ContactInfoBlock block={block} />;
-      case "accordion": return <AccordionBlock block={block} />;
-      case "wave": return <WaveBlock block={block} />;
-      case "masonry": return <MasonryBlock block={block} />;
-      case "media-picker": return <MediaPickerBlock block={block} />;
-      case "stats": return <StatsBlock block={block} />;
-      case "chart": return <ChartBlock block={block} />;
-      case "grid": return <GridBlock block={block} />;
-      case "qrcode": return <QRCodeBlock block={block} />;
-      case "deleteAccount": return <DeleteAccountBlock block={block} />;
-      case "tos":
-      case "privacy":
-      case "about": return <LegalBlock block={block} />;
-      case "footer":
-      case "footer-2": return <FooterBlock block={block} />;
-      default: return (
-        <div style={{ padding: 16, color: "var(--text-subtle)", fontSize: 13 }}>
-          Unknown block: {block.type}
-        </div>
-      );
-    }
-  };
+  const Component = blockRegistry[block.type];
 
   return (
     <BlockContext.Provider value={block.id}>
-      {renderBlock()}
+      {Component ? (
+        <Component block={block} />
+      ) : (
+        <div style={{ padding: 16, color: "var(--text-subtle)", fontSize: 13 }}>
+          Unknown block: {block.type}
+        </div>
+      )}
     </BlockContext.Provider>
   );
 }

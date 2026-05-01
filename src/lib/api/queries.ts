@@ -80,6 +80,10 @@ export const useSitePages = () => {
 
 // ─── Pages Mutations ─────────────────────────────────────────────────────────
 
+function touchesTemplateListing(body: Record<string, any>) {
+    return ["isTemplate", "isPublic", "category", "status", "title", "slug", "thumbnail", "thumbnails"].some((key) => key in body);
+}
+
 export const useCreatePage = () => {
     const queryClient = useQueryClient();
     return useMutation({
@@ -98,13 +102,16 @@ export const useUpdatePage = () => {
     return useMutation({
         mutationFn: ({ id, ...body }: { id: string } & Record<string, any>) =>
             pagesApi.update(id, body),
-        onSuccess: (_, variables) => {
+        onSuccess: (res, variables) => {
+            const updatedPage = (res as any)?.data?.page || (res as any)?.data;
+            if (updatedPage) {
+                queryClient.setQueryData(["pages", variables.id], updatedPage);
+            }
             queryClient.invalidateQueries({ queryKey: ["pages"] });
-            queryClient.invalidateQueries({ queryKey: ["pages", variables.id] });
-            queryClient.invalidateQueries({ queryKey: ["templates"] });
-            queryClient.invalidateQueries({ queryKey: ["admin", "templates"] });
-            // Force refetch to be absolutely sure
-            queryClient.refetchQueries({ queryKey: ["admin", "templates"] });
+            if (touchesTemplateListing(variables)) {
+                queryClient.invalidateQueries({ queryKey: ["templates"] });
+                queryClient.invalidateQueries({ queryKey: ["admin", "templates"] });
+            }
         },
     });
 };

@@ -15,17 +15,17 @@ export const GlassOrb = memo(function GlassOrb({ style }: { style: React.CSSProp
   );
 });
 
-// ─── Shared dark-theme design tokens ─────────────────────────────────────────
+// ─── Shared theme-aware design tokens ────────────────────────────────────────
 export const INPUT_STYLE: React.CSSProperties = {
-  background: "rgba(255,255,255,0.05)",
-  borderColor: "rgba(255,255,255,0.1)",
+  background: "var(--auth-input-bg)",
+  borderColor: "var(--auth-input-border)",
   borderRadius: 10,
   height: 44,
-  color: "#f9fafb",
+  color: "var(--auth-text)",
 };
 
 export const LABEL_STYLE: React.CSSProperties = {
-  color: "rgba(255,255,255,0.65)",
+  color: "var(--auth-label)",
   fontSize: "0.82rem",
   fontWeight: 600,
 };
@@ -43,9 +43,9 @@ export function TabSwitcher({ tab, onChange }: { tab: Tab; onChange: (t: "login"
   return (
     <div style={{
       display: "grid", gridTemplateColumns: "1fr 1fr",
-      background: "rgba(255,255,255,0.05)",
+      background: "var(--auth-control-bg)",
       borderRadius: 10, padding: 3,
-      border: "1px solid rgba(255,255,255,0.07)",
+      border: "1px solid var(--auth-border)",
       marginBottom: "1.5rem",
     }}>
       {(["login", "register"] as const).map(t => (
@@ -55,12 +55,12 @@ export function TabSwitcher({ tab, onChange }: { tab: Tab; onChange: (t: "login"
           onClick={() => onChange(t)}
           style={{
             padding: "9px 12px", borderRadius: 8, border: "none",
-            background: tab === t ? "rgba(99,102,241,0.25)" : "transparent",
-            color: tab === t ? "#a5b4fc" : "rgba(255,255,255,0.35)",
+            background: tab === t ? "var(--auth-tab-active-bg)" : "transparent",
+            color: tab === t ? "var(--auth-link)" : "var(--auth-muted)",
             fontWeight: tab === t ? 700 : 500,
             fontSize: "0.875rem", cursor: "pointer", fontFamily: "inherit",
             transition: "all 0.2s ease",
-            boxShadow: tab === t ? "0 0 0 1px rgba(99,102,241,0.3)" : "none",
+            boxShadow: tab === t ? "0 0 0 1px var(--auth-tab-active-border)" : "none",
           }}
         >
           {t === "login" ? "Log in" : "Sign up"}
@@ -76,12 +76,12 @@ export function FormHeading({ title, subtitle }: { title: string; subtitle: stri
     <div style={{ marginBottom: "1.25rem" }}>
       <h3 style={{
         fontWeight: 800, fontSize: "1.25rem",
-        color: "#f9fafb",
-        margin: "0 0 4px", letterSpacing: "-0.02em",
+        color: "var(--auth-text)",
+        margin: "0 0 4px",
       }}>
         {title}
       </h3>
-      <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.4)", margin: 0 }}>
+      <p style={{ fontSize: "0.82rem", color: "var(--auth-muted)", margin: 0 }}>
         {subtitle}
       </p>
     </div>
@@ -104,13 +104,13 @@ export function GlassLink({
       onClick={onClick}
       style={{
         background: "none", border: "none", cursor: "pointer",
-        color: "#a78bfa", fontWeight: 700,
+        color: "var(--auth-link)", fontWeight: 700,
         fontSize: "0.82rem", fontFamily: "inherit",
         padding: 0, transition: "color 0.15s",
         ...style,
       }}
-      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#c4b5fd"; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#a78bfa"; }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--auth-link-hover)"; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--auth-link)"; }}
     >
       {children}
     </button>

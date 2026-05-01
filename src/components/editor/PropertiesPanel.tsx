@@ -14,6 +14,7 @@ import type { Block } from "@/types";
 import React, { useRef, useEffect, useState } from "react";
 
 import { useEditorStore } from "@/stores/editorStore";
+import { usePropertiesPanelState } from "@/stores/editor/selectors";
 import { Section, Field, TextInput, PANEL_COLORS } from "./panels/shared";
 import { ConfigProvider, theme as antdTheme } from "antd";
 
@@ -90,7 +91,7 @@ function findBlock(blocks: Block[] | undefined, id: string): Block | undefined {
 // ─── Main PropertiesPanel ────────────────────────────────────────────────────
 
 export default function PropertiesPanel() {
-    const { page, selectedBlockId, updateBlock, activeRouteId } = useEditorStore();
+    const { page, selectedBlockId, updateBlock, activeRouteId } = usePropertiesPanelState();
 
     // Ref for the scrollable aside container
     const scrollRef = useRef<HTMLElement>(null);

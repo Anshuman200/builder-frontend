@@ -24,7 +24,7 @@ export function ForgotPasswordForm({ handleForgotPassword, setTab, isLoading }: 
     return (
       <div style={{ textAlign: "center", padding: "24px 0" }}>
         <FormHeading title="Check your email" subtitle="We've sent you a secure reset link." />
-        <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.95rem", margin: "16px 0 32px" }}>
+        <p style={{ color: "var(--auth-copy)", fontSize: "0.95rem", margin: "16px 0 32px" }}>
           Please click the link in the email to set a new password. You can close this window.
         </p>
         <Button size="large" block style={BTN_STYLE} onClick={() => setTab("login")}>Back to login</Button>
@@ -43,7 +43,7 @@ export function ForgotPasswordForm({ handleForgotPassword, setTab, isLoading }: 
         style={{ marginBottom: 10 }}
       >
         <Input
-          prefix={<EnvelopeIcon style={{ width: 16, height: 16, color: "rgba(255,255,255,0.4)" }} />}
+          prefix={<EnvelopeIcon style={{ width: 16, height: 16, color: "var(--auth-icon)" }} />}
           placeholder="you@example.com"
           size="large"
           style={INPUT_STYLE}
@@ -67,7 +67,7 @@ export function ForgotPasswordForm({ handleForgotPassword, setTab, isLoading }: 
         </Button>
       </Form.Item>
 
-      <p style={{ textAlign: "center", fontSize: "0.82rem", color: "rgba(255,255,255,0.4)", margin: 0 }}>
+      <p style={{ textAlign: "center", fontSize: "0.82rem", color: "var(--auth-icon)", margin: 0 }}>
         <GlassLink onClick={() => setTab("login")}>← Back to login</GlassLink>
       </p>
     </Form>

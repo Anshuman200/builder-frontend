@@ -109,6 +109,46 @@
   box-shadow: none !important;
 }
 
+/* Auth modal follows the active site theme while preserving Ant Design form behavior. */
+.ant-modal-container,
+.auth-modal-root .ant-modal,
+.auth-modal-root .ant-modal-content,
+.auth-modal-root .ant-modal-body,
+.auth-modal.ant-modal,
+.auth-modal.ant-modal .ant-modal-content,
+.auth-modal .ant-modal-content {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.auth-modal-shell .ant-input,
+.auth-modal-shell .ant-input-affix-wrapper,
+.auth-modal-shell .ant-input-password {
+  background: var(--auth-input-bg) !important;
+  border-color: var(--auth-input-border) !important;
+  color: var(--auth-text) !important;
+}
+
+.auth-modal-shell .ant-input-affix-wrapper input,
+.auth-modal-shell .ant-input-password input {
+  background: transparent !important;
+  color: var(--auth-text) !important;
+}
+
+.auth-modal-shell .ant-input::placeholder,
+.auth-modal-shell .ant-input-affix-wrapper input::placeholder {
+  color: var(--auth-muted) !important;
+}
+
+.auth-modal-shell .ant-input-password-icon {
+  color: var(--auth-icon) !important;
+}
+
+.auth-modal-shell .ant-form-item-explain-error {
+  font-size: 0.78rem;
+}
+
 /* ─── Light Mode Override Class (for Previews) ─────────────────────────────── */
 .light {
   --bg: #ffffff;

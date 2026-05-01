@@ -41,7 +41,7 @@ export function ResetPasswordForm({ handleResetPassword, setTab, isLoading }: an
         style={{ marginBottom: 10 }}
       >
         <Input.Password
-          prefix={<LockClosedIcon style={{ width: 16, height: 16, color: "rgba(255,255,255,0.4)" }} />}
+          prefix={<LockClosedIcon style={{ width: 16, height: 16, color: "var(--auth-icon)" }} />}
           placeholder="••••••••"
           size="large"
           style={INPUT_STYLE}
@@ -65,7 +65,7 @@ export function ResetPasswordForm({ handleResetPassword, setTab, isLoading }: an
         </Button>
       </Form.Item>
 
-      <p style={{ textAlign: "center", fontSize: "0.82rem", color: "rgba(255,255,255,0.4)", margin: 0 }}>
+      <p style={{ textAlign: "center", fontSize: "0.82rem", color: "var(--auth-icon)", margin: 0 }}>
         <GlassLink onClick={() => setTab("login")}>← Back to login</GlassLink>
       </p>
     </Form>

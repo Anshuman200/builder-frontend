@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
+import { useEditorPageState } from "@/stores/editor/selectors";
 import { loadPage, savePage, hasLocalDraft } from "@/lib/utils/storage";
 import { migrateProjectName } from "@/lib/config/blocks";
 import EditorShell from "@/components/editor/EditorShell";
@@ -18,7 +19,7 @@ import { createBlock, injectProjectName } from "@/lib/config/blocks";
  * Fetches plain-text data from server and initializes the store.
  */
 export default function EditorPage() {
-  const { page, isDirty, setPage, markClean } = useEditorStore();
+  const { page, isDirty, setPage, markClean } = useEditorPageState();
   const { pageId } = useParams<{ pageId: string }>() ?? {};
   const { error: toastError } = useToasts();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

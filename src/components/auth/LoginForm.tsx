@@ -8,7 +8,7 @@ import { FormHeading, GlassLink, INPUT_STYLE, LABEL_STYLE, BTN_STYLE } from "./A
 import { useAuth } from "@/hooks/useAuth";
 
 export function LoginForm(props: any) {
-  const { handleLogin, setTab, setRegEmail, setAuthError, isLoading, forced } = props;
+  const { handleLogin, setTab, isLoading, forced } = props;
   const { logout } = useAuth();
   const router = useRouter();
   const [globalError, setGlobalError] = useState("");
@@ -20,8 +20,6 @@ export function LoginForm(props: any) {
       await handleLogin(values.email, values.password);
     } catch (err: any) {
       if (err.status === 403 || String(err.status) === "403" || err.message?.toLowerCase().includes("verify")) {
-        if (setRegEmail) setRegEmail(values.email);
-        if (setAuthError) setAuthError("Account not verified. Please check your email for the code.");
         setTab("verify");
         return;
       }
@@ -40,7 +38,7 @@ export function LoginForm(props: any) {
         style={{ marginBottom: 10 }}
       >
         <Input
-          prefix={<EnvelopeIcon style={{ width: 16, height: 16, color: "rgba(255,255,255,0.4)" }} />}
+          prefix={<EnvelopeIcon style={{ width: 16, height: 16, color: "var(--auth-icon)" }} />}
           placeholder="you@example.com"
           size="large"
           style={INPUT_STYLE}
@@ -61,7 +59,7 @@ export function LoginForm(props: any) {
         }
       >
         <Input.Password
-          prefix={<LockClosedIcon style={{ width: 16, height: 16, color: "rgba(255,255,255,0.4)" }} />}
+          prefix={<LockClosedIcon style={{ width: 16, height: 16, color: "var(--auth-icon)" }} />}
           placeholder="••••••••"
           size="large"
           style={INPUT_STYLE}
@@ -91,12 +89,12 @@ export function LoginForm(props: any) {
           icon={<ArrowLeftOnRectangleIcon style={{ width: 16, height: 16 }} />}
           size="large"
           block
-          style={{ borderRadius: 10, height: 44, background: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }}
+          style={{ borderRadius: 10, height: 44, background: "var(--auth-control-bg)", borderColor: "var(--auth-border)", color: "var(--auth-muted)" }}
         >
           Logout & Exit
         </Button>
       ) : (
-        <p style={{ textAlign: "center", fontSize: "0.82rem", color: "rgba(255,255,255,0.4)", margin: 0 }}>
+        <p style={{ textAlign: "center", fontSize: "0.82rem", color: "var(--auth-icon)", margin: 0 }}>
           No account?{" "}
           <GlassLink onClick={() => setTab("register")}>Create one free</GlassLink>
         </p>

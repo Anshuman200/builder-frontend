@@ -3,6 +3,7 @@
 import React, { useState, useEffect, createContext, useContext, useCallback } from "react";
 import { clearTokens, getCookie } from "@/lib/utils";
 import { useProfile, useLogin, useRegister, useLogout, useVerifyOtp, useForgotPassword, useResetPassword } from "@/lib/api/queries";
+import { hasSessionSecret, setSessionSecret } from "@/lib/utils/crypto";
 
 interface User {
     _id: string;
@@ -47,14 +48,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Sync Key Status (Legacy - for E2EE or similar logic)
     useEffect(() => {
-        const hasKey = !!sessionStorage.getItem("pagecraft_session_key");
-        setKeyStatus(hasKey ? "unlocked" : "locked");
+        setKeyStatus(hasSessionSecret() ? "unlocked" : "locked");
     }, [user]);
 
     const login = useCallback(async (email: string, password: string) => {
         const res = await loginMutation.mutateAsync({ email, password });
-        // WhatsApp-Grade: Capture password in session storage for E2EE
-        sessionStorage.setItem("pagecraft_session_key", password);
+        setSessionSecret(password);
         setKeyStatus("unlocked");
         return { redirectTo: res.data.redirectTo };
     }, [loginMutation]);
@@ -66,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const verifyOtp = useCallback(async (payload: string, password?: string) => {
         await verifyOtpMutation.mutateAsync({ payload });
         if (password) {
-            sessionStorage.setItem("pagecraft_session_key", password);
+            setSessionSecret(password);
             setKeyStatus("unlocked");
         }
     }, [verifyOtpMutation]);
@@ -84,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await logoutMutation.mutateAsync();
         } finally {
             clearTokens();
-            sessionStorage.removeItem("pagecraft_session_key");
+            setSessionSecret(null);
             setKeyStatus("locked");
         }
     }, [logoutMutation]);

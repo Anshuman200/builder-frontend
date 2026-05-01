@@ -95,7 +95,7 @@ export function FeaturesBlock({ block }: BlockProps) {
 
     const SectionHeader = () => (
         <div 
-            onClick={() => !isPreview && focusSubItem(block.id, "Content")} 
+            onClick={() => !isPreview && focusSubItem(block.id, "Text Content")} 
             style={{ 
                 textAlign: align as any, 
                 marginBottom: "3rem",
