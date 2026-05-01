@@ -209,25 +209,27 @@ export function MediaInput({ value, onChange, placeholder, type = "image", varia
                                 <ArrowPathIcon style={{ width: 14, height: 14 }} />
                                 Change
                             </button>
-                            <button
-                                onClick={() => onChange("")}
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 6,
-                                    padding: "6px 12px",
-                                    borderRadius: 6,
-                                    background: "rgba(239, 68, 68, 0.1)",
-                                    border: "1px solid rgba(239, 68, 68, 0.2)",
-                                    color: "#f87171",
-                                    fontSize: 11,
-                                    fontWeight: 600,
-                                    cursor: "pointer"
-                                }}
-                            >
-                                <TrashIcon style={{ width: 14, height: 14 }} />
-                                Remove
-                            </button>
+                            {variant !== "compact" && (
+                                <button
+                                    onClick={() => onChange("")}
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 6,
+                                        padding: "6px 12px",
+                                        borderRadius: 6,
+                                        background: "rgba(239, 68, 68, 0.1)",
+                                        border: "1px solid rgba(239, 68, 68, 0.2)",
+                                        color: "#f87171",
+                                        fontSize: 11,
+                                        fontWeight: 600,
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    <TrashIcon style={{ width: 14, height: 14 }} />
+                                    Remove
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1325,7 +1327,7 @@ export function VideoPlaybackOptions({
     title?: string;
 }) {
     return (
-        <div style={{ marginTop: 12 }}>
+        <div className="px-4">
             <div style={{
                 fontSize: 10,
                 fontWeight: 800,

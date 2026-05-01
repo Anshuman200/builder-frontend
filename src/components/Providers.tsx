@@ -47,7 +47,7 @@ function AntdThemeProvider({ children }: { children: React.ReactNode }) {
                     },
                     Layout: {
                         bodyBg: "transparent", // Let the global CSS handle body background
-                        colorBgHeader: "transparent",
+                        headerBg: "transparent",
                     }
                 }
             }}

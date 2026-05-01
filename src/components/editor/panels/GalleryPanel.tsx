@@ -45,7 +45,6 @@ export function GalleryPanel({ block }: { block: Block }) {
                         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                             <SortableList
                                 items={mediaItems}
-                                containerClassName="grid grid-cols-2 gap-2"
                                 strategy={rectSortingStrategy}
                                 onReorder={(activeId, overId) => {
                                     const oldIndex = mediaItems.findIndex((img) => img.id === activeId);

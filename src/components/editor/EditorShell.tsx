@@ -89,6 +89,63 @@ export default function EditorShell() {
     return undefined;
   }
 
+  function reorderMasonryChildBlocks(activeId: string, overId: string, dropPosition: "before" | "after") {
+    const { page, updateBlock } = useEditorStore.getState();
+    if (!page) return false;
+
+    const roots = [
+      ...(page.globalBlocks?.header ? [page.globalBlocks.header] : []),
+      ...(page.routes?.flatMap((route) => route.content || []) || []),
+      ...(page.content || []),
+      ...(page.globalBlocks?.footer ? [page.globalBlocks.footer] : []),
+    ];
+
+    const stack = [...roots];
+    while (stack.length > 0) {
+      const block = stack.pop();
+      if (!block) continue;
+
+      const childBlocks = block.props?.childBlocks;
+      if (block.type === "masonry" && Array.isArray(childBlocks)) {
+        const mediaItems = childBlocks.filter((child: Block) => child.type !== "media-picker");
+        const pickerItems = childBlocks.filter((child: Block) => child.type === "media-picker");
+        const oldIndex = mediaItems.findIndex((child: Block) => child.id === activeId);
+        const newIndex = mediaItems.findIndex((child: Block) => child.id === overId);
+
+        if (oldIndex !== -1 && newIndex !== -1) {
+          const moving = mediaItems[oldIndex];
+          const withoutMoving = mediaItems.filter((child: Block) => child.id !== activeId);
+          const targetIndex = withoutMoving.findIndex((child: Block) => child.id === overId);
+          const insertIndex = targetIndex + (dropPosition === "after" ? 1 : 0);
+          const reorderedMedia = [
+            ...withoutMoving.slice(0, insertIndex),
+            moving,
+            ...withoutMoving.slice(insertIndex),
+          ];
+
+          updateBlock(block.id, { childBlocks: [...reorderedMedia, ...pickerItems] }, true);
+          selectBlock(activeId);
+          return true;
+        }
+      }
+
+      if (block.children?.length) stack.push(...block.children);
+      const props = block.props || {};
+      for (const key of ["childBlocks", "col0", "col1"]) {
+        const nested = props[key];
+        if (Array.isArray(nested)) stack.push(...nested as Block[]);
+      }
+      const items = props.items;
+      if (Array.isArray(items)) {
+        items.forEach((item) => {
+          if (Array.isArray(item.blocks)) stack.push(...item.blocks);
+        });
+      }
+    }
+
+    return false;
+  }
+
   function handleDragStart(event: DragStartEvent) {
     const data = event.active.data.current as { type: "palette" | "canvas" | "section"; blockType?: string; templateId?: string };
     if (data?.type === "palette") {
@@ -118,6 +175,7 @@ export default function EditorShell() {
     let targetId = overId;
     let position: "before" | "after" | "inside" | "replace" = "after";
     let childProp: string | undefined = undefined;
+    let masonryDropPosition: "before" | "after" = "after";
 
     const isRootOnly = data.blockType === "header" || data.blockType === "footer";
 
@@ -138,6 +196,7 @@ export default function EditorShell() {
     if (overRect && activeRect) {
       const activeCenterY = activeRect.top + activeRect.height / 2;
       const relativeY = (activeCenterY - overRect.top) / overRect.height;
+      masonryDropPosition = relativeY > 0.5 ? "after" : "before";
 
       const isContainer = ["wave", "hero", "container", "features"].includes(over.data.current?.blockType as string || "");
 
@@ -172,6 +231,9 @@ export default function EditorShell() {
         position = "after";
       } else {
         // Middle 60% of a standard block
+        if (data?.type === "canvas" && over.data.current?.blockType === "image") {
+          position = masonryDropPosition;
+        } else
         if (isContainer && !isRootOnly) {
           position = "inside";
           childProp = "childBlocks";
@@ -214,6 +276,10 @@ export default function EditorShell() {
       }
     } else if (data?.type === "canvas") {
       if (active.id !== over.id) {
+        if (reorderMasonryChildBlocks(active.id as string, over.id as string, masonryDropPosition)) {
+          return;
+        }
+
         if (position === "replace") {
           useEditorStore.getState().swapBlocks(active.id as string, over.id as string);
           return;

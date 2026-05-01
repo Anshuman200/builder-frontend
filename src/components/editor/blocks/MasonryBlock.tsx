@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { Block } from "@/types";
+import { rectSortingStrategy } from "@dnd-kit/sortable";
 import { ChildBlockWrapper, PreviewContext, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
@@ -49,6 +50,17 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
 
     // Active column count for live view based on viewMode
     const colCount = viewMode === "mobile" ? colsMobile : viewMode === "tablet" ? colsTablet : cols;
+    const getEditorColumns = () => {
+        const count = Math.max(1, colCount);
+        const distributedColumns: Block[][] = Array.from({ length: count }, () => []);
+
+        mediaItems.forEach((item: Block, index: number) => {
+            distributedColumns[index % count].push(item);
+        });
+
+        return distributedColumns;
+    };
+    const editorColumns = getEditorColumns();
 
     return (
         <div
@@ -63,18 +75,10 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
             <BackgroundOverlay p={block.props} />
             <MasonryContext.Provider value={block.id}>
                 <div style={{ position: "relative", zIndex: 2 }}>
-                    {/* ── CSS Columns masonry ──────────────────────────────── */}
+                    {/* ── Masonry media grid ───────────────────────────────── */}
                     {mediaItems.length > 0 && (
-                        <div
-                            style={{
-                                columns: isPreview ? undefined : colCount,
-                                columnCount: isPreview ? undefined : colCount,
-                                columnGap: gap,
-                                // In preview, use CSS responsive columns via classname (below)
-                            }}
-                            className={isPreview ? "masonry-preview-grid" : undefined}
-                        >
-                            {isPreview && (
+                        isPreview ? (
+                            <div className="masonry-preview-grid">
                                 <style>{`
                                     .masonry-preview-grid {
                                         column-count: ${cols};
@@ -93,8 +97,6 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
                                         .masonry-preview-grid { column-count: ${colsMobile}; }
                                     }
                                 `}</style>
-                            )}
-                            <SortableBlockGroup blocks={mediaItems}>
                                 {mediaItems.map((child: Block) => (
                                     <div
                                         key={child.id}
@@ -110,8 +112,44 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
                                         <ChildBlockWrapper block={child} />
                                     </div>
                                 ))}
+                            </div>
+                        ) : (
+                            <SortableBlockGroup blocks={mediaItems} strategy={rectSortingStrategy}>
+                                <div
+                                    style={{
+                                        display: "grid",
+                                        gridTemplateColumns: `repeat(${Math.max(1, colCount)}, minmax(0, 1fr))`,
+                                        gap,
+                                        alignItems: "start",
+                                    }}
+                                >
+                                    {editorColumns.map((column, columnIndex) => (
+                                        <div
+                                            key={columnIndex}
+                                            style={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                gap,
+                                                minWidth: 0,
+                                            }}
+                                        >
+                                            {column.map((child: Block) => (
+                                                <div
+                                                    key={child.id}
+                                                    style={{
+                                                        width: "100%",
+                                                        borderRadius: "12px",
+                                                        overflow: "visible",
+                                                    }}
+                                                >
+                                                    <ChildBlockWrapper block={child} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ))}
+                                </div>
                             </SortableBlockGroup>
-                        </div>
+                        )
                     )
                     }
 

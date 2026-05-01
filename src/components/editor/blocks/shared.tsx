@@ -345,6 +345,7 @@ export function ChildBlockWrapper({
 
     // Propagate explicit height:100% so image blocks inside columns can fill their parent.
     const needsFullHeight = block.props.height === "100%";
+    const sortableTransform = CSS.Transform.toString(transform);
 
     if (isPreview) {
         if (animType !== "none" && variants) {
@@ -377,11 +378,13 @@ export function ChildBlockWrapper({
                 position: "relative",
                 width: "100%",
                 height: needsFullHeight ? "100%" : undefined,
-                transform: CSS.Transform.toString(transform),
-                transition: sortableTransition || undefined,
-                // Keep a very faint ghost in the original spot to prevent "gray holes" 
-                // while still avoiding the double-rendering flicker.
-                opacity: isDragging ? 0.2 : 1,
+                transform: `${sortableTransform || ""}${isDragging ? " scale(0.985)" : ""}`.trim() || undefined,
+                transformOrigin: "center",
+                transition: sortableTransition || (isDragging ? undefined : "transform 180ms cubic-bezier(0.2, 0, 0, 1), box-shadow 180ms ease, opacity 120ms ease"),
+                opacity: 1,
+                zIndex: isDragging ? 12000 : undefined,
+                boxShadow: isDragging ? "0 18px 45px rgba(15,23,42,0.22)" : undefined,
+                willChange: isDragging ? "transform" : undefined,
             }}
             onClick={(e) => {
                 e.stopPropagation();
@@ -404,7 +407,7 @@ export function ChildBlockWrapper({
                     zIndex: 9998, pointerEvents: "none",
                 }} />
             )}
-            {showControls && (
+            {showControls && !isDragging && (
                 <div style={{
                     position: "absolute", top: 4, right: 4,
                     display: "flex", gap: 2, padding: 3,
@@ -485,11 +488,19 @@ export function ChildBlockWrapper({
 // ─── SortableBlockGroup ───────────────────────────────────────────────────────
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
-export function SortableBlockGroup({ blocks, children }: { blocks: Block[], children: React.ReactNode }) {
+export function SortableBlockGroup({
+    blocks,
+    children,
+    strategy = verticalListSortingStrategy,
+}: {
+    blocks: Block[],
+    children: React.ReactNode,
+    strategy?: any,
+}) {
     const isPreview = React.useContext(PreviewContext);
     if (isPreview) return <>{children}</>;
     return (
-        <SortableContext items={blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={blocks.map(b => b.id)} strategy={strategy}>
             {children}
         </SortableContext>
     );

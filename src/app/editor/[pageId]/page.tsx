@@ -12,7 +12,15 @@ import { useToasts } from "@/hooks/useToasts";
 import { usePage } from "@/lib/api/queries";
 import { useLiveHead } from "@/hooks/useLiveHead";
 import NewPageWizard from "@/components/editor/NewPageWizard";
-import { createBlock, injectProjectName } from "@/lib/config/blocks";
+import { injectProjectName } from "@/lib/config/blocks";
+import type { EditorPage } from "@/types";
+
+function hasAnyPageContent(candidate: EditorPage) {
+  const legacyContent = Array.isArray(candidate.content) && candidate.content.length > 0;
+  const routedContent = Array.isArray(candidate.routes) && candidate.routes.some(route => (route.content || []).length > 0);
+  const hasGlobalBlocks = !!candidate.globalBlocks?.header || !!candidate.globalBlocks?.footer;
+  return legacyContent || routedContent || hasGlobalBlocks;
+}
 
 /**
  * Editor Page — The main workspace for building/editing.
@@ -48,8 +56,7 @@ export default function EditorPage() {
       savePage(pageId, migrated); // persist so reload shows correct name
       markClean();
 
-      const isEmpty = !migrated.routes || migrated.routes.length === 0 || migrated.routes[0].content.length === 0;
-      if (isEmpty) {
+      if (!hasAnyPageContent(migrated)) {
         setShowWizard(true);
       }
     } else if (apiPage && !hasLoadedApi) {
@@ -60,8 +67,7 @@ export default function EditorPage() {
         savePage(pageId, migrated); // persist migrated version
         setHasLoadedApi(true);
 
-        const isEmpty = !migrated.routes || migrated.routes.length === 0 || migrated.routes[0].content.length === 0;
-        if (isEmpty) {
+        if (!hasAnyPageContent(migrated)) {
           setShowWizard(true);
         }
         // Do NOT markClean — auto-save will push to DB.
@@ -74,8 +80,7 @@ export default function EditorPage() {
         setHasLoadedApi(true);
 
         // TRIGGER WIZARD IF EMPTY
-        const isEmpty = !migrated.routes || migrated.routes.length === 0 || migrated.routes[0].content.length === 0;
-        if (isEmpty) {
+        if (!hasAnyPageContent(migrated)) {
           setShowWizard(true);
         }
       }

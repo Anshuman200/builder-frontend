@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: [],
    reactStrictMode: true,
   images: {
-    qualities: [75, 90, 100],
+    qualities: [75, 80, 90, 100],
 
     // Device breakpoints (tuned for most apps)
     deviceSizes: [320, 420, 768, 1024, 1200, 1600],

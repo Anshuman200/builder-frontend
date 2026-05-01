@@ -12,7 +12,7 @@ export const heroSections: SectionTemplate[] = [
             const root = makeBlock("hero", { align: "left", layout: "fluid", bgColor: "#0f172a", textColor: "#ffffff", padding: "6rem 2rem" });
             const columns = makeBlock("columns", { leftWidth: "50", gap: "2rem", align: "center" });
             columns.props.col0 = [
-                makeBlock("text", { content: "Launch your next big idea", tag: "h1", fontSize: "3.5rem", color: "#ffffff", bold: true, lineHeight: "1.2" }),
+                makeBlock("text", { content: "Launch your next big idea", tag: "h1", fontSize: "3.5rem", textColor: "#ffffff", bold: true, lineHeight: "1.2" }),
                 makeBlock("text", {
                     content: `Build stunning pages in minutes with our powerful drag-and-drop builder. 
 ⚡ Effortless drag-and-drop page creation  

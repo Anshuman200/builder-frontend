@@ -255,8 +255,9 @@ export function EditorMedia({
     }
 
     // ── Image: natural mode (auto height, no aspect ratio) ──────────────────
-    // Use a plain <img> so objectFit can still be applied via a wrapper trick:
-    // We render at intrinsic size (width: 100%, height: auto).
+    // Use a plain img so masonry items keep their true intrinsic proportions.
+    // NextImage requires fixed dimensions here, which makes unknown media look
+    // like 16:9 thumbnails and breaks natural masonry height.
     return (
         <div
             style={{
@@ -266,12 +267,9 @@ export function EditorMedia({
             className={className}
         >
             {loading && <ShimmerLayer />}
-            <NextImage
+            <img
                 src={src}
                 alt={alt}
-                fill={false}
-                width={1600}
-                height={900}
                 style={{
                     width: "100%",
                     height: "auto",
@@ -282,8 +280,6 @@ export function EditorMedia({
                 }}
                 onLoad={() => setLoading(false)}
                 onError={() => { setLoading(false); setError(true); }}
-                unoptimized={!isOptimizable}
-                priority={priority}
             />
         </div>
     );

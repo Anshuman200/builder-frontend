@@ -264,6 +264,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     src={member.image}
                                                     alt={member.name}
                                                     fill
+                                                    sizes="56px"
                                                     style={{ objectFit: "cover" }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
@@ -322,6 +323,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     src={member.image}
                                                     alt={member.name}
                                                     fill
+                                                    sizes="160px"
                                                     style={{ objectFit: "cover" }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
                                                 />
@@ -378,6 +380,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     src={member.image}
                                                     alt={member.name}
                                                     fill
+                                                    sizes="140px"
                                                     style={{ objectFit: "cover" }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
@@ -437,6 +440,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     src={member.image}
                                                     alt={member.name}
                                                     fill
+                                                    sizes={imageSize}
                                                     style={{ objectFit: "cover", objectPosition: iPosition }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
@@ -450,6 +454,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                     src={member.image}
                                                     alt={member.name}
                                                     fill
+                                                    sizes="(max-width: 768px) 100vw, 33vw"
                                                     style={{ objectFit: "cover", objectPosition: iPosition }}
                                                     unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net') && !member.image.includes('placehold.co') && !member.image.includes('placeholder.com')}
                                                 />
@@ -463,6 +468,7 @@ export function TeamBlock({ block }: BlockProps) {
                                                 src={member.image}
                                                 alt={member.name}
                                                 fill
+                                                sizes={imageStyle === "square" ? "(max-width: 768px) 100vw, 33vw" : imageSize}
                                                 style={{ objectFit: "cover", objectPosition: iPosition }}
                                                 unoptimized={!member.image.includes('unsplash.com') && !member.image.includes('pexels.com') && !member.image.includes('amazonaws.com') && !member.image.includes('cloudfront.net')}
                                             />

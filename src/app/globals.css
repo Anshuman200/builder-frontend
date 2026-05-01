@@ -110,7 +110,7 @@
 }
 
 /* Auth modal follows the active site theme while preserving Ant Design form behavior. */
-.ant-modal-container,
+.auth-modal .ant-modal-container,
 .auth-modal-root .ant-modal,
 .auth-modal-root .ant-modal-content,
 .auth-modal-root .ant-modal-body,

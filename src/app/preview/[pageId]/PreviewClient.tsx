@@ -24,15 +24,18 @@ export default function PreviewClient({ pageId, initialData, initialPath = "/" }
     useLiveHead(page);
 
     useEffect(() => {
-        if (!initialData || page) return;
-        setPage(initialData);
-        setLoading(false);
-    }, [initialData, page, setPage]);
+        let cancelled = false;
 
-    useEffect(() => {
         async function load() {
             if (!pageId) return;
-            if (initialData && !page) return;
+
+            if (initialData) {
+                if (!useEditorStore.getState().page && !cancelled) {
+                    setPage(initialData);
+                }
+                if (!cancelled) setLoading(false);
+                return;
+            }
 
             try {
                 // ── 1. Try the preview cache (holds current unsaved editor state) ──
@@ -41,6 +44,7 @@ export default function PreviewClient({ pageId, initialData, initialPath = "/" }
                 if (cacheRes.ok) {
                     const cached = await cacheRes.json();
                     if (cached && !cached.error) {
+                        if (cancelled) return;
                         setPage({
                             ...cached,
                             content: Array.isArray(cached.content) ? cached.content : [],
@@ -59,24 +63,31 @@ export default function PreviewClient({ pageId, initialData, initialPath = "/" }
                 const data = res.data?.page || res.data;
 
                 if (data) {
+                    if (cancelled) return;
                     setPage({
                         ...data,
                         content: Array.isArray(data.content) ? data.content : []
                     });
                 } else {
                     // ── 3. Last resort: local draft ──
+                    if (cancelled) return;
                     setPage(loadPage(pageId));
                 }
             } catch (e) {
                 console.error("Preview load failed", e);
                 // ── 3. Last resort: local draft ──
+                if (cancelled) return;
                 setPage(loadPage(pageId));
             } finally {
-                setLoading(false);
+                if (!cancelled) setLoading(false);
             }
         }
+
         load();
-    }, [initialData, page, pageId, setPage]);
+        return () => {
+            cancelled = true;
+        };
+    }, [initialData, pageId, setPage]);
 
     useEffect(() => {
         if (mainRef.current) {
