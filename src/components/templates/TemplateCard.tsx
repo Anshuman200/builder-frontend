@@ -139,10 +139,10 @@ export function TemplateCard({
                     )}
                     {variant !== "public" && template.isPublic !== undefined && (
                         <span className={cn(
-                          "text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg border backdrop-blur-md transition-all",
-                          template.isPublic 
-                            ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20" 
-                            : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                            "text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg border backdrop-blur-md transition-all",
+                            template.isPublic
+                                ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
+                                : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
                         )}>
                             {template.isPublic ? (
                                 <>
@@ -181,26 +181,26 @@ export function TemplateCard({
                                 className="w-full bg-black/40 border-2 border-indigo-500/50 rounded-lg px-3 py-1.5 text-sm font-bold text-white outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all"
                             />
                         ) : (
-                        <div className="flex items-center gap-2 mb-1.5 min-w-0">
-                            <h3 className={cn(
-                                "font-bold text-white leading-tight transition-colors group-hover:text-white truncate",
-                                variant === "public" ? "text-lg sm:text-2xl" : "text-sm sm:text-base"
-                            )}>
-                                {template.title || "Untitled"}
-                            </h3>
-                            {isLive && (template as any).domain && (
-                                <a
-                                    href={`https://${(template as any).domain}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="p-1 rounded-md hover:bg-white/10 text-white/40 hover:text-indigo-400 transition-all shrink-0"
-                                    title="Visit live site"
-                                >
-                                    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                                </a>
-                            )}
-                        </div>
+                            <div className="flex items-center gap-2 mb-1.5 min-w-0">
+                                <h3 className={cn(
+                                    "font-bold text-white leading-tight transition-colors group-hover:text-white truncate",
+                                    variant === "public" ? "text-lg sm:text-2xl" : "text-sm sm:text-base"
+                                )}>
+                                    {template.title || "Untitled"}
+                                </h3>
+                                {isLive && (template as any).domain && (
+                                    <a
+                                        href={`https://${(template as any).domain}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="p-1 rounded-md hover:bg-white/10 text-white/40 hover:text-indigo-400 transition-all shrink-0"
+                                        title="Visit live site"
+                                    >
+                                        <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                                    </a>
+                                )}
+                            </div>
                         )}
 
                         {(variant === "public" || variant === "admin") && !isRenaming && (
@@ -220,7 +220,7 @@ export function TemplateCard({
                 </div>
 
                 {variant === "public" && (
-                    <div className="mt-auto grid grid-cols-[0.9fr_1.1fr] gap-2 pt-5">
+                    <div className="mt-auto grid grid-cols-[0.9fr_1.1fr] gap-2 pt-2">
                         <button
                             type="button"
                             onClick={handlePreview}

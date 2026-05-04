@@ -636,8 +636,8 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
     const defaultText = theme.colors?.buttonText || "#ffffff";
 
     let background = defaultPrimary, color = defaultText, border = "none";
-    const finalBg = (p[`${prefix}Bg`] as string) || (p[`${prefix}BgColor`] as string) || (p.buttonBg as string) || (p.bgColor as string);
-    const finalText = (p[`${prefix}TextColor`] as string) || (p.buttonTextColor as string) || (p.textColor as string);
+    const finalBg = (p[`${prefix}Bg`] as string) || (p[`${prefix}BgColor`] as string) || (p.buttonBg as string) || (p.buttonBgColor as string);
+    const finalText = (p[`${prefix}TextColor`] as string) || (p[`${prefix}Color`] as string) || (p.buttonTextColor as string) || (p.buttonColor as string);
     const resolvedBorderColor = borderColorProp || finalBg || defaultPrimary;
     const hasExplicitBorder = !!borderWidthProp && borderWidthProp !== "0px" && borderWidthProp !== "0";
 

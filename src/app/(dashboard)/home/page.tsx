@@ -135,7 +135,7 @@ export default function HomePage() {
     );
   }
 
-  const filtered = pages.filter((p: Page) => {
+  const filtered = pages?.filter((p: Page) => {
     const matchesSearch = !search || p.title?.toLowerCase().includes(search.toLowerCase());
     const matchesTab = activeTab === "all"
       || (activeTab === "live" && p.isLive)
