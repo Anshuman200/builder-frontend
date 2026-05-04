@@ -145,6 +145,9 @@ export const pagesApi = {
 
     stopLive: (id: string) =>
         request(`/pages/${id}/stop-live`, { method: "POST", body: "{}" }),
+    
+    verifyPassword: (id: string, password: string) =>
+        request(`/pages/${id}/verify-password`, { method: "POST", body: JSON.stringify({ password }) }),
 };
 
 export const authApi = {

@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo } from "react";
-import { Form, Input, Select, message, ConfigProvider, theme as antdTheme } from "antd";
+import { Form, Input, Select, ConfigProvider, theme as antdTheme } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -8,6 +8,7 @@ import type { BlockProps } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { PreviewContext, CommonButton, getBackgroundStyles, BackgroundOverlay } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
+import { useToasts } from "@/hooks/useToasts";
 
 const { Option } = Select;
 
@@ -19,7 +20,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
     const bgStyles = getBackgroundStyles(p, activeTheme);
     
     const [form] = Form.useForm();
-    const [messageApi, contextHolder] = message.useMessage();
+    const toast = useToasts();
 
     // ── Props ────────────────────────────────────────────────────────────────
     const apiUrl = (p.apiUrl as string) || "";
@@ -92,12 +93,12 @@ export function DeleteAccountBlock({ block }: BlockProps) {
             return response.json();
         },
         onSuccess: () => {
-            messageApi.success(successMessageStr);
+            toast.success(successMessageStr);
             form.resetFields();
         },
         onError: (err: Error | unknown) => {
             const errorMsg = err instanceof Error ? err.message : errorMessageStr;
-            messageApi.error(errorMsg);
+            toast.error(errorMsg);
         },
     });
 
@@ -158,7 +159,6 @@ export function DeleteAccountBlock({ block }: BlockProps) {
                 }
             }}
         >
-            {contextHolder}
             <section
                 id={(p.sectionId as string) || `block-${block.id}`}
                 style={{

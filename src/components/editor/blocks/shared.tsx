@@ -778,7 +778,7 @@ interface GetCardStylesOptions {
 
 export function getCardStyles({ props: p, isFocused, isHovered, primaryColor = "#6366f1", primaryRgb = "99, 102, 241" }: GetCardStylesOptions): React.CSSProperties {
     const cardStyle = (p.cardStyle as string) || "raised";
-    const cardBg = (p.cardBg as string) || "var(--surface)";
+    const cardBg = (p.cardBg as string) || (cardStyle === "none" ? "transparent" : "#ffffff");
     const cardRadius = (p.cardRadius as string) || "16px";
     const shadowKey = (p.cardShadow as string) || (cardStyle === "raised" ? "md" : "none");
     const cardShadow = CARD_SHADOWS[shadowKey] || shadowKey;
@@ -847,10 +847,9 @@ export function getCardStyles({ props: p, isFocused, isHovered, primaryColor = "
 
 export function getBackgroundStyles(p: Record<string, any>, theme: any): React.CSSProperties {
     const bgColor = (p.bgColor as string) || (p.sectionBg as string) || "transparent";
-    const hasManagedBackground = bgColor && bgColor !== "transparent";
 
     return {
-        background: hasManagedBackground ? "transparent" : bgColor,
+        background: bgColor,
         position: "relative",
         overflow: "hidden",
     };
@@ -1251,8 +1250,8 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
     const bgImage = p.bgImage as string;
     const bgColor = ((p.bgColor as string) || (p.sectionBg as string) || "").trim();
     const bgGradient = p.bgGradient as string;
-    const backgroundOpacity = Number(p.bgFillOpacity ?? p.bgImageOpacity ?? 60) / 100;
-    const bgOpacity = Number(p.bgOpacity ?? 0);
+    const backgroundOpacity = Number(p.bgImageOpacity ?? 100) / 100;
+    const bgOpacity = Number(p.bgOpacity ?? p.bgOverlayOpacity ?? 0);
     const bgOverlayColor = (p.bgOverlayColor as string) || "#000000";
     const bgPosition = (p.bgPosition as string) || (p.bgImagePosition as string) || "center";
     const bgSize = (p.bgSize as string) || (p.bgImageSize as string) || "cover";
@@ -1272,7 +1271,7 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
 
     return (
         <>
-            {/* Image/Video Layer (Bottom) */}
+            {/* 1. Image/Video Layer */}
             {bgImage && (
                 isVideo ? (
                     <video
@@ -1311,29 +1310,15 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
                 )
             )}
 
-            {/* Tint Overlay Layer (Middle) */}
-            {bgImage && bgOpacity > 0 && (
+            {/* 2. Gradient Overlay / Tint Layer (On top of image) */}
+            {(bgGradient || (bgImage && bgOpacity > 0)) && (
                 <div
                     style={{
                         position: "absolute",
                         inset: 0,
-                        backgroundColor: bgOverlayColor,
-                        opacity: bgOpacity / 100,
+                        background: bgGradient || bgOverlayColor,
+                        opacity: bgGradient ? backgroundOpacity : (bgOpacity / 100),
                         zIndex: 1,
-                        pointerEvents: "none"
-                    }}
-                />
-            )}
-
-            {/* Fill Layer (Top / Overlay) */}
-            {(bgGradient || hasColorFill) && (
-                <div
-                    style={{
-                        position: "absolute",
-                        inset: 0,
-                        background: bgGradient || bgColor,
-                        opacity: backgroundOpacity,
-                        zIndex: 2,
                         pointerEvents: "none"
                     }}
                 />

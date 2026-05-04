@@ -45,25 +45,23 @@ export function BackgroundPanel({ block, hasMargin = true }: BackgroundPanelProp
           />
         </Field>
 
-        {hasBackground && (
-          <Field label="Background Opacity">
-            <SliderInput
-              value={backgroundOpacity}
-              onChange={updateBackgroundOpacity}
-            />
-          </Field>
-        )}
-
         <Field label="Media (Image or Video)">
           <MediaInput
             value={(p.bgImage as string) || ""}
             onChange={(v) => up("bgImage", v, true)}
             placeholder="https://solario.ai/cdn/videos/"
+            showRemove={true}
           />
         </Field>
 
         {!!p.bgImage && (
           <>
+            <Field label="Background Opacity">
+              <SliderInput
+                value={backgroundOpacity}
+                onChange={updateBackgroundOpacity}
+              />
+            </Field>
             {isVideo && (
               <VideoPlaybackOptions
                 autoPlay={!!p.bgAutoPlay} onChangeAutoPlay={(v) => up("bgAutoPlay", v, true)}

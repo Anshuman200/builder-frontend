@@ -89,7 +89,7 @@ export function TeamBlock({ block }: BlockProps) {
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
     const bgStyles = getBackgroundStyles(p, theme);
 
-    const textColor = (p.textColor as string) || "#1e293b";
+    const textColor = (p.textColor as string) || (p.color as string) || (theme?.colors?.text) || "#1e293b";
     const title = typeof p.title === "string" ? p.title : "Meet Our Team";
     const subtitle = typeof p.subtitle === "string" ? p.subtitle : "The people behind the magic";
     const align = (p.align as string) || "center";
@@ -100,8 +100,8 @@ export function TeamBlock({ block }: BlockProps) {
 
     const titleSize = (p.titleSize as string) || "2.25rem";
     const subtitleSize = (p.subtitleSize as string) || "1.125rem";
-    const titleColor = (p.titleColor as string) || textColor;
-    const subtitleColor = (p.subtitleColor as string) || textColor;
+    const titleColor = (p.titleColor as string) || (p.textColor as string) || (p.color as string) || textColor;
+    const subtitleColor = (p.subtitleColor as string) || (p.textColor as string) || (p.color as string) || textColor;
 
     const cardStyle = (p.cardStyle as string) || "raised";
     const rawCardBg = (p.cardBg as string) || "#ffffff";
@@ -113,16 +113,12 @@ export function TeamBlock({ block }: BlockProps) {
     const imageSize = (p.imageSize as string) || "120px";
     const imageRadius = (p.imageRadius as string) || "50%";
     const imageFit = (p.imageFit as React.CSSProperties["objectFit"]) || "cover";
-
-    const rawNameColor = (p.nameColor as string) || "#0f172a";
-    const rawRoleColor = (p.roleColor as string) || "#64748b";
-    const rawDescColor = (p.descColor as string) || "#475569";
-    const rawSocialColor = (p.socialColor as string) || "#94a3b8";
     const socialIconSize = (p.socialIconSize as string | number) || 18;
-    const nameColor = rawNameColor;
-    const roleColor = rawRoleColor;
-    const descColor = rawDescColor;
-    const socialColor = rawSocialColor;
+
+    const nameColor = (p.nameColor as string) || (p.textColor as string) || (p.color as string) || textColor;
+    const roleColor = (p.roleColor as string) || (p.textColor as string) || (p.color as string) || (theme?.colors?.primary) || "#6366f1";
+    const descColor = (p.descColor as string) || (p.textColor as string) || (p.color as string) || textColor;
+    const socialColor = (p.socialIconColor as string) || (p.socialColor as string) || "#94a3b8";
 
     const members = (p.members as any[]) || [];
 
@@ -237,7 +233,8 @@ export function TeamBlock({ block }: BlockProps) {
                         style={{
                             textAlign: textAlign as React.CSSProperties["textAlign"],
                             cursor: "pointer",
-                            transition: "all 0.4s ease-in-out"
+                            transition: "all 0.4s ease-in-out",
+                            color: textColor
                         }}
                     >
                         {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor, transition: "all 0.4s ease-in-out" }}>{title}</h2>}

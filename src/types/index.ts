@@ -101,6 +101,9 @@ export interface EditorPage {
     tags?: string[];
     thumbnail?: string | null;
     thumbnails?: string[];
+    visibility?: "PUBLIC" | "PRIVATE" | string;
+    password?: string | null;
+    author?: string;
 }
 
 // ─── BLOCKS & TEMPLATES ────────────────────────────────────────────────────────

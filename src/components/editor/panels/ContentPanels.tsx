@@ -162,11 +162,19 @@ export function TeamPanel({ block }: { block: Block }) {
 
     return (
         <>
-            <Section title="Text Content" focusKeys={["title", "subtitle"]}>
-                <TypographyFields p={p} up={up} showAlign={false} />
-                <Field label="Text Alignment">
+            <Section title="Text Content" focusKeys={["title", "subtitle", "titleColor", "subtitleColor"]}>
+                <TypographyFields p={p} up={up} showAlign={false} showColor={false} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 }}>
+                    <Field label="Title Color">
+                        <ColorInput value={(p.titleColor as string) || (p.textColor as string) || (p.color as string) || "#1e293b"} onChange={(v) => up("titleColor", v, true)} />
+                    </Field>
+                    <Field label="Subtitle Color">
+                        <ColorInput value={(p.subtitleColor as string) || (p.textColor as string) || (p.color as string) || "#64748b"} onChange={(v) => up("subtitleColor", v, true)} />
+                    </Field>
+                </div>
+                <div>
                     <AlignmentInput value={(p.textAlign as string) || "center"} onChange={(v) => up("textAlign", v)} />
-                </Field>
+                </div>
             </Section>
             <BackgroundPanel block={block} />
             <Section title="Layout & Grid" focusKeys={["layout", "columns", "align"]}>
@@ -185,17 +193,16 @@ export function TeamPanel({ block }: { block: Block }) {
                 {p.imageStyle !== "cover" && (<>
                     <Field label="Image Size"><TextInputWithUnit value={(p.imageSize as string) ?? ""} onChange={(v) => up("imageSize", v)} placeholder="120" /></Field>
                     {p.imageStyle === "square" && (<Field label="Image Height"><TextInputWithUnit value={(p.imageHeight as string) ?? ""} onChange={(v) => up("imageHeight", v)} placeholder="240" /></Field>)}
-                    <Field label="Image Radius"><BorderRadiusInput value={(p.imageRadius as string) || "50%"} onChange={(v) => up("imageRadius", v)} /></Field>
-                    <Field label="Image Position"><SelectInput value={(p.imagePosition as string) || "center"} onChange={(v) => up("imagePosition", v)} options={[{ label: "Center", value: "center" }, { label: "Top", value: "top" }, { label: "Bottom", value: "bottom" }]} /></Field>
                     <Field label="Image Fit"><SelectInput value={(p.imageFit as string) || "cover"} onChange={(v) => up("imageFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
+                    {p.imageFit !== "contain" && <Field label="Image Position"><SelectInput value={(p.imagePosition as string) || "center"} onChange={(v) => up("imagePosition", v)} options={[{ label: "Center", value: "center" }, { label: "Top", value: "top" }, { label: "Bottom", value: "bottom" }]} /></Field>}
+                    <Field label="Image Radius"><BorderRadiusInput value={(p.imageRadius as string) || "50%"} onChange={(v) => up("imageRadius", v)} /></Field>
                 </>)}
                 {p.imageStyle === "cover" && (<>
                     <Field label="Gradient Overlay"><ColorInput value={(p.coverGradientBottom as string) || "rgba(0,0,0,0.9)"} onChange={(v) => up("coverGradientBottom", v)} /></Field>
-                    <Field label="Image Fit"><SelectInput value={(p.imageFit as string) || "cover"} onChange={(v) => up("imageFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
+                    {/* <Field label="Image Fit"><SelectInput value={(p.imageFit as string) || "cover"} onChange={(v) => up("imageFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field> */}
                 </>)}
             </Section>
             <Section title="Typography" focusKeys={["nameColor", "roleColor", "descColor"]}>
-                <TypographyFields p={p} up={up} />
                 <Field label="Name Text Color"><ColorInput value={(p.nameColor as string) || "#0f172a"} onChange={(v) => up("nameColor", v)} /></Field>
                 <Field label="Role Text Color"><ColorInput value={(p.roleColor as string) || "#64748b"} onChange={(v) => up("roleColor", v)} /></Field>
                 <Field label="Description Text Color"><ColorInput value={(p.descColor as string) || "#475569"} onChange={(v) => up("descColor", v)} /></Field>

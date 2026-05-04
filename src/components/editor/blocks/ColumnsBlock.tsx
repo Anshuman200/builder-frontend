@@ -19,13 +19,13 @@ function ColumnDropZone({ zoneId, blocks, label, flexBasis, alignItems }: { zone
             style={{
                 flex: isStacked ? "none" : `${flexBasis.replace("%", "")} ${flexBasis.replace("%", "")} 0%`,
                 width: isStacked ? "100%" : undefined,
-                minHeight: blocks.length === 0 ? 80 : undefined,
+                minHeight: blocks.length === 0 ? 80 : "100%",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: alignItems === "center" ? "center" : alignItems === "flex-end" ? "flex-end" : "flex-start",
+                justifyContent: alignItems === "center" ? "center" : alignItems === "flex-end" ? "flex-end" : alignItems === "stretch" ? "space-between" : "flex-start",
                 alignItems: "stretch",
-                alignSelf: "stretch",
-                height: "100%",
+                flexGrow: 1,
+                // minHeight: "100%",
                 border: isPreview ? "none" : `2px dashed ${isOver ? "#6366f1" : "#e2e8f0"}`,
                 borderRadius: 6,
                 background: !isPreview && isOver ? "rgba(99,102,241, 0.04)" : "transparent",
@@ -39,7 +39,7 @@ function ColumnDropZone({ zoneId, blocks, label, flexBasis, alignItems }: { zone
                     {blocks.map((child) => <ChildBlockWrapper key={child.id} block={child} />)}
                 </SortableBlockGroup>
             )}
-            
+
             {!isPreview && (
                 <div style={{ padding: blocks.length > 0 ? "8px 12px" : 12, opacity: blocks.length > 0 ? 0.3 : 1, transition: "opacity 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.opacity = "1"} onMouseLeave={(e) => e.currentTarget.style.opacity = blocks.length > 0 ? "0.3" : "1"}>
                     <DropZoneStrip
@@ -78,7 +78,7 @@ export function ColumnsBlock({ block }: BlockProps) {
             id={(p.sectionId as string) || `block-${block.id}`}
             className={isPreview ? `builder-columns-${block.id}` : undefined}
             style={{
-                ...(isPreview ? {} : { display: "flex", flexDirection: isStackedEditor ? "column" : "row", alignItems: (p.alignItems as string) || "stretch", gap, width: "100%" }),
+                ...(isPreview ? {} : { display: "flex", flexDirection: isStackedEditor ? "column" : "row", alignItems: "stretch", gap, width: "100%" }),
                 ...bgStyles,
                 padding: editorPadding,
                 position: "relative"
@@ -87,7 +87,7 @@ export function ColumnsBlock({ block }: BlockProps) {
             <BackgroundOverlay p={p} />
             {isPreview && (
                 <style>{`
-          .builder-columns-${block.id} { display: flex; flex-direction: row; align-items: ${p.alignItems || "stretch"}; gap: ${gap}; width: 100%; }
+          .builder-columns-${block.id} { display: flex; flex-direction: row; align-items: stretch; gap: ${gap}; width: 100%; }
           @media (max-width: 1024px) { .builder-columns-${block.id} { } }
           @media (max-width: 768px) { .builder-columns-${block.id} { flex-direction: column !important; } }
         `}</style>

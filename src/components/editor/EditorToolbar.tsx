@@ -231,7 +231,7 @@ export default function EditorToolbar() {
 
   function openPreview() {
     if (!pageId) return;
-    const previewUrl = typeof window !== "undefined" ? `${window.location.origin}/preview/${pageId}` : `/preview/${pageId}`;
+    const previewUrl = typeof window !== "undefined" ? `${window.location.origin}/preview/${pageId}?isEditor=true` : `/preview/${pageId}?isEditor=true`;
 
     // Open immediately to avoid popup blockers
     const newWin = typeof window !== "undefined" ? window.open("about:blank", "_blank") : null;

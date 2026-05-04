@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useDeferredValue, useEffect } from "react";
-import { 
-    MagnifyingGlassIcon, 
-    ClockIcon, 
+import {
+    MagnifyingGlassIcon,
+    ClockIcon,
     PlusIcon,
     EllipsisVerticalIcon,
     PencilSquareIcon,
@@ -16,8 +16,8 @@ import {
     CameraIcon
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
-import { 
-    useAdminTemplates, 
+import {
+    useAdminTemplates,
     useCreatePage,
     useDeletePage,
     usePublishPage,
@@ -37,7 +37,6 @@ import PillSegmented from "@/components/ui/PillSegmented";
 import NewPageWizard from "@/components/editor/NewPageWizard";
 import { SECTION_TEMPLATES } from "@/lib/config/sections";
 import { useCallback } from "react";
-import { useDeleteToast } from "@/context/DeleteToastContext";
 
 const SECTION_ID_MAP: Record<string, string> = {
     header: "nav-", hero: "hero-", features: "features-",
@@ -87,7 +86,8 @@ const VISIBILITY_TABS: { key: Visibility; label: string }[] = [
 ];
 
 export default function AdminTemplatesPage() {
-    const { success, error: toastError } = useToasts();
+    const toast = useToasts();
+    const { success, error: toastError } = toast;
     const router = useRouter();
     const [search, setSearch] = useState("");
     const [visibility, setVisibility] = useState<Visibility>("all");
@@ -109,7 +109,6 @@ export default function AdminTemplatesPage() {
     const [showCapturePicker, setShowCapturePicker] = useState(false);
     const [captureTarget, setCaptureTarget] = useState<any | null>(null);
 
-    const { startDelete } = useDeleteToast();
 
     const [wizardOpen, setWizardOpen] = useState(false);
     const deferredSearch = useDeferredValue(search);
@@ -191,13 +190,12 @@ export default function AdminTemplatesPage() {
     };
 
     const handleDelete = useCallback((tpl: any) => {
-        startDelete(
-            [{ id: tpl._id, label: tpl.title }],
-            async (item) => {
-                await deleteMutation.mutateAsync(item.id);
-            }
-        );
-    }, [deleteMutation, startDelete]);
+        toast.promise(deleteMutation.mutateAsync(tpl._id), {
+            loading: `Deleting ${tpl.title}...`,
+            success: `${tpl.title} deleted`,
+            error: (err: any) => err.message || `Failed to delete ${tpl.title}`
+        });
+    }, [deleteMutation, toast]);
 
     return (
         <CommonContainer className="py-8">
@@ -363,7 +361,7 @@ export default function AdminTemplatesPage() {
                     previewUrl={typeof window !== 'undefined' ? `${window.location.origin}/preview/${captureTarget._id}` : `/preview/${captureTarget._id}`}
                     currentThumbnail={captureTarget.thumbnail}
                     existingThumbnails={captureTarget.thumbnails || []}
-                    onSelect={() => {}}
+                    onSelect={() => { }}
                     onUpdateThumbnails={handleUpdateThumbnails}
                 />
             )}

@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ClockIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
-import { Modal, Button, Tabs, Tag, Skeleton, Divider, InputNumber, App } from "antd";
+import { Modal, Button, Tabs, Tag, Skeleton, Divider, InputNumber } from "antd";
 import { cn } from "@/lib/utils";
 import { useAdminUser, useUpdateUserLimit } from "@/lib/api/queries";
 import { TemplatePreviewModal } from "./TemplatePreviewModal";
+import { useToasts } from "@/hooks/useToasts";
 
 function timeAgo(dateStr: string) {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -32,7 +33,7 @@ interface Props {
 }
 
 export function UserProfileModal({ userId, onClose }: Props) {
-    const { message } = App.useApp();
+    const toast = useToasts();
     const { data, isLoading } = useAdminUser(userId);
     const updateLimitMut = useUpdateUserLimit();
     const [previewPageId, setPreviewPageId] = useState<string | null>(null);
@@ -164,7 +165,7 @@ export function UserProfileModal({ userId, onClose }: Props) {
                                                                     onChange={(val) => {
                                                                         if (val) {
                                                                             updateLimitMut.mutate({ id: userId, publishLimit: val });
-                                                                            message.success("Limit updated");
+                                                                            toast.success("Limit updated");
                                                                         }
                                                                     }}
                                                                     className="flex-1 bg-black/20 border-white/10 text-white rounded-lg"

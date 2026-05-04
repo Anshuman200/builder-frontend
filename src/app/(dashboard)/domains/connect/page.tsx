@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Steps, Input, Button, Alert, Progress, Typography, Space, App, Card, Select, Tag } from 'antd';
+import { Steps, Input, Button, Alert, Progress, Typography, Space, Card, Select, Tag } from 'antd';
 import {
     RocketOutlined,
     GlobalOutlined,
@@ -19,7 +19,9 @@ import { LockClosedIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import { useCreateDomain, useVerifyDomain, useCreateProxy, useProxyStatus } from "@/lib/api/domainHooks";
 import { useAuth } from "@/hooks/useAuth";
 import { useGoLivePage, usePage, usePages } from "@/lib/api/queries";
+import { useToasts } from "@/hooks/useToasts";
 // Removed plain CSS import in favor of Tailwind
+import { motion, AnimatePresence } from "framer-motion";
 
 const { Title, Text } = Typography;
 
@@ -55,7 +57,7 @@ const DEPLOY_STEPS = [
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 function ConnectDomainContent() {
-    const { message } = App.useApp();
+    const toast = useToasts();
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user } = useAuth();
@@ -201,7 +203,7 @@ function ConnectDomainContent() {
             if (pageIdToUse) {
                 await goLiveMutation.mutateAsync(pageIdToUse).catch(e => {
                     console.warn("Go Live failed but domain created:", e);
-                    message.warning("Domain connected, but failed to mark project as 'Live'. Check your limits.");
+                    toast.info("Domain connected, but failed to mark project as 'Live'. Check your limits.");
                 });
             }
 
@@ -225,17 +227,17 @@ function ConnectDomainContent() {
 
             if (pageIdToUse) {
                 await goLiveMutation.mutateAsync(pageIdToUse);
-                message.success("Project is now live via proxy URL!");
+                toast.success("Project is now live via proxy URL!");
             }
             router.push('/domains');
         } catch (err: any) {
-            message.error(err.message || "Failed to go live");
+            toast.error(err.message || "Failed to go live");
         }
     };
 
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
-        message.success('Copied to clipboard!');
+        toast.success('Copied to clipboard!');
     };
 
     // Auto-validation effect
@@ -282,30 +284,49 @@ function ConnectDomainContent() {
     }, [currentStep, domainResult]);
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] px-5 py-10 flex justify-center">
-            <div className="w-full max-w-7xl">
+        <div className="min-h-screen bg-[#030303] text-white selection:bg-indigo-500/30 overflow-x-hidden relative">
+            {/* Background Decorative Elements */}
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-600/5 rounded-full blur-[120px] pointer-events-none" />
+
+            <div className="relative z-10 w-full max-w-6xl mx-auto px-6 py-8 md:py-12">
                 <Header onBack={() => router.push('/domains')} />
 
-                <div className="perspective-[100dvw]">
-                    <div className="bg-[#141414]! border-white/10! rounded-t-2xl! rounded-b-none! overflow-hidden shadow-2xl!">
-                        <div className="bg-linear-to-br from-indigo-500/20 to-purple-600/20 p-8 border-b border-white/10 rounded-md">
-                            <Title level={2} className="text-white! m-0! mb-6!">
-                                <RocketOutlined className="mr-3 text-indigo-400" />
-                                Publish Project
-                            </Title>
-                            <Steps
-                                current={currentStep}
-                                size="small"
-                                items={[
-                                    { title: <span className="text-white">Deploy Worker</span> },
-                                    { title: <span className="text-white">Add Domain</span> },
-                                    { title: <span className="text-white">Complete</span> },
-                                ]}
-                                className="[&_.ant-steps-item-title::after]:bg-white/10 [&_.ant-steps-item-icon]:bg-transparent! [&_.ant-steps-item-icon]:border-white/20! [&_.ant-steps-item-finish_.ant-steps-item-icon]:border-emerald-500!"
-                            />
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="relative"
+                >
+                    {/* Main Container Card */}
+                    <div className="bg-neutral-900/40 backdrop-blur-3xl border border-white/10 rounded-lg overflow-hidden shadow-2xl">
+                        {/* Header Section */}
+                        <div className="relative px-8 pt-10 pb-8 border-b border-white/5 bg-linear-to-b from-white/[0.03] to-transparent">
+                            <div className="flex flex-col gap-8">
+                                <div>
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                                        <RocketOutlined className="text-xs" /> Deploy & Connect
+                                    </div>
+                                    <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white m-0">
+                                        Publish <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 to-purple-400">Project</span>
+                                    </h2>
+                                </div>
+                                <div className="w-full">
+                                    <Steps
+                                        current={currentStep}
+                                        size="small"
+                                        items={[
+                                            { title: <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Deploy</span> },
+                                            { title: <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Domain</span> },
+                                            { title: <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Live</span> },
+                                        ]}
+                                        className="compact-steps"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="p-8">
+                        {/* Content Section */}
+                        <div className="p-8 md:p-10">
                             {pageIdFromUrl && pageData?.isPublic && (
                                 <Alert
                                     title="Public Templates Cannot Go Live"
@@ -368,7 +389,7 @@ function ConnectDomainContent() {
                             )}
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
     );
@@ -376,15 +397,14 @@ function ConnectDomainContent() {
 
 function Header({ onBack }: { onBack: () => void }) {
     return (
-        <div className="mb-6">
-            <Button
-                type="text"
-                icon={<ArrowLeftOutlined />}
+        <div className="mb-10">
+            <button
                 onClick={onBack}
-                className="text-white hover:text-indigo-400"
+                className="group flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300 backdrop-blur-md"
             >
-                Back to Domains
-            </Button>
+                <ArrowLeftOutlined className="text-xs group-hover:-translate-x-1 transition-transform" />
+                <span className="text-[11px] font-black uppercase tracking-widest">Back to Domains</span>
+            </button>
         </div>
     );
 }
@@ -430,7 +450,7 @@ function StepDeployWorker({
                     type="info"
                     showIcon
                     icon={<RocketOutlined />}
-                    className="bg-indigo-500/10! border-indigo-500/20! rounded-md! [&_.ant-alert-message]:text-white! [&_.ant-alert-description]:text-white/70!"
+                    className="bg-indigo-500/10! border-indigo-500/20! text-white! rounded-md! [&_.ant-alert-message]:text-white! [&_.ant-alert-description]:text-white/70!"
                 />
             )}
 
@@ -459,84 +479,115 @@ function StepDeployWorker({
             )}
 
             {!workerResult && !workerDeploying && !isPreFilled && (
-                <div className="mb-8">
-                    <label className="block mb-2 font-semibold text-white">Select Private Project</label>
-                    <Select
-                        size="large"
-                        placeholder="Choose a project to connect..."
-                        className="w-full group"
-                        popupClassName="!bg-[#1f1f1f] !border !border-white/10 !p-1.5"
-                        rootClassName="[&_.ant-select-selector]:!bg-white/5 [&_.ant-select-selector]:!border-white/10 [&_.ant-select-selector]:!text-white [&_.ant-select-selection-placeholder]:!text-white/30"
-                        onChange={onProjectSelect}
-                        loading={projectsLoading}
-                        options={projects.map((p) => ({
-                            label: (
-                                <div className="flex items-center gap-3 py-1 text-white">
-                                    <div className="w-9 h-9 rounded-md overflow-hidden shrink-0 border border-white/10 bg-black">
-                                        {p.thumbnail ? (
-                                            <img src={p.thumbnail} alt={p.title} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full bg-indigo-500/20 flex items-center justify-center">
-                                                <GlobalOutlined className="text-[10px] text-indigo-400" />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex flex-col min-w-0">
-                                        <div className="flex items-center gap-2 overflow-hidden">
-                                            <span className="font-medium truncate">{p.title}</span>
-                                            {p.isLive && <Tag color="green" className="m-0! px-1! text-[9px] leading-3 uppercase font-bold bg-emerald-500/20 border-emerald-500/30 text-emerald-400">LIVE</Tag>}
+                <div className="mb-10 max-w-6xl mx-auto">
+                    <label className="block mb-3 font-black text-white/20 uppercase tracking-[0.2em] text-[10px] text-center">Select Destination Project</label>
+                    <div className="relative group">
+                        <div className="absolute -inset-0.5 bg-linear-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-10 group-hover:opacity-30 transition duration-1000"></div>
+                        <Select
+                            size="large"
+                            placeholder="Choose a project to connect..."
+                            className="w-full relative h-16 rounded-2xl overflow-hidden"
+                            style={{ 
+                                background: '#0f0f0f',
+                                borderRadius: '16px',
+                                border: '1px solid rgba(255,255,255,0.1)'
+                            }}
+                            dropdownStyle={{ 
+                                background: '#0f0f0f',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                padding: '8px',
+                                borderRadius: '16px'
+                            }}
+                            rootClassName="custom-dark-select [&_.ant-select-selector]:!bg-transparent! [&_.ant-select-selector]:!border-none! [&_.ant-select-selector]:!text-white! [&_.ant-select-selection-placeholder]:!text-white/20! [&_.ant-select-selection-placeholder]:!leading-[62px]! [&_.ant-select-selection-item]:!leading-[62px]!"
+                            onChange={onProjectSelect}
+                            loading={projectsLoading}
+                            options={projects.map((p) => ({
+                                label: (
+                                    <div className="flex items-center gap-4 py-2 text-white group/item">
+                                        <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-white/10 bg-black group-hover/item:border-indigo-500/50 transition-colors">
+                                            {p.thumbnail ? (
+                                                <img src={p.thumbnail} alt={p.title} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full bg-indigo-500/10 flex items-center justify-center">
+                                                    <GlobalOutlined className="text-xs text-indigo-400" />
+                                                </div>
+                                            )}
                                         </div>
-                                        <span className="text-white/40 text-[10px] truncate">{p.slug || 'no-slug'}</span>
+                                        <div className="flex flex-col min-w-0">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-sm tracking-tight">{p.title}</span>
+                                                {p.isLive && <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[8px] font-black uppercase tracking-widest">LIVE</span>}
+                                            </div>
+                                            <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest mt-0.5">{p.slug || 'no-slug'}</span>
+                                        </div>
                                     </div>
-                                </div>
-                            ),
-                            value: p._id
-                        }))}
-                    />
+                                ),
+                                value: p._id
+                            }))}
+                        />
+                    </div>
                 </div>
             )}
 
             {!workerResult && !workerDeploying && (
-                <div className="mt-2 animate-in fade-in duration-500">
-                    <label className="block mb-4 font-black text-white/40 uppercase tracking-[0.2em] text-[10px]">Visibility Settings</label>
-                    <div className="grid grid-cols-2 gap-4">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="mt-4"
+                >
+                    <label className="block mb-4 font-black text-white/20 uppercase tracking-[0.2em] text-[10px] text-center">Set Project Access</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto">
                         <button
                             onClick={() => setVisibility('PUBLIC')}
-                            className={`flex flex-col items-center gap-4 p-8 rounded-[2rem] border transition-all duration-300 ${visibility === 'PUBLIC' ? 'bg-indigo-500/10 border-indigo-500 shadow-[0_0_30px_-10px_rgba(99,102,241,0.3)] text-white' : 'bg-white/2 border-white/5 text-white/30 hover:bg-white/5'}`}
+                            className={`group relative flex items-center gap-4 px-6 py-4 rounded-2xl border transition-all duration-300 ${visibility === 'PUBLIC' ? 'bg-indigo-500/10 border-indigo-500/50 shadow-[0_10px_20px_-5px_rgba(99,102,241,0.2)]' : 'bg-white/[0.02] border-white/5 opacity-50 hover:opacity-100 hover:bg-white/[0.04]'}`}
                         >
-                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${visibility === 'PUBLIC' ? 'bg-indigo-500 text-white' : 'bg-white/5'}`}>
-                                <GlobeAltIcon className="w-6 h-6" />
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${visibility === 'PUBLIC' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/40' : 'bg-white/5 text-white/40 group-hover:scale-105'}`}>
+                                <GlobeAltIcon className="w-5 h-5" />
                             </div>
-                            <div className="text-center">
-                                <span className="block font-black uppercase tracking-widest text-xs">Public</span>
-                                <span className="block text-[10px] opacity-40 mt-1">Accessible by URL</span>
+                            <div className="text-left">
+                                <span className={`block font-black uppercase tracking-widest text-[11px] transition-colors ${visibility === 'PUBLIC' ? 'text-white' : 'text-white/40'}`}>Public</span>
+                                <span className="block text-[9px] font-bold text-white/20">Free access</span>
                             </div>
                         </button>
                         <button
                             onClick={() => setVisibility('PRIVATE')}
-                            className={`flex flex-col items-center gap-4 p-8 rounded-[2rem] border transition-all duration-300 ${visibility === 'PRIVATE' ? 'bg-indigo-500/10 border-indigo-500 shadow-[0_0_30px_-10px_rgba(99,102,241,0.3)] text-white' : 'bg-white/2 border-white/5 text-white/30 hover:bg-white/5'}`}
+                            className={`group relative flex items-center gap-4 px-6 py-4 rounded-2xl border transition-all duration-300 ${visibility === 'PRIVATE' ? 'bg-purple-500/10 border-purple-500/50 shadow-[0_10px_20px_-5px_rgba(168,85,247,0.2)]' : 'bg-white/[0.02] border-white/5 opacity-50 hover:opacity-100 hover:bg-white/[0.04]'}`}
                         >
-                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${visibility === 'PRIVATE' ? 'bg-indigo-500 text-white' : 'bg-white/5'}`}>
-                                <LockClosedIcon className="w-6 h-6" />
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${visibility === 'PRIVATE' ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/40' : 'bg-white/5 text-white/40 group-hover:scale-105'}`}>
+                                <LockClosedIcon className="w-5 h-5" />
                             </div>
-                            <div className="text-center">
-                                <span className="block font-black uppercase tracking-widest text-xs">Private</span>
-                                <span className="block text-[10px] opacity-40 mt-1">Password protected</span>
+                            <div className="text-left">
+                                <span className={`block font-black uppercase tracking-widest text-[11px] transition-colors ${visibility === 'PRIVATE' ? 'text-white' : 'text-white/40'}`}>Private</span>
+                                <span className="block text-[9px] font-bold text-white/20">Gated access</span>
                             </div>
                         </button>
                     </div>
-                    {visibility === 'PRIVATE' && (
-                        <div className="mt-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                            <Input.Password
-                                placeholder="Enter a secure password..."
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                className="bg-white/5! border-white/10! text-white! h-14 rounded-2xl px-6! text-lg font-medium hover:border-white/20! focus:border-indigo-500! transition-all"
-                                prefix={<LockOutlined className="mr-2 opacity-40" />}
-                            />
-                        </div>
-                    )}
-                </div>
+
+                    <AnimatePresence>
+                        {visibility === 'PRIVATE' && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0, y: -20 }}
+                                animate={{ opacity: 1, height: 'auto', y: 0 }}
+                                exit={{ opacity: 0, height: 0, y: -20 }}
+                                className="mt-8 max-w-6xl mx-auto"
+                            >
+                                <div className="relative group">
+                                    <div className="absolute -inset-0.5 bg-linear-to-r from-purple-500 to-indigo-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                                    <Input.Password
+                                        placeholder="Create a protection password..."
+                                        value={password}
+                                        onChange={e => setPassword(e.target.value)}
+                                        className="relative bg-[#0f0f0f]! border-white/10! text-white! h-16 rounded-2xl px-6! text-lg font-medium hover:border-white/20! focus:border-purple-500! transition-all shadow-2xl"
+                                        prefix={<LockOutlined className="mr-3 text-purple-400" />}
+                                    />
+                                </div>
+                                <p className="text-center text-[10px] font-bold text-white/20 uppercase tracking-widest mt-4">
+                                    Users will need this to view your project
+                                </p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
             )}
 
             {/* Project Preview URL is handled internally now */}
@@ -616,36 +667,39 @@ function StepDeployWorker({
                 </div>
             )}
 
-            <div className="flex flex-col gap-3 mt-4">
+            <div className="flex flex-col gap-4 mt-8 max-w-md mx-auto">
                 {!workerResult ? (
-                    <Button
-                        type="primary"
-                        size="large"
-                        block
-                        onClick={onDeploy}
-                        loading={workerDeploying}
-                        disabled={disabled}
-                        className="h-12! text-lg! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-2xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
-                    >
-                        🚀 Publish
-                    </Button>
+                    <div className="relative group">
+                        <div className="absolute -inset-0.5 bg-linear-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                        <Button
+                            type="primary"
+                            size="large"
+                            block
+                            onClick={onDeploy}
+                            loading={workerDeploying}
+                            disabled={disabled}
+                            className="relative h-11! text-xs! font-black! uppercase! tracking-widest! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all shadow-xl shadow-indigo-500/10"
+                        >
+                            🚀 Start Publishing
+                        </Button>
+                    </div>
                 ) : (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                         <Button
                             size="large"
                             onClick={onSkip}
                             loading={isSkipping}
-                            className="h-12! font-bold! bg-white/5! border-white/10! text-white! rounded-2xl! hover:bg-white/10!"
+                            className="h-11! text-[10px] font-black uppercase tracking-widest bg-white/5! border-white/10! text-white! rounded-xl! hover:bg-white/10!"
                         >
-                            Continue
+                            Skip
                         </Button>
                         <Button
                             type="primary"
                             size="large"
                             onClick={onNext}
-                            className="h-12! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-2xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
+                            className="h-11! text-[10px] font-black uppercase tracking-widest bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all shadow-lg shadow-indigo-500/10"
                         >
-                            🌐 Connect Domain
+                            Next
                         </Button>
                     </div>
                 )}
@@ -665,46 +719,62 @@ interface StepAddDomainProps {
 
 function StepAddDomain({ customDomain, setCustomDomain, domainCreating, domainError, onBack, onCreate }: StepAddDomainProps) {
     return (
-        <Space orientation="vertical" style={{ width: '100%' }} size="large">
-            <Alert
-                message="Step 2: Connect Your Domain"
-                description="Enter the domain or subdomain you want to use (e.g. landing.example.com)."
-                type="info"
-                showIcon
-                icon={<GlobalOutlined />}
-                className="bg-indigo-500/10! border-indigo-500/20! rounded-md! [&_.ant-alert-message]:text-white! [&_.ant-alert-description]:text-white/70!"
-            />
+        <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="max-w-6xl mx-auto"
+        >
+            <div className="mb-6 text-center">
+                <div className="inline-flex p-3 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 mb-3">
+                    <GlobalOutlined className="text-xl text-indigo-400" />
+                </div>
+                <h3 className="text-lg font-black text-white m-0 mb-1 tracking-tight">Connect Your Domain</h3>
+                <p className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Map your project to a custom address</p>
+            </div>
 
-            <div>
-                <label className="block mb-2 font-semibold text-white">Custom Domain</label>
-                <Input
-                    size="large"
-                    placeholder="landing.yourdomain.com"
-                    value={customDomain}
-                    onChange={(e) => setCustomDomain(e.target.value)}
+            <div className="flex flex-col sm:flex-row gap-3 mb-8">
+                <div className="relative flex-1 group">
+                    <div className="absolute -inset-0.5 bg-linear-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                    <Input
+                        size="large"
+                        placeholder="e.g. landing.yourbrand.com"
+                        value={customDomain}
+                        onChange={(e) => setCustomDomain(e.target.value)}
+                        disabled={domainCreating}
+                        className="relative bg-[#0f0f0f]! border-white/10! text-white! h-11 rounded-xl px-4! text-sm font-medium hover:border-white/20! focus:border-indigo-500! transition-all shadow-xl"
+                        prefix={<GlobalOutlined className="mr-2 text-indigo-400 opacity-40" />}
+                    />
+                </div>
+                <div className="relative group">
+                    <div className="absolute -inset-0.5 bg-linear-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                    <Button
+                        type="primary"
+                        size="large"
+                        onClick={onCreate}
+                        loading={domainCreating}
+                        className="relative h-11! px-8! text-[10px]! font-black! uppercase! tracking-widest! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-xl! hover:scale-[1.02]! active:scale-[0.98]! transition-all shadow-lg shadow-indigo-500/10"
+                    >
+                        {domainCreating ? 'Connecting...' : 'Finish Setup'}
+                    </Button>
+                </div>
+            </div>
+
+            {domainError && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+                    <Alert message={domainError} type="error" showIcon className="rounded-xl! bg-red-500/10! border-red-500/20! [&_.ant-alert-message]:text-red-400! text-xs! font-bold!" />
+                </motion.div>
+            )}
+
+            <div className="flex justify-center">
+                <button
+                    onClick={onBack}
                     disabled={domainCreating}
-                    prefix={<GlobalOutlined />}
-                    className="bg-white/5! border-white/10! text-white! rounded-md! h-12"
-                />
-            </div>
-
-            {domainError && <Alert message={domainError} type="error" showIcon />}
-
-            <div className="flex gap-4 mt-4">
-                <Button size="large" onClick={onBack} disabled={domainCreating} className="h-12! flex-1! bg-white/5! border-white/10! text-white! rounded-2xl! hover:bg-white/10!">
-                    ← Back
-                </Button>
-                <Button
-                    type="primary"
-                    size="large"
-                    onClick={onCreate}
-                    loading={domainCreating}
-                    className="h-12! flex-2! text-lg! font-bold! bg-linear-to-r! from-indigo-600! to-purple-600! border-0! rounded-md! hover:scale-[1.02]! active:scale-[0.98]! transition-all"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-white/40 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest"
                 >
-                    {domainCreating ? 'Connecting...' : '🌐 Connect Domain'}
-                </Button>
+                    <ArrowLeftOutlined className="text-[10px]" /> Go Back
+                </button>
             </div>
-        </Space>
+        </motion.div>
     );
 }
 
@@ -719,115 +789,72 @@ interface StepCompleteProps {
 }
 
 function StepComplete({ domainResult, workerResult, isSkipped, autoValidating, validationProgress, validationSuccess, onDone }: StepCompleteProps) {
-    const { message } = App.useApp();
+    const toast = useToasts();
     return (
-        <Space orientation="vertical" style={{ width: '100%' }} size="large">
-            {isSkipped ? (
-                <Alert
-                    message="Setup Successful!"
-                    description="Your landing page is now live and ready to share via the proxy link."
-                    type="success"
-                    showIcon
-                    className="mb-4 bg-emerald-500/10! border-emerald-500/20! rounded-md!"
-                />
-            ) : domainResult?.requiresManualDns ? (
-                <Alert
-                    message="Action Required: DNS Setup"
-                    description="Your domain was added, but you need to configure your DNS records to activate it."
-                    type="warning"
-                    showIcon
-                    className="mb-4 bg-amber-500/10! border-amber-500/20! rounded-md!"
-                />
-            ) : (
-                <Alert
-                    message="Domain Ready!"
-                    description="Your custom domain has been successfully added."
-                    type="success"
-                    showIcon
-                    className="mb-4 bg-emerald-500/10! border-emerald-500/20! rounded-md!"
-                />
-            )}
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-6xl mx-auto text-center"
+        >
+            <div className="mb-8">
+                <div className="inline-flex relative">
+                    <div className="absolute -inset-2 bg-emerald-500/20 rounded-full blur-xl animate-pulse" />
+                    <div className="relative p-6 bg-emerald-500/10 rounded-full border border-emerald-500/20 shadow-xl">
+                        <RocketOutlined className="text-5xl text-emerald-400" />
+                    </div>
+                </div>
+            </div>
 
-            <div className="p-12 bg-white/3 rounded-md border border-white/5">
-                {isSkipped ? (
-                    <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="inline-flex p-8 bg-emerald-500/10 rounded-full mb-6 border border-emerald-500/20 shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)]">
-                            <RocketOutlined className="text-7xl text-emerald-500" />
-                        </div>
-                        <Title level={2} className="text-white! m-0! mb-3!">Project is Live!</Title>
-                        <Text className="text-white/60! text-lg block mb-10">Your site is now accessible globally via the secure proxy link.</Text>
+            <h2 className="text-2xl md:text-3xl font-black text-white m-0 mb-2 tracking-tight">
+                Project <span className="text-emerald-400">Published!</span>
+            </h2>
+            <p className="text-white/40 text-sm font-medium mb-8 max-w-sm mx-auto">
+                Your site is now live on the global edge network.
+            </p>
 
-                        <div className="max-w-xl mx-auto p-1! rounded-2xl bg-linear-to-r from-emerald-500/20 to-indigo-500/20 border border-white/10 overflow-hidden mb-12">
-                            <div className="bg-[#1a1a1a] p-6 rounded-[14px]">
-                                <div className="flex items-center gap-2 mb-4 justify-center">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                    <Text className="text-white/50! text-[10px] font-bold uppercase tracking-[0.2em]">Public Access URL</Text>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="flex-1 px-5 py-4 bg-white/5 border border-white/10 rounded-xl overflow-hidden group hover:border-white/20 transition-colors">
-                                        <Text className="text-emerald-400! text-base font-mono truncate block">{workerResult?.workerUrl}</Text>
-                                    </div>
-                                    <Button
-                                        type="primary"
-                                        icon={<CopyOutlined />}
-                                        size="large"
-                                        onClick={() => {
-                                            if (workerResult?.workerUrl) {
-                                                navigator.clipboard.writeText(workerResult.workerUrl);
-                                                message.success("Link copied to clipboard!");
-                                            }
-                                        }}
-                                        className="h-[60px]! w-[60px]! flex items-center justify-center bg-emerald-600! border-0! rounded-xl! hover:scale-105! transition-transform shadow-lg shadow-emerald-900/20"
-                                    />
-                                </div>
-                            </div>
-                        </div>
+            <div className="relative group max-w-sm mx-auto mb-10">
+                <div className="absolute -inset-0.5 bg-linear-to-r from-emerald-500 to-indigo-500 rounded-2xl blur opacity-20 transition duration-500"></div>
+                <div className="relative bg-neutral-950/50 backdrop-blur-xl border border-white/10 p-5 rounded-2xl">
+                    <div className="flex items-center gap-2 mb-4 justify-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Production URL</span>
                     </div>
-                ) : domainResult?.requiresManualDns ? (
-                    <div className="text-center">
-                        <ClockCircleOutlined className="text-6xl text-amber-400 mb-4" />
-                        <Title level={3} className="text-white!">Manual DNS Setup Pending</Title>
-                        <Text className="text-white/60! block mb-6">
-                            Follow the instructions on the next screen to configure your DNS records.
-                        </Text>
-                    </div>
-                ) : autoValidating ? (
-                    <div className="text-center">
-                        <Progress type="circle" percent={validationProgress} strokeColor={{ '0%': '#6366f1', '100%': '#10b981' }} className="[&_.ant-progress-text]:text-white!" />
-                        <Title level={3} className="text-white! mt-8 flex items-center justify-center gap-3">
-                            <SyncOutlined spin className="text-indigo-400" />
-                            Validating Connection...
-                        </Title>
-                        <Text className="text-white/60! block">Provisioning SSL and global edge routing.</Text>
-                    </div>
-                ) : validationSuccess ? (
-                    <div className="text-center">
-                        <div className="inline-flex p-6 bg-emerald-500/10 rounded-full mb-5">
-                            <CheckCircleOutlined className="text-6xl text-emerald-500" />
-                        </div>
-                        <Title level={3} className="text-white! mt-4">Domain is Active!</Title>
-                        <Text className="text-white/60! block mb-8">Your landing page is now live at your custom domain.</Text>
-                    </div>
-                ) : (
-                    <div className="text-center">
-                        <ClockCircleOutlined className="text-6xl text-amber-400 mb-4" />
-                        <Title level={3} className="text-white!">DNS Propagation Pending</Title>
-                        <Text className="text-white/60! block mb-8">Validation might take a few minutes. You can check the status anytime.</Text>
-                    </div>
-                )}
 
+                    <div className="flex items-center gap-3">
+                        <div className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl hover:border-emerald-500/20 transition-all overflow-hidden text-left">
+                            <span className="text-emerald-400 font-mono text-xs truncate block">
+                                {isSkipped ? workerResult?.workerUrl : `https://${domainResult?.domain}`}
+                            </span>
+                        </div>
+                        <button
+                            onClick={() => {
+                                const url = isSkipped ? workerResult?.workerUrl : `https://${domainResult?.domain}`;
+                                if (url) {
+                                    navigator.clipboard.writeText(url);
+                                    toast.success("Copied!");
+                                }
+                            }}
+                            className="h-10 w-10 shrink-0 flex items-center justify-center bg-emerald-500 text-black rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
+                        >
+                            <CopyOutlined className="text-base" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="max-w-md mx-auto">
                 <Button
                     type="primary"
                     size="large"
                     block
                     onClick={onDone}
-                    className="h-14 text-lg font-bold mt-4"
-                    style={{ background: validationSuccess ? '#10b981' : '#6366f1', borderColor: validationSuccess ? '#10b981' : '#6366f1' }}
+                    className="h-11! text-[10px]! font-black! uppercase! tracking-widest! bg-white! text-black! border-0! rounded-xl! hover:bg-neutral-200! transition-all shadow-xl"
                 >
-                    {autoValidating ? 'Continue to Dashboard' : 'Finish Setup'}
+                    Done
                 </Button>
             </div>
-        </Space>
+        </motion.div>
     );
 }
 

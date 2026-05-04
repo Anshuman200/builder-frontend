@@ -1,4 +1,4 @@
-  "use client";
+"use client";
 
 import { useCallback, useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -11,7 +11,6 @@ import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { PageTransition } from "@/components/layout/PageTransition";
 import NewPageWizard from "@/components/editor/NewPageWizard";
 import { SECTION_TEMPLATES } from "@/lib/config/sections";
-import { DeleteToastProvider } from "@/context/DeleteToastContext";
 
 // ─── Map wizard section IDs → section template category prefixes ──────────────
 const SECTION_ID_MAP: Record<string, string> = {
@@ -100,26 +99,24 @@ export default function DashboardLayout({
   }
 
   return (
-    <DeleteToastProvider>
-      <div className="dashboard-dark min-h-screen selection:bg-indigo-500/30">
-        <DashboardHeader onCreatePage={handleCreate} />
+    <div className="dashboard-dark min-h-screen selection:bg-indigo-500/30">
+      <DashboardHeader onCreatePage={handleCreate} />
 
-        <main className="relative">
-          <PageTransition pathname={pathname}>
-            {children}
-          </PageTransition>
-        </main>
+      <main className="relative">
+        <PageTransition pathname={pathname}>
+          {children}
+        </PageTransition>
+      </main>
 
-        {/* Persistent mobile navigation spacer */}
-        <div className="h-16 lg:hidden shrink-0" />
+      {/* Persistent mobile navigation spacer */}
+      <div className="h-16 lg:hidden shrink-0" />
 
-        <NewPageWizard
-          open={wizardOpen}
-          onClose={() => setWizardOpen(false)}
-          onSubmit={handleWizardSubmit}
-          isSubmitting={createMutation.isPending}
-        />
-      </div>
-    </DeleteToastProvider>
+      <NewPageWizard
+        open={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        onSubmit={handleWizardSubmit}
+        isSubmitting={createMutation.isPending}
+      />
+    </div>
   );
 }

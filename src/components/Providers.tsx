@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ToastProvider } from "@/hooks/useToasts";
-import { ToastContainer } from "@/components/ui/ToastContainer";
+import { CustomToaster } from "@/components/ui/CustomToaster";
 import { ConfigProvider, theme, App } from "antd";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { usePathname } from "next/navigation";
@@ -104,7 +104,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                     <ToastProvider>
                         <AuthProvider>
                             {children}
-                            <ToastContainer />
+                            <CustomToaster />
                             <AuthModal
                                 open={authOpen}
                                 onClose={() => { setAuthOpen(false); setAuthForced(false); }}

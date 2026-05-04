@@ -125,8 +125,7 @@ export const DashboardHeader = ({ onCreatePage }: DashboardHeaderProps) => {
               }}
               placement="bottomRight"
               trigger={["click"]}
-              overlayClassName="profile-dropdown-overlay"
-              // classNames={r}
+              classNames={{ root: "profile-dropdown-overlay" }}
             >
               <button
                 className="w-10 h-10 rounded-md bg-linear-to-br from-indigo-500 to-purple-600 p-px cursor-pointer hover:scale-105 transition-transform overflow-hidden relative"

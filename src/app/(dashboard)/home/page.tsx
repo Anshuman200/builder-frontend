@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { usePages, useDeletePage, usePublishPage, useUnpublishPage, useDuplicatePage, useUpdatePage } from "@/lib/api/queries";
 import { useToasts } from "@/hooks/useToasts";
-import { useDeleteToast } from "@/context/DeleteToastContext";
 import { cn } from "@/lib/utils";
 import {
   Squares2X2Icon,
@@ -13,7 +12,6 @@ import {
   PencilIcon,
   TrashIcon,
   GlobeAltIcon,
-  MagnifyingGlassIcon,
   EyeIcon,
   ArrowPathIcon,
   CameraIcon,
@@ -53,7 +51,8 @@ function timeAgo(dateStr: string) {
 
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth();
-  const { success, error: toastError } = useToasts();
+  const toast = useToasts();
+  const { success, error: toastError } = toast;
   const router = useRouter();
 
   const { data: pages = [], isLoading: loading } = usePages();
@@ -71,18 +70,17 @@ export default function HomePage() {
   const [showCapturePicker, setShowCapturePicker] = useState(false);
   const [captureTarget, setCaptureTarget] = useState<any | null>(null);
 
-  const { startDelete } = useDeleteToast();
   const [passwordModalId, setPasswordModalId] = useState<string | null>(null);
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
   const handleDelete = useCallback((page: Page) => {
-    startDelete(
-      [{ id: page._id, label: page.title }],
-      async (item) => {
-        await deleteMutation.mutateAsync(item.id);
-      }
-    );
-  }, [deleteMutation, startDelete]);
+    // Better use toast.promise with mutateAsync
+    toast.promise(deleteMutation.mutateAsync(page._id), {
+      loading: `Deleting ${page.title}...`,
+      success: `${page.title} deleted successfully`,
+      error: (err: any) => err.message || `Failed to delete ${page.title}`
+    });
+  }, [deleteMutation, toast]);
 
   const handleRenameSubmit = useCallback(async (page: Page) => {
     if (!renameValue.trim() || renameValue.trim() === page.title) {

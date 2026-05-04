@@ -80,7 +80,7 @@ export const PANEL_COLORS = {
 
 // ─── MediaInput ───────────────────────────────────────────────────────────────
 
-export function MediaInput({ value, onChange, placeholder, type = "image", variant = "default", aspectRatio }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: "image" | "video"; variant?: "default" | "compact"; aspectRatio?: string }) {
+export function MediaInput({ value, onChange, placeholder, type = "image", variant = "default", aspectRatio, showRemove = false }: { value: string; onChange: (v: string) => void; placeholder?: string; type?: "image" | "video"; variant?: "default" | "compact"; aspectRatio?: string, showRemove?: boolean }) {
     const [pickerOpen, setPickerOpen] = React.useState(false);
 
     const isVideo = type === "video" || (value && (value?.endsWith(".mp4") || value?.includes("youtube.com") || value?.includes("vimeo.com") || value?.includes("youtu.be")));
@@ -209,7 +209,7 @@ export function MediaInput({ value, onChange, placeholder, type = "image", varia
                                 <ArrowPathIcon style={{ width: 14, height: 14 }} />
                                 Change
                             </button>
-                            {/* {variant !== "compact" && (
+                            {showRemove && (
                                 <button
                                     onClick={() => onChange("")}
                                     style={{
@@ -229,7 +229,7 @@ export function MediaInput({ value, onChange, placeholder, type = "image", varia
                                     <TrashIcon style={{ width: 14, height: 14 }} />
                                     Remove
                                 </button>
-                            )} */}
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1893,11 +1893,13 @@ export function TypographyFields({
     variant = "standard",
     showContentField = true,
     showAlign = true,
+    showColor = true,
 }: PropertyGroupProps & {
     showSubtitle?: boolean;
     variant?: "standard" | "quick";
     showContentField?: boolean;
     showAlign?: boolean;
+    showColor?: boolean
 }) {
     // Helper to resolve keys based on prefix and common patterns
     const getK = (base: string) => {
@@ -2039,13 +2041,13 @@ export function TypographyFields({
 
             {showAlign && p[getK("align")] !== undefined && <AlignmentInput value={(p[getK("align")] as string) || "left"} onChange={(v) => up(getK("align"), v)} />}
 
-            <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Color`}>
+            {showColor && <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Color`}>
                 <ColorInput
                     value={(p[getK("color")] || "#0f172a") as string}
                     onChange={(v) => up(getK("color"), v)}
                     onBlur={(v) => up(getK("color"), v, true)}
                 />
-            </Field>
+            </Field>}
 
             {p[getK("fontSize")] !== undefined && (
                 <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Size`}>
@@ -2223,7 +2225,7 @@ export function CardFields({ p, up, prefix = "card" }: PropertyGroupProps) {
     );
 }
 
-export function ButtonFields({ p, up, prefix = "button", hideLabel = false, textKey: customTextKey, hasMargin=true }: PropertyGroupProps & { hideLabel?: boolean; textKey?: string, hasMargin?: boolean }) {
+export function ButtonFields({ p, up, prefix = "button", hideLabel = false, textKey: customTextKey, hasMargin = true }: PropertyGroupProps & { hideLabel?: boolean; textKey?: string, hasMargin?: boolean }) {
     // Resolve keys
     const textKey = customTextKey || (prefix === "button" ? (p.label !== undefined ? "label" : "buttonText") : `${prefix}Text`);
     const variantKey = `${prefix}Variant`;
