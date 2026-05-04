@@ -70,14 +70,26 @@ export default function DashboardLayout({
 
   const handleWizardSubmit = useCallback(async (title: string, slug: string, selectedSections: string[], showInHeader: boolean, showInFooter: boolean, tags: string[]) => {
     try {
-      const content = buildContentFromSections(selectedSections);
+      const allBlocks = buildContentFromSections(selectedSections);
+      const header = allBlocks.find(b => b.type === "header") || null;
+      const footer = allBlocks.find(b => b.type === "footer") || null;
+      const middle = allBlocks.filter(b => b.type !== "header" && b.type !== "footer");
+
       const payload = {
         title,
         slug: slug || "page-" + Date.now().toString().slice(-4),
         status: "DRAFT",
         isPublic: false,
         visibility: 'PUBLIC',
-        content,
+        globalBlocks: { header, footer },
+        routes: [{
+          id: "home",
+          path: "/",
+          name: "Home",
+          content: middle,
+          showInHeader: false,
+          showInFooter: false
+        }],
         tags,
         meta: {}
       };
