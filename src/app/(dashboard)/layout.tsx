@@ -43,7 +43,7 @@ function buildContentFromSections(sectionIds: string[]) {
       const template = SECTION_TEMPLATES.find((t) => t.id.startsWith(prefix));
       return template ? template.create() : null;
     })
-    .filter(Boolean);
+    .filter((b): b is import("@/types").Block => !!b);
 }
 
 export default function DashboardLayout({
@@ -71,9 +71,9 @@ export default function DashboardLayout({
   const handleWizardSubmit = useCallback(async (title: string, slug: string, selectedSections: string[], showInHeader: boolean, showInFooter: boolean, tags: string[]) => {
     try {
       const allBlocks = buildContentFromSections(selectedSections);
-      const header = allBlocks.find(b => b.type === "header") || null;
-      const footer = allBlocks.find(b => b.type === "footer") || null;
-      const middle = allBlocks.filter(b => b.type !== "header" && b.type !== "footer");
+      const header = allBlocks.find(b => b?.type === "header") || null;
+      const footer = allBlocks.find(b => b?.type === "footer") || null;
+      const middle = allBlocks.filter(b => b?.type !== "header" && b?.type !== "footer");
 
       const payload = {
         title,
