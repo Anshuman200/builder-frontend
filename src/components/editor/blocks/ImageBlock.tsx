@@ -32,6 +32,10 @@ export function ImageBlock({ block }: BlockProps) {
         padding: isInMasonry ? "0" : (p.padding as string) || "8px 16px",
         width: "100%",
         height: height === "100%" ? "100%" : "auto",
+        display: height === "100%" ? "flex" : "block",
+        flexDirection: height === "100%" ? "column" : undefined,
+        flex: height === "100%" ? 1 : undefined,
+        overflow: "hidden",
         marginTop: (p.marginTop as string) || "0",
         marginLeft: (p.marginLeft as string) || "0",
         marginRight: (p.marginRight as string) || "0",
@@ -49,6 +53,8 @@ export function ImageBlock({ block }: BlockProps) {
         flexDirection: "column",
         width: "100%",
         height: height === "100%" ? "100%" : undefined,
+        flex: height === "100%" ? 1 : undefined,
+        justifyContent: "center",
         alignItems:
             align === "left" ? "flex-start"
             : align === "right" ? "flex-end"
@@ -80,7 +86,7 @@ export function ImageBlock({ block }: BlockProps) {
         >
             <div style={alignStyle}>
                 {link ? (
-                    <a href={link} onClick={(e) => e.preventDefault()} style={{ display: "block", width: "100%" }}>
+                    <a href={link} onClick={(e) => e.preventDefault()} style={{ display: "block", width: "100%", height: height === "100%" ? "100%" : "auto", flex: height === "100%" ? 1 : undefined }}>
                         {media}
                     </a>
                 ) : media}

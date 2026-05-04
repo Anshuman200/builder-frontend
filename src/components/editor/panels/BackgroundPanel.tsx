@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils";
 
 interface BackgroundPanelProps {
   block: Block;
-  hasMargin?:boolean;
+  hasMargin?: boolean;
 }
 
-export function BackgroundPanel({ block, hasMargin=true }: BackgroundPanelProps) {
+export function BackgroundPanel({ block, hasMargin = true }: BackgroundPanelProps) {
   const { updateBlock } = useEditorStore();
   const p = block.props;
 
@@ -20,7 +20,7 @@ export function BackgroundPanel({ block, hasMargin=true }: BackgroundPanelProps)
   const bgImage = (p.bgImage as string) || "";
   const hasFill = !!p.bgColor || !!p.bgGradient || !!p.sectionBg;
   const hasBackground = hasFill || !!bgImage;
-  const backgroundOpacity = Number(p.bgFillOpacity ?? p.bgImageOpacity ?? 100);
+  const backgroundOpacity = Number(p.bgFillOpacity ?? p.bgImageOpacity ?? 60);
   const isVideo = bgImage ? (
     /\.(mp4|webm|ogg|mov|m4v)($|\?)/i.test(bgImage) ||
     bgImage.toLowerCase().includes("video")

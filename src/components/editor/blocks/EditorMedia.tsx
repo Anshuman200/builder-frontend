@@ -38,7 +38,7 @@ function ShimmerLayer() {
                 style={{
                     position: "absolute",
                     inset: 0,
-                    background: "rgba(100,116,139,0.06)",
+                    background: "rgba(100,116,139,0.12)",
                     zIndex: 1,
                     overflow: "hidden",
                 }}
@@ -68,9 +68,9 @@ function Placeholder({ isVideo, style }: { isVideo?: boolean; style?: React.CSSP
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 8,
-                background: "rgba(100,116,139,0.06)",
-                border: "2px dashed rgba(100,116,139,0.25)",
-                color: "rgba(100,116,139,0.6)",
+                background: "rgba(100,116,139,0.1)",
+                border: "2px dashed rgba(100,116,139,0.3)",
+                color: "rgba(100,116,139,0.8)",
                 width: "100%",
                 minHeight: 140,
                 ...style,
@@ -173,7 +173,7 @@ export function EditorMedia({
         backgroundColor: "rgba(100,116,139,0.04)",
         ...(hasAspect ? { aspectRatio } : {}),
         ...(hasExplicitHeight ? { height } : {}),
-        ...(height === "100%" ? { height: "100%" } : {}),
+        ...(height === "100%" ? { height: "100%", flex: 1, display: "flex", flexDirection: "column" } : {}),
         ...style,
     };
 

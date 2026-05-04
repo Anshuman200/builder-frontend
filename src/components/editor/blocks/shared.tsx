@@ -351,7 +351,14 @@ export function ChildBlockWrapper({
         if (animType !== "none" && variants) {
             return (
                 <motion.div
-                    style={{ position: "relative", width: "100%", height: needsFullHeight ? "100%" : undefined }}
+                    style={{
+                        position: "relative",
+                        width: "100%",
+                        height: needsFullHeight ? "100%" : undefined,
+                        display: needsFullHeight ? "flex" : "block",
+                        flexDirection: needsFullHeight ? "column" : undefined,
+                        flex: needsFullHeight ? 1 : undefined
+                    }}
                     initial="hidden"
                     whileInView="visible"
                     viewport={viewport}
@@ -364,7 +371,14 @@ export function ChildBlockWrapper({
         }
 
         return (
-            <div style={{ position: "relative", width: "100%", height: needsFullHeight ? "100%" : undefined }}>
+            <div style={{
+                position: "relative",
+                width: "100%",
+                height: needsFullHeight ? "100%" : undefined,
+                display: needsFullHeight ? "flex" : "block",
+                flexDirection: needsFullHeight ? "column" : undefined,
+                flex: needsFullHeight ? 1 : undefined
+            }}>
                 {children || <BlockRendererRef block={block} />}
             </div>
         );
@@ -378,6 +392,9 @@ export function ChildBlockWrapper({
                 position: "relative",
                 width: "100%",
                 height: needsFullHeight ? "100%" : undefined,
+                display: needsFullHeight ? "flex" : "block",
+                flexDirection: needsFullHeight ? "column" : undefined,
+                flex: needsFullHeight ? 1 : undefined,
                 transform: `${sortableTransform || ""}${isDragging ? " scale(0.985)" : ""}`.trim() || undefined,
                 transformOrigin: "center",
                 transition: sortableTransition || (isDragging ? undefined : "transform 180ms cubic-bezier(0.2, 0, 0, 1), box-shadow 180ms ease, opacity 120ms ease"),
@@ -1071,17 +1088,17 @@ export function IntegratedTextEditor({
 
     const handleTextInteraction = (e: React.MouseEvent) => {
         e.stopPropagation();
-        
+
         // Safety: Ensure it doesn't spawn in the sidebar
         const sidebarWidth = document.getElementById("editor-scroll-container")?.getBoundingClientRect().left || 0;
-        const coords = { 
-            x: Math.max(sidebarWidth + 20, e.clientX - 170), 
-            y: Math.max(60, e.clientY - 140) 
+        const coords = {
+            x: Math.max(sidebarWidth + 20, e.clientX - 170),
+            y: Math.max(60, e.clientY - 140)
         };
 
         useEditorStore.getState().selectBlock(blockId);
         setTextEditorPos(coords);
-        
+
         setTimeout(() => {
             useEditorStore.getState().focusSubItem(blockId, "Typography");
         }, 10);
@@ -1168,9 +1185,9 @@ function IntegratedWave({ p, blockId }: { p: Record<string, any>, blockId: strin
 
         // Safety: Ensure it doesn't spawn in the sidebar
         const sidebarWidth = document.getElementById("editor-scroll-container")?.getBoundingClientRect().left || 0;
-        const coords = { 
-            x: Math.max(sidebarWidth + 20, e.clientX - 170), 
-            y: Math.max(60, e.clientY - 140) 
+        const coords = {
+            x: Math.max(sidebarWidth + 20, e.clientX - 170),
+            y: Math.max(60, e.clientY - 140)
         };
 
         useEditorStore.getState().selectBlock(blockId);
@@ -1234,7 +1251,7 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
     const bgImage = p.bgImage as string;
     const bgColor = ((p.bgColor as string) || (p.sectionBg as string) || "").trim();
     const bgGradient = p.bgGradient as string;
-    const backgroundOpacity = Number(p.bgFillOpacity ?? p.bgImageOpacity ?? 100) / 100;
+    const backgroundOpacity = Number(p.bgFillOpacity ?? p.bgImageOpacity ?? 60) / 100;
     const bgOpacity = Number(p.bgOpacity ?? 0);
     const bgOverlayColor = (p.bgOverlayColor as string) || "#000000";
     const bgPosition = (p.bgPosition as string) || (p.bgImagePosition as string) || "center";
@@ -1296,7 +1313,7 @@ export function BackgroundOverlay({ p }: { p: Record<string, any> }) {
 
             {/* Tint Overlay Layer (Middle) */}
             {bgImage && bgOpacity > 0 && (
-                <div 
+                <div
                     style={{
                         position: "absolute",
                         inset: 0,

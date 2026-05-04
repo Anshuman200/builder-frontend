@@ -25,6 +25,7 @@ function ColumnDropZone({ zoneId, blocks, label, flexBasis, alignItems }: { zone
                 justifyContent: alignItems === "center" ? "center" : alignItems === "flex-end" ? "flex-end" : "flex-start",
                 alignItems: "stretch",
                 alignSelf: "stretch",
+                height: "100%",
                 border: isPreview ? "none" : `2px dashed ${isOver ? "#6366f1" : "#e2e8f0"}`,
                 borderRadius: 6,
                 background: !isPreview && isOver ? "rgba(99,102,241, 0.04)" : "transparent",
