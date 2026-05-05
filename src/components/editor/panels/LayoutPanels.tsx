@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
 
-import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove, PaddingFields, TextInputWithUnit, PanelInlineEditor, BorderRadiusInput, DirectionInput, ShadowInput, BorderPropertyInput } from "./shared";
+import { Section, Field, TextInput, TextareaInput, SelectInput, ColorInput, MediaInput, LinkInput, ButtonFields, ToggleSwitch, AlignmentInput, PaddingInput, SortableList, arrayMove, PaddingFields, TextInputWithUnit, PanelInlineEditor, BorderRadiusInput, DirectionInput, ShadowInput, BorderPropertyInput, FontStyleInput, TypographyFields } from "./shared";
 import { AnimationPanel } from "./AnimationPanel";
 import { IconPicker } from "@/components/editor/IconPicker";
 import { EDITOR_FEATURES } from "@/lib/config/features";
@@ -35,16 +35,6 @@ export function HeaderPanel({ block }: { block: Block }) {
     return (
         <>
             <Section title="Header Layout">
-                <Field label="Logo Type">
-                    <SelectInput
-                        value={(p.logoType as string) || "text"}
-                        onChange={(v) => up("logoType", v)}
-                        options={[
-                            { label: "Text Logo", value: "text" },
-                            { label: "Image Logo", value: "image" },
-                        ]}
-                    />
-                </Field>
                 <Field label="Header Style">
                     <SelectInput
                         value={(p.style as string) || "solid"}
@@ -98,6 +88,7 @@ export function HeaderPanel({ block }: { block: Block }) {
                     </div>
                 )}
             </Section>
+
             <Section title="Brand (Logo)">
                 <Field label="Logo Type"><SelectInput value={(p.logoType as string) || "text"} onChange={(v) => up("logoType", v)} options={[{ label: "Text Only", value: "text" }, { label: "Image", value: "image" }]} /></Field>
                 <Field label="Logo Text"><PanelInlineEditor value={(p.logoText as string) || "Solario Forge"} onChange={(v) => up("logoText", v)} placeholder="Your Brand" /></Field>
@@ -108,8 +99,74 @@ export function HeaderPanel({ block }: { block: Block }) {
                     <Field label="Object Fit"><SelectInput value={(p.logoObjectFit as string) || "cover"} onChange={(v) => up("logoObjectFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
                     <Field label="Logo Shape"><SelectInput value={(p.logoShape as string) || "square"} onChange={(v) => up("logoShape", v)} options={[{ label: "Square", value: "square" }, { label: "Circle", value: "circle" }, { label: "Rounded", value: "rounded" }]} /></Field>
                 </>)}
+                {((p.logoType as string) || "text") === "text" && (
+                    <TypographyFields p={p} up={up} prefix="logo" showContentField={false} showAlign={false} />
+                )}
+
             </Section>
-            <BackgroundPanel block={block} />
+
+            <Section title="Navigation Style">
+                <Field label="Active Style">
+                    <SelectInput
+                        value={(p.navActiveStyle as string) || "underline"}
+                        onChange={(v) => up("navActiveStyle", v)}
+                        options={[
+                            { label: "Underline", value: "underline" },
+                            { label: "Dot (below)", value: "dot" },
+                            { label: "Pill / Background", value: "pill" },
+                            { label: "Bold only", value: "bold" },
+                        ]}
+                    />
+                </Field>
+                {(p.navActiveStyle as string) && (
+                    <Field label="Active Color">
+                        <ColorInput
+                            value={(p.navActiveColor as string) || (p.ctaBgColor as string) || "#6366f1"}
+                            onChange={(v) => up("navActiveColor", v)}
+                            onBlur={(v) => up("navActiveColor", v, true)}
+                        />
+                    </Field>
+                )}
+                <Field label="Active Weight">
+                    <SelectInput
+                        value={(p.navActiveWeight as string) || "700"}
+                        onChange={(v) => up("navActiveWeight", v)}
+                        options={[
+                            { label: "Normal (400)", value: "400" },
+                            { label: "Medium (500)", value: "500" },
+                            { label: "Semibold (600)", value: "600" },
+                            { label: "Bold (700)", value: "700" },
+                            { label: "Extra Bold (800)", value: "800" },
+                        ]}
+                    />
+                </Field>
+                <Field label="Link Color">
+                    <ColorInput
+                        value={(p.navColor as string) || (p.textColor as string) || "#1e293b"}
+                        onChange={(v) => up("navColor", v)}
+                        onBlur={(v) => up("navColor", v, true)}
+                    />
+                </Field>
+                <Field label="Inactive Opacity">
+                    <SelectInput
+                        value={(p.navInactiveOpacity as string) || "0.75"}
+                        onChange={(v) => up("navInactiveOpacity", v)}
+                        options={[
+                            { label: "40%", value: "0.4" },
+                            { label: "50%", value: "0.5" },
+                            { label: "60%", value: "0.6" },
+                            { label: "70%", value: "0.7" },
+                            { label: "75% (default)", value: "0.75" },
+                            { label: "80%", value: "0.8" },
+                            { label: "90%", value: "0.9" },
+                            { label: "Full (100%)", value: "1" },
+                        ]}
+                    />
+                </Field>
+            </Section>
+
+            <BackgroundPanel block={block} hasWave={false} />
+
             <Section title="Section Padding (Responsive)">
                 <PaddingFields p={p} up={up} />
             </Section>
@@ -127,6 +184,7 @@ export function HeaderPanel({ block }: { block: Block }) {
                     </>
                 )}
             </Section>
+
             <Section title="Navigation Links">
                 <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Dynamic links from your Pages and custom links. Drag to reorder.</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -221,59 +279,6 @@ export function HeaderPanel({ block }: { block: Block }) {
                 </div>
             </Section>
 
-            <Section title="Navigation Style">
-                <Field label="Active Style">
-                    <SelectInput
-                        value={(p.navActiveStyle as string) || "underline"}
-                        onChange={(v) => up("navActiveStyle", v)}
-                        options={[
-                            { label: "Underline", value: "underline" },
-                            { label: "Dot (below)", value: "dot" },
-                            { label: "Pill / Background", value: "pill" },
-                            { label: "Bold only", value: "bold" },
-                        ]}
-                    />
-                </Field>
-                {(p.navActiveStyle as string) && (
-                    <Field label="Active Color">
-                        <ColorInput
-                            value={(p.navActiveColor as string) || (p.ctaBgColor as string) || "#6366f1"}
-                            onChange={(v) => up("navActiveColor", v)}
-                            onBlur={(v) => up("navActiveColor", v, true)}
-                        />
-                    </Field>
-                )}
-                <Field label="Active Weight">
-                    <SelectInput
-                        value={(p.navActiveWeight as string) || "700"}
-                        onChange={(v) => up("navActiveWeight", v)}
-                        options={[
-                            { label: "Normal (400)", value: "400" },
-                            { label: "Medium (500)", value: "500" },
-                            { label: "Semibold (600)", value: "600" },
-                            { label: "Bold (700)", value: "700" },
-                            { label: "Extra Bold (800)", value: "800" },
-                        ]}
-                    />
-                </Field>
-                <Field label="Inactive Opacity">
-                    <SelectInput
-                        value={(p.navInactiveOpacity as string) || "0.75"}
-                        onChange={(v) => up("navInactiveOpacity", v)}
-                        options={[
-                            { label: "40%", value: "0.4" },
-                            { label: "50%", value: "0.5" },
-                            { label: "60%", value: "0.6" },
-                            { label: "70%", value: "0.7" },
-                            { label: "75% (default)", value: "0.75" },
-                            { label: "80%", value: "0.8" },
-                            { label: "90%", value: "0.9" },
-                            { label: "Full (100%)", value: "1" },
-                        ]}
-                    />
-                </Field>
-            </Section>
-
             {EDITOR_FEATURES.enableAnimations && <AnimationPanel block={block} />}
         </>
     );
@@ -292,9 +297,10 @@ export function FooterPanel({ block }: { block: Block }) {
                 <Field label="Section Layout"><SelectInput value={(p.layout as string) || "standard"} onChange={(v) => updateProps({ layout: v })} options={[{ label: "Standard (Logo + Links)", value: "standard" }, { label: "Centered (Logo Center)", value: "centered" }, { label: "Columns (Multi-section)", value: "columns" }, { label: "Minimal (1 line)", value: "minimal" }]} /></Field>
                 <ToggleSwitch label="Full Width Container" value={!!p.fullWidth} onChange={(v) => updateProps({ fullWidth: v })} />
             </Section>
-            <BackgroundPanel block={block} />
+            <BackgroundPanel block={block} hasWave={false} />
             <Section title="Text Styling">
                 <Field label="Text Color"><ColorInput value={(p.textColor as string) || "#f8fafc"} onChange={(v) => up("textColor", v)} onBlur={(v) => up("textColor", v, true)} /></Field>
+                <Field label="Link Color"><ColorInput value={(p.navColor as string) || (p.textColor as string) || "#f8fafc"} onChange={(v) => up("navColor", v)} onBlur={(v) => up("navColor", v, true)} /></Field>
             </Section>
             <Section title="Section Padding (Responsive)">
                 <PaddingFields p={p} up={up} />
@@ -309,6 +315,10 @@ export function FooterPanel({ block }: { block: Block }) {
                     <Field label="Object Fit"><SelectInput value={(p.logoObjectFit as string) || "cover"} onChange={(v) => up("logoObjectFit", v)} options={[{ label: "Cover", value: "cover" }, { label: "Contain", value: "contain" }, { label: "Fill", value: "fill" }, { label: "Auto", value: "none" }]} /></Field>
                     <Field label="Logo Shape"><SelectInput value={(p.logoShape as string) || "square"} onChange={(v) => up("logoShape", v)} options={[{ label: "Square", value: "square" }, { label: "Circle", value: "circle" }, { label: "Rounded", value: "rounded" }]} /></Field>
                 </>)}
+                {((p.logoType as string) || "text") === "text" && (
+                    <TypographyFields p={p} up={up} prefix="logo" showContentField={false} showAlign={false} />
+                )}
+
                 <Field label="Description"><PanelInlineEditor multiline value={(p.description as string) || ""} onChange={(v) => up("description", v)} placeholder="Brief company description..." /></Field>
             </Section>
             <Section title="Copyright">

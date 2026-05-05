@@ -64,6 +64,13 @@ export default function DashboardLayout({
     setMounted(true);
   }, []);
 
+  // Strict Auth Protection: Redirect to landing if user is missing and not loading
+  useEffect(() => {
+    if (mounted && !authLoading && !user) {
+      router.push("/");
+    }
+  }, [mounted, user, authLoading, router]);
+
   const handleCreate = useCallback(() => {
     setWizardOpen(true);
   }, []);
@@ -125,6 +132,7 @@ export default function DashboardLayout({
 
       <NewPageWizard
         open={wizardOpen}
+        mode="project"
         onClose={() => setWizardOpen(false)}
         onSubmit={handleWizardSubmit}
         isSubmitting={createMutation.isPending}

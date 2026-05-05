@@ -1029,6 +1029,11 @@ export function ChartPanel({ block }: { block: Block }) {
                         rows={3}
                     />
                 </Field>
+                <div style={{ marginTop: 12 }}>
+                    <TypographyFields p={p} up={up} prefix="title" />
+                    <div style={{ marginTop: 8 }} />
+                    <TypographyFields p={p} up={up} prefix="subtitle" />
+                </div>
             </Section>
 
             <Section title="Chart Settings">
@@ -1219,7 +1224,7 @@ export function LegalPanel({ block }: { block: Block }) {
                 <ToggleSwitch label="Show Title" value={p.showTitle !== false} onChange={(v) => up("showTitle", v)} />
                 {p.showTitle !== false && (
                     <>
-                        <TypographyFields p={p} up={up} showContentField={false} />
+                        <TypographyFields p={p} up={up} prefix="title" showContentField={false} />
                         <Field label="Title Alignment">
                             <SelectInput
                                 value={(p.titleAlign as string) || "left"}

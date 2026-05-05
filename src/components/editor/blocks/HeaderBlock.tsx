@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, useLinkHandler, useActivePath, CommonButton, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { PreviewContext, BlockProps, useLinkHandler, useActivePath, CommonButton, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 import Link from "next/link";
 
@@ -105,10 +105,15 @@ export function HeaderBlock({ block }: BlockProps) {
                     if (!isPreview) focusSubItem(block.id, "Brand (Logo)");
                 }}
                 style={{
-                    fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em",
-                    color: textColor, display: "flex", alignItems: "center",
-                    textDecoration: "none", cursor: "pointer"
+                    ...getTextStyles(p, "logo"),
+                    fontSize: getTextStyles(p, "logo").fontSize || "1.25rem", 
+                    letterSpacing: getTextStyles(p, "logo").letterSpacing || "-0.02em",
+                    color: getTextStyles(p, "logo").color || (p.logoColor as string) || textColor, 
+                    display: "flex", alignItems: "center",
+                    textDecorationSkipInk: "auto",
+                    cursor: "pointer"
                 }}
+
             >
                 {logoType === "image" && logoImage ? (
                     <div style={{
@@ -185,8 +190,9 @@ export function HeaderBlock({ block }: BlockProps) {
                 })();
 
                 // Pill background
+                const navColor = (p.navColor as string) || textColor;
                 const pillBg = navActiveStyle === "pill" && isActive ? navActiveColor : "transparent";
-                const pillColor = navActiveStyle === "pill" && isActive ? "#ffffff" : "inherit";
+                const pillColor = navActiveStyle === "pill" && isActive ? "#ffffff" : navColor;
                 const pillRadius = "6px";
                 const pillPad = navActiveStyle === "pill" ? (isMobileMenu ? "6px 16px" : "4px 14px") : undefined;
 

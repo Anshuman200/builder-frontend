@@ -2,7 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, useLinkHandler, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { PreviewContext, BlockProps, useLinkHandler, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function FooterBlock({ block }: BlockProps) {
@@ -64,7 +64,8 @@ export function FooterBlock({ block }: BlockProps) {
 
     const NavLink = ({ link }: { link: { id: string; label: string; url: string } }) => {
         const handleNavClick = (e: React.MouseEvent) => { handleLink(link.url, e); };
-        return (<a href={link.url} onClick={handleNavClick} style={{ color: "inherit", textDecoration: "none", fontWeight: 500, fontSize: "0.9rem", opacity: 0.75, transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.75"}>{link.label}</a>);
+        const navColor = (p.navColor as string) || textColor;
+        return (<a href={link.url} onClick={handleNavClick} style={{ color: navColor, textDecoration: "none", fontWeight: 500, fontSize: "0.9rem", opacity: 0.75, transition: "opacity 0.2s" }} onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.75"}>{link.label}</a>);
     };
 
     const Logo = () => (
@@ -75,10 +76,15 @@ export function FooterBlock({ block }: BlockProps) {
                 if (!isPreview) focusSubItem(block.id, "Brand & Content");
             }}
             style={{
-                fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em",
-                color: "inherit", textDecoration: "none", cursor: "pointer",
+                ...getTextStyles(p, "logo"),
+                fontSize: getTextStyles(p, "logo").fontSize || "1.25rem",
+                letterSpacing: getTextStyles(p, "logo").letterSpacing || "-0.02em",
+                color: getTextStyles(p, "logo").color || (p.logoColor as string) || "inherit", 
+                textDecorationSkipInk: "auto",
+                cursor: "pointer",
                 display: "flex", alignItems: "center"
             }}
+
         >
             {logoType === "image" && logoImage ? (
                 <div style={{

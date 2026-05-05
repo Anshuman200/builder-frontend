@@ -432,6 +432,7 @@ export default function EditorShell() {
       <TemplatePickerDrawer />
       <NewPageWizard
         open={wizard.open}
+        mode="page"
         onClose={closeWizard}
         isSubmitting={isCreatingPage}
         blankMode={wizard.blankMode}

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, createContext, useContext, useCallback } from "react";
 import { clearTokens, getCookie } from "@/lib/utils";
-import { useProfile, useLogin, useRegister, useLogout, useVerifyOtp, useForgotPassword, useResetPassword } from "@/lib/api/queries";
+import { useProfile, useLogin, useRegister, useLogout, useVerifyEmail, useForgotPassword, useResetPassword } from "@/lib/api/queries";
 import { hasSessionSecret, setSessionSecret } from "@/lib/utils/crypto";
 
 interface User {
@@ -21,7 +21,7 @@ interface AuthContextType {
     keyStatus: "locked" | "unlocked";
     login: (email: string, password: string) => Promise<{ redirectTo?: string }>;
     register: (name: string, email: string, password: string) => Promise<void>;
-    verifyOtp: (payload: string, password?: string) => Promise<void>;
+    verifyEmail: (payload: string, password?: string) => Promise<void>;
     forgotPassword: (email: string) => Promise<void>;
     resetPassword: (payload: string, newPassword: string) => Promise<void>;
     logout: () => Promise<void>;
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Auth Mutations
     const loginMutation = useLogin();
     const registerMutation = useRegister();
-    const verifyOtpMutation = useVerifyOtp();
+    const verifyEmailMutation = useVerifyEmail();
     const logoutMutation = useLogout();
     const forgotPasswordMutation = useForgotPassword();
     const resetPasswordMutation = useResetPassword();
@@ -62,13 +62,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await registerMutation.mutateAsync({ name, email, password });
     }, [registerMutation]);
 
-    const verifyOtp = useCallback(async (payload: string, password?: string) => {
-        await verifyOtpMutation.mutateAsync({ payload });
+    const verifyEmail = useCallback(async (payload: string, password?: string) => {
+        await verifyEmailMutation.mutateAsync({ payload });
         if (password) {
             setSessionSecret(password);
             setKeyStatus("unlocked");
         }
-    }, [verifyOtpMutation]);
+    }, [verifyEmailMutation]);
 
     const forgotPassword = useCallback(async (email: string) => {
         await forgotPasswordMutation.mutateAsync({ email });
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Dummy setter for compatibility if needed, though useQuery is the source of truth now
     const setUser = () => {};
 
-    const globalAuthError = (loginMutation.error || registerMutation.error || verifyOtpMutation.error || forgotPasswordMutation.error || resetPasswordMutation.error) as any;
+    const globalAuthError = (loginMutation.error || registerMutation.error || verifyEmailMutation.error || forgotPasswordMutation.error || resetPasswordMutation.error) as any;
 
     return (
         <AuthContext.Provider value={{ 
@@ -99,14 +99,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             isLoading: isLoading || 
                        loginMutation.isPending || 
                        registerMutation.isPending || 
-                       verifyOtpMutation.isPending || 
+                       verifyEmailMutation.isPending || 
                        forgotPasswordMutation.isPending || 
                        resetPasswordMutation.isPending ||
                        logoutMutation.isPending, 
             keyStatus, 
             login, 
             register, 
-            verifyOtp, 
+            verifyEmail, 
             forgotPassword, 
             resetPassword, 
             logout, 

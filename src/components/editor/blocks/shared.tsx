@@ -85,6 +85,56 @@ export function useLinkHandler() {
     };
 }
 
+/**
+ * getTextStyles - Shared helper to extract typography styles from props
+ * Handles prefix-based resolution for B/I/U/S/TT styles.
+ */
+export function getTextStyles(p: Record<string, any>, prefix: string = ""): React.CSSProperties {
+    const k = (prop: string) => {
+        if (!prefix) return prop;
+        return `${prefix}${prop.charAt(0).toUpperCase() + prop.slice(1)}`;
+    };
+
+    const decoration = [
+        p[k("underline")] && "underline",
+        p[k("strikethrough")] && "line-through"
+    ].filter(Boolean).join(" ");
+
+    // Robust resolution for fontWeight (supports 'Weight' and 'FontWeight' suffixes)
+    const getWeight = () => {
+        if (p[k("bold")] === true) return 700;
+        const weight = p[k("fontWeight")] ?? p[k("weight")] ?? (prefix ? p[`${prefix}Weight`] : p.fontWeight);
+        if (weight !== undefined) return weight;
+        if (p[k("bold")] === false) return 400;
+        return undefined;
+    };
+
+
+    // Robust resolution for color
+    const getColor = () => {
+        const color = p[k("color")] ?? p[k("textColor")] ?? (prefix ? p[`${prefix}Color`] : p.textColor);
+        return color || undefined;
+    };
+
+    const style: React.CSSProperties = {
+        fontWeight: getWeight() as any,
+        fontStyle: p[k("italic")] ? "italic" : "normal",
+        textDecoration: decoration || "none",
+        textTransform: p[k("uppercase")] ? "uppercase" : "none",
+        fontSize: p[k("fontSize")] || undefined,
+        lineHeight: p[k("lineHeight")] || undefined,
+        letterSpacing: p[k("letterSpacing")] || undefined,
+    };
+
+
+
+    const color = getColor();
+    if (color) style.color = color;
+
+    return style;
+}
+
+
 export function getBlockMediaInfo(type: string) {
     if (type === "image") return { prop: "src", label: "Image", icon: ArrowPathIcon, mediaType: "image" as const };
     if (type === "video") return { prop: "url", label: "Video", icon: VideoCameraIcon, mediaType: "video" as const };
@@ -686,9 +736,12 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
         width: (p[`${prefix}FullWidth`] === true || p.buttonFullWidth === true || p.fullWidth === true) ? "100%" : undefined,
         textDecoration: variant === "link" ? "underline" : "none",
         borderRadius: radius,
-        fontWeight: (p[`${prefix}FontWeight`] as string) || (p.fontWeight as string) || "600",
+        ...getTextStyles(p, prefix),
+        fontWeight: getTextStyles(p, prefix).fontWeight || "600",
         fontSize: (p[`${prefix}FontSize`] as string) || (p.fontSize as string) || sizeStyle.fontSize,
-        letterSpacing: (p[`${prefix}LetterSpacing`] as string) || (p.letterSpacing as string) || "0.01em",
+        letterSpacing: getTextStyles(p, prefix).letterSpacing || "0.01em",
+        textTransform: getTextStyles(p, prefix).textTransform || "none",
+
         cursor: (isPreview && !disabled && !isLoading) ? "pointer" : (isLoading || disabled ? "not-allowed" : "default"),
         boxShadow: shadow === "none" ? undefined : shadow,
         transition: "all 0.2s ease",

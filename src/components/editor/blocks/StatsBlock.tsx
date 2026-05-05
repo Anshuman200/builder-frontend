@@ -205,8 +205,8 @@ export function StatsBlock({ block }: BlockProps) {
                                 
                                 <motion.h4 
                                     layout
-                                    className="font-black uppercase tracking-widest mb-2 transition-all duration-500" 
-                                    style={{ opacity: 0.4, fontSize: subtitleSize }}
+                                    className="font-black tracking-widest mb-2 transition-all duration-500" 
+                                    style={{ opacity: 0.4, fontSize: subtitleSize, textTransform: p.uppercase ? "uppercase" : "none" }}
                                 >
                                     {item.label}
                                 </motion.h4>

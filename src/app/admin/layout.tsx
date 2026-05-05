@@ -108,6 +108,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         router.push("/");
     };
 
+    useEffect(() => {
+        if (!isLoading && !user) {
+            router.push("/");
+        }
+    }, [isLoading, user, router]);
+
     if (isLoading || !user) return (
         <div className="h-screen flex items-center justify-center bg-neutral-950">
             <div className="w-10 h-10 rounded-2xl border-2 border-indigo-500 border-t-transparent animate-spin" />

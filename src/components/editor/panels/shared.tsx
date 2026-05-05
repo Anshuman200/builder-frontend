@@ -1882,10 +1882,66 @@ export interface PropertyGroupProps {
     prefix?: string;
 }
 
-/**
- * TypographyFields - Unified component for text editing.
- * Used in both the sidebar and floating quick editors.
- */
+// ─── FontStyleInput ──────────────────────────────────────────────────────────
+export function FontStyleInput({ p, up, prefix = "" }: { p: any; up: (k: string, v: any) => void; prefix?: string }) {
+    const getK = (base: string) => {
+        if (!prefix) return base;
+        const camel = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+        return `${prefix}${base.charAt(0).toUpperCase() + base.slice(1)}`;
+    };
+
+    const styles = [
+        { label: "B", key: "bold", title: "Bold", weight: 800 },
+        { label: "/", key: "italic", title: "Italic", style: "italic" },
+        { label: "U", key: "underline", title: "Underline", deco: "underline" },
+        { label: "S", key: "strikethrough", title: "Strikethrough", deco: "line-through" },
+    ];
+
+    return (
+        <div style={{ display: "flex", gap: 4, width: "100%" }}>
+            {styles.map((s) => {
+                const k = getK(s.key);
+                const isActive = !!p[k];
+                return (
+                    <button
+                        key={s.key}
+                        title={s.title}
+                        onClick={() => up(k, !isActive)}
+                        style={{
+                            flex: 1, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
+                            background: isActive ? "#ff0000" : "#2a2a2a",
+                            color: isActive ? "#fff" : "#aaa",
+                            border: "none", borderRadius: 6, cursor: "pointer",
+                            fontSize: 13,
+                            fontWeight: s.weight || 400,
+                            fontStyle: (s.style as any) || "normal",
+                            textDecoration: (s.deco as any) || "none",
+                            transition: "all 0.15s"
+                        }}
+                    >
+                        {s.label}
+                    </button>
+                );
+            })}
+            <button
+                title="Uppercase"
+                onClick={() => up(getK("uppercase"), !p[getK("uppercase")])}
+                style={{
+                    flex: 1, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
+                    background: p[getK("uppercase")] ? "#ff0000" : "#2a2a2a",
+                    color: p[getK("uppercase")] ? "#fff" : "#aaa",
+                    border: "none", borderRadius: 6, cursor: "pointer",
+                    fontSize: 10, fontWeight: 800,
+                    transition: "all 0.15s"
+                }}
+            >
+                TT
+            </button>
+        </div>
+    );
+}
+
+
 export function TypographyFields({
     p, up,
     prefix = "",
@@ -1906,15 +1962,20 @@ export function TypographyFields({
         if (!prefix) {
             if (base === "color" && p.textColor !== undefined) return "textColor";
             if (base === "fontSize" && p.size !== undefined) return "size";
+            if (base === "bold" && p.bold !== undefined) return "bold";
+            if (base === "italic" && p.italic !== undefined) return "italic";
+            if (base === "underline" && p.underline !== undefined) return "underline";
+            if (base === "strikethrough" && p.strikethrough !== undefined) return "strikethrough";
+            if (base === "uppercase" && p.uppercase !== undefined) return "uppercase";
             return base;
         }
-        // Prefixed logic (e.g. title -> titleColor, titleSize, titleWeight)
-        const camel = prefix.charAt(0).toUpperCase() + prefix.slice(1);
-        if (base === "color") return p[`${prefix}Color`] !== undefined ? `${prefix}Color` : (p[`${prefix}TextColor`] !== undefined ? `${prefix}TextColor` : "color");
-        if (base === "fontSize") return p[`${prefix}Size`] !== undefined ? `${prefix}Size` : "fontSize";
-        if (base === "fontWeight") return p[`${prefix}Weight`] !== undefined ? `${prefix}Weight` : "fontWeight";
+        // Prefixed logic (e.g. logo -> logoColor, logoSize, logoWeight)
+        if (base === "color") return p[`${prefix}Color`] !== undefined ? `${prefix}Color` : (p[`${prefix}TextColor`] !== undefined ? `${prefix}TextColor` : `${prefix}Color`);
+        if (base === "fontSize") return p[`${prefix}Size`] !== undefined ? `${prefix}Size` : `${prefix}Size`;
+        if (base === "fontWeight") return p[`${prefix}Weight`] !== undefined ? `${prefix}Weight` : `${prefix}Weight`;
         return `${prefix}${base.charAt(0).toUpperCase() + base.slice(1)}`;
     };
+
 
     // ─── Quick Variant (Popover) ─────────────────────────────────────────────
     if (variant === "quick") {
@@ -1970,27 +2031,32 @@ export function TypographyFields({
                 </div>
 
                 {showAlign && (
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                        <Field label="Weight">
-                            <SelectInput
-                                value={String(p[getK("fontWeight")] || "400")}
-                                onChange={(v) => up(getK("fontWeight"), v)}
-                                options={[
-                                    { label: "Regular", value: "400" },
-                                    { label: "Medium", value: "500" },
-                                    { label: "SemiBold", value: "600" },
-                                    { label: "Bold", value: "700" },
-                                    { label: "Black", value: "900" }
-                                ]}
-                            />
-                        </Field>
-                        <Field label="Alignment">
-                            <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "6px", padding: "2px" }}>
-                                <AlignmentInput
-                                    value={(p[getK("align")] as string) || "left"}
-                                    onChange={(v) => up(getK("align"), v)}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                            <Field label="Weight">
+                                <SelectInput
+                                    value={String(p[getK("fontWeight")] || "400")}
+                                    onChange={(v) => up(getK("fontWeight"), v)}
+                                    options={[
+                                        { label: "Regular", value: "400" },
+                                        { label: "Medium", value: "500" },
+                                        { label: "SemiBold", value: "600" },
+                                        { label: "Bold", value: "700" },
+                                        { label: "Black", value: "900" }
+                                    ]}
                                 />
-                            </div>
+                            </Field>
+                            <Field label="Alignment">
+                                <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "6px", padding: "2px" }}>
+                                    <AlignmentInput
+                                        value={(p[getK("align")] as string) || "left"}
+                                        onChange={(v) => up(getK("align"), v)}
+                                    />
+                                </div>
+                            </Field>
+                        </div>
+                        <Field label="Style">
+                            <FontStyleInput p={p} up={up} prefix={prefix} />
                         </Field>
                     </div>
                 )}
@@ -2039,7 +2105,7 @@ export function TypographyFields({
                 </Field>
             )}
 
-            {showAlign && p[getK("align")] !== undefined && <AlignmentInput value={(p[getK("align")] as string) || "left"} onChange={(v) => up(getK("align"), v)} />}
+            {showAlign && <AlignmentInput value={(p[getK("align")] as string) || "left"} onChange={(v) => up(getK("align"), v)} />}
 
             {showColor && <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Color`}>
                 <ColorInput
@@ -2049,51 +2115,42 @@ export function TypographyFields({
                 />
             </Field>}
 
-            {p[getK("fontSize")] !== undefined && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                 <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Size`}>
                     <TextInputWithUnit value={p[getK("fontSize")] || ""} onChange={(v) => up(getK("fontSize"), v)} placeholder="1rem" />
                 </Field>
-            )}
+
+                <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Weight`}>
+                    <SelectInput
+                        value={String(p[getK("fontWeight")] || "400")}
+                        onChange={(v) => up(getK("fontWeight"), v)}
+
+                            options={[
+                                { label: "Thin (100)", value: "100" },
+                                { label: "Light (300)", value: "300" },
+                                { label: "Regular (400)", value: "400" },
+                                { label: "Medium (500)", value: "500" },
+                                { label: "Semibold (600)", value: "600" },
+                                { label: "Bold (700)", value: "700" },
+                                { label: "Extrabold (800)", value: "800" },
+                                { label: "Black (900)", value: "900" }
+                            ]}
+                        />
+                    </Field>
+                </div>
+
+
+            <Field label="Style">
+                <FontStyleInput p={p} up={up} prefix={prefix} />
+            </Field>
 
             {/* Responsive Sizes (Section Level) */}
             {p.titleSize !== undefined && <Field label="Title Size"><TextInputWithUnit value={p.titleSize || ""} onChange={(v) => up("titleSize", v)} placeholder="2.5rem" /></Field>}
             {p.subtitleSize !== undefined && <Field label="Subtitle Size"><TextInputWithUnit value={p.subtitleSize || ""} onChange={(v) => up("subtitleSize", v)} placeholder="1.25rem" /></Field>}
             {p.descSize !== undefined && <Field label="Desc Size"><TextInputWithUnit value={p.descSize || ""} onChange={(v) => up("descSize", v)} placeholder="0.9rem" /></Field>}
 
-            {p[getK("fontWeight")] !== undefined && (
-                <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Weight`}>
-                    <SelectInput
-                        value={String(p[getK("fontWeight")] || "400")}
-                        onChange={(v) => up(getK("fontWeight"), v)}
-                        options={[
-                            { label: "Thin (100)", value: "100" },
-                            { label: "Light (300)", value: "300" },
-                            { label: "Regular (400)", value: "400" },
-                            { label: "Medium (500)", value: "500" },
-                            { label: "Semibold (600)", value: "600" },
-                            { label: "Bold (700)", value: "700" },
-                            { label: "Extrabold (800)", value: "800" },
-                            { label: "Black (900)", value: "900" }
-                        ]}
-                    />
-                </Field>
-            )}
-
-            {p[getK("bold")] !== undefined && (
-                <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Style`}>
-                    <div className="w-full" style={{ display: "flex", gap: 6 }}>
-                        {[["B", "bold", "Bold"], ["I", "italic", "Italic"], ["U", "underline", "Underline"], ["S", "strikethrough", "Strikethrough"]].map(([label, key, title]) => {
-                            const fullKey = getK(key);
-                            return (
-                                <button key={key} title={title} onClick={() => up(fullKey, !p[fullKey])} style={{ flex: 1, padding: "5px 0", fontSize: 13, fontWeight: label === "B" ? 800 : 400, fontStyle: label === "I" ? "italic" : "normal", textDecoration: label === "U" ? "underline" : label === "S" ? "line-through" : "none", background: p[fullKey] ? "#ff0000" : "#2a2a2a", color: p[fullKey] ? "#fff" : "#aaa", border: "none", borderRadius: 4, cursor: "pointer", transition: "all 0.15s" }}>{label}</button>
-                            );
-                        })}
-                    </div>
-                </Field>
-            )}
-
-            {p[getK("lineHeight")] !== undefined && <Field label="Line Height"><TextInputWithUnit value={(p[getK("lineHeight")] as string) ?? ""} onChange={(v) => up(getK("lineHeight"), v)} placeholder="1.6" /></Field>}
-            {p[getK("letterSpacing")] !== undefined && <Field label="Letter Spacing"><TextInputWithUnit value={(p[getK("letterSpacing")] as string) ?? ""} onChange={(v) => up(getK("letterSpacing"), v)} placeholder="0em" /></Field>}
+            <Field label="Line Height"><TextInputWithUnit value={(p[getK("lineHeight")] as string) ?? ""} onChange={(v) => up(getK("lineHeight"), v)} placeholder="1.6" /></Field>
+            <Field label="Letter Spacing"><TextInputWithUnit value={(p[getK("letterSpacing")] as string) ?? ""} onChange={(v) => up(getK("letterSpacing"), v)} placeholder="0em" /></Field>
         </>
     );
 }

@@ -5,7 +5,7 @@ const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api";
 export async function POST(req: NextRequest) {
     const body = await req.json();
 
-    const res = await fetch(`${BACKEND}/auth/verify-otp`, {
+    const res = await fetch(`${BACKEND}/auth/verify-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

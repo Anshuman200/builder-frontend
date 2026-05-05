@@ -182,14 +182,14 @@ export const authApi = {
             })
         }),
 
-    resendOtp: (body: Record<string, string>) =>
-        request("/auth/resend-otp", {
+    resendVerification: (body: Record<string, string>) =>
+        request("/auth/resend-verification", {
             method: "POST",
             body: JSON.stringify(body)
         }),
  
-    verifyOtp: (body: Record<string, string>) =>
-        fetch(`${API}/auth/verify-otp`, {
+    verifyEmail: (body: Record<string, string>) =>
+        fetch(`${API}/auth/verify-email`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",

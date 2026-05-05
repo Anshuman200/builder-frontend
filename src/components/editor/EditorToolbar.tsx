@@ -80,7 +80,8 @@ export default function EditorToolbar() {
     activeRouteId, setActiveRoute, addRoute,
     openTemplatePicker, openWizard,
   } = useEditorToolbarState();
-  const { data: tags = [] } = usePageTags();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { data: tags = [] } = usePageTags({ enabled: drawerOpen });
   const { pageId } = useParams<{ pageId: string }>() ?? {};
   const router = useRouter();
 
@@ -93,7 +94,7 @@ export default function EditorToolbar() {
   const [isSaving, setIsSaving] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showCapturePicker, setShowCapturePicker] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+
   const [mediaPickerType, setMediaPickerType] = useState<"favicon" | "ogImage" | null>(null);
   const [showNewPageMenu, setShowNewPageMenu] = useState(false);
 

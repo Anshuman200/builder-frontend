@@ -7,7 +7,7 @@ import {
   PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
-import { PreviewContext, BlockProps, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { PreviewContext, BlockProps, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { cn } from "@/lib/utils";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
@@ -248,12 +248,12 @@ export function ChartBlock({ block }: BlockProps) {
         {!!(p.title || p.subtitle) && (
           <div className="mb-8 select-none" onClick={() => !isPreview && focusSubItem(block.id, "Content")}>
             {!!p.title && (
-              <h3 className="text-2xl font-black tracking-tight mb-1">
+              <h3 className="text-2xl mb-1" style={getTextStyles(p, "title")}>
                 {p.title as string}
               </h3>
             )}
             {!!p.subtitle && (
-              <p className="text-sm font-medium opacity-60">
+              <p className="text-sm opacity-60" style={getTextStyles(p, "subtitle")}>
                 {p.subtitle as string}
               </p>
             )}

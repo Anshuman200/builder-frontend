@@ -14,7 +14,7 @@ import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { ResetPasswordForm } from "./ResetPasswordForm";
-import { VerifyOtpForm } from "./VerifyOtpForm";
+import { VerifyEmailForm } from "./VerifyEmailForm";
 
 interface AuthModalProps {
   open: boolean;
@@ -33,7 +33,7 @@ export function AuthModal({
 }: AuthModalProps) {
   const [tab, setTab] = useState<Tab>(defaultTab);
 
-  const { login, register, verifyOtp, forgotPassword, resetPassword, isLoading } = useAuth();
+  const { login, register, verifyEmail, forgotPassword, resetPassword, isLoading } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -109,8 +109,8 @@ export function AuthModal({
   };
 
   const executeVerify = async (payload: string) => {
-    await verifyOtp(payload);
-    // Let VerifyOtpForm handle the redirection internally
+    await verifyEmail(payload);
+    // Let VerifyEmailForm handle the redirection internally
   };
 
   const ModalBackground = useMemo(() => (
@@ -191,7 +191,12 @@ export function AuthModal({
           )}
 
           {tab === "verify" && (
-            <VerifyOtpForm handleVerify={executeVerify} setTab={setTab} redirectOnSuccess={redirectOnSuccess} />
+            <VerifyEmailForm 
+              handleVerify={executeVerify} 
+              setTab={setTab} 
+              redirectOnSuccess={redirectOnSuccess} 
+              onClose={onClose}
+            />
           )}
         </div>
       </div>

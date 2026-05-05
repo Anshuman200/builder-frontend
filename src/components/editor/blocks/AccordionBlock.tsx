@@ -166,7 +166,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
                                             })()}
                                         </div>
                                     )}
-                                    <div style={{ fontWeight: Number(titleWeight) || 600, color: titleColor, fontSize: titleSize }}>
+                                    <div style={{ fontWeight: Number(titleWeight) || 600, color: titleColor, fontSize: titleSize, textTransform: block.props.titleUppercase ? "uppercase" : "none" }}>
                                         {item.title}
                                     </div>
                                 </div>
@@ -220,6 +220,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
                                         padding: "0 20px 20px 20px",
                                         color: contentColor,
                                         fontSize: descSize,
+                                        textTransform: block.props.descUppercase ? "uppercase" : "none",
                                         lineHeight: "1.6",
                                         borderTop: (isOpen && divider === "line" && variant !== "minimal") ? `1px solid ${itemBorderColor}` : "none",
                                         paddingTop: (isOpen && divider === "line" && variant !== "minimal") ? "16px" : "0",

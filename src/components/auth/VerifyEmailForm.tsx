@@ -7,7 +7,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { FormHeading, GlassLink, BTN_STYLE } from "./AuthShared";
 import { useToasts } from "@/hooks/useToasts";
 
-export function VerifyOtpForm({ handleVerify, error, setTab, redirectOnSuccess }: any) {
+export function VerifyEmailForm({ handleVerify, error, setTab, redirectOnSuccess, onClose }: any) {
   const toast = useToasts();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -41,12 +41,12 @@ export function VerifyOtpForm({ handleVerify, error, setTab, redirectOnSuccess }
         setVerifying(false);
         toast.success("Email verified successfully! Logging you in...");
 
-        // Let the AuthModal handle the redirection or close, but we can enforce it here
         setTimeout(() => {
+          if (onClose) onClose();
           if (redirectOnSuccess) {
             router.replace("/home");
           }
-        }, 1000);
+        }, 1500);
       } catch (err: any) {
         setVerifying(false);
         setGlobalError(err?.message || "Verification failed. Link may be expired.");

@@ -237,8 +237,8 @@ export function TeamBlock({ block }: BlockProps) {
                             color: textColor
                         }}
                     >
-                        {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor, transition: "all 0.4s ease-in-out" }}>{title}</h2>}
-                        {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor, transition: "all 0.4s ease-in-out" }}>{subtitle}</p>}
+                        {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor, textTransform: p.uppercase ? "uppercase" : "none", transition: "all 0.4s ease-in-out" }}>{title}</h2>}
+                        {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor, textTransform: p.uppercase ? "uppercase" : "none", transition: "all 0.4s ease-in-out" }}>{subtitle}</p>}
                     </div>
                     {/* ── Compact Row ───────────────────────────────────────────── */}
                     {layout === "compact" && (

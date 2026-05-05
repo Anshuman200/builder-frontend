@@ -202,7 +202,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
 
                         {/* Heading */}
                         <div style={{ textAlign: "center", marginBottom: "2rem" }} onClick={() => {}}>
-                            <h2 style={{ fontSize: "2rem", fontWeight: 800, margin: "0 0 0.5rem", color: titleColor }}>
+                            <h2 style={{ fontSize: "2rem", fontWeight: 800, margin: "0 0 0.5rem", color: titleColor, textTransform: p.titleUppercase ? "uppercase" : "none" }}>
                                 {titleText}
                             </h2>
                             <p style={{ fontSize: "1rem", color: subtitleColor, lineHeight: 1.6, maxWidth: "450px", margin: "0 auto" }}>

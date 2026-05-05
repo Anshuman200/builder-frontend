@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getBackgroundStyles, BackgroundOverlay, InlineTextEditor, IntegratedTextEditor } from "./shared";
+import { PreviewContext, BlockProps, getBackgroundStyles, BackgroundOverlay, InlineTextEditor, IntegratedTextEditor, getTextStyles } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function TextBlock({ block }: BlockProps) {
@@ -46,9 +46,9 @@ export function TextBlock({ block }: BlockProps) {
         margin: 0,
         width: "100%",
         fontSize,
-        fontWeight: p.bold ? 700 : tag.startsWith("h") ? 700 : (p.fontWeight as number) || 400,
-        fontStyle: p.italic ? "italic" : "normal",
-        textDecoration: p.underline ? "underline" : p.strikethrough ? "line-through" : undefined,
+        ...getTextStyles(p),
+        fontWeight: getTextStyles(p).fontWeight || (tag.startsWith("h") ? 700 : 400),
+
         color: finalColor,
         textAlign: (p.align as React.CSSProperties["textAlign"]) || "left",
         lineHeight: (p.lineHeight as string) || 1.6,
@@ -59,6 +59,7 @@ export function TextBlock({ block }: BlockProps) {
         position: "relative",
         zIndex: 2
     };
+
 
     return (
         <div id={(p.sectionId as string) || `block-${block.id}`} style={wrapperStyle}>

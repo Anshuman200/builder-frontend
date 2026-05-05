@@ -27,13 +27,14 @@ export const useTemplates = () => {
     });
 };
 
-export const usePageTags = () => {
+export const usePageTags = (options: { enabled?: boolean } = {}) => {
     return useQuery({
         queryKey: ["page-tags"],
         queryFn: async () => {
             const { data } = await pagesApi.getTags();
             return (data as any).tags || [];
         },
+        ...options
     });
 };
 
@@ -244,16 +245,16 @@ export const useRegister = () => {
     });
 };
 
-export const useResendOtp = () => {
+export const useResendVerification = () => {
     return useMutation({
-        mutationFn: (body: Record<string, string>) => authApi.resendOtp(body),
+        mutationFn: (body: Record<string, string>) => authApi.resendVerification(body),
     });
 };
 
-export const useVerifyOtp = () => {
+export const useVerifyEmail = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (body: Record<string, string>) => authApi.verifyOtp(body),
+        mutationFn: (body: Record<string, string>) => authApi.verifyEmail(body),
         onSuccess: (res) => {
             queryClient.setQueryData(["profile"], res.data.user);
             queryClient.invalidateQueries({ queryKey: ["profile"] });

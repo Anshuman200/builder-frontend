@@ -205,6 +205,8 @@ interface NewPageWizardProps {
   blankMode?: boolean;
   /** List of existing route names/paths to prevent duplicates */
   existingRoutes?: { name: string; path: string }[];
+  /** mode: 'project' (initial setup) or 'page' (adding to existing) */
+  mode?: "project" | "page";
 }
 
 // ─── Stepper Bar ─────────────────────────────────────────────────────────────
@@ -242,7 +244,7 @@ function StepBar({ step }: { step: 1 | 2 }) {
 export default function NewPageWizard({
   open, onClose, onSubmit, isSubmitting = false, closable = true,
   initialStep = 1, excludeSections = [], blankMode = false,
-  existingRoutes = []
+  existingRoutes = [], mode = "project"
 }: NewPageWizardProps) {
   const [step, setStep] = useState<1 | 2>(initialStep);
   const [title, setTitle] = useState("");
@@ -257,7 +259,7 @@ export default function NewPageWizard({
   const [titleError, setTitleError] = useState("");
   const [slugError, setSlugError] = useState("");
 
-  const { data: tags = [] } = usePageTags();
+  const { data: tags = [] } = usePageTags({ enabled: open });
 
   const handleClose = useCallback(() => {
     if (!closable) return;
@@ -435,9 +437,11 @@ export default function NewPageWizard({
                 <BoltIcon className="w-5 h-5 text-indigo-400" />
               </div>
               <div>
-                <h2 className="text-base font-black text-white tracking-tight">Create New Project</h2>
+                <h2 className="text-base font-black text-white tracking-tight">
+                  {mode === "page" ? "Add New Page" : "Create New Project"}
+                </h2>
                 <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                  {initialStep === 2 ? "Pick sections to pre-fill" : step === 1 ? "Name your Project" : "Choose sections to pre-fill"}
+                  {initialStep === 2 ? "Pick sections to pre-fill" : step === 1 ? (mode === "page" ? "Name your Page" : "Name your Project") : "Choose sections to pre-fill"}
                 </p>
               </div>
             </div>
@@ -465,12 +469,14 @@ export default function NewPageWizard({
             {step === 1 && (
               <div style={{ animation: "slide-left 0.25s ease" }} className="flex flex-col gap-5">
                 <div className="p-2 bg-white/3 rounded-2xl border border-white/5">
-                  <label className="block text-xs font-black text-white/50 uppercase tracking-widest mb-2">Project Name *</label>
+                  <label className="block text-xs font-black text-white/50 uppercase tracking-widest mb-2">
+                    {mode === "page" ? "Page Name *" : "Project Name *"}
+                  </label>
                   <Input
                     autoFocus
                     value={title}
                     onChange={(e) => handleTitleChange(e.target.value)}
-                    placeholder="e.g. SaaS Landing Page"
+                    placeholder={mode === "page" ? "e.g. About Us" : "e.g. SaaS Landing Page"}
                     className={`w-full bg-transparent text-xl font-black text-white placeholder:text-white/15 border-none !outline-none resize-none leading-snug py-1 ${titleError ? "placeholder:text-red-400/50" : ""}`}
                   />
                   {titleError && (
@@ -517,34 +523,36 @@ export default function NewPageWizard({
                   </button> */}
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-black text-white/50 uppercase tracking-widest mb-2">Project Tags</label>
-                    <Select
-                      mode="multiple"
-                      allowClear
-                      value={selectedTags}
-                      onChange={(value) => setSelectedTags(value as string[])}
-                      options={tags.map((tag: any) => ({
-                        label: (
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tag.color || '#6366f1' }} />
-                            <span>{tag.name}</span>
-                          </div>
-                        ),
-                        value: tag.slug || tag.name
-                      }))}
-                      placeholder="Choose tags"
-                      className="w-full custom-wizard-select"
-                      popupMatchSelectWidth={false}
-                    />
+                {mode === "project" && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-black text-white/50 uppercase tracking-widest mb-2">Project Tags</label>
+                      <Select
+                        mode="multiple"
+                        allowClear
+                        value={selectedTags}
+                        onChange={(value) => setSelectedTags(value as string[])}
+                        options={tags.map((tag: any) => ({
+                          label: (
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tag.color || '#6366f1' }} />
+                              <span>{tag.name}</span>
+                            </div>
+                          ),
+                          value: tag.slug || tag.name
+                        }))}
+                        placeholder="Choose tags"
+                        className="w-full custom-wizard-select"
+                        popupMatchSelectWidth={false}
+                      />
+                    </div>
+                    <div className="px-1">
+                      <p className="text-white/25 text-[10px] font-medium leading-relaxed uppercase tracking-wider">
+                        Build your page from ground up with premium components.
+                      </p>
+                    </div>
                   </div>
-                  <div className="px-1">
-                    <p className="text-white/25 text-[10px] font-medium leading-relaxed uppercase tracking-wider">
-                      Build your page from ground up with premium components.
-                    </p>
-                  </div>
-                </div>
+                )}
               </div>
             )}
 

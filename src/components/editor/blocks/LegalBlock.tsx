@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BlockProps, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { BlockProps, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { proxyApi } from "@/lib/api/client";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
@@ -82,13 +82,12 @@ export function LegalBlock({ block }: BlockProps) {
     };
 
     const titleStyle: React.CSSProperties = {
+        ...getTextStyles(p, "title"),
         textAlign: (p.titleAlign as any) || "left",
         fontSize: (p.titleFontSize as string) || "2rem",
         color: (p.titleColor as string) || "inherit",
-        fontWeight: (p.titleFontWeight as any) || "700",
         marginBottom: "2rem",
     };
-
     return (
         <section
             id={(p.sectionId as string) || `block-${block.id}`}

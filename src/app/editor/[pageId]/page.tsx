@@ -180,6 +180,7 @@ export default function EditorPage() {
       <EditorShell />
       <NewPageWizard
         open={showWizard}
+        mode="project"
         onClose={() => setShowWizard(false)}
         onSubmit={handleWizardSubmit}
         closable={!(isGuest && (!page?.routes || page.routes.length === 0 || page.routes[0].content.length === 0))}
