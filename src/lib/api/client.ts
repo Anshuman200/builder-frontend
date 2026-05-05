@@ -68,7 +68,8 @@ export async function request<T = any>(
         delete retryHeaders["authorization"];
 
         // GIVE THE BROWSER A BREATHER: Commit cookie store.
-        await new Promise(resolve => setTimeout(resolve, 50));
+        console.log(`[AUTH] Token refreshed for ${path}, retrying after delay...`);
+        await new Promise(resolve => setTimeout(resolve, 100));
 
         // Retry with same options and sanitized headers
         res = await fetch(`${API}${path}`, {

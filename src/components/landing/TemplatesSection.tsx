@@ -32,7 +32,7 @@ async function TemplatesDataFetcher() {
     // Explicitly call the API on the server
     try {
         const { data: responseData } = await pagesApi.templates({ limit: 8 });
-        
+
         // Correctly handle the new standardized { data: { templates: [...] } } structure
         const templates = Array.isArray(responseData)
             ? responseData
