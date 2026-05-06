@@ -192,7 +192,7 @@ export default function CapturePreviewModal({
       title={
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", paddingRight: 32 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ background: "linear-gradient(135deg, #6366f1, #a855f7)", borderRadius: 8, padding: 6 }}>
+            <div style={{ background: "linear-gradient(135deg, #d97706, #a855f7)", borderRadius: 8, padding: 6 }}>
               <CameraIcon style={{ width: 18, height: 18, color: "#fff" }} />
             </div>
             <div>
@@ -247,7 +247,7 @@ export default function CapturePreviewModal({
                     flex: "0 0 70px",
                     height: 34,
                     position: "relative", borderRadius: 6, overflow: "hidden",
-                    border: activeThumbnail === url ? "2px solid #6366f1" : "1px solid rgba(255,255,255,0.1)",
+                    border: activeThumbnail === url ? "2px solid #d97706" : "1px solid rgba(255,255,255,0.1)",
                     cursor: "pointer", transition: "all 0.2s",
                     background: "#000",
                   }}
@@ -338,7 +338,7 @@ export default function CapturePreviewModal({
                 borderRadius: 10, overflow: "hidden",
                 backdropFilter: "blur(10px)"
               }}>
-                <div style={{ height: "100%", width: `${uploadProgress}%`, background: "#6366f1", transition: "width 0.3s" }} />
+                <div style={{ height: "100%", width: `${uploadProgress}%`, background: "#d97706", transition: "width 0.3s" }} />
               </div>
             )}
 
@@ -359,7 +359,7 @@ export default function CapturePreviewModal({
                 style={{
                   display: "flex", alignItems: "center", gap: 10,
                   padding: "10px 24px",
-                  background: isCapturing ? "rgba(99,102,241,0.2)" : "linear-gradient(135deg, #6366f1, #a855f7)",
+                  background: isCapturing ? "rgba(99,102,241,0.2)" : "linear-gradient(135deg, #d97706, #a855f7)",
                   color: "#fff", border: "none", borderRadius: 14, fontSize: 13, fontWeight: 700,
                   cursor: isCapturing || !iframeLoaded ? "not-allowed" : "pointer",
                   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -416,7 +416,7 @@ export default function CapturePreviewModal({
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); borderRadius: 10px; }
         .horizontal-scroll { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .loader-ring { width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.1); border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .loader-ring { width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.1); border-top-color: #d97706; border-radius: 50%; animation: spin 0.8s linear infinite; }
         .control-icon-btn:hover { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
         .proof-card:hover .proof-overlay { opacity: 1 !important; }
         .proof-card:hover .proof-actions { opacity: 1 !important; transform: translateY(0) !important; }

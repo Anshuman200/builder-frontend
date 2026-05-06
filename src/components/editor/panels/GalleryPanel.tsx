@@ -92,7 +92,7 @@ export function GalleryPanel({ block }: { block: Block }) {
                                     };
                                     up("childBlocks", [...mediaItems, newImageBlock, ...pickerItems], true);
                                 }}
-                                style={{ padding: "8px 0", background: "rgba(99,102,241,0.08)", color: "#6366f1", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer" }}
+                                style={{ padding: "8px 0", background: "rgba(99,102,241,0.08)", color: "#d97706", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer" }}
                             >
                                 + Add Image
                             </button>

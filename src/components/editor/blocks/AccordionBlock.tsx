@@ -39,7 +39,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
     const itemBorderColor = (block.props.itemBorderColor as string) || "#e2e8f0";
     const itemRadius = (block.props.itemRadius as string) || "8px";
 
-    const defaultPrimary = theme.colors?.primary || "#6366f1";
+    const defaultPrimary = theme.colors?.primary || "#d97706";
 
     const titleColor = (block.props.titleColor as string) || "#0f172a";
     const contentColor = (block.props.contentColor as string) || "#475569";
@@ -109,7 +109,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
                     const isOpen = !!openItems[item.id];
                     const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index == index;
                     const focusedStyle = isFocused ? {
-                        boxShadow: "0 0 0 2px #6366f1, 0 0 20px rgba(99,102,241,0.4)",
+                        boxShadow: "0 0 0 2px #d97706, 0 0 20px rgba(99,102,241,0.4)",
                         zIndex: 10,
                         transform: "scale(1.01)",
                         background: 'rgba(99,102,241,0.03)'

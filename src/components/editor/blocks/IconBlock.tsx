@@ -10,7 +10,7 @@ export function IconBlock({ block }: BlockProps) {
     const IconCmp = getIcon(iconName);
     const size: any = p.size || "24px";
     const align = (p.align as string) || "center";
-    const color = (p.color as string) || "#6366f1";
+    const color = (p.color as string) || "#d97706";
 
     const wrapperStyle: React.CSSProperties = {
         padding: (p.padding as string) || "16px",

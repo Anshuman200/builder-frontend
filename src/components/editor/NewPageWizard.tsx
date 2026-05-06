@@ -390,8 +390,8 @@ export default function NewPageWizard({
           font-weight: 500 !important;
         }
         .custom-wizard-select .ant-select-selection-item {
-          background: rgba(99, 102, 241, 0.1) !important;
-          border: 1px solid rgba(99, 102, 241, 0.2) !important;
+          background: rgba(217, 119, 6, 0.1) !important;
+          border: 1px solid rgba(217, 119, 6, 0.2) !important;
           color: #818cf8 !important;
           border-radius: 8px !important;
           font-weight: 700 !important;
@@ -421,7 +421,7 @@ export default function NewPageWizard({
           color: white !important;
         }
         .ant-select-item-option-selected {
-          background-color: rgba(99, 102, 241, 0.15) !important;
+          background-color: rgba(217, 119, 6, 0.15) !important;
           color: #818cf8 !important;
         }
       `}</style>

@@ -40,8 +40,8 @@ export function FeaturesBlock({ block }: BlockProps) {
     const iconRadius = (p.iconRadius as string) || "14px";
 
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
-    const defaultPrimary = theme.colors?.primary || "#6366f1";
-    const primaryRgb = hexToRgb(defaultPrimary) || "99, 102, 241";
+    const defaultPrimary = theme.colors?.primary || "#d97706";
+    const primaryRgb = hexToRgb(defaultPrimary) || "217, 119, 6";
     const iconColor = (p.iconColor as string) || defaultPrimary;
     const iconBg = (p.iconBg as string) || `rgba(${primaryRgb}, 0.15)`;
 

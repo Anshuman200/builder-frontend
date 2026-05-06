@@ -116,7 +116,7 @@ export function TeamBlock({ block }: BlockProps) {
     const socialIconSize = (p.socialIconSize as string | number) || 18;
 
     const nameColor = (p.nameColor as string) || (p.textColor as string) || (p.color as string) || textColor;
-    const roleColor = (p.roleColor as string) || (p.textColor as string) || (p.color as string) || (theme?.colors?.primary) || "#6366f1";
+    const roleColor = (p.roleColor as string) || (p.textColor as string) || (p.color as string) || (theme?.colors?.primary) || "#d97706";
     const descColor = (p.descColor as string) || (p.textColor as string) || (p.color as string) || textColor;
     const socialColor = (p.socialIconColor as string) || (p.socialColor as string) || "#94a3b8";
 

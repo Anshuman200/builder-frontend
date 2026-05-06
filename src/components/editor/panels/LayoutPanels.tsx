@@ -121,7 +121,7 @@ export function HeaderPanel({ block }: { block: Block }) {
                 {(p.navActiveStyle as string) && (
                     <Field label="Active Color">
                         <ColorInput
-                            value={(p.navActiveColor as string) || (p.ctaBgColor as string) || "#6366f1"}
+                            value={(p.navActiveColor as string) || (p.ctaBgColor as string) || "#d97706"}
                             onChange={(v) => up("navActiveColor", v)}
                             onBlur={(v) => up("navActiveColor", v, true)}
                         />

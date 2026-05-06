@@ -15,7 +15,7 @@ import { DEFAULT_THEME } from "@/lib/utils/theme";
 const LegendComponent = Legend as any;
 
 export const CHART_COLORS = [
-  "var(--primary, #6366f1)",
+  "var(--primary, #d97706)",
   "var(--accent, #f43f5e)",
   "#10b981", // Emerald
   "#f59e0b", // Amber

@@ -9,7 +9,7 @@ import React from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { TrashIcon, EllipsisHorizontalIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon, ArrowPathIcon, SparklesIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, EllipsisHorizontalIcon, PhotoIcon, VideoCameraIcon, ViewColumnsIcon, PaintBrushIcon, ArrowPathIcon, SparklesIcon, ArrowsRightLeftIcon, Square2StackIcon } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 
 import { useEditorStore } from "@/stores/editorStore";
@@ -50,7 +50,7 @@ export function useLinkHandler() {
 
     return (url: string, e?: React.MouseEvent) => {
         if (!url) return;
-        
+
         const normalizePath = (p: string) => (p.startsWith("/") ? p : `/${p}`);
         const normalizedUrl = normalizePath(url);
 
@@ -208,7 +208,7 @@ export function QuickLayoutChange({ block }: { block: Block }) {
     return (
         <AppToolTip title="Change Template">
             <Dropdown menu={{ items: menuItems }} placement="bottomRight" trigger={['click']}>
-                <IconButton icon={<SparklesIcon style={{ width: 14, height: 14 }} />} />
+                <IconButton className="bg-blue-200 hover:bg-blue-900 hover:text-white transition-all duration-200" icon={<SparklesIcon style={{ width: 14, height: 14 }} />} />
             </Dropdown>
         </AppToolTip>
     );
@@ -340,7 +340,7 @@ export function InlineTextEditor({
 export function ChildBlockWrapper({
     block,
     children,
-    outlineColor = "#6366f1",
+    outlineColor = "#d97706",
     outlineColorHover = "#a5b4fc",
 }: {
     block: Block;
@@ -535,7 +535,7 @@ export function ChildBlockWrapper({
                         <IconButton
                             {...attributes}
                             {...listeners}
-                            className="cursor-grab active:cursor-grabbing"
+                            className="cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-110"
                             icon={
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                     <circle cx="9" cy="5" r="2" />
@@ -548,9 +548,14 @@ export function ChildBlockWrapper({
                             }
                         />
                     </AppToolTip>
+                    {/* Duplicate block */}
+                    <AppToolTip title="Duplicate block">
+                        <IconButton className="bg-green-200 transition-all duration-200 hover:bg-green-600 hover:text-white hover:scale-110" icon={<Square2StackIcon style={{ width: 13, height: 13 }} />} onClick={(e) => { e.stopPropagation(); useEditorStore.getState().duplicateBlock(block.id); }} />
+                    </AppToolTip>
+
                     {/* Delete block */}
                     <AppToolTip title="Delete block">
-                        <IconButton icon={<TrashIcon style={{ width: 13, height: 13 }} />} onClick={(e) => { e.stopPropagation(); deleteBlock(block.id); }} />
+                        <IconButton className="bg-red-200 transition-all duration-200 hover:bg-red-900 hover:text-white hover:scale-110" icon={<TrashIcon style={{ width: 13, height: 13 }} />} onClick={(e) => { e.stopPropagation(); deleteBlock(block.id); }} />
                     </AppToolTip>
                 </div>
             )}
@@ -586,12 +591,14 @@ export function DropZoneStrip({
     zoneId,
     childProp,
     hasChildren,
-    stripColor = "#6366f1",
+    position = "inside",
+    stripColor = "#d97706",
     emptyLabel = "Drag blocks here",
 }: {
     zoneId: string;
     childProp?: string;
     hasChildren: boolean;
+    position?: "inside" | "inside-start";
     stripColor?: string;
     emptyLabel?: string;
 }) {
@@ -610,7 +617,7 @@ export function DropZoneStrip({
                 // 1. Determine the actual block ID (cleaning prefixes if necessary)
                 let targetId = zoneId;
                 const colMatch = zoneId.match(/^col-([01])-(.+)$/);
-                const childMatch = zoneId.match(/^(?:hero|container|wave|features)-(.+)$/);
+                const childMatch = zoneId.match(/^(?:hero|container|wave|features)-(?:top-)?(.+)$/);
 
                 if (colMatch) targetId = colMatch[2];
                 else if (childMatch) targetId = childMatch[1];
@@ -622,7 +629,7 @@ export function DropZoneStrip({
                     else effectiveChildProp = "childBlocks";
                 }
 
-                openBlockPicker({ id: targetId, position: "inside", childProp: effectiveChildProp }, "elements");
+                openBlockPicker({ id: targetId, position:position as any, childProp: effectiveChildProp }, "elements");
             }}
             style={{
                 width: "100%",
@@ -688,7 +695,7 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
     const bWidth = borderWidthProp || "1px";
 
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
-    const defaultPrimary = theme.colors?.primary || "#6366f1";
+    const defaultPrimary = theme.colors?.primary || "#d97706";
     const defaultSecondary = theme.colors?.secondary || "#8b5cf6";
     const defaultText = theme.colors?.buttonText || "#ffffff";
 
@@ -841,7 +848,7 @@ interface GetCardStylesOptions {
     primaryRgb?: string;
 }
 
-export function getCardStyles({ props: p, isFocused, isHovered, primaryColor = "#6366f1", primaryRgb = "99, 102, 241" }: GetCardStylesOptions): React.CSSProperties {
+export function getCardStyles({ props: p, isFocused, isHovered, primaryColor = "#d97706", primaryRgb = "217, 119, 6" }: GetCardStylesOptions): React.CSSProperties {
     const cardStyle = (p.cardStyle as string) || "raised";
     const cardBg = (p.cardBg as string) || (cardStyle === "none" ? "transparent" : "#ffffff");
     const cardRadius = (p.cardRadius as string) || "16px";
@@ -978,7 +985,7 @@ export function QuickPopoverEditor({
             theme={{
                 algorithm: theme.darkAlgorithm,
                 token: {
-                    colorPrimary: '#6366f1',
+                    colorPrimary: '#d97706',
                     borderRadius: 6,
                     colorBgBase: '#000000',
                     colorBgContainer: '#0a0a0a',

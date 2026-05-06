@@ -410,7 +410,7 @@ export default function EditorShell() {
             style={{
               background: "var(--background, #fff)",
               color: "var(--text, #1e293b)",
-              borderColor: "var(--primary, #6366f1)",
+              borderColor: "var(--primary, #d97706)",
               width: draggedWidth,
               height: draggedHeight,
             }}

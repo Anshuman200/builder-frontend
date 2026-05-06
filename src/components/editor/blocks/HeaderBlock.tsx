@@ -50,7 +50,7 @@ export function HeaderBlock({ block }: BlockProps) {
 
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
     const bgStyles = getBackgroundStyles(p, theme);
-    const defaultPrimary = theme.colors?.primary || "#6366f1";
+    const defaultPrimary = theme.colors?.primary || "#d97706";
     const defaultText = theme.colors?.buttonText || "#ffffff";
 
     const ctaBgColor = (p.ctaBg as string) || (p.ctaBgColor as string) || defaultPrimary;

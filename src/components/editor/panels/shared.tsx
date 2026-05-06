@@ -75,7 +75,7 @@ export const PANEL_COLORS = {
     inputBg: "#111111",
     inputBorder: "rgba(255, 255, 255, 0.1)",
     inputHoverBg: "#1a1a1a",
-    primary: "#6366f1",
+    primary: "#d97706",
 };
 
 // ─── MediaInput ───────────────────────────────────────────────────────────────
@@ -287,7 +287,7 @@ export function TextInput({ value, onChange, onBlur, placeholder, type = "text",
             onFocus={(e) => {
                 e.currentTarget.style.background = "#000";
                 e.currentTarget.style.borderColor = PANEL_COLORS.primary;
-                e.currentTarget.style.boxShadow = `0 0 0 3px rgba(99, 102, 241, 0.2)`;
+                e.currentTarget.style.boxShadow = `0 0 0 3px rgba(217, 119, 6, 0.2)`;
             }}
             onBlur={(e) => {
                 e.currentTarget.style.background = PANEL_COLORS.inputBg;
@@ -334,7 +334,7 @@ export function PanelInlineEditor({ value, onChange, onBlur, placeholder, multil
             onFocus={(e: any) => {
                 e.currentTarget.style.background = "#000";
                 e.currentTarget.style.borderColor = PANEL_COLORS.primary;
-                e.currentTarget.style.boxShadow = `0 0 0 3px rgba(99, 102, 241, 0.2)`;
+                e.currentTarget.style.boxShadow = `0 0 0 3px rgba(217, 119, 6, 0.2)`;
             }}
             onBlur={(e: any) => {
                 e.currentTarget.style.background = "rgba(255,255,255,0.03)";
@@ -508,7 +508,7 @@ export function TextareaInput({ value, onChange, onBlur, rows = 3, placeholder }
             onFocus={(e) => {
                 e.currentTarget.style.borderColor = PANEL_COLORS.primary;
                 e.currentTarget.style.background = "#000";
-                e.currentTarget.style.boxShadow = `0 0 0 3px rgba(99, 102, 241, 0.2)`;
+                e.currentTarget.style.boxShadow = `0 0 0 3px rgba(217, 119, 6, 0.2)`;
             }}
             onBlur={(e) => {
                 e.currentTarget.style.background = PANEL_COLORS.inputBg;
@@ -855,7 +855,7 @@ export function AppColorPicker({
                 presets={[
                     {
                         label: 'Brand Colors',
-                        colors: ["#6366f1", "#0ea5e9", "#22c55e", "#eab308", "#f97316", "#ef4444", "#0099ff"],
+                        colors: ["#d97706", "#0ea5e9", "#22c55e", "#eab308", "#f97316", "#ef4444", "#0099ff"],
                     },
                     {
                         label: 'Grayscale',
@@ -887,7 +887,7 @@ export function AppColorPicker({
                     {
                         label: 'Brand Colors',
                         colors: [
-                            "#6366f1", "#4f46e5", "#3b82f6", "#0ea5e9",
+                            "#d97706", "#4f46e5", "#3b82f6", "#0ea5e9",
                             "#06b6d4", "#10b981", "#22c55e", "#84cc16",
                             "#eab308", "#f59e0b", "#f97316", "#ef4444",
                             "#ec4899", "#d946ef", "#a855f7", "#8b5cf6"
@@ -987,7 +987,7 @@ export function ColorInput({ value, onChange, onBlur, placeholder = "#ffffff", h
 export function GradientInput({ value, onChange, onBlur }: { value: string; onChange: (v: string) => void; onBlur?: (v: string) => void }) {
     const gradients = [
         { name: "None", value: "" },
-        { name: "Indigo Night", value: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)" },
+        { name: "Indigo Night", value: "linear-gradient(135deg, #d97706 0%, #a855f7 100%)" },
         { name: "Ocean Breeze", value: "linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%)" },
         { name: "Sunset Glow", value: "linear-gradient(135deg, #f97316 0%, #ef4444 100%)" },
         { name: "Midnight", value: "linear-gradient(135deg, #0f172a 0%, #334155 100%)" },
@@ -1019,7 +1019,7 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
                 })
             };
         }
-        return { type: "linear", deg: 135, stops: [{ id: "s1", color: "#6366f1", offset: 0 }, { id: "s2", color: "#a855f7", offset: 100 }] };
+        return { type: "linear", deg: 135, stops: [{ id: "s1", color: "#d97706", offset: 0 }, { id: "s2", color: "#a855f7", offset: 100 }] };
     };
 
     const { type, deg, stops } = parseStops(value || gradients[1].value);
@@ -1033,7 +1033,7 @@ export function GradientInput({ value, onChange, onBlur }: { value: string; onCh
         else if (newType === "radial") newVal = `radial-gradient(circle at center, ${stopsStr})`;
         else if (newType === "conic") newVal = `conic-gradient(from ${newDeg}deg at center, ${stopsStr.replace(/%/g, 'deg')})`; // Conic uses deg or %? Actually it uses deg mostly, but CSS supports both. But for simplicity we map 0-100% to 0-360deg if needed, but CSS conic supports % too.
 
-        // Fix for conic: conic-gradient(from 135deg at center, #6366f1 0%, #a855f7 100%) is valid.
+        // Fix for conic: conic-gradient(from 135deg at center, #d97706 0%, #a855f7 100%) is valid.
         if (newType === "conic") newVal = `conic-gradient(from ${newDeg}deg at center, ${stopsStr})`;
 
         onChange(newVal);
@@ -1449,7 +1449,7 @@ export function SliderInput({ value, onChange, min = 0, max = 100, step = 1, uni
                     border-radius: 50%;
                     cursor: pointer;
                     border: 2px solid #fff;
-                    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+                    box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2);
                 }
             `}</style>
             <input
@@ -1678,18 +1678,18 @@ export function Section({ title, children, focusKeys = [], hasMargin = true }: {
                 margin: hasMargin ? "14px 16px" : undefined,
                 padding: "16px 20px",
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                background: isFlashing ? "rgba(99, 102, 241, 0.2)" : isFocused ? "rgba(99, 102, 241, 0.12)" : "rgba(255,255,255,0.03)",
+                background: isFlashing ? "rgba(217, 119, 6, 0.2)" : isFocused ? "rgba(217, 119, 6, 0.12)" : "rgba(255,255,255,0.03)",
                 backdropFilter: isFocused ? "blur(8px)" : "none",
                 position: "relative",
                 boxShadow: isFocused
-                    ? `0 8px 32px rgba(99, 102, 241, 0.2), inset 0 0 0 1px rgba(255,255,255,0.05)`
+                    ? `0 8px 32px rgba(217, 119, 6, 0.2), inset 0 0 0 1px rgba(255,255,255,0.05)`
                     : "0 4px 12px rgba(0,0,0,0.25)"
             }}
         >
             <style>{`
                 @keyframes section-flash {
-                    0% { background: rgba(99, 102, 241, 0.3); }
-                    100% { background: rgba(99, 102, 241, 0.05); }
+                    0% { background: rgba(217, 119, 6, 0.3); }
+                    100% { background: rgba(217, 119, 6, 0.05); }
                 }
                 .section-focused-flash {
                     animation: section-flash 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;

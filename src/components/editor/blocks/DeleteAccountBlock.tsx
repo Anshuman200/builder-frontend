@@ -134,7 +134,7 @@ export function DeleteAccountBlock({ block }: BlockProps) {
             theme={{
                 algorithm: antdTheme.defaultAlgorithm,
                 token: {
-                    colorPrimary: activeTheme.colors?.primary || "#6366f1",
+                    colorPrimary: activeTheme.colors?.primary || "#d97706",
                     borderRadius: parseInt(inputRadius) || 8,
                     controlHeight: parseInt(inputHeight) || 40,
                     colorBgContainer: inputBg,

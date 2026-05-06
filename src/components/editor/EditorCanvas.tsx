@@ -580,11 +580,11 @@ const CanvasBlock = memo(function CanvasBlock({
           transition: transition || undefined,
           opacity: isDragging ? 0.25 : 1,
           boxShadow: isInside
-            ? "inset 0 0 0 2px #6366f1, 0 0 15px rgba(99,102,241,0.2)"
+            ? "inset 0 0 0 2px #d97706, 0 0 15px rgba(217,119,6,0.2)"
             : isReplace
               ? "inset 0 0 0 3px #10b981, 0 0 15px rgba(16,185,129,0.3)"
               : showDropHighlight
-                ? "inset 0 0 0 2px rgba(99,102,241,0.25)"
+                ? "inset 0 0 0 2px rgba(217,119,6,0.25)"
                 : undefined,
           borderRadius: block.props.isFloating ? ((block.props.floatingRadius as string) || "16px") : (isInside || isReplace ? 8 : 0),
         }}
@@ -609,9 +609,9 @@ const CanvasBlock = memo(function CanvasBlock({
             left: 0,
             right: 0,
             height: 4,
-            background: "linear-gradient(90deg, #6366f1, #8b5cf6)",
+            background: "linear-gradient(90deg, #d97706, #f59e0b)",
             zIndex: 5,
-            boxShadow: "0 0 8px rgba(99,102,241,0.5)",
+            boxShadow: "0 0 8px rgba(217,119,6,0.5)",
           }} />
         )}
 
@@ -642,7 +642,7 @@ const CanvasBlock = memo(function CanvasBlock({
             top: 12,
             left: "50%",
             transform: "translateX(-50%)",
-            background: "#6366f1",
+            background: "#d97706",
             color: "#fff",
             padding: "4px 12px",
             borderRadius: 99,
@@ -651,7 +651,7 @@ const CanvasBlock = memo(function CanvasBlock({
             zIndex: 100,
             textTransform: "uppercase",
             letterSpacing: "0.05em",
-            boxShadow: "0 4px 12px rgba(99,102,241,0.3)",
+            boxShadow: "0 4px 12px rgba(217,119,6,0.3)",
             pointerEvents: "none",
           }}>
             Drop Inside
@@ -662,10 +662,12 @@ const CanvasBlock = memo(function CanvasBlock({
         {(isSelected || isHovered) && !isDragging && (
           <div
             style={{
-              position: "absolute", inset: 0,
-              border: isSelected ? "2.5px solid #6366f1" : "1.5px solid #94a3b8",
-              boxShadow: isSelected ? "inset 0 0 0 1px rgba(99,102,241,0.15), 0 0 0 3px rgba(99,102,241,0.12)" : undefined,
-              zIndex: 11000, pointerEvents: "none",
+              position: "absolute",
+              top: -4, left: -4, right: -4, bottom: -4,
+              border: isSelected ? "2.5px solid #d97706" : "1.5px solid #94a3b8",
+              boxShadow: isSelected ? "inset 0 0 0 1px rgba(217,119,6,0.15), 0 0 0 3px rgba(217,119,6,0.12)" : undefined,
+              zIndex: 11500, pointerEvents: "none",
+              borderRadius: block.props.isFloating ? ((block.props.floatingRadius as string) || "16px") : (isInside || isReplace ? 8 : 0),
             }}
           />
         )}
@@ -673,11 +675,11 @@ const CanvasBlock = memo(function CanvasBlock({
         {isSelected && (
           <div style={{
             position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
-            background: "#6366f1", color: "#fff",
+            background: "#d97706", color: "#fff",
             fontSize: 9, fontWeight: 700, letterSpacing: "0.08em",
             padding: "2px 10px", borderRadius: "0 0 6px 6px",
             zIndex: 11001, pointerEvents: "none", textTransform: "uppercase",
-            whiteSpace: "nowrap", boxShadow: "0 2px 6px rgba(99,102,241,0.4)",
+            whiteSpace: "nowrap", boxShadow: "0 2px 6px rgba(217,119,6,0.4)",
           }}>
             {block.type}
           </div>
@@ -823,7 +825,7 @@ function EmptyState({ isOver }: { isOver: boolean }) {
         display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
         minHeight: 400, gap: 12,
-        border: `2px dashed ${isOver ? "#6366f1" : "rgba(150,150,150,0.3)"}`,
+        border: `2px dashed ${isOver ? "#d97706" : "rgba(150,150,150,0.3)"}`,
         margin: 24, borderRadius: 12,
         background: isOver ? "rgba(99,102,241,0.05)" : "rgba(150,150,150,0.02)",
         transition: "all 0.2s cubic-bezier(0.2, 0, 0, 1)",
@@ -834,7 +836,7 @@ function EmptyState({ isOver }: { isOver: boolean }) {
       <div style={{ textAlign: "center" }}>
         <p style={{
           margin: 0, fontSize: 16,
-          color: isOver ? "#6366f1" : "#1e293b",
+          color: isOver ? "#d97706" : "#1e293b",
           fontWeight: 600,
         }}>
           {isOver ? "Drop to add block" : "Starting your page?"}
@@ -856,16 +858,16 @@ function AddSectionInvitation({ isOver, isFirst }: { isOver: boolean, isFirst?: 
       }
       className={cn(
         "flex flex-col items-center h-56 mx-5 justify-center gap-2 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200",
-        isFirst ? "mt-4" : "mt-10",
+        isFirst ? "my-4" : "my-10",
         isOver
           ? "border-indigo-500 bg-indigo-500/5 scale-[1.02]"
-          : "border-[rgba(150,150,150,0.2)] bg-transparent",
+          : "border-indigo-500 bg-transparent",
         "hover:border-indigo-500 hover:bg-indigo-500/5 hover:scale-[1.01]"
       )}
     >
-      <PlusIcon className={cn( "w-10 h-10 bg-slate-600 rounded-full p-1", isOver ? "text-indigo-500" : "text-white" )} />
-      <span className={cn( "text-[13px] font-semibold tracking-[0.02em]", isOver ? "text-indigo-500" : "text-slate-500")}>
-        {isFirst ? "Starting your page...." : "Add a new section"}
+      <PlusIcon className={cn("w-10 h-10 bg-slate-600 rounded-full p-1", isOver ? "text-indigo-500" : "text-white")} />
+      <span className={cn("text-[13px] font-semibold tracking-[0.02em]", isOver ? "text-indigo-500" : "text-slate-500")}>
+        {isFirst ? "Starting your page...." : "Add section"}
       </span>
     </div>
   );

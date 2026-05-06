@@ -143,7 +143,7 @@ export function findAndRemoveBlock(blocks: Block[], id: string): { newBlocks: Bl
 
 export function insertBlockDeep(
     blocks: Block[], insertBlock: Block, targetId: string,
-    position: "before" | "after" | "inside" = "after", childProp?: string
+    position: "before" | "after" | "inside" | "inside-start" = "after", childProp?: string
 ): { newBlocks: Block[], inserted: boolean } {
     let inserted = false;
     const newBlocks: Block[] = [];
@@ -155,13 +155,21 @@ export function insertBlockDeep(
             } else if (position === "after") {
                 newBlocks.push(b, insertBlock);
                 inserted = true;
-            } else if (position === "inside" && childProp) {
+            } else if ((position === "inside" || position === "inside-start") && childProp) {
                 const updated = { ...b };
                 if (childProp === "children") {
-                    updated.children = [...(updated.children || []), insertBlock];
+                    updated.children = position === "inside-start"
+                        ? [insertBlock, ...(updated.children || [])]
+                        : [...(updated.children || []), insertBlock];
                     inserted = true;
                 } else if (childProp === "col0" || childProp === "col1" || childProp === "childBlocks") {
-                    updated.props = { ...updated.props, [childProp]: [...((updated.props[childProp] as Block[]) || []), insertBlock] };
+                    const currentArr = (updated.props[childProp] as Block[]) || [];
+                    updated.props = {
+                        ...updated.props,
+                        [childProp]: position === "inside-start"
+                            ? [insertBlock, ...currentArr]
+                            : [...currentArr, insertBlock]
+                    };
                     inserted = true;
                 } else {
                     const items = updated.props.items as any[] | undefined;
@@ -169,9 +177,12 @@ export function insertBlockDeep(
                         const slotIdx = items.findIndex(s => s.id === childProp);
                         if (slotIdx !== -1) {
                             const nextItems = [...items];
+                            const currentBlocks = nextItems[slotIdx].blocks || [];
                             nextItems[slotIdx] = {
                                 ...nextItems[slotIdx],
-                                blocks: [...(nextItems[slotIdx].blocks || []), insertBlock]
+                                blocks: position === "inside-start"
+                                    ? [insertBlock, ...currentBlocks]
+                                    : [...currentBlocks, insertBlock]
                             };
                             updated.props = { ...updated.props, items: nextItems };
                             inserted = true;
@@ -213,33 +224,50 @@ export function insertBlockDeep(
     return { newBlocks, inserted };
 }
 
+function isBlock(obj: any): obj is Block {
+    return obj && typeof obj === "object" && typeof obj.id === "string" && typeof obj.type === "string" && obj.props;
+}
+
 export function recursiveClone(block: Block): Block {
     const newId = crypto.randomUUID();
-    const newProps = { ...block.props };
+    const newBlock = { ...block, id: newId };
 
-    if (Array.isArray(newProps.childBlocks)) newProps.childBlocks = newProps.childBlocks.map(recursiveClone);
-    if (Array.isArray(newProps.col0)) newProps.col0 = newProps.col0.map(recursiveClone);
-    if (Array.isArray(newProps.col1)) newProps.col1 = newProps.col1.map(recursiveClone);
-    if (Array.isArray(newProps.items)) {
-        newProps.items = (newProps.items as any[]).map(item => ({
-            ...item,
-            id: `slot-${crypto.randomUUID()}`,
-            blocks: Array.isArray(item.blocks) ? item.blocks.map(recursiveClone) : []
-        }));
+    // 1. Clone children if they exist
+    if (Array.isArray(newBlock.children)) {
+        newBlock.children = newBlock.children.map(recursiveClone);
     }
+
+    // 2. Clone props recursively to find any nested blocks
+    const newProps = { ...block.props };
 
     for (const key in newProps) {
         const val = newProps[key];
-        if (Array.isArray(val) && val.length > 0 && typeof val[0] === "object" && val[0] !== null && "id" in (val[0] as any)) {
-            newProps[key] = (val as any[]).map(v => ({ ...v, id: crypto.randomUUID() }));
+
+        if (isBlock(val)) {
+            newProps[key] = recursiveClone(val);
+        } else if (Array.isArray(val)) {
+            newProps[key] = val.map(item => {
+                if (isBlock(item)) return recursiveClone(item);
+                // Special case for the "items" / slots pattern
+                if (item && typeof item === "object" && item.id && Array.isArray(item.blocks)) {
+                    return {
+                        ...item,
+                        id: item.id.startsWith("slot-") ? `slot-${crypto.randomUUID()}` : crypto.randomUUID(),
+                        blocks: item.blocks.map(recursiveClone)
+                    };
+                }
+                return item;
+            });
         }
     }
 
-    return { ...block, id: newId, props: newProps };
+    newBlock.props = newProps;
+    return newBlock;
 }
 
 export function duplicateBlockDeep(blocks: Block[], targetId: string): { newBlocks: Block[], clonedId: string | null } {
     let clonedId: string | null = null;
+
     const items = blocks.flatMap(b => {
         if (b.id === targetId) {
             const clone = recursiveClone(b);
@@ -248,36 +276,89 @@ export function duplicateBlockDeep(blocks: Block[], targetId: string): { newBloc
         }
 
         let changed = false;
-        const newProps = { ...b.props };
+        const newBlock = { ...b };
 
-        ["childBlocks", "col0", "col1"].forEach(prop => {
-            if (Array.isArray(b.props[prop])) {
-                const res = duplicateBlockDeep(b.props[prop] as Block[], targetId);
-                if (res.clonedId) {
-                    newProps[prop] = res.newBlocks;
-                    clonedId = res.clonedId;
-                    changed = true;
-                }
+        // Check standard children
+        if (Array.isArray(b.children)) {
+            const res = duplicateBlockDeep(b.children, targetId);
+            if (res.clonedId) {
+                newBlock.children = res.newBlocks;
+                clonedId = res.clonedId;
+                changed = true;
             }
-        });
-
-        if (Array.isArray(b.props.items) && !changed) {
-            const nextItems = (b.props.items as any[]).map(item => {
-                if (changed || !Array.isArray(item.blocks)) return item;
-                const res = duplicateBlockDeep(item.blocks, targetId);
-                if (res.clonedId) {
-                    clonedId = res.clonedId;
-                    changed = true;
-                    return { ...item, blocks: res.newBlocks };
-                }
-                return item;
-            });
-            if (changed) newProps.items = nextItems;
         }
 
-        if (changed) return [{ ...b, props: newProps }];
-        return [b];
+        // Check all props for potential blocks
+        if (!changed) {
+            const newProps = { ...b.props };
+            for (const key in newProps) {
+                const val = newProps[key];
+                if (Array.isArray(val)) {
+                    // Check if this array contains blocks (or is an items array with blocks)
+                    let arrayChanged = false;
+                    const nextArray = val.flatMap(item => {
+                        if (isBlock(item)) {
+                            // If this is the array containing the target, we flatMap it
+                            if (item.id === targetId) {
+                                const clone = recursiveClone(item);
+                                clonedId = clone.id;
+                                arrayChanged = true;
+                                return [item, clone];
+                            }
+                        }
+                        return [item];
+                    });
+
+                    // If we didn't find the target as a direct child of this array,
+                    // recurse into each item's children/props
+                    if (!arrayChanged) {
+                        const deeplyProcessedArray = val.map(item => {
+                            if (arrayChanged) return item;
+
+                            if (isBlock(item)) {
+                                const res = duplicateBlockDeep([item], targetId);
+                                if (res.clonedId) {
+                                    arrayChanged = true;
+                                    clonedId = res.clonedId;
+                                    return res.newBlocks[0];
+                                }
+                            } else if (item && typeof item === "object" && Array.isArray(item.blocks)) {
+                                // Handle the "items" slot pattern
+                                const res = duplicateBlockDeep(item.blocks, targetId);
+                                if (res.clonedId) {
+                                    arrayChanged = true;
+                                    clonedId = res.clonedId;
+                                    return { ...item, blocks: res.newBlocks };
+                                }
+                            }
+                            return item;
+                        });
+
+                        if (arrayChanged) {
+                            newProps[key] = deeplyProcessedArray;
+                            changed = true;
+                        }
+                    } else {
+                        newProps[key] = nextArray;
+                        changed = true;
+                    }
+                } else if (isBlock(val)) {
+                    const res = duplicateBlockDeep([val], targetId);
+                    if (res.clonedId) {
+                        newProps[key] = res.newBlocks[0];
+                        clonedId = res.clonedId;
+                        changed = true;
+                    }
+                }
+
+                if (changed) break;
+            }
+            if (changed) newBlock.props = newProps;
+        }
+
+        return [changed ? newBlock : b];
     });
+
     return { newBlocks: items, clonedId };
 }
 

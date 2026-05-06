@@ -366,7 +366,7 @@ export default function EditorToolbar() {
           >
             <div style={{
               width: 28, height: 28, borderRadius: 8,
-              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              background: "linear-gradient(135deg, #d97706, #8b5cf6)",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
               <ZapIcon style={{ width: 14, height: 14 }} color="#fff" />
@@ -853,7 +853,7 @@ export default function EditorToolbar() {
                     )}
                     <button
                       onClick={() => setShowCapturePicker(true)}
-                      style={{ width: '100%', padding: '8px 0', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 8, border: 'none', cursor: 'pointer', transition: 'opacity 0.2s' }}
+                      style={{ width: '100%', padding: '8px 0', background: 'linear-gradient(135deg, #d97706, #8b5cf6)', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 8, border: 'none', cursor: 'pointer', transition: 'opacity 0.2s' }}
                       onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
                       onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                     >

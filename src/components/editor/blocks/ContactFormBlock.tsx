@@ -87,7 +87,7 @@ export function ContactFormBlock({ block }: BlockProps) {
     const inputBorderColor = (p.inputBorderColor as string) || "#e2e8f0";
 
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
-    const defaultPrimary = theme.colors?.primary || "#6366f1";
+    const defaultPrimary = theme.colors?.primary || "#d97706";
     // const defaultText = theme.colors?.buttonText || "#ffffff";
 
     const inputFocusBorderColor = (p.inputFocusBorderColor as string) || defaultPrimary;

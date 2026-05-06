@@ -39,7 +39,7 @@ export function WaveBlock({ block }: BlockProps) {
   const layers = (props.layers as number) ?? 3; // 1 to 3
 
   const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
-  const defaultPrimary = theme.colors?.primary || "#6366f1";
+  const defaultPrimary = theme.colors?.primary || "#d97706";
 
   // Resolve colors — must be real hex/rgb for SVG fill to work in all contexts
   const fillColorRaw = (props.fillColor as string) || defaultPrimary;
