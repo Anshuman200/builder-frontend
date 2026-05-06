@@ -380,7 +380,6 @@ export function ContainerPanel({ block }: { block: Block }) {
         { label: "Medium (960px)", value: "960px" },
         { label: "Responsive 75vw", value: "75vw" },
         { label: "Prose (60rem)", value: "60rem" },
-        { label: "Compact (800px)", value: "800px" },
     ];
     const currentWidth = (p.maxWidth as string) || "100%";
     // If saved value isn't in presets, add it as a custom option

@@ -865,7 +865,7 @@ export function AccordionPanel({ block }: { block: Block }) {
                 <Field label="Item Radius"><BorderRadiusInput value={(p.itemRadius as string) || "8px"} onChange={(v) => up("itemRadius", v)} /></Field>
             </Section>
 
-            {/* <Section title="Typography">
+            <Section title="Typography">
                 <TypographyFields p={p} up={up} prefix="title" />
                 <TypographyFields p={p} up={up} prefix="desc" />
             </Section>
@@ -881,9 +881,8 @@ export function AccordionPanel({ block }: { block: Block }) {
                 <BackgroundPanel block={block} />
                 <Field label="Item Background"><ColorInput value={(p.itemBgColor as string) || "#ffffff"} onChange={(v) => up("itemBgColor", v)} /></Field>
                 <Field label="Item Border"><ColorInput value={(p.itemBorderColor as string) || "#e2e8f0"} onChange={(v) => up("itemBorderColor", v)} /></Field>
-                <TypographyFields p={p} up={up} prefix="title" />
                 <TypographyFields p={p} up={up} prefix="content" />
-            </Section> */}
+            </Section>
 
             <Section title="Container Padding">
                 <PaddingInput value={(p.padding as string) || "24px"} onChange={(v) => up("padding", v)} placeholder="e.g. 64px 24px" />

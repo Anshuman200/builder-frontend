@@ -19,7 +19,7 @@ export function TextBlock({ block }: BlockProps) {
     const mobileSize = (p.mobileFontSize as string) || tabletSize;
     const fontSize = viewMode === "mobile" ? mobileSize : viewMode === "tablet" ? tabletSize : desktopSize;
 
-    const finalColor = (p.color as string) || "inherit";
+    // Final styles come from getTextStyles, but we keep some local overrides for responsive sizes
 
     const wrapperStyle: React.CSSProperties = {
         ...bgStyles,
@@ -49,7 +49,7 @@ export function TextBlock({ block }: BlockProps) {
         fontSize,
         fontWeight: getTextStyles(p).fontWeight || (tag.startsWith("h") ? 700 : 400),
 
-        color: finalColor,
+        color: getTextStyles(p).color || "inherit",
         textAlign: (p.align as React.CSSProperties["textAlign"]) || "left",
         lineHeight: (p.lineHeight as string) || 1.6,
         letterSpacing: (p.letterSpacing as string) || undefined,

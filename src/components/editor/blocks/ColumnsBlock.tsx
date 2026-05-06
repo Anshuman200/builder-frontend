@@ -17,16 +17,14 @@ function ColumnDropZone({ zoneId, blocks, label, flexBasis, alignItems }: { zone
         <div
             ref={setNodeRef}
             style={{
-                flex: isStacked ? "none" : `${flexBasis.replace("%", "")} ${flexBasis.replace("%", "")} 0%`,
+                flex: isStacked ? "1 1 100%" : `${flexBasis.replace("%", "")} ${flexBasis.replace("%", "")} 0%`,
                 width: isStacked ? "100%" : undefined,
                 minHeight: blocks.length === 0 ? 80 : "100%",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: alignItems === "center" ? "center" : alignItems === "flex-end" ? "flex-end" : alignItems === "stretch" ? "space-between" : "flex-start",
                 alignItems: "stretch",
-                flexGrow: 1,
-                // minHeight: "100%",
-                border: isPreview ? "none" : `2px dashed ${isOver ? "#6366f1" : "#e2e8f0"}`,
+                border: isPreview ? "none" : `2px dashed ${isOver ? "var(--primary)" : "var(--border)"}`,
                 borderRadius: 6,
                 background: !isPreview && isOver ? "rgba(99,102,241, 0.04)" : "transparent",
                 transition: "all 0.15s",

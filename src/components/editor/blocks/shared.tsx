@@ -112,7 +112,14 @@ export function getTextStyles(p: Record<string, any>, prefix: string = ""): Reac
 
     // Robust resolution for color
     const getColor = () => {
-        const color = p[k("color")] ?? p[k("textColor")] ?? (prefix ? p[`${prefix}Color`] : p.textColor);
+        // Prefer the specific prefixed keys first
+        if (prefix) {
+            const prefColor = p[`${prefix}Color`] ?? p[`${prefix}TextColor`];
+            if (prefColor !== undefined) return prefColor;
+        }
+
+        // Then check general keys, preferring what TypographyFields might have updated
+        const color = p[k("color")] ?? p[k("textColor")] ?? p.textColor ?? p.color;
         return color || undefined;
     };
 
@@ -751,7 +758,7 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
         boxShadow: shadow === "none" ? undefined : shadow,
         transition: "all 0.2s ease",
         background,
-        color,
+        color: getTextStyles(p, prefix).color || color,
         border,
         padding: variant === "link" ? "0" : sizeStyle.padding,
         opacity: (disabled || isLoading) ? 0.7 : 1,

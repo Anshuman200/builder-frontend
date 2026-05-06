@@ -2,7 +2,7 @@
 import React from "react";
 
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 import NextImage from "next/image";
 
@@ -46,7 +46,7 @@ export function HeroBlock({ block }: BlockProps) {
                     ...bgStyles,
                     minHeight: sectionMinHeight,
                     borderRadius: (p.borderRadius as string) || "0px",
-                    color: (p.textColor as string) || "#ffffff",
+                    color: (getTextStyles(p).color as string) || "#ffffff",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "stretch",

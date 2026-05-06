@@ -242,10 +242,20 @@ export function ContactFormBlock({ block }: BlockProps) {
             >
                 <div onClick={(e) => { e.stopPropagation(); selectBlock(block.id); focusSubItem(block.id, "Inside Text (Optional)"); }}>
                     {titleText && (
-                        <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.8rem", fontWeight: 800, color: titleColor, textTransform: p.titleUppercase ? "uppercase" : "none" }}>{titleText}</h2>
+                        <h2 style={{ 
+                            ...getTextStyles(p, "title"),
+                            margin: "0 0 0.5rem", 
+                            color: getTextStyles(p, "title").color || titleColor,
+                            textTransform: p.titleUppercase ? "uppercase" : "none" 
+                        }}>{titleText}</h2>
                     )}
                     {subtitleText && (
-                        <p style={{ margin: "0 0 1.75rem", fontSize: "0.95rem", color: subtitleColor, lineHeight: 1.6 }}>{subtitleText}</p>
+                        <p style={{ 
+                            ...getTextStyles(p, "subtitle"),
+                            margin: "0 0 1.75rem", 
+                            color: getTextStyles(p, "subtitle").color || subtitleColor,
+                            lineHeight: 1.6 
+                        }}>{subtitleText}</p>
                     )}
                 </div>
 

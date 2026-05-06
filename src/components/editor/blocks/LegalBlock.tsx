@@ -66,7 +66,7 @@ export function LegalBlock({ block }: BlockProps) {
     const wrapperStyle: React.CSSProperties = {
         ...bgStyles,
         padding: (p.padding as string) || "64px 24px",
-        color: (p.textColor as string) || "var(--text)",
+        color: (getTextStyles(p).color as string) || "var(--text)",
         width: "100%",
         minHeight: "100px",
         position: "relative"
@@ -85,7 +85,7 @@ export function LegalBlock({ block }: BlockProps) {
         ...getTextStyles(p, "title"),
         textAlign: (p.titleAlign as any) || "left",
         fontSize: (p.titleFontSize as string) || "2rem",
-        color: (p.titleColor as string) || "inherit",
+        color: (getTextStyles(p, "title").color as string) || "inherit",
         marginBottom: "2rem",
     };
     return (

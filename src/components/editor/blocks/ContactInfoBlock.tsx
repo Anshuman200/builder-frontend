@@ -144,7 +144,7 @@ export function ContactInfoBlock({ block }: BlockProps) {
                                     style={{
                                         fontSize: titleSize,
                                         fontWeight: 700,
-                                        color: "rgba(255,255,255,0.4)",
+                                        color: getTextStyles(p, "title").color || "rgba(255,255,255,0.4)",
                                         textTransform: "uppercase",
                                         letterSpacing: "0.05em",
                                         marginBottom: "0.25rem",
@@ -156,7 +156,7 @@ export function ContactInfoBlock({ block }: BlockProps) {
                                     style={{
                                         fontSize: contentSize,
                                         fontWeight: 500,
-                                        color: textColor,
+                                        color: getTextStyles(p, "content").color || textColor,
                                         whiteSpace: "pre-line",
                                         lineHeight: 1.5,
                                     }}
