@@ -138,6 +138,13 @@ export default function EditorCanvas() {
     applyThemeToElement(canvasRef.current, page?.theme || DEFAULT_THEME);
   }, [page?.theme]);
 
+  // Scroll to top on route change
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [activeRouteId]);
+
   return (
     // Outer scroll area
     <div

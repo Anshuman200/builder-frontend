@@ -248,12 +248,7 @@ export function TextPanel({ block }: { block: Block }) {
                 </div>
             </Section>
             <Section title="Typography">
-                <TypographyFields p={p} up={up} />
-            </Section>
-            <Section title="Font Size (Responsive)">
-                <Field label="Desktop"><TextInputWithUnit value={(p.fontSize as string) ?? ""} onChange={(v) => up("fontSize", v)} placeholder="1rem" /></Field>
-                <Field label="Tablet ≤ 768px"><TextInputWithUnit value={(p.tabletFontSize as string) ?? ""} onChange={(v) => up("tabletFontSize", v)} placeholder="same as desktop" /></Field>
-                <Field label="Mobile ≤ 390px"><TextInputWithUnit value={(p.mobileFontSize as string) ?? ""} onChange={(v) => up("mobileFontSize", v)} placeholder="same as tablet" /></Field>
+                <TypographyFields p={p} up={up} showResponsiveSize={true} />
             </Section>
             <Section title="Spacing">
                 <PaddingInput value={(p.padding as string) || "12px 24px"} onChange={(v) => up("padding", v)} placeholder="12px 24px" />

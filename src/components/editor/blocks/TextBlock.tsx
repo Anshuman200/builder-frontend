@@ -45,8 +45,8 @@ export function TextBlock({ block }: BlockProps) {
     const tagStyle: React.CSSProperties = {
         margin: 0,
         width: "100%",
-        fontSize,
         ...getTextStyles(p),
+        fontSize,
         fontWeight: getTextStyles(p).fontWeight || (tag.startsWith("h") ? 700 : 400),
 
         color: finalColor,

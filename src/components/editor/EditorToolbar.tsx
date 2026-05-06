@@ -40,7 +40,8 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { pagesApi } from "@/lib/api/client";
 import { clearLocalDraft } from "@/lib/utils/storage";
 import { useToasts } from "@/hooks/useToasts";
-import { useUpdatePage, useCreatePage, usePublishPage, usePageTags } from "@/lib/api/queries";
+import { useUpdatePage, useCreatePage, usePublishPage } from "@/lib/api/queries";
+import TagSelect from "@/components/shared/TagSelect";
 import CapturePreviewModal from "@/components/editor/CapturePreviewModal";
 import BlockPalette from "./BlockPalette";
 import MediaPicker from "@/components/editor/MediaPicker";
@@ -81,7 +82,6 @@ export default function EditorToolbar() {
     openTemplatePicker, openWizard,
   } = useEditorToolbarState();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { data: tags = [] } = usePageTags({ enabled: drawerOpen });
   const { pageId } = useParams<{ pageId: string }>() ?? {};
   const router = useRouter();
 
@@ -966,14 +966,11 @@ export default function EditorToolbar() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
               <h3 style={{ color: 'rgba(165,163,255,0.6)', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: 8, margin: 0 }}>Page Tags</h3>
               <DarkSettingField label="Tags">
-                <Select
-                  mode="multiple"
-                  allowClear
+                <TagSelect
+                  mode="settings"
                   value={page?.tags || []}
-                  onChange={(value) => updatePageData({ tags: value as string[] })}
-                  options={tags.map((tag: any) => ({ label: tag.name, value: tag.slug || tag.name }))}
+                  onChange={(value) => updatePageData({ tags: value })}
                   placeholder="Select tags"
-                  style={{ width: '100%' }}
                 />
               </DarkSettingField>
               <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1.5, margin: 0 }}>Organize your page with tags. Tags are managed in the <a href="/admin/page-tags" target="_blank" rel="noopener noreferrer" style={{ color: '#818cf8', textDecoration: 'none' }}>Page Tags admin panel</a>.</p>

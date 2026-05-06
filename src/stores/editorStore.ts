@@ -307,7 +307,7 @@ export const useEditorStore = create<EditorStore>()(
             const newRoute: import("@/types").RouteConfig = {
                 id: crypto.randomUUID(),
                 name: route.name,
-                path: route.path,
+                path: route.path.startsWith("/") ? route.path : `/${route.path}`,
                 content: [],
                 hideHeader: route.hideHeader,
                 hideFooter: route.hideFooter,
@@ -330,7 +330,10 @@ export const useEditorStore = create<EditorStore>()(
                 const r = s.page.routes.find(x => x.id === routeId);
                 if (r) {
                     if (updates.name !== undefined) r.name = updates.name;
-                    if (updates.path !== undefined) r.path = updates.path;
+                    if (updates.path !== undefined) {
+                        const p = updates.path;
+                        r.path = p.startsWith("/") ? p : `/${p}`;
+                    }
                     if (updates.hideHeader !== undefined) r.hideHeader = updates.hideHeader;
                     if (updates.hideFooter !== undefined) r.hideFooter = updates.hideFooter;
                     if (updates.showInHeader !== undefined) r.showInHeader = updates.showInHeader;

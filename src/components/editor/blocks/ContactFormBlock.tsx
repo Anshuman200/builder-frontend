@@ -97,7 +97,7 @@ export function ContactFormBlock({ block }: BlockProps) {
     // const buttonTextColor = (p.buttonTextColor as string) || defaultText;
     // const buttonBorderRadius = (p.buttonBorderRadius as string) || "10px";
     // const buttonFullWidth = p.buttonFullWidth !== false;  // default true
-    const buttonAlign = (p.buttonAlign as string) || "right";
+    const buttonAlign = (p.buttonAlign as string) || (p.align as string) || "center";
     const titleText = (p.titleText as string) || "";
     const subtitleText = (p.subtitleText as string) || "";
     const titleColor = (p.titleColor as string) || "#0f172a";

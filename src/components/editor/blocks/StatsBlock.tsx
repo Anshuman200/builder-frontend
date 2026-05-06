@@ -3,7 +3,7 @@ import React from "react";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
@@ -180,7 +180,10 @@ export function StatsBlock({ block }: BlockProps) {
                                         cardContentAlignment
                                     )}
                                 >
-                                    <span className="font-black tracking-tighter leading-none" style={{ color: layout === "kpi" ? textColor : accentColor, fontSize: titleSize }}>
+                                    <span className="font-black tracking-tighter leading-none" style={{ 
+                                        color: layout === "kpi" ? textColor : accentColor, 
+                                        ...getTextStyles(p, "title")
+                                    }}>
                                         {item.value}
                                     </span>
                                     
@@ -206,7 +209,10 @@ export function StatsBlock({ block }: BlockProps) {
                                 <motion.h4 
                                     layout
                                     className="font-black tracking-widest mb-2 transition-all duration-500" 
-                                    style={{ opacity: 0.4, fontSize: subtitleSize, textTransform: p.uppercase ? "uppercase" : "none" }}
+                                    style={{ 
+                                        opacity: 0.4, 
+                                        ...getTextStyles(p, "subtitle")
+                                    }}
                                 >
                                     {item.label}
                                 </motion.h4>

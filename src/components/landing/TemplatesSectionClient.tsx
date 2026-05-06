@@ -6,7 +6,6 @@ import { Template } from "@/types/templates";
 import { TemplateCard } from "@/components/templates/TemplateCard";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 import { Button } from "antd";
-
 interface TemplatesSectionClientProps {
     templates: Template[];
 }

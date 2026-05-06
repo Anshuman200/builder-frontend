@@ -4,7 +4,7 @@ import Image from "next/image";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
 import { DEFAULT_THEME, hexToRgb } from "@/lib/utils/theme";
 
 export function FeaturesBlock({ block }: BlockProps) {
@@ -102,8 +102,27 @@ export function FeaturesBlock({ block }: BlockProps) {
                 transition: "all 0.4s ease-in-out" 
             }}
         >
-            {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor, textTransform: p.uppercase ? "uppercase" : "none", transition: "all 0.4s ease-in-out" }}>{title}</h2>}
-            {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor, textTransform: p.uppercase ? "uppercase" : "none", transition: "all 0.4s ease-in-out" }}>{subtitle}</p>}
+            {title && (
+                <h2 style={{ 
+                    ...getTextStyles(p, "title"),
+                    margin: "0 0 1rem 0", 
+                    transition: "all 0.4s ease-in-out" 
+                }}>
+                    {title}
+                </h2>
+            )}
+            {subtitle && (
+                <p style={{ 
+                    ...getTextStyles(p, "subtitle"),
+                    opacity: 0.7, 
+                    margin: 0, 
+                    maxWidth: "600px", 
+                    display: "inline-block", 
+                    transition: "all 0.4s ease-in-out" 
+                }}>
+                    {subtitle}
+                </p>
+            )}
         </div>
     );
 
@@ -136,8 +155,8 @@ export function FeaturesBlock({ block }: BlockProps) {
                             >
                                 <IconWrapper feature={feat} />
                             </div>
-                            <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.5rem 0" }}>{feat.title}</h3>
-                            <p style={{ fontSize: cardDescSize, opacity: 0.65, margin: 0, lineHeight: 1.65 }}>{feat.description}</p>
+                            <h3 style={{ ...getTextStyles(p, "cardTitle"), fontWeight: getTextStyles(p, "cardTitle").fontWeight || 700, margin: "0 0 0.5rem 0" }}>{feat.title}</h3>
+                            <p style={{ ...getTextStyles(p, "cardDesc"), margin: 0, lineHeight: 1.65, opacity: getTextStyles(p, "cardDesc").opacity || 0.65 }}>{feat.description}</p>
                         </div>
                     );
                 })}
@@ -181,8 +200,8 @@ export function FeaturesBlock({ block }: BlockProps) {
                                 </div>
                             </div>
                             <div style={{ flex: 1 }}>
-                                <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.75rem 0" }}>{feat.title}</h3>
-                                <p style={{ fontSize: cardDescSize, opacity: 0.65, margin: 0, lineHeight: 1.7 }}>{feat.description}</p>
+                                <h3 style={{ ...getTextStyles(p, "cardTitle"), fontWeight: getTextStyles(p, "cardTitle").fontWeight || 700, margin: "0 0 0.75rem 0" }}>{feat.title}</h3>
+                                <p style={{ ...getTextStyles(p, "cardDesc"), margin: 0, lineHeight: 1.7, opacity: getTextStyles(p, "cardDesc").opacity || 0.65 }}>{feat.description}</p>
                             </div>
                         </div>
                     );
@@ -215,8 +234,8 @@ export function FeaturesBlock({ block }: BlockProps) {
                             }}
                         >
                             <IconWrapper feature={feat} />
-                            <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "1rem 0 0.5rem 0" }}>{feat.title}</h3>
-                            <p style={{ fontSize: cardDescSize, opacity: 0.6, margin: 0, lineHeight: 1.6 }}>{feat.description}</p>
+                            <h3 style={{ ...getTextStyles(p, "cardTitle"), fontWeight: getTextStyles(p, "cardTitle").fontWeight || 700, margin: "1rem 0 0.5rem 0" }}>{feat.title}</h3>
+                            <p style={{ ...getTextStyles(p, "cardDesc"), margin: 0, lineHeight: 1.6, opacity: getTextStyles(p, "cardDesc").opacity || 0.6 }}>{feat.description}</p>
                         </div>
                     );
                 })}
@@ -250,8 +269,8 @@ export function FeaturesBlock({ block }: BlockProps) {
                             {(() => { const C = getIcon(feat.icon); return C ? <C width={iconSize} height={iconSize} /> : <Square2StackIcon width={iconSize} height={iconSize} />; })()}
                         </div>
                         <div>
-                            <p style={{ fontWeight: 700, margin: "0 0 2px 0", fontSize: "0.95rem" }}>{feat.title}</p>
-                            <p style={{ fontSize: "0.82rem", opacity: 0.55, margin: 0 }}>{feat.description}</p>
+                            <p style={{ ...getTextStyles(p, "cardTitle"), fontWeight: getTextStyles(p, "cardTitle").fontWeight || 700, margin: "0 0 2px 0" }}>{feat.title}</p>
+                            <p style={{ ...getTextStyles(p, "cardDesc"), margin: 0, opacity: getTextStyles(p, "cardDesc").opacity || 0.55 }}>{feat.description}</p>
                         </div>
                     </div>
                 ))}
@@ -288,8 +307,8 @@ export function FeaturesBlock({ block }: BlockProps) {
                             }}
                         >
                             <div style={{ position: "absolute", top: "1.5rem", left: "1.5rem" }}><IconWrapper feature={feat} /></div>
-                            <h3 style={{ fontSize: cardTitleSize, fontWeight: 700, margin: "0 0 0.4rem 0" }}>{feat.title}</h3>
-                            <p style={{ fontSize: cardDescSize, opacity: 0.6, margin: 0, lineHeight: 1.6 }}>{feat.description}</p>
+                            <h3 style={{ ...getTextStyles(p, "cardTitle"), fontWeight: getTextStyles(p, "cardTitle").fontWeight || 700, margin: "0 0 0.4rem 0" }}>{feat.title}</h3>
+                            <p style={{ ...getTextStyles(p, "cardDesc"), margin: 0, lineHeight: 1.6, opacity: getTextStyles(p, "cardDesc").opacity || 0.6 }}>{feat.description}</p>
                         </div>
                     );
                 })}

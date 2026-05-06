@@ -1950,12 +1950,16 @@ export function TypographyFields({
     showContentField = true,
     showAlign = true,
     showColor = true,
+    showContents=true,
+    showResponsiveSize = false
 }: PropertyGroupProps & {
     showSubtitle?: boolean;
     variant?: "standard" | "quick";
     showContentField?: boolean;
     showAlign?: boolean;
     showColor?: boolean
+    showContents?: boolean
+    showResponsiveSize?: boolean
 }) {
     // Helper to resolve keys based on prefix and common patterns
     const getK = (base: string) => {
@@ -2115,9 +2119,38 @@ export function TypographyFields({
                 />
             </Field>}
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Size`}>
-                    <TextInputWithUnit value={p[getK("fontSize")] || ""} onChange={(v) => up(getK("fontSize"), v)} placeholder="1rem" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <Field label={showResponsiveSize ? "Font Size (Responsive)" : `${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Size`}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            {showResponsiveSize && <span style={{ fontSize: 9, fontWeight: 700, color: "var(--text-muted)", width: 50 }}>DESKTOP</span>}
+                            <TextInputWithUnit 
+                                value={p[getK("fontSize")] || ""} 
+                                onChange={(v) => up(getK("fontSize"), v)} 
+                                placeholder={showResponsiveSize ? "1rem" : "16px"} 
+                            />
+                        </div>
+                        {showResponsiveSize && (
+                            <>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    <span style={{ fontSize: 9, fontWeight: 700, color: "var(--text-muted)", width: 50 }}>TABLET</span>
+                                    <TextInputWithUnit 
+                                        value={p[`${prefix ? prefix : ""}tabletFontSize`] || p.tabletFontSize || ""} 
+                                        onChange={(v) => up(`${prefix ? prefix : ""}tabletFontSize`, v)} 
+                                        placeholder="same as desktop" 
+                                    />
+                                </div>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    <span style={{ fontSize: 9, fontWeight: 700, color: "var(--text-muted)", width: 50 }}>MOBILE</span>
+                                    <TextInputWithUnit 
+                                        value={p[`${prefix ? prefix : ""}mobileFontSize`] || p.mobileFontSize || ""} 
+                                        onChange={(v) => up(`${prefix ? prefix : ""}mobileFontSize`, v)} 
+                                        placeholder="same as tablet" 
+                                    />
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </Field>
 
                 <Field label={`${prefix ? (prefix.charAt(0).toUpperCase() + prefix.slice(1) + " ") : ""}Weight`}>
@@ -2314,10 +2347,10 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
                         value={variant}
                         onChange={(v) => up(variantKey, v)}
                         options={[
-                            { label: "Solid", value: "solid" },
+                            { label: "Solid Color", value: "solid" },
                             { label: "Outline", value: "outline" },
                             { label: "Ghost", value: "ghost" },
-                            { label: "Gradient", value: "gradient" },
+                            { label: "Gradient Fill", value: "gradient" },
                             { label: "Link", value: "link" },
                         ]}
                     />
@@ -2342,9 +2375,11 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
 
             {variant === "gradient" && (
                 <Section title="Button Gradient">
-                    <Field label="From Color"><ColorInput value={p[getK("gradientFrom")] || "#6366f1"} onChange={(v) => up(getK("gradientFrom"), v)} onBlur={(v) => up(getK("gradientFrom"), v, true)} /></Field>
-                    <Field label="To Color"><ColorInput value={p[getK("gradientTo")] || "#8b5cf6"} onChange={(v) => up(getK("gradientTo"), v)} onBlur={(v) => up(getK("gradientTo"), v, true)} /></Field>
-                    <DirectionInput value={p[getK("gradientDir")] || "to right"} onChange={(v) => up(getK("gradientDir"), v)} />
+                    <GradientInput 
+                        value={(p[getK("gradient")] as string) || ""} 
+                        onChange={(v) => up(getK("gradient"), v)} 
+                        onBlur={(v) => up(getK("gradient"), v, true)} 
+                    />
                 </Section>
             )}
 

@@ -49,24 +49,12 @@ export function useLinkHandler() {
     const { page, setActiveRoute } = useEditorStore();
 
     return (url: string, e?: React.MouseEvent) => {
-        // In the editor (not preview)
-        if (!isPreview) {
-            // Handle internal page transitions within the editor
-            if (url.startsWith("/")) {
-                const targetRoute = page?.routes?.find(r => r.path === url);
-                if (targetRoute) {
-                    if (e) e.preventDefault();
-                    setActiveRoute(targetRoute.id);
-                    return;
-                }
-            }
+        if (!url) return;
+        
+        const normalizePath = (p: string) => (p.startsWith("/") ? p : `/${p}`);
+        const normalizedUrl = normalizePath(url);
 
-            // Standard editor behavior: block the click so we don't navigate away
-            if (e) e.preventDefault();
-            return;
-        }
-
-        // Anchor links (e.g. #contact)
+        // 1. Anchor links (e.g. #contact)
         if (url.startsWith("#") && url.length > 1) {
             if (e) e.preventDefault();
             const el = document.getElementById(url.substring(1));
@@ -74,14 +62,26 @@ export function useLinkHandler() {
             return;
         }
 
-        // Internal routes (e.g. /about)
-        if (url.startsWith("/") && isPreview) {
+        // 2. Internal routes (e.g. /about or about)
+        const isInternal = url.startsWith("/") || page?.routes?.some(r => normalizePath(r.path) === normalizedUrl);
+
+        if (isInternal) {
             if (e) e.preventDefault();
-            window.location.hash = url;
+
+            if (!isPreview) {
+                // Editor mode: change active route in store
+                const targetRoute = page?.routes?.find(r => normalizePath(r.path) === normalizedUrl);
+                if (targetRoute) {
+                    setActiveRoute(targetRoute.id);
+                }
+            } else {
+                // Preview mode: change hash
+                window.location.hash = normalizedUrl;
+            }
             return;
         }
 
-        // External links or other manual URLs — let them follow default behavior in preview
+        // 3. External links or other manual URLs — let them follow default behavior in preview
     };
 }
 
@@ -121,7 +121,7 @@ export function getTextStyles(p: Record<string, any>, prefix: string = ""): Reac
         fontStyle: p[k("italic")] ? "italic" : "normal",
         textDecoration: decoration || "none",
         textTransform: p[k("uppercase")] ? "uppercase" : "none",
-        fontSize: p[k("fontSize")] || undefined,
+        fontSize: p[k("fontSize")] ?? p[k("size")] ?? (prefix ? p[`${prefix}Size`] : undefined),
         lineHeight: p[k("lineHeight")] || undefined,
         letterSpacing: p[k("letterSpacing")] || undefined,
     };
@@ -686,8 +686,8 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
     const defaultText = theme.colors?.buttonText || "#ffffff";
 
     let background = defaultPrimary, color = defaultText, border = "none";
-    const finalBg = (p[`${prefix}Bg`] as string) || (p[`${prefix}BgColor`] as string) || (p.buttonBg as string) || (p.buttonBgColor as string);
-    const finalText = (p[`${prefix}TextColor`] as string) || (p[`${prefix}Color`] as string) || (p.buttonTextColor as string) || (p.buttonColor as string);
+    const finalBg = (p[`${prefix}Bg`] as string) || (p[`${prefix}BgColor`] as string) || (p.buttonBg as string) || (p.buttonBgColor as string) || (p.bgColor as string) || (p.bg as string);
+    const finalText = (p[`${prefix}TextColor`] as string) || (p[`${prefix}Color`] as string) || (p.buttonTextColor as string) || (p.buttonColor as string) || (p.textColor as string) || (p.color as string);
     const resolvedBorderColor = borderColorProp || finalBg || defaultPrimary;
     const hasExplicitBorder = !!borderWidthProp && borderWidthProp !== "0px" && borderWidthProp !== "0";
 
@@ -711,7 +711,12 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
             border = `${bWidth} solid ${(p[`${prefix}BorderColor`] as string) || (p.borderColor as string) || (finalBg ? `${finalBg}55` : "rgba(99,102,241,0.3)")}`;
             break;
         case "gradient":
-            background = `linear-gradient(${(p[`${prefix}GradientDir`] as string) || (p.gradientDir as string) || "to right"}, ${(p[`${prefix}GradientFrom`] as string) || (p.gradientFrom as string) || defaultPrimary}, ${(p[`${prefix}GradientTo`] as string) || (p.gradientTo as string) || defaultSecondary})`;
+            const fullGradient = (p[`${prefix}Gradient`] as string) || (p.gradient as string) || (p.buttonGradient as string);
+            if (fullGradient) {
+                background = fullGradient;
+            } else {
+                background = `linear-gradient(${(p[`${prefix}GradientDir`] as string) || (p.gradientDir as string) || "to right"}, ${(p[`${prefix}GradientFrom`] as string) || (p.gradientFrom as string) || defaultPrimary}, ${(p[`${prefix}GradientTo`] as string) || (p.gradientTo as string) || defaultSecondary})`;
+            }
             color = finalText || defaultText;
             break;
         case "link":

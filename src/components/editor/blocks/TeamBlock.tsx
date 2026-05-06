@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 // ─── Inline brand SVG icons ───────────────────────────────────────────────────
@@ -229,7 +229,6 @@ export function TeamBlock({ block }: BlockProps) {
                 <BackgroundOverlay p={p} />
                 <div style={{ boxSizing: "border-box", width: "100%", position: "relative", zIndex: 2 }}>
                     <div
-                        onClick={() => !isPreview && focusSubItem(block.id, "Text Content")}
                         style={{
                             textAlign: textAlign as React.CSSProperties["textAlign"],
                             cursor: "pointer",
@@ -237,8 +236,27 @@ export function TeamBlock({ block }: BlockProps) {
                             color: textColor
                         }}
                     >
-                        {title && <h2 style={{ fontSize: titleSize, fontWeight: 700, margin: "0 0 1rem 0", color: titleColor, textTransform: p.uppercase ? "uppercase" : "none", transition: "all 0.4s ease-in-out" }}>{title}</h2>}
-                        {subtitle && <p style={{ fontSize: subtitleSize, opacity: 0.7, margin: 0, maxWidth: "600px", display: "inline-block", color: subtitleColor, textTransform: p.uppercase ? "uppercase" : "none", transition: "all 0.4s ease-in-out" }}>{subtitle}</p>}
+                        {title && (
+                            <h2 onClick={() => !isPreview && focusSubItem(block.id, "Title Typography")} style={{
+                                ...getTextStyles(p, "title"),
+                                margin: "0 0 1rem 0",
+                                transition: "all 0.4s ease-in-out"
+                            }}>
+                                {title}
+                            </h2>
+                        )}
+                        {subtitle && (
+                            <p onClick={() => !isPreview && focusSubItem(block.id, "Subtitle Typography")} style={{
+                                ...getTextStyles(p, "subtitle"),
+                                opacity: 0.7,
+                                margin: 0,
+                                maxWidth: "600px",
+                                display: "inline-block",
+                                transition: "all 0.4s ease-in-out"
+                            }}>
+                                {subtitle}
+                            </p>
+                        )}
                     </div>
                     {/* ── Compact Row ───────────────────────────────────────────── */}
                     {layout === "compact" && (

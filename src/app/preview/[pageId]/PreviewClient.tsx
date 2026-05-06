@@ -139,10 +139,13 @@ export default function PreviewClient({ pageId, initialData, initialPath = "/" }
     useEffect(() => {
         // Handle hash-based routing for internal navigation within the editor/preview
         const handler = () => {
-            const hash = window.location.hash.replace('#', '');
-            if (hash.startsWith('/')) {
-                setCurrentPath(hash);
-            } else if (!hash && initialPath) {
+            // Split by # and find the last segment that looks like a path
+            const parts = window.location.hash.split('#').filter(Boolean);
+            const pathPart = parts.reverse().find(p => p.startsWith('/'));
+
+            if (pathPart) {
+                setCurrentPath(pathPart);
+            } else if (!window.location.hash && initialPath) {
                 setCurrentPath(initialPath);
             }
         };
@@ -150,6 +153,18 @@ export default function PreviewClient({ pageId, initialData, initialPath = "/" }
         handler(); // Initialize
         return () => window.removeEventListener("hashchange", handler);
     }, [initialPath]);
+
+    // Scroll to top on navigation
+    useEffect(() => {
+        const prefersReducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+        window.scrollTo({
+            top: 0,
+            behavior: prefersReducedMotion ? "auto" : "smooth",
+        });
+    }, [currentPath]);
 
     if (loading || !page) {
         return (
@@ -164,10 +179,12 @@ export default function PreviewClient({ pageId, initialData, initialPath = "/" }
         );
     }
 
-    const normalizedPath = currentPath === "" ? "/" : currentPath;
-    const activeRoute = page.routes?.find(r => r.path === normalizedPath)
-        || page.routes?.find(r => r.path === "/")
-        || page.routes?.[0];
+    const normalizePath = (p: string) => (p.startsWith("/") ? p : `/${p}`);
+    const normalizedPath = currentPath === "" ? "/" : normalizePath(currentPath);
+    const activeRoute =
+        page.routes?.find((r) => normalizePath(r.path) === normalizedPath) ||
+        page.routes?.find((r) => normalizePath(r.path) === "/") ||
+        page.routes?.[0];
 
     const content = activeRoute?.content || page.content || [];
     const header = page.globalBlocks?.header;

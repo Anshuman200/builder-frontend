@@ -4,6 +4,8 @@ import { TemplatesSectionClient } from "./TemplatesSectionClient";
 import { Suspense } from "react";
 import { CommonContainer } from "@/components/layout/CommonContainer";
 
+export const dynamic = "force-dynamic";
+
 /**
  * A curated section for the landing page showcasing top community templates.
  * Leveraging modern Server-Side Caching (CacheBox) for instant delivery.

@@ -10,8 +10,8 @@ import {
   Squares2X2Icon,
   ListBulletIcon,
 } from "@heroicons/react/24/outline";
-import { Input, Select } from "antd";
-import { usePageTags } from "@/lib/api/queries";
+import { Input } from "antd";
+import TagSelect from "@/components/shared/TagSelect";
 
 // ─── Section definitions shown in Step 2  ─────────────────────────────────────
 
@@ -239,12 +239,15 @@ function StepBar({ step }: { step: 1 | 2 }) {
   );
 }
 
+const DEFAULT_EXCLUDE: string[] = [];
+const DEFAULT_ROUTES: any[] = [];
+
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function NewPageWizard({
   open, onClose, onSubmit, isSubmitting = false, closable = true,
-  initialStep = 1, excludeSections = [], blankMode = false,
-  existingRoutes = [], mode = "project"
+  initialStep = 1, excludeSections = DEFAULT_EXCLUDE, blankMode = false,
+  existingRoutes = DEFAULT_ROUTES, mode = "project"
 }: NewPageWizardProps) {
   const [step, setStep] = useState<1 | 2>(initialStep);
   const [title, setTitle] = useState("");
@@ -259,7 +262,6 @@ export default function NewPageWizard({
   const [titleError, setTitleError] = useState("");
   const [slugError, setSlugError] = useState("");
 
-  const { data: tags = [] } = usePageTags({ enabled: open });
 
   const handleClose = useCallback(() => {
     if (!closable) return;
@@ -268,6 +270,7 @@ export default function NewPageWizard({
     setSlug("");
     setSlugManual(false);
     setSelectedSections(["header", "hero", "footer"].filter(id => !excludeSections.includes(id)));
+    setSelectedTags([]);
     setTitleError("");
     setSlugError("");
     onClose();
@@ -283,6 +286,20 @@ export default function NewPageWizard({
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [open, closable, handleClose]);
+
+  // Reset state when wizard opens
+  useEffect(() => {
+    if (open) {
+      setStep(initialStep);
+      setTitle("");
+      setSlug("");
+      setSlugManual(false);
+      setSelectedSections(["header", "hero", "footer"].filter(id => !excludeSections.includes(id)));
+      setSelectedTags([]);
+      setTitleError("");
+      setSlugError("");
+    }
+  }, [open, initialStep, excludeSections]);
 
   const slugify = (str: string) =>
     str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -527,23 +544,10 @@ export default function NewPageWizard({
                   <div className="space-y-4">
                     <div>
                       <label className="block text-xs font-black text-white/50 uppercase tracking-widest mb-2">Project Tags</label>
-                      <Select
-                        mode="multiple"
-                        allowClear
+                      <TagSelect
                         value={selectedTags}
-                        onChange={(value) => setSelectedTags(value as string[])}
-                        options={tags.map((tag: any) => ({
-                          label: (
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tag.color || '#6366f1' }} />
-                              <span>{tag.name}</span>
-                            </div>
-                          ),
-                          value: tag.slug || tag.name
-                        }))}
-                        placeholder="Choose tags"
-                        className="w-full custom-wizard-select"
-                        popupMatchSelectWidth={false}
+                        onChange={setSelectedTags}
+                        placeholder="Choose tags for your project"
                       />
                     </div>
                     <div className="px-1">

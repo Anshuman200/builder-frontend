@@ -7,6 +7,7 @@ import { Template } from "@/types/templates";
 import { getGradient } from "@/lib/utils/gradients";
 import { cn } from "@/lib/utils";
 import React from "react";
+import Image from "next/image";
 
 interface TemplateCardProps {
     template: Template & {
@@ -50,6 +51,7 @@ export function TemplateCard({
     setRenameValue,
     onRenameSubmit
 }: TemplateCardProps) {
+    const [isExpanded, setIsExpanded] = React.useState(false);
     const isLive = !!template.isLive;
     const isLocked = template.isLocked;
     const templateMeta = template as any;
@@ -86,18 +88,15 @@ export function TemplateCard({
                 {/* Actual Page Screenshot */}
                 {!isLocked && thumbnail ? (
                     <div className="absolute inset-0 bg-neutral-950">
-                        <img
+                        <Image
                             src={thumbnail}
                             alt={template.title}
                             className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                            loading="lazy"
+                            fill
+                            sizes="100vw"
+                            quality={90}
+                            priority
                         />
-                        <div className="absolute left-3 right-3 top-3 flex h-6 items-center gap-1.5 rounded-full border border-white/10 bg-black/35 px-3 backdrop-blur-md">
-                            <span className="h-2 w-2 rounded-full bg-red-400/80" />
-                            <span className="h-2 w-2 rounded-full bg-amber-300/80" />
-                            <span className="h-2 w-2 rounded-full bg-emerald-400/80" />
-                            <span className="ml-2 h-1.5 flex-1 rounded-full bg-white/15" />
-                        </div>
                         {/* Subtle gradient overlay for text readability */}
                         <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/5 to-black/20 pointer-events-none" />
                     </div>
@@ -124,7 +123,10 @@ export function TemplateCard({
                 )}
 
                 {/* Status Badges (Admin / Dashboard) */}
-                <div className="absolute top-3 left-3 flex gap-1.5 z-20">
+                <div className={cn(
+                    "absolute left-3 flex gap-1.5 z-20",
+                    "top-3"
+                )}>
                     {variant !== "public" && (isLive) && (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/40 backdrop-blur-md text-white border border-white/10 flex items-center gap-1.5 shadow-lg">
                             {isLocked ? "ENCRYPTED" : (
@@ -139,7 +141,7 @@ export function TemplateCard({
                     )}
                     {variant !== "public" && template.isPublic !== undefined && (
                         <span className={cn(
-                            "text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg border backdrop-blur-md transition-all",
+                            "text-[10px] min-w-20 h-auto font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg border backdrop-blur-md transition-all",
                             template.isPublic
                                 ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
                                 : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
@@ -157,18 +159,47 @@ export function TemplateCard({
                             )}
                         </span>
                     )}
-                    {variant === "public" && template.category && (
-                        <div className="bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-white shadow-xl">
-                            {template.category}
-                        </div>
-                    )}
                 </div>
 
             </div>
 
             {/* Content / Metadata Section */}
             <div className="p-4 flex flex-col flex-1 relative bg-zinc-950/90">
-                <div className="flex justify-between items-start gap-3">
+                {/* Tags */}
+                {(variant === "public" || variant === "dashboard") && (
+                    <div className="flex flex-wrap gap-1.5 items-center">
+                        {template.category && (!template.tags || template.tags.length === 0) && (
+                            <div className="bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-white shadow-xl">
+                                {template.category}
+                            </div>
+                        )}
+                        {(isExpanded ? template.tags : template.tags?.slice(0, 3))?.map((tag: any) => (
+                            <div
+                                key={tag._id}
+                                style={{
+                                    backgroundColor: `${tag.color || '#6366f1'}22`,
+                                    borderColor: `${tag.color || '#6366f1'}44`,
+                                    color: tag.color || '#818cf8'
+                                }}
+                                className="backdrop-blur-md border px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-lg flex items-center gap-1.5"
+                            >
+                                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: tag.color || '#6366f1' }} />
+                                {tag.name}
+                            </div>
+                        ))}
+                        {!isExpanded && template.tags && template.tags.length > 3 && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }}
+                                className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider text-white shadow-lg transition-all active:scale-95"
+                            >
+                                +{template.tags.length - 3}
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* Title and Subtitle */}
+                <div className="flex justify-between items-start gap-3 mt-3">
                     <div className="flex-1 min-w-0">
                         {isRenaming && setRenameValue && onRenameSubmit ? (
                             <input

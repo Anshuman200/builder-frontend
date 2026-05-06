@@ -17,6 +17,12 @@ export interface Template {
     thumbnail?: string;
     thumbnails?: string[];
     author: Author;
+    tags?: Array<{
+        _id: string;
+        name: string;
+        slug: string;
+        color?: string;
+    }>;
     createdAt: string;
     updatedAt: string;
 }
