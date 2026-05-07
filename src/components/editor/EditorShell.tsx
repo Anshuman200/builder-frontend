@@ -131,7 +131,7 @@ export default function EditorShell() {
 
       if (block.children?.length) stack.push(...block.children);
       const props = block.props || {};
-      for (const key of ["childBlocks", "col0", "col1"]) {
+      for (const key of ["childBlocks", "topBlocks", "sectionBlocks", "topSectionBlocks", "col0", "col1"]) {
         const nested = props[key];
         if (Array.isArray(nested)) stack.push(...nested as Block[]);
       }
@@ -173,21 +173,30 @@ export default function EditorShell() {
     const overId = over.id as string;
 
     let targetId = overId;
-    let position: "before" | "after" | "inside" | "replace" = "after";
+    let position: "before" | "after" | "inside" | "inside-start" | "replace" = "after";
     let childProp: string | undefined = undefined;
     let masonryDropPosition: "before" | "after" = "after";
 
     const isRootOnly = data.blockType === "header" || data.blockType === "footer";
 
     // 1. Map nested zones to parent block but track if it was an internal zone
-    const colMatch = overId.match(/^col-([01])-(.+)$/);
-    const gridMatch = overId.match(/^grid-([^-]+)-(.+)$/); // grid-{slotId}-{blockId}
-    const childZoneMatch = overId.match(/^(?:hero|container|wave)-(.+)$/);
+    // Use '::' as separator so UUID dashes don't break parsing
+    const colMatch = overId.match(/^col::(.+)::(.+)$/);
+    const gridMatch = overId.match(/^grid::(.+)::(.+)$/);
+    const isTopZone = overId.includes("-top-");
+    // Normalize top zone IDs: "stats-top-abc" → "stats-abc" so childZoneMatch can extract correctly
+    const normalizedOverId = isTopZone ? overId.replace("-top-", "-") : overId;
+    const childZoneMatch = normalizedOverId.match(/^(?:hero|container|wave|stats|features|team|footer|gblock|legal|masonry|accordion)-(.+)$/);
 
     let effectiveTargetId = overId;
     if (colMatch) effectiveTargetId = colMatch[2];
     else if (gridMatch) effectiveTargetId = gridMatch[2];
-    else if (childZoneMatch) effectiveTargetId = childZoneMatch[1];
+    else if (childZoneMatch) {
+      const subId = childZoneMatch[1];
+      const subColMatch = subId.match(/^col::(.+)::(.+)$/);
+      if (subColMatch) effectiveTargetId = subColMatch[2];
+      else effectiveTargetId = subId;
+    }
 
     // 2. Calculate position using the target block's rect (or the strip's rect)
     const overRect = over.rect;
@@ -213,16 +222,26 @@ export default function EditorShell() {
         } else if (relativeY > 0.3 && relativeY < 0.7 && !colMatch) {
           position = "replace";
         } else {
-          position = "inside";
+          // Top zones insert at start, bottom zones append to end
+          position = isTopZone ? "inside-start" : "inside";
           if (colMatch) {
             targetId = colMatch[2];
-            childProp = `col${colMatch[1]}`;
+            // col::0::blockId → col0, col::1::blockId → col1, col::slotId::blockId → slotId
+            const colKey = colMatch[1];
+            childProp = (colKey === "0" || colKey === "1") ? `col${colKey}` : colKey;
           } else if (gridMatch) {
             targetId = gridMatch[2];
-            childProp = gridMatch[1]; // slot-0, slot-1, etc.
+            childProp = gridMatch[1]; // slotId
           } else if (childZoneMatch) {
-            targetId = childZoneMatch[1];
-            childProp = "childBlocks";
+            const subId = childZoneMatch[1];
+            const subColMatch = subId.match(/^col::(.+)::(.+)$/);
+            if (subColMatch) {
+              targetId = subColMatch[2];
+              childProp = subColMatch[1];
+            } else {
+              targetId = subId;
+              childProp = "childBlocks";
+            }
           }
         }
       } else if (relativeY < 0.20) {
@@ -234,17 +253,17 @@ export default function EditorShell() {
         if (data?.type === "canvas" && over.data.current?.blockType === "image") {
           position = masonryDropPosition;
         } else
-        if (isContainer && !isRootOnly) {
-          position = "inside";
-          childProp = "childBlocks";
-        } else {
-          // Provide a 40% center zone for swapping blocks
-          if (relativeY >= 0.3 && relativeY <= 0.7) {
-            position = "replace";
+          if (isContainer && !isRootOnly) {
+            position = "inside";
+            childProp = "childBlocks";
           } else {
-            position = relativeY < 0.5 ? "before" : "after";
+            // Provide a 40% center zone for swapping blocks
+            if (relativeY >= 0.3 && relativeY <= 0.7) {
+              position = "replace";
+            } else {
+              position = relativeY < 0.5 ? "before" : "after";
+            }
           }
-        }
       }
     }
 
@@ -322,7 +341,7 @@ export default function EditorShell() {
     function onKey(e: KeyboardEvent) {
       const target = e.target as HTMLElement | Node;
       const element = (target.nodeType === 3 ? target.parentNode : target) as HTMLElement;
-      
+
       const isInput =
         element.tagName === "INPUT" ||
         element.tagName === "TEXTAREA" ||
@@ -332,13 +351,13 @@ export default function EditorShell() {
 
       const meta = e.metaKey || e.ctrlKey;
 
-      if (meta && !e.shiftKey && e.key === "z") { 
+      if (meta && !e.shiftKey && e.key === "z") {
         if (!isInput) { e.preventDefault(); undo(); }
-        return; 
+        return;
       }
-      if (meta && e.shiftKey && e.key === "z") { 
+      if (meta && e.shiftKey && e.key === "z") {
         if (!isInput) { e.preventDefault(); redo(); }
-        return; 
+        return;
       }
       if (meta && e.key === "d") {
         e.preventDefault();
@@ -357,7 +376,7 @@ export default function EditorShell() {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={pointerWithin}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       autoScroll={{

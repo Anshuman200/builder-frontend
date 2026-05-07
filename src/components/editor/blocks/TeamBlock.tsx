@@ -3,7 +3,8 @@ import React from "react";
 import Image from "next/image";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay, getTextStyles, SectionChildBlocks } from "./shared";
+import type { Block } from "@/types";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 // ─── Inline brand SVG icons ───────────────────────────────────────────────────
@@ -227,6 +228,7 @@ export function TeamBlock({ block }: BlockProps) {
                 style={bgStyles}
             >
                 <BackgroundOverlay p={p} />
+                <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} topBlocks={p.topBlocks as Block[]} top prefix="team" />
                 <div style={{ boxSizing: "border-box", width: "100%", position: "relative", zIndex: 2 }}>
                     <div
                         style={{
@@ -546,6 +548,7 @@ export function TeamBlock({ block }: BlockProps) {
                         </div>
                     )}
                 </div>
+                <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} childBlocks={p.childBlocks as Block[]} bottom prefix="team" emptyLabel="Drop more blocks here" />
             </section>
         </>
     );

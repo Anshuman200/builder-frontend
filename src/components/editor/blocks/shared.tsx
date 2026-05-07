@@ -86,6 +86,140 @@ export function useLinkHandler() {
 }
 
 /**
+ * useSectionDropZones - Centralized logic for showing top/bottom drop zones in sections.
+ * Handles recursive check to keep zones visible if a descendant is selected.
+ */
+export function useSectionDropZones(blockId: string, isSelected: boolean, childBlocks: any[]) {
+    const isPreview = React.useContext(PreviewContext);
+    const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
+
+    const isDescendantOf = React.useCallback((id: string, blocks: any[]): boolean => {
+        for (const b of blocks) {
+            if (b.id === id) return true;
+            if (b.props) {
+                for (const key of ["childBlocks", "topBlocks", "sectionBlocks", "topSectionBlocks", "col0", "col1"]) {
+                    if (Array.isArray(b.props[key]) && isDescendantOf(id, b.props[key])) return true;
+                }
+                if (Array.isArray(b.props.items)) {
+                    for (const item of b.props.items) {
+                        if (item.blocks && isDescendantOf(id, item.blocks)) return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }, []);
+
+    const isDescendantSelected = React.useMemo(() => {
+        if (!selectedBlockId) return false;
+        return isDescendantOf(selectedBlockId, childBlocks);
+    }, [selectedBlockId, childBlocks, isDescendantOf]);
+
+    const showDropZones = !isPreview
+    // const showDropZones = !isPreview && (isSelected || isDescendantSelected);
+
+    return { showDropZones, isDescendantSelected };
+}
+
+/**
+ * SectionChildBlocks - Renders child blocks and drop zones for container-enabled sections.
+ *
+ * - `top`: renders a "top" drop zone (inside-start) + topBlocks rendered below it
+ * - `bottom`: renders childBlocks first, then the "bottom" drop zone (inside) below them
+ *
+ * Using two separate arrays means top-added blocks truly stay above section content,
+ * and bottom-added blocks truly stay below section content.
+ */
+export function SectionChildBlocks({
+    block,
+    isSelected,
+    childBlocks = [],
+    topBlocks = [],
+    top = false,
+    bottom = false,
+    emptyLabel = "Drag blocks here to build section",
+    stripColor = "#d97706",
+    prefix = "",
+    childProp,
+    childrenLabel,
+    topChildProp,
+    showChildAddBlock = true,
+}: {
+    block: Block;
+    isSelected: boolean;
+    /** Blocks in the bottom zone (stored as p.childBlocks) */
+    childBlocks?: Block[];
+    /** Blocks in the top zone (stored as p.topBlocks) */
+    topBlocks?: Block[];
+    top?: boolean;
+    bottom?: boolean;
+    emptyLabel?: string;
+    stripColor?: string;
+    prefix?: string;
+    /** childProp for bottom zone insertion (default: "childBlocks") */
+    childProp?: string;
+    /** Label when the zone already has blocks */
+    childrenLabel?: string;
+    /** childProp for top zone insertion (default: "topBlocks") */
+    topChildProp?: string;
+    showChildAddBlock?: boolean;
+}) {
+    const allBlocks = [...topBlocks, ...childBlocks];
+    const { showDropZones } = useSectionDropZones(block.id, isSelected, allBlocks);
+    const baseId = prefix ? `${prefix}-${block.id}` : block.id;
+    const topId = prefix ? `${prefix}-top-${block.id}` : `top-${block.id}`;
+    const effectiveChildProp = childProp || "childBlocks";
+    const effectiveTopChildProp = topChildProp || "topBlocks";
+
+    if (top) {
+        return (
+            <>
+                {showDropZones && (
+                    <DropZoneStrip
+                        zoneId={topId}
+                        childProp={effectiveTopChildProp}
+                        hasChildren={topBlocks.length > 0}
+                        position="inside-start"
+                        stripColor={stripColor}
+                        emptyLabel="Add block at the top"
+                    />
+                )}
+                <SortableBlockGroup blocks={topBlocks}>
+                    {topBlocks.map((child) => (
+                        <ChildBlockWrapper key={child.id} block={child} />
+                    ))}
+                </SortableBlockGroup>
+            </>
+        );
+    }
+
+    if (bottom) {
+        return (
+            <>
+                <SortableBlockGroup blocks={childBlocks}>
+                    {childBlocks.map((child) => (
+                        <ChildBlockWrapper key={child.id} block={child} />
+                    ))}
+                </SortableBlockGroup>
+                {((showDropZones && showChildAddBlock) || childBlocks.length === 0) && (
+                    <DropZoneStrip
+                        zoneId={baseId}
+                        childProp={effectiveChildProp}
+                        hasChildren={childBlocks.length > 0}
+                        stripColor={stripColor}
+                        emptyLabel={emptyLabel}
+                        childrenLabel={childrenLabel}
+                    />
+                )}
+            </>
+        );
+    }
+
+    return null;
+}
+
+
+/**
  * getTextStyles - Shared helper to extract typography styles from props
  * Handles prefix-based resolution for B/I/U/S/TT styles.
  */
@@ -594,6 +728,7 @@ export function DropZoneStrip({
     position = "inside",
     stripColor = "#d97706",
     emptyLabel = "Drag blocks here",
+    childrenLabel = "+ drop more blocks here",
 }: {
     zoneId: string;
     childProp?: string;
@@ -601,6 +736,8 @@ export function DropZoneStrip({
     position?: "inside" | "inside-start";
     stripColor?: string;
     emptyLabel?: string;
+    /** Label shown when blocks already exist in this zone */
+    childrenLabel?: string;
 }) {
     const isPreview = React.useContext(PreviewContext);
     const { setNodeRef, isOver } = useDroppable({ id: zoneId });
@@ -616,24 +753,38 @@ export function DropZoneStrip({
 
                 // 1. Determine the actual block ID (cleaning prefixes if necessary)
                 let targetId = zoneId;
-                const colMatch = zoneId.match(/^col-([01])-(.+)$/);
-                const childMatch = zoneId.match(/^(?:hero|container|wave|features)-(?:top-)?(.+)$/);
 
-                if (colMatch) targetId = colMatch[2];
-                else if (childMatch) targetId = childMatch[1];
+                // Remove "-top-" or "top-" if present
+                if (targetId.includes("-top-")) {
+                    targetId = targetId.replace("-top-", "-");
+                } else if (targetId.startsWith("top-")) {
+                    targetId = targetId.replace("top-", "");
+                }
+
+                // Handle colMatch separately as it has special property logic
+                // Use '::' separator format (UUID-safe)
+                const colMatch = targetId.match(/^col::(.+)::(.+)$/) || targetId.match(/^col-(.+)-(.+)$/);
+                if (colMatch) {
+                    targetId = colMatch[2];
+                } else {
+                    // Generic prefix removal (e.g., hero-123 -> 123)
+                    const prefixMatch = targetId.match(/^[a-z]+-(.+)$/);
+                    if (prefixMatch) targetId = prefixMatch[1];
+                }
 
                 // 2. Determine the child property
                 let effectiveChildProp = childProp;
-                if (!effectiveChildProp) {
-                    if (colMatch) effectiveChildProp = `col${colMatch[1]}`;
-                    else effectiveChildProp = "childBlocks";
+                if (colMatch) {
+                    effectiveChildProp = colMatch[1];
+                } else if (!effectiveChildProp) {
+                    effectiveChildProp = "childBlocks";
                 }
 
-                openBlockPicker({ id: targetId, position:position as any, childProp: effectiveChildProp }, "elements");
+                openBlockPicker({ id: targetId, position: position as any, childProp: effectiveChildProp }, "elements");
             }}
             style={{
                 width: "100%",
-                minHeight: hasChildren ? 44 : 120,
+                minHeight: hasChildren ? 40 : 40,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 border: `2px dashed ${isOver ? stripColor : "rgba(150,150,150,0.35)"}`,
                 borderRadius: 8,
@@ -645,7 +796,7 @@ export function DropZoneStrip({
             }}
         >
             <span style={{ fontSize: 12, color: isOver ? stripColor : "rgba(150,150,150,0.6)", fontWeight: 500, userSelect: "none" }}>
-                {isOver ? "Drop here" : hasChildren ? "+ drop more blocks here" : emptyLabel}
+                {isOver ? "Drop here" : hasChildren ? childrenLabel : emptyLabel}
             </span>
         </div>
     );

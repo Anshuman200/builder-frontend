@@ -2,7 +2,7 @@
 import React from "react";
 import { getIcon } from "@/lib/utils/icons";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 interface ContactItem {

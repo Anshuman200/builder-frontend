@@ -3,7 +3,7 @@
 import React from "react";
 import type { Block } from "@/types";
 import { rectSortingStrategy } from "@dnd-kit/sortable";
-import { ChildBlockWrapper, PreviewContext, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { ChildBlockWrapper, PreviewContext, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay, SectionChildBlocks } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
@@ -22,6 +22,8 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
         gap: rawGap = 8,
         padding = "24px",
         childBlocks = [],
+        sectionBlocks = [],
+        topSectionBlocks = [],
         columns,
         columnsTablet,
         columnsMobile,
@@ -73,6 +75,7 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
             }}
         >
             <BackgroundOverlay p={block.props} />
+            <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} topBlocks={topSectionBlocks as Block[]} top prefix="masonry" topChildProp="topSectionBlocks" />
             <MasonryContext.Provider value={block.id}>
                 <div style={{ position: "relative", zIndex: 2 }}>
                     {/* ── Masonry media grid ───────────────────────────────── */}
@@ -183,6 +186,7 @@ export const MasonryBlock: React.FC<MasonryBlockProps> = ({ block }) => {
                     }
                 </div>
             </MasonryContext.Provider >
+            <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} childBlocks={block.props.sectionBlocks as Block[]} bottom prefix="masonry" childProp="sectionBlocks" emptyLabel="Drop more blocks here" />
         </div >
     );
 };

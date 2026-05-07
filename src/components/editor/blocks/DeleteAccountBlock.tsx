@@ -6,7 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import type { BlockProps } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, CommonButton, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { PreviewContext, CommonButton, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 import { useToasts } from "@/hooks/useToasts";
 

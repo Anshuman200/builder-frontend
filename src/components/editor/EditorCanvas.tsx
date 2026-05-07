@@ -68,7 +68,7 @@ export default function EditorCanvas() {
         if (found) return found;
       }
       // Check column props
-      const colProps = ["col0", "col1", "childBlocks"];
+      const colProps = ["col0", "col1", "childBlocks", "topBlocks", "sectionBlocks", "topSectionBlocks"];
       for (const p of colProps) {
         if (Array.isArray(b.props[p])) {
           const found = findBlock(b.props[p] as Block[], id);

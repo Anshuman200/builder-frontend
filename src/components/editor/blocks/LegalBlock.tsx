@@ -1,7 +1,9 @@
 "use client";
+import type { Block } from "@/types";
+
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BlockProps, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
+import { BlockProps, getBackgroundStyles, BackgroundOverlay, getTextStyles, SectionChildBlocks } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { proxyApi } from "@/lib/api/client";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
@@ -95,6 +97,7 @@ export function LegalBlock({ block }: BlockProps) {
             className="legal-section-content"
         >
             <BackgroundOverlay p={p} />
+            <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} topBlocks={p.topBlocks as Block[]} top prefix="legal" />
             <div style={contentStyle}>
                 {p.showTitle !== false && p.title && (
                     <h1 className="legal-title" style={titleStyle}>
@@ -169,6 +172,7 @@ export function LegalBlock({ block }: BlockProps) {
                     }
                 }
             `}</style>
+            <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} childBlocks={p.childBlocks as Block[]} bottom prefix="legal" emptyLabel="Drop more blocks here" />
         </section>
     );
 }

@@ -1,13 +1,16 @@
 "use client";
+import type { Block } from "@/types";
+
 import React from "react";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay, SectionChildBlocks } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function ContainerBlock({ block }: BlockProps) {
     const p = block.props;
     const childBlocks = (p.childBlocks as any[]) ?? [];
+    const topBlocks = (p.topBlocks as any[]) ?? [];
 
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
     const bgStyles = getBackgroundStyles(p, theme);
@@ -62,18 +65,8 @@ export function ContainerBlock({ block }: BlockProps) {
                 }}
             >
                 <BackgroundOverlay p={p} />
-                {!isPreview && childBlocks.length === 0 && (
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, paddingBottom: 8, color: "#94a3b8" }}>
-                        <Square2StackIcon style={{ width: 22, height: 22 }} />
-                        <span style={{ fontSize: 11, fontWeight: 500 }}>Container</span>
-                    </div>
-                )}
-                <SortableBlockGroup blocks={childBlocks}>
-                    {childBlocks.map((child) => (<ChildBlockWrapper key={child.id} block={child} />))}
-                </SortableBlockGroup>
-                {!isPreview && (isSelected || childBlocks.length === 0) && (
-                    <DropZoneStrip zoneId={`container-${block.id}`} hasChildren={childBlocks.length > 0} emptyLabel="Drag blocks into this container" />
-                )}
+                <SectionChildBlocks block={block} isSelected={isSelected} topBlocks={topBlocks} top prefix="container" />
+                <SectionChildBlocks block={block} isSelected={isSelected} childBlocks={childBlocks} bottom prefix="container" emptyLabel="Drag blocks into this container" />
             </div>
         </>
     );

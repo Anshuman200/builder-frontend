@@ -1,8 +1,10 @@
 "use client";
+import type { Block } from "@/types";
+
 import React from "react";
 import Image from "next/image";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, useLinkHandler, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
+import { PreviewContext, BlockProps, useLinkHandler, getBackgroundStyles, BackgroundOverlay, getTextStyles, SectionChildBlocks } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function FooterBlock({ block }: BlockProps) {
@@ -204,7 +206,9 @@ export function FooterBlock({ block }: BlockProps) {
                 }}
             >
                 <BackgroundOverlay p={p} />
+                <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} topBlocks={p.topBlocks as Block[]} top prefix="footer" />
                 {renderFooterContent()}
+                <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} childBlocks={p.childBlocks as Block[]} bottom prefix="footer" emptyLabel="Drop more blocks here" />
             </footer>
         </>
     );

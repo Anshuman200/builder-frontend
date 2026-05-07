@@ -1,48 +1,50 @@
 "use client";
+import type { Block } from "@/types";
+
 import React from "react";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
+import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay, getTextStyles, SectionChildBlocks } from "./shared";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 export function StatsBlock({ block }: BlockProps) {
-  const p = block.props;
-  const isPreview = React.useContext(PreviewContext);
-  const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
-  const viewMode = useEditorStore((s) => s.viewMode);
-  const focusSubItem = useEditorStore((s) => s.focusSubItem);
-  const subItemFocus = useEditorStore((s) => s.subItemFocus);
+    const p = block.props;
+    const isPreview = React.useContext(PreviewContext);
+    const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
+    const viewMode = useEditorStore((s) => s.viewMode);
+    const focusSubItem = useEditorStore((s) => s.focusSubItem);
+    const subItemFocus = useEditorStore((s) => s.subItemFocus);
 
-  const bgStyles = getBackgroundStyles(p, theme);
+    const bgStyles = getBackgroundStyles(p, theme);
 
-  const layout = (p.layout as string) || "grid";
-  const columns = Number(p.columns || 4);
-  const items = (p.items as any[]) || [];
-  const cardStyle = (p.cardStyle as string) || "none";
-  const isGlass = cardStyle === "glass";
+    const layout = (p.layout as string) || "grid";
+    const columns = Number(p.columns || 4);
+    const items = (p.items as any[]) || [];
+    const cardStyle = (p.cardStyle as string) || "none";
+    const isGlass = cardStyle === "glass";
 
-  const textColor = (p.textColor as string) || "var(--text)";
-  const accentColor = (p.accentColor as string) || "var(--primary)";
+    const textColor = (p.textColor as string) || "var(--text)";
+    const accentColor = (p.accentColor as string) || "var(--primary)";
 
-  const gridCols = React.useMemo(() => {
-    // If we're in the editor and simulating a view, force the grid
-    if (viewMode === "mobile") return "grid-cols-1";
-    if (viewMode === "tablet") return "grid-cols-2";
+    const gridCols = React.useMemo(() => {
+        // If we're in the editor and simulating a view, force the grid
+        if (viewMode === "mobile") return "grid-cols-1";
+        if (viewMode === "tablet") return "grid-cols-2";
 
-    // Standard responsive classes for the published site
-    const mapping: Record<number, string> = {
-      1: "grid-cols-1",
-      2: "grid-cols-1 sm:grid-cols-2",
-      3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-      4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
-      5: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-5",
-      6: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6",
-    };
-    return mapping[columns] || mapping[4];
-  }, [columns, viewMode]);
+        // Standard responsive classes for the published site
+        const mapping: Record<number, string> = {
+            1: "grid-cols-1",
+            2: "grid-cols-1 sm:grid-cols-2",
+            3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+            4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+            5: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-5",
+            6: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6",
+        };
+        return mapping[columns] || mapping[4];
+    }, [columns, viewMode]);
 
     const iconPosition = (p.iconPosition as string) || "center";
     const gapVal = (p.gap as string) || "2rem";
@@ -81,11 +83,12 @@ export function StatsBlock({ block }: BlockProps) {
             }}
             className={cn(
                 "w-full relative overflow-hidden transition-all duration-300",
-                "py-12 px-6 lg:py-20 lg:px-8" 
+                "py-12 px-6 lg:py-20 lg:px-8"
             )}
         >
             <BackgroundOverlay p={p} />
-            <div 
+            <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} topBlocks={p.topBlocks as Block[]} top prefix="stats" />
+            <div
                 className={cn(
                     "relative z-10",
                     layout === "strip" ? "flex flex-wrap justify-around items-center" : cn("grid", gridCols)
@@ -95,7 +98,7 @@ export function StatsBlock({ block }: BlockProps) {
                 {items.map((item, idx) => {
                     const IconCmp = getIcon(item.icon);
                     const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index == idx;
-                    
+
                     const cardBase = getCardStyles({
                         props: p,
                         isFocused,
@@ -108,7 +111,7 @@ export function StatsBlock({ block }: BlockProps) {
                             initial={isPreview ? { opacity: 0, y: 20 } : false}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ 
+                            transition={{
                                 delay: idx * 0.1,
                                 layout: { duration: 0.4, ease: "easeInOut" }
                             }}
@@ -128,14 +131,14 @@ export function StatsBlock({ block }: BlockProps) {
                         >
                             {/* Decorative Glow for Glassmorphism */}
                             {isGlass && (
-                                <motion.div 
+                                <motion.div
                                     layout
-                                    className="absolute -z-10 bg-primary/10 blur-[60px] w-full h-full left-0 top-0 opacity-50 pointer-events-none" 
+                                    className="absolute -z-10 bg-primary/10 blur-[60px] w-full h-full left-0 top-0 opacity-50 pointer-events-none"
                                 />
                             )}
-                            
+
                             {item.icon && (
-                                <motion.div 
+                                <motion.div
                                     layout
                                     className={cn(
                                         "mb-6 flex items-center justify-center transition-all duration-500 group-hover:scale-110",
@@ -150,7 +153,7 @@ export function StatsBlock({ block }: BlockProps) {
                                         store.selectBlock(block.id);
                                         store.focusSubItem(block.id, "Icon Styling");
                                     }}
-                                    style={{ 
+                                    style={{
                                         backgroundColor: p.iconBg ? (p.iconBg as string) : (layout === "kpi" ? "rgba(var(--primary-rgb), 0.1)" : accentColor),
                                         color: p.iconColor ? (p.iconColor as string) : (layout === "kpi" ? accentColor : "#fff"),
                                         width: (p.iconWrapperSize as string) || (layout === "strip" ? "40px" : layout === "kpi" ? "48px" : "64px"),
@@ -166,27 +169,27 @@ export function StatsBlock({ block }: BlockProps) {
                                 </motion.div>
                             )}
 
-                            <motion.div 
+                            <motion.div
                                 layout
                                 className={cn(
                                     "flex flex-col w-full transition-all duration-500",
                                     cardAlignment
                                 )}
                             >
-                                <motion.div 
+                                <motion.div
                                     layout
                                     className={cn(
                                         "flex items-baseline gap-2 mb-2 flex-wrap transition-all duration-500",
                                         cardContentAlignment
                                     )}
                                 >
-                                    <span className="font-black tracking-tighter leading-none" style={{ 
-                                        color: layout === "kpi" ? textColor : accentColor, 
+                                    <span className="font-black tracking-tighter leading-none" style={{
+                                        color: layout === "kpi" ? textColor : accentColor,
                                         ...getTextStyles(p, "title")
                                     }}>
                                         {item.value}
                                     </span>
-                                    
+
                                     {(item.unit || item.trend) && (
                                         <div className="flex items-center gap-2">
                                             {item.unit && (
@@ -205,22 +208,22 @@ export function StatsBlock({ block }: BlockProps) {
                                         </div>
                                     )}
                                 </motion.div>
-                                
-                                <motion.h4 
+
+                                <motion.h4
                                     layout
-                                    className="font-black tracking-widest mb-2 transition-all duration-500" 
-                                    style={{ 
-                                        opacity: 0.4, 
+                                    className="font-black tracking-widest mb-2 transition-all duration-500"
+                                    style={{
+                                        opacity: 0.4,
                                         ...getTextStyles(p, "subtitle")
                                     }}
                                 >
                                     {item.label}
                                 </motion.h4>
-                                
+
                                 {item.description && (
-                                    <motion.p 
+                                    <motion.p
                                         layout
-                                        className="leading-relaxed transition-all duration-500" 
+                                        className="leading-relaxed transition-all duration-500"
                                         style={{ fontSize: descSize, color: descColor, opacity: 0.8, maxWidth: "100%" }}
                                     >
                                         {item.description}
@@ -231,6 +234,7 @@ export function StatsBlock({ block }: BlockProps) {
                     );
                 })}
             </div>
+            <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} childBlocks={p.childBlocks as Block[]} bottom prefix="stats" emptyLabel="Drop more blocks here" />
         </section>
     );
 }

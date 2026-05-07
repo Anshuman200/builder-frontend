@@ -106,9 +106,9 @@ export function HeaderBlock({ block }: BlockProps) {
                 }}
                 style={{
                     ...getTextStyles(p, "logo"),
-                    fontSize: getTextStyles(p, "logo").fontSize || "1.25rem", 
+                    fontSize: getTextStyles(p, "logo").fontSize || "1.25rem",
                     letterSpacing: getTextStyles(p, "logo").letterSpacing || "-0.02em",
-                    color: getTextStyles(p, "logo").color || (p.logoColor as string) || textColor, 
+                    color: getTextStyles(p, "logo").color || (p.logoColor as string) || textColor,
                     display: "flex", alignItems: "center",
                     textDecorationSkipInk: "auto",
                     cursor: "pointer"
@@ -274,7 +274,7 @@ export function HeaderBlock({ block }: BlockProps) {
                                         prefix="cta"
                                         blockId={block.id}
                                         onClick={() => {
-                                            if (!isPreview) focusSubItem(block.id, "Call to Action (CTA)");
+                                            if (!isPreview) focusSubItem(block.id, "CTA Content");
                                         }}
                                     />
                                 )}

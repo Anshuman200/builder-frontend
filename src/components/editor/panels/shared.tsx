@@ -366,7 +366,7 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style, ty
 
     // Robust parsing: extract leading number and whatever follows as unit
     const lastUnit = React.useRef("px");
-    const match = String(value || "").match(/^([+-]?\d*\.?\d+)(.*)$/);
+    const match = String(value || "").match(/^([+-]?(?:\d+\.?\d*|\.\d+)?)(.*)$/);
 
     let numValue = "";
     let unitValue = lastUnit.current;
@@ -392,14 +392,27 @@ export function TextInputWithUnit({ value = "", onChange, placeholder, style, ty
     const currentUnit = units.find(u => u.value === unitValue) ? unitValue : lastUnit.current;
 
     const handleNumChange = (v: string) => {
-        const reg = /^-?\d*(\.\d*)?$/;
-        if (reg.test(v) || v === '' || v === '-') {
-            // Allow clearing the input fully
-            if (v === "") {
-                onChange("");
-            } else {
-                onChange(`${v}${currentUnit}`);
-            }
+        // Allow:
+        // 1
+        // 1.
+        // .5
+        // -1.5
+        // but prevent multiple dots
+
+        if (v === "" || v === "-") {
+            onChange(v);
+            return;
+        }
+
+        // Prevent more than one decimal point
+        const dotCount = (v.match(/\./g) || []).length;
+        if (dotCount > 1) return;
+
+        // Strict numeric validation
+        const reg = /^-?(\d+)?(\.)?(\d*)?$/;
+
+        if (reg.test(v)) {
+            onChange(`${v}${currentUnit}`);
         }
     };
 
@@ -1950,7 +1963,7 @@ export function TypographyFields({
     showContentField = true,
     showAlign = true,
     showColor = true,
-    showContents=true,
+    showContents = true,
     showResponsiveSize = false
 }: PropertyGroupProps & {
     showSubtitle?: boolean;
@@ -2124,28 +2137,28 @@ export function TypographyFields({
                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             {showResponsiveSize && <span style={{ fontSize: 9, fontWeight: 700, color: "var(--text-muted)", width: 50 }}>DESKTOP</span>}
-                            <TextInputWithUnit 
-                                value={p[getK("fontSize")] || ""} 
-                                onChange={(v) => up(getK("fontSize"), v)} 
-                                placeholder={showResponsiveSize ? "1rem" : "16px"} 
+                            <TextInputWithUnit
+                                value={p[getK("fontSize")] || ""}
+                                onChange={(v) => up(getK("fontSize"), v)}
+                                placeholder={showResponsiveSize ? "1rem" : "16px"}
                             />
                         </div>
                         {showResponsiveSize && (
                             <>
                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                     <span style={{ fontSize: 9, fontWeight: 700, color: "var(--text-muted)", width: 50 }}>TABLET</span>
-                                    <TextInputWithUnit 
-                                        value={p[`${prefix ? prefix : ""}tabletFontSize`] || p.tabletFontSize || ""} 
-                                        onChange={(v) => up(`${prefix ? prefix : ""}tabletFontSize`, v)} 
-                                        placeholder="same as desktop" 
+                                    <TextInputWithUnit
+                                        value={p[`${prefix ? prefix : ""}tabletFontSize`] || p.tabletFontSize || ""}
+                                        onChange={(v) => up(`${prefix ? prefix : ""}tabletFontSize`, v)}
+                                        placeholder="same as desktop"
                                     />
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                     <span style={{ fontSize: 9, fontWeight: 700, color: "var(--text-muted)", width: 50 }}>MOBILE</span>
-                                    <TextInputWithUnit 
-                                        value={p[`${prefix ? prefix : ""}mobileFontSize`] || p.mobileFontSize || ""} 
-                                        onChange={(v) => up(`${prefix ? prefix : ""}mobileFontSize`, v)} 
-                                        placeholder="same as tablet" 
+                                    <TextInputWithUnit
+                                        value={p[`${prefix ? prefix : ""}mobileFontSize`] || p.mobileFontSize || ""}
+                                        onChange={(v) => up(`${prefix ? prefix : ""}mobileFontSize`, v)}
+                                        placeholder="same as tablet"
                                     />
                                 </div>
                             </>
@@ -2158,19 +2171,19 @@ export function TypographyFields({
                         value={String(p[getK("fontWeight")] || "400")}
                         onChange={(v) => up(getK("fontWeight"), v)}
 
-                            options={[
-                                { label: "Thin (100)", value: "100" },
-                                { label: "Light (300)", value: "300" },
-                                { label: "Regular (400)", value: "400" },
-                                { label: "Medium (500)", value: "500" },
-                                { label: "Semibold (600)", value: "600" },
-                                { label: "Bold (700)", value: "700" },
-                                { label: "Extrabold (800)", value: "800" },
-                                { label: "Black (900)", value: "900" }
-                            ]}
-                        />
-                    </Field>
-                </div>
+                        options={[
+                            { label: "Thin (100)", value: "100" },
+                            { label: "Light (300)", value: "300" },
+                            { label: "Regular (400)", value: "400" },
+                            { label: "Medium (500)", value: "500" },
+                            { label: "Semibold (600)", value: "600" },
+                            { label: "Bold (700)", value: "700" },
+                            { label: "Extrabold (800)", value: "800" },
+                            { label: "Black (900)", value: "900" }
+                        ]}
+                    />
+                </Field>
+            </div>
 
 
             <Field label="Style">
@@ -2178,9 +2191,9 @@ export function TypographyFields({
             </Field>
 
             {/* Responsive Sizes (Section Level) */}
-            {p.titleSize !== undefined && <Field label="Title Size"><TextInputWithUnit value={p.titleSize || ""} onChange={(v) => up("titleSize", v)} placeholder="2.5rem" /></Field>}
-            {p.subtitleSize !== undefined && <Field label="Subtitle Size"><TextInputWithUnit value={p.subtitleSize || ""} onChange={(v) => up("subtitleSize", v)} placeholder="1.25rem" /></Field>}
-            {p.descSize !== undefined && <Field label="Desc Size"><TextInputWithUnit value={p.descSize || ""} onChange={(v) => up("descSize", v)} placeholder="0.9rem" /></Field>}
+            {p.titleSize !== undefined && <Field label="Title Size"><TextInputWithUnit value={p.titleSize || ""} onChange={(v) => up("titleSize", v)} placeholder="2.5" /></Field>}
+            {p.subtitleSize !== undefined && <Field label="Subtitle Size"><TextInputWithUnit value={p.subtitleSize || ""} onChange={(v) => up("subtitleSize", v)} placeholder="1.25" /></Field>}
+            {p.descSize !== undefined && <Field label="Desc Size"><TextInputWithUnit value={p.descSize || ""} onChange={(v) => up("descSize", v)} placeholder="0.9" /></Field>}
 
             <Field label="Line Height"><TextInputWithUnit value={(p[getK("lineHeight")] as string) ?? ""} onChange={(v) => up(getK("lineHeight"), v)} placeholder="1.6" /></Field>
             <Field label="Letter Spacing"><TextInputWithUnit value={(p[getK("letterSpacing")] as string) ?? ""} onChange={(v) => up(getK("letterSpacing"), v)} placeholder="0em" /></Field>
@@ -2315,7 +2328,7 @@ export function CardFields({ p, up, prefix = "card" }: PropertyGroupProps) {
     );
 }
 
-export function ButtonFields({ p, up, prefix = "button", hideLabel = false, textKey: customTextKey, hasMargin = true }: PropertyGroupProps & { hideLabel?: boolean; textKey?: string, hasMargin?: boolean }) {
+export function ButtonFields({ p, up, prefix = "button", hideLabel = false, textKey: customTextKey, hasMargin = true, showToggleKey, urlKey, urlLabel = "Action Link" }: PropertyGroupProps & { hideLabel?: boolean; textKey?: string, hasMargin?: boolean, showToggleKey?: string, urlKey?: string, urlLabel?: string }) {
     // Resolve keys
     const textKey = customTextKey || (prefix === "button" ? (p.label !== undefined ? "label" : "buttonText") : `${prefix}Text`);
     const variantKey = `${prefix}Variant`;
@@ -2337,120 +2350,137 @@ export function ButtonFields({ p, up, prefix = "button", hideLabel = false, text
     };
 
     const variant = (p[variantKey] as string) || (p.variant as string) || "solid";
+    const isVisible = showToggleKey ? p[showToggleKey] !== false : true;
+    const prettyPrefix = prefix === "cta" ? "CTA" : prefix.charAt(0).toUpperCase() + prefix.slice(1);
 
     return (
         <div className="p-0">
-            <Section hasMargin={hasMargin} title="Button Content">
-                {!hideLabel && <Field label="Action Text"><TextInput value={p[textKey] || ""} onChange={(v) => up(textKey, v)} placeholder="Click Me" /></Field>}
-                <Field label="Variant">
-                    <SelectInput
-                        value={variant}
-                        onChange={(v) => up(variantKey, v)}
-                        options={[
-                            { label: "Solid Color", value: "solid" },
-                            { label: "Outline", value: "outline" },
-                            { label: "Ghost", value: "ghost" },
-                            { label: "Gradient Fill", value: "gradient" },
-                            { label: "Link", value: "link" },
-                        ]}
-                    />
-                </Field>
-                {variant !== "gradient" && (
-                    <Field label="Background Color">
-                        <ColorInput
-                            value={(p[getK("bg")] as string) || (p[`${prefix}Bg`] as string) || (prefix === "button" ? "var(--primary)" : "")}
-                            onChange={(v) => up(getK("bg"), v)}
-                            onBlur={(v) => up(getK("bg"), v, true)}
-                        />
-                    </Field>
-                )}
-                <Field label="Text Color">
-                    <ColorInput
-                        value={(p[getK("textColor")] as string) || (p[`${prefix}TextColor`] as string) || (prefix === "button" ? "var(--button-text)" : "")}
-                        onChange={(v) => up(getK("textColor"), v)}
-                        onBlur={(v) => up(getK("textColor"), v, true)}
-                    />
-                </Field>
-            </Section>
-
-            {variant === "gradient" && (
-                <Section title="Button Gradient">
-                    <GradientInput 
-                        value={(p[getK("gradient")] as string) || ""} 
-                        onChange={(v) => up(getK("gradient"), v)} 
-                        onBlur={(v) => up(getK("gradient"), v, true)} 
-                    />
+            {showToggleKey && (
+                <Section hasMargin={hasMargin} title={`${prettyPrefix} Visibility`}>
+                    <ToggleSwitch value={isVisible} onChange={(v) => up(showToggleKey, v)} label={`Show ${prettyPrefix} Button`} />
                 </Section>
             )}
 
-            <Section hasMargin={hasMargin} title="Button Appearance">
-                <Field label="Size">
-                    <SelectInput
-                        value={p[getK("size")] || "md"}
-                        onChange={(v) => up(getK("size"), v)}
-                        options={[
-                            { label: "Small", value: "sm" },
-                            { label: "Medium", value: "md" },
-                            { label: "Large", value: "lg" },
-                            { label: "Extra Large", value: "xl" }
-                        ]}
-                    />
-                </Field>
-                <AlignmentInput label="Alignment" value={p[getK("align")] || "center"} onChange={(v) => up(getK("align"), v)} />
-                <ToggleSwitch value={!!(p[getK("fullWidth")])} onChange={(v) => up(getK("fullWidth"), v)} label="Full Width" />
-            </Section>
+            {isVisible && (
+                <>
+                    <Section hasMargin={hasMargin} title={`${prettyPrefix} Content`}>
+                        {!hideLabel && <Field label="Action Text"><TextInput value={p[textKey] || ""} onChange={(v) => up(textKey, v)} placeholder="Click Me" /></Field>}
+                        {urlKey && (
+                            <Field label={urlLabel}>
+                                <LinkInput value={(p[urlKey] as string) || ""} onChange={(v) => up(urlKey, v)} placeholder="https://..." />
+                            </Field>
+                        )}
+                        <Field label="Variant">
+                            <SelectInput
+                                value={variant}
+                                onChange={(v) => up(variantKey, v)}
+                                options={[
+                                    { label: "Solid Color", value: "solid" },
+                                    { label: "Outline", value: "outline" },
+                                    { label: "Ghost", value: "ghost" },
+                                    { label: "Gradient Fill", value: "gradient" },
+                                    { label: "Link", value: "link" },
+                                ]}
+                            />
+                        </Field>
+                        {variant !== "gradient" && (
+                            <Field label="Background Color">
+                                <ColorInput
+                                    value={(p[getK("bg")] as string) || (p[`${prefix}Bg`] as string) || (prefix === "button" ? "var(--primary)" : "")}
+                                    onChange={(v) => up(getK("bg"), v)}
+                                    onBlur={(v) => up(getK("bg"), v, true)}
+                                />
+                            </Field>
+                        )}
+                        <Field label="Text Color">
+                            <ColorInput
+                                value={(p[getK("textColor")] as string) || (p[`${prefix}TextColor`] as string) || (prefix === "button" ? "var(--button-text)" : "")}
+                                onChange={(v) => up(getK("textColor"), v)}
+                                onBlur={(v) => up(getK("textColor"), v, true)}
+                            />
+                        </Field>
+                    </Section>
 
-            <Section hasMargin={hasMargin} title="Button Shape & Shadow">
-                <Field label="Shadow">
-                    <SelectInput
-                        value={p[shadowKey] || "none"}
-                        onChange={(v) => up(shadowKey, v)}
-                        options={[
-                            { label: "None", value: "none" },
-                            { label: "Small", value: "sm" },
-                            { label: "Medium", value: "md" },
-                            { label: "Large", value: "lg" },
-                            { label: "Glow", value: "glow" }
-                        ]}
-                    />
-                </Field>
-                <BorderPropertyInput
-                    radius={p[radiusKey] || "8px"}
-                    width={(p[getK("borderWidth")] as string) || "0px"}
-                    color={(p[getK("borderColor")] as string) || ""}
-                    onChange={({ radius, width, color }) => {
-                        up(radiusKey, radius);
-                        up(getK("borderWidth"), width);
-                        up(getK("borderColor"), color);
-                    }}
-                    placeholderRadius="8px"
-                    placeholderWidth="0px"
-                    placeholderColor=""
-                />
-            </Section>
+                    {variant === "gradient" && (
+                        <Section title="Button Gradient">
+                            <GradientInput
+                                value={(p[getK("gradient")] as string) || ""}
+                                onChange={(v) => up(getK("gradient"), v)}
+                                onBlur={(v) => up(getK("gradient"), v, true)}
+                            />
+                        </Section>
+                    )}
 
-            <Section hasMargin={hasMargin} title="Button Typography">
-                <Field label="Font Size override"><TextInputWithUnit value={(p[fontSizeKey] as string) ?? ""} onChange={(v) => up(fontSizeKey, v)} placeholder="auto" /></Field>
-                <Field label="Font Weight">
-                    <SelectInput
-                        value={(p[fontWeightKey] as string) || "700"}
-                        onChange={(v) => up(fontWeightKey, v)}
-                        options={[
-                            { label: "Normal (400)", value: "400" },
-                            { label: "Medium (500)", value: "500" },
-                            { label: "Semibold (600)", value: "600" },
-                            { label: "Bold (700)", value: "700" },
-                            { label: "Black (900)", value: "900" }
-                        ]}
-                    />
-                </Field>
-                <Field label="Letter Spacing"><TextInputWithUnit value={(p[letterSpacingKey] as string) ?? ""} onChange={(v) => up(letterSpacingKey, v)} placeholder="0.02em" /></Field>
-            </Section>
+                    <Section hasMargin={hasMargin} title="Button Appearance">
+                        <Field label="Size">
+                            <SelectInput
+                                value={p[getK("size")] || "md"}
+                                onChange={(v) => up(getK("size"), v)}
+                                options={[
+                                    { label: "Small", value: "sm" },
+                                    { label: "Medium", value: "md" },
+                                    { label: "Large", value: "lg" },
+                                    { label: "Extra Large", value: "xl" }
+                                ]}
+                            />
+                        </Field>
+                        <AlignmentInput label="Alignment" value={p[getK("align")] || "center"} onChange={(v) => up(getK("align"), v)} />
+                        <ToggleSwitch value={!!(p[getK("fullWidth")])} onChange={(v) => up(getK("fullWidth"), v)} label="Full Width" />
+                    </Section>
 
-            <Section hasMargin={hasMargin} title="Button Icons">
-                <Field label="Left Icon"><IconPicker value={p[getK("iconLeft")] || ""} onChange={(v) => up(getK("iconLeft"), v)} /></Field>
-                <Field label="Right Icon"><IconPicker value={p[getK("iconRight")] || ""} onChange={(v) => up(getK("iconRight"), v)} /></Field>
-            </Section>
+                    <Section hasMargin={hasMargin} title="Button Shape & Shadow">
+                        <Field label="Shadow">
+                            <SelectInput
+                                value={p[shadowKey] || "none"}
+                                onChange={(v) => up(shadowKey, v)}
+                                options={[
+                                    { label: "None", value: "none" },
+                                    { label: "Small", value: "sm" },
+                                    { label: "Medium", value: "md" },
+                                    { label: "Large", value: "lg" },
+                                    { label: "Glow", value: "glow" }
+                                ]}
+                            />
+                        </Field>
+                        <BorderPropertyInput
+                            radius={p[radiusKey] || "8px"}
+                            width={(p[getK("borderWidth")] as string) || "0px"}
+                            color={(p[getK("borderColor")] as string) || ""}
+                            onChange={({ radius, width, color }) => {
+                                up(radiusKey, radius);
+                                up(getK("borderWidth"), width);
+                                up(getK("borderColor"), color);
+                            }}
+                            placeholderRadius="8px"
+                            placeholderWidth="0px"
+                            placeholderColor=""
+                        />
+                    </Section>
+
+                    <Section hasMargin={hasMargin} title="Button Typography">
+                        <Field label="Font Size override"><TextInputWithUnit value={(p[fontSizeKey] as string) ?? ""} onChange={(v) => up(fontSizeKey, v)} placeholder="auto" /></Field>
+                        <Field label="Font Weight">
+                            <SelectInput
+                                value={(p[fontWeightKey] as string) || "700"}
+                                onChange={(v) => up(fontWeightKey, v)}
+                                options={[
+                                    { label: "Normal (400)", value: "400" },
+                                    { label: "Medium (500)", value: "500" },
+                                    { label: "Semibold (600)", value: "600" },
+                                    { label: "Bold (700)", value: "700" },
+                                    { label: "Black (900)", value: "900" }
+                                ]}
+                            />
+                        </Field>
+                        <Field label="Letter Spacing"><TextInputWithUnit value={(p[letterSpacingKey] as string) ?? ""} onChange={(v) => up(letterSpacingKey, v)} placeholder="0.02em" /></Field>
+                    </Section>
+
+                    <Section hasMargin={hasMargin} title="Button Icons">
+                        <Field label="Left Icon"><IconPicker value={p[getK("iconLeft")] || ""} onChange={(v) => up(getK("iconLeft"), v)} /></Field>
+                        <Field label="Right Icon"><IconPicker value={p[getK("iconRight")] || ""} onChange={(v) => up(getK("iconRight"), v)} /></Field>
+                    </Section>
+                </>
+            )}
         </div>
     );
 }

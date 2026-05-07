@@ -791,10 +791,6 @@ export function ContactFormPanel({ block }: { block: Block }) {
                 <Field label="Error"><TextInput value={(p.errorMessage as string) || "Something went wrong. Please try again."} onChange={(v) => up("errorMessage", v)} /></Field>
             </Section>
 
-            <Section title="Inside Text (Optional)">
-                <TypographyFields p={p} up={up} prefix="title" />
-            </Section>
-
             <AnimationPanel block={block} />
         </>
     );
@@ -1235,13 +1231,13 @@ export function LegalPanel({ block }: { block: Block }) {
                         <div style={{ marginTop: 12 }}>
                             <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 8 }}>Font Size (Responsive)</p>
                             <Field label="Desktop">
-                                <TextInputWithUnit value={(p.titleFontSize as string) || "2rem"} onChange={(v) => up("titleFontSize", v)} placeholder="2rem" />
+                                <TextInputWithUnit value={(p.titleFontSize as string) || "2"} onChange={(v) => up("titleFontSize", v)} placeholder="2" />
                             </Field>
                             <Field label="Tablet">
-                                <TextInputWithUnit value={(p.titleTabletFontSize as string) || ""} onChange={(v) => up("titleTabletFontSize", v)} placeholder="1.75rem" />
+                                <TextInputWithUnit value={(p.titleTabletFontSize as string) || "2"} onChange={(v) => up("titleTabletFontSize", v)} placeholder="1.75" />
                             </Field>
                             <Field label="Mobile">
-                                <TextInputWithUnit value={(p.titleMobileFontSize as string) || ""} onChange={(v) => up("titleMobileFontSize", v)} placeholder="1.5rem" />
+                                <TextInputWithUnit value={(p.titleMobileFontSize as string) || "2"} onChange={(v) => up("titleMobileFontSize", v)} placeholder="1.5" />
                             </Field>
                         </div>
                     </>

@@ -85,7 +85,7 @@ interface EditorStore {
         open: boolean;
         target: {
             id: string; // blockId or "canvas-root"
-            position: "before" | "after" | "inside";
+            position: "before" | "after" | "inside" | "inside-start";
             childProp?: string;
         } | null;
         preferredTab?: "sections" | "elements";
@@ -139,11 +139,11 @@ interface EditorStore {
     updateBlockStyle: (id: string, style: Partial<BlockStyle>, commit?: boolean) => void;
     deleteBlock: (id: string) => void;
     duplicateBlock: (id: string) => void;
-    moveBlock: (activeId: string, overId: string, position?: "before" | "after" | "inside", childProp?: string) => void;
+    moveBlock: (activeId: string, overId: string, position?: "before" | "after" | "inside" | "inside-start", childProp?: string) => void;
     swapBlocks: (idA: string, idB: string) => void;
     replaceBlock: (id: string, newBlock: Block) => void;
 
-    openBlockPicker: (target: { id: string, position: "before" | "after" | "inside", childProp?: string }, preferredTab?: "sections" | "elements") => void;
+    openBlockPicker: (target: { id: string, position: "before" | "after" | "inside" | "inside-start", childProp?: string }, preferredTab?: "sections" | "elements") => void;
     closeBlockPicker: () => void;
     addBlockAtTarget: (block: Block, target: NonNullable<EditorStore["blockPicker"]["target"]>) => Block;
     openTemplatePicker: () => void;

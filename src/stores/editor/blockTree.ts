@@ -5,7 +5,7 @@ function updateColProps(b: Block, id: string, updater: (b: Block) => Block): Blo
     let changed = false;
     const newProps = { ...p };
 
-    for (const key of ["col0", "col1", "childBlocks"]) {
+    for (const key of ["col0", "col1", "childBlocks", "topBlocks", "sectionBlocks", "topSectionBlocks"]) {
         const arr = p[key] as Block[] | undefined;
         if (arr) {
             const next = findAndUpdate(arr, id, updater);
@@ -37,7 +37,7 @@ function deleteColProps(b: Block, id: string): Block {
     let changed = false;
     const newProps = { ...p };
 
-    for (const key of ["col0", "col1", "childBlocks"]) {
+    for (const key of ["col0", "col1", "childBlocks", "topBlocks", "sectionBlocks", "topSectionBlocks"]) {
         const arr = p[key] as Block[] | undefined;
         if (arr) {
             const next = findAndDelete(arr, id);
@@ -108,20 +108,15 @@ export function findAndRemoveBlock(blocks: Block[], id: string): { newBlocks: Bl
             const res = findAndRemoveBlock(updated.children, id);
             if (res.removed) { removed = res.removed; updated.children = res.newBlocks; }
         }
-        const col0 = updated.props.col0 as Block[] | undefined;
-        if (col0 && !removed) {
-            const res = findAndRemoveBlock(col0, id);
-            if (res.removed) { removed = res.removed; updated.props = { ...updated.props, col0: res.newBlocks }; }
-        }
-        const col1 = updated.props.col1 as Block[] | undefined;
-        if (col1 && !removed) {
-            const res = findAndRemoveBlock(col1, id);
-            if (res.removed) { removed = res.removed; updated.props = { ...updated.props, col1: res.newBlocks }; }
-        }
-        const childBlocks = updated.props.childBlocks as Block[] | undefined;
-        if (childBlocks && !removed) {
-            const res = findAndRemoveBlock(childBlocks, id);
-            if (res.removed) { removed = res.removed; updated.props = { ...updated.props, childBlocks: res.newBlocks }; }
+        for (const key of ["col0", "col1", "childBlocks", "topBlocks", "sectionBlocks", "topSectionBlocks"]) {
+            const arr = updated.props[key] as Block[] | undefined;
+            if (arr && !removed) {
+                const res = findAndRemoveBlock(arr, id);
+                if (res.removed) {
+                    removed = res.removed;
+                    updated.props = { ...updated.props, [key]: res.newBlocks };
+                }
+            }
         }
         const items = updated.props.items as { id: string, blocks: Block[] }[] | undefined;
         if (items && !removed) {
@@ -162,7 +157,7 @@ export function insertBlockDeep(
                         ? [insertBlock, ...(updated.children || [])]
                         : [...(updated.children || []), insertBlock];
                     inserted = true;
-                } else if (childProp === "col0" || childProp === "col1" || childProp === "childBlocks") {
+                } else if (childProp === "col0" || childProp === "col1" || childProp === "childBlocks" || childProp === "topBlocks" || childProp === "sectionBlocks" || childProp === "topSectionBlocks") {
                     const currentArr = (updated.props[childProp] as Block[]) || [];
                     updated.props = {
                         ...updated.props,
@@ -200,7 +195,7 @@ export function insertBlockDeep(
                 if (res.inserted) { updated.children = res.newBlocks; inserted = true; }
             }
             if (!inserted) {
-                for (const prop of ["col0", "col1", "childBlocks"]) {
+                for (const prop of ["col0", "col1", "childBlocks", "topBlocks", "sectionBlocks", "topSectionBlocks"]) {
                     const children = updated.props[prop] as Block[] | undefined;
                     if (children && !inserted) {
                         const res = insertBlockDeep(children, insertBlock, targetId, position, childProp);

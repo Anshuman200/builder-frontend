@@ -4,7 +4,7 @@ import { Form, Input, Radio, ConfigProvider, Space } from "antd";
 import { useSubmitForm } from "@/lib/api/queries";
 import type { BlockProps } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, CommonButton, getCardStyles } from "./shared";
+import { PreviewContext, CommonButton, getCardStyles, getTextStyles } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
 // ─── Toast Component ──────────────────────────────────────────────────────────
@@ -240,21 +240,21 @@ export function ContactFormBlock({ block }: BlockProps) {
                     width: "100%",
                 }}
             >
-                <div onClick={(e) => { e.stopPropagation(); selectBlock(block.id); focusSubItem(block.id, "Inside Text (Optional)"); }}>
+                <div>
                     {titleText && (
-                        <h2 style={{ 
+                        <h2 style={{
                             ...getTextStyles(p, "title"),
-                            margin: "0 0 0.5rem", 
+                            margin: "0 0 0.5rem",
                             color: getTextStyles(p, "title").color || titleColor,
-                            textTransform: p.titleUppercase ? "uppercase" : "none" 
+                            textTransform: p.titleUppercase ? "uppercase" : "none"
                         }}>{titleText}</h2>
                     )}
                     {subtitleText && (
-                        <p style={{ 
+                        <p style={{
                             ...getTextStyles(p, "subtitle"),
-                            margin: "0 0 1.75rem", 
+                            margin: "0 0 1.75rem",
                             color: getTextStyles(p, "subtitle").color || subtitleColor,
-                            lineHeight: 1.6 
+                            lineHeight: 1.6
                         }}>{subtitleText}</p>
                     )}
                 </div>

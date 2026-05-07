@@ -3,7 +3,7 @@ import type { Block } from "@/types";
 import React, { useState } from "react";
 import { ChevronDownIcon, Square2StackIcon } from "@heroicons/react/24/outline";
 import { getIcon } from "@/lib/utils/icons";
-import { ChildBlockWrapper, PreviewContext, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { ChildBlockWrapper, PreviewContext, getBackgroundStyles, BackgroundOverlay, SectionChildBlocks } from "./shared";
 import { useEditorStore } from "@/stores/editorStore";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
 
@@ -104,6 +104,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
             }}
         >
             <BackgroundOverlay p={block.props} />
+            <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} topBlocks={block.props.topBlocks as Block[]} top prefix="accordion" />
             <div style={{ width, maxWidth, position: "relative", zIndex: 2 }}>
                 {items.map((item: any, index: number) => {
                     const isOpen = !!openItems[item.id];
@@ -234,6 +235,7 @@ export default function AccordionBlock({ block }: { block: Block }) {
                     );
                 })}
             </div>
+            <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} childBlocks={block.props.childBlocks as Block[]} bottom prefix="accordion" emptyLabel="Drop more blocks here" />
         </div>
     );
 }

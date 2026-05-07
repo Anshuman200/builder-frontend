@@ -19,7 +19,7 @@ function ColumnDropZone({ zoneId, blocks, label, flexBasis, alignItems }: { zone
             style={{
                 flex: isStacked ? "1 1 100%" : `${flexBasis.replace("%", "")} ${flexBasis.replace("%", "")} 0%`,
                 width: isStacked ? "100%" : undefined,
-                minHeight: blocks.length === 0 ? 80 : "100%",
+                minHeight: blocks.length === 0 ? 80 : 100,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: alignItems === "center" ? "center" : alignItems === "flex-end" ? "flex-end" : alignItems === "stretch" ? "space-between" : "flex-start",
@@ -30,6 +30,7 @@ function ColumnDropZone({ zoneId, blocks, label, flexBasis, alignItems }: { zone
                 transition: "all 0.15s",
                 overflow: "hidden",
                 position: "relative",
+                paddingBottom: isPreview ? 0 : 24,
             }}
         >
             {blocks.length > 0 && (
@@ -42,7 +43,7 @@ function ColumnDropZone({ zoneId, blocks, label, flexBasis, alignItems }: { zone
                 <div style={{ padding: blocks.length > 0 ? "8px 12px" : 12, opacity: blocks.length > 0 ? 0.3 : 1, transition: "opacity 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.opacity = "1"} onMouseLeave={(e) => e.currentTarget.style.opacity = blocks.length > 0 ? "0.3" : "1"}>
                     <DropZoneStrip
                         zoneId={zoneId}
-                        childProp={zoneId.startsWith("col-0") ? "col0" : "col1"}
+                        childProp={zoneId.startsWith("col::0::") ? "col0" : "col1"}
                         hasChildren={blocks.length > 0}
                         emptyLabel={label}
                     />
@@ -90,8 +91,8 @@ export function ColumnsBlock({ block }: BlockProps) {
           @media (max-width: 768px) { .builder-columns-${block.id} { flex-direction: column !important; } }
         `}</style>
             )}
-            <ColumnDropZone zoneId={`col-0-${block.id}`} blocks={col0} label="Drag blocks here (Column 1)" flexBasis={`${leftWidth}%`} alignItems={p.alignItems as string} />
-            <ColumnDropZone zoneId={`col-1-${block.id}`} blocks={col1} label="Drag blocks here (Column 2)" flexBasis={`${rightWidth}%`} alignItems={p.alignItems as string} />
+            <ColumnDropZone zoneId={`col::0::${block.id}`} blocks={col0} label="Drag blocks here (Column 1)" flexBasis={`${leftWidth}%`} alignItems={p.alignItems as string} />
+            <ColumnDropZone zoneId={`col::1::${block.id}`} blocks={col1} label="Drag blocks here (Column 2)" flexBasis={`${rightWidth}%`} alignItems={p.alignItems as string} />
         </div>
     );
 }

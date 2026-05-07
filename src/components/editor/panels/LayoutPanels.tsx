@@ -171,19 +171,15 @@ export function HeaderPanel({ block }: { block: Block }) {
                 <PaddingFields p={p} up={up} />
             </Section>
 
-            <Section title="Call to Action (CTA)">
-                <section className="mb-3">
-                    <ToggleSwitch value={p.showCta !== false} onChange={(v) => up("showCta", v)} label="Show CTA Button" />
-                </section>
-                {p.showCta !== false && (
-                    <>
-                        <ButtonFields p={p} up={up} prefix="cta" textKey="ctaText" hasMargin={false} />
-                        <section className="mt-3">
-                            <Field label="Button URL"><LinkInput value={(p.ctaUrl as string) || "#"} onChange={(v) => up("ctaUrl", v)} placeholder="https://..." /></Field>
-                        </section>
-                    </>
-                )}
-            </Section>
+            <ButtonFields 
+                p={p} 
+                up={up} 
+                prefix="cta" 
+                textKey="ctaText" 
+                showToggleKey="showCta"
+                urlKey="ctaUrl"
+                urlLabel="Button URL"
+            />
 
             <Section title="Navigation Links">
                 <div style={{ padding: "8px 0", fontSize: 11, color: "var(--text-subtle)" }}>Dynamic links from your Pages and custom links. Drag to reorder.</div>

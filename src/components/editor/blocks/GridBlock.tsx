@@ -4,13 +4,26 @@ import React from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { recursiveClone, useEditorStore } from "@/stores/editorStore";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay } from "./shared";
+import { PreviewContext, BlockProps, ChildBlockWrapper, DropZoneStrip, SortableBlockGroup, getBackgroundStyles, BackgroundOverlay, SectionChildBlocks } from "./shared";
 import { DEFAULT_THEME } from "@/lib/utils/theme";
+import { cn } from "@/lib/utils";
 
 function GridSlot({ zoneId, slotId, blockId, blocks, onDelete, itemsCount, style }: { zoneId: string; slotId: string; blockId: string; blocks: Block[]; onDelete: () => void; itemsCount: number; style?: React.CSSProperties }) {
     const isPreview = React.useContext(PreviewContext);
     const { setNodeRef, isOver } = useDroppable({ id: zoneId });
     const [isHovered, setIsHovered] = React.useState(false);
+    const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
+
+    // Synthetic block representing this grid slot for the drop zone system
+    const slotVirtualId = `col-${slotId}-${blockId}`;
+    const slotBlock = React.useMemo(() => ({
+        id: slotVirtualId,
+        type: "grid-slot",
+        props: { childBlocks: blocks }
+    } as Block), [slotVirtualId, blocks]);
+
+    const slotIsSelected = selectedBlockId === slotVirtualId
+        || (!!selectedBlockId && blocks.some(b => b.id === selectedBlockId));
 
     return (
         <div
@@ -45,13 +58,13 @@ function GridSlot({ zoneId, slotId, blockId, blocks, onDelete, itemsCount, style
                 </button>
             )}
 
-            <SortableBlockGroup blocks={blocks}>
-                {blocks.map((child) => <ChildBlockWrapper key={child.id} block={child} />)}
-            </SortableBlockGroup>
 
-            {!isPreview && blocks.length === 0 && (
-                <div 
-                    className="flex-1 flex flex-col items-center justify-center gap-3 p-8 group cursor-pointer hover:bg-indigo-50/50 transition-all rounded-lg"
+            {blocks.length > 0 && (
+                <SectionChildBlocks block={slotBlock} isSelected={slotIsSelected} childBlocks={blocks} bottom emptyLabel="Add Content" showChildAddBlock={false} childrenLabel="Add Content" stripColor="var(--primary)" />
+            )}
+            {!isPreview && (
+                <div
+                    className={cn("flex-1 flex flex-col items-center justify-center gap-3 group cursor-pointer hover:bg-indigo-50/50 transition-all rounded-lg", blocks.length === 0 ? "p-8" : "p-2")}
                     onClick={() => {
                         useEditorStore.getState().openBlockPicker({ id: blockId, position: "inside", childProp: slotId }, "elements");
                     }}
@@ -60,17 +73,6 @@ function GridSlot({ zoneId, slotId, blockId, blocks, onDelete, itemsCount, style
                         <PlusIcon className="w-6 h-6" />
                     </div>
                     <span className="text-xs font-medium text-slate-400 group-hover:text-indigo-500 transition-colors">Add Content</span>
-                </div>
-            )}
-
-            {!isPreview && blocks.length > 0 && (
-                <div className="p-2 w-full">
-                    <DropZoneStrip
-                        zoneId={blockId}
-                        childProp={slotId}
-                        hasChildren={blocks.length > 0}
-                        emptyLabel="Click or drag content here"
-                    />
                 </div>
             )}
         </div>
@@ -85,12 +87,31 @@ export function GridBlock({ block }: BlockProps) {
     const verticalAlign = (p.verticalAlign as string) || "center";
     const gridAlign = (p.gridAlign as string) || "stretch";
 
+    // Card Style props
+    const cardBg = (p.cardBg as string) || "";
+    const cardPadding = (p.cardPadding as string) || "";
+    const cardBorderRadius = (p.cardBorderRadius as string) || "12px";
+    const cardBorderWidth = (p.cardBorderWidth as string) || "";
+    const cardBorderColor = (p.cardBorderColor as string) || "";
+    const cardShadowKey = (p.cardShadow as string) || "none";
+    const shadowMap: Record<string, string> = {
+        none: "none",
+        sm: "0 1px 3px rgba(0,0,0,0.08)",
+        md: "0 4px 12px rgba(0,0,0,0.12)",
+        lg: "0 8px 30px rgba(0,0,0,0.18)",
+    };
+    const cardBoxShadow = shadowMap[cardShadowKey] || "none";
+    const cardBorderStyle: React.CSSProperties = cardBorderWidth && cardBorderWidth !== "0px"
+        ? { border: `${cardBorderWidth} solid ${cardBorderColor || "var(--border)"}` }
+        : {};
+
     const { updateBlock, viewMode, openBlockPicker } = useEditorStore();
     const isPreview = React.useContext(PreviewContext);
     const isMobile = viewMode === "mobile";
     const isTablet = viewMode === "tablet";
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
     const bgStyles = getBackgroundStyles(p, theme);
+    const topBlocks = (p.topBlocks as Block[]) ?? [];
 
     // Alignment Mapping
     const justifyMap: Record<string, string> = {
@@ -179,6 +200,7 @@ export function GridBlock({ block }: BlockProps) {
             }}
         >
             <BackgroundOverlay p={p} />
+            <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} topBlocks={topBlocks} top prefix="gblock" />
             <div
                 style={{
                     display: "grid",
@@ -209,11 +231,18 @@ export function GridBlock({ block }: BlockProps) {
                             justifyContent: alignMap[verticalAlign] || "center",
                             width: "100%",
                             height: "100%",
-                            textAlign: align === "stretch" ? "left" : (align as any)
+                            textAlign: align === "stretch" ? "left" : (align as any),
+                            // Card appearance
+                            ...(cardBg ? { background: cardBg } : {}),
+                            ...(cardPadding ? { padding: cardPadding } : {}),
+                            borderRadius: cardBorderRadius,
+                            boxShadow: cardBoxShadow,
+                            ...cardBorderStyle,
                         }}
                     />
                 ))}
             </div>
+            <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} childBlocks={p.childBlocks as Block[]} bottom prefix="gblock" emptyLabel="Drop more blocks here" />
 
             {!isPreview && (
                 <div className="flex items-center justify-center" style={{ position: "relative", zIndex: 2 }}>

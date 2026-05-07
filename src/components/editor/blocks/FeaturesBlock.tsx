@@ -1,10 +1,12 @@
 "use client";
+import type { Block } from "@/types";
+
 import React from "react";
 import Image from "next/image";
 import { getIcon } from "@/lib/utils/icons";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import { useEditorStore } from "@/stores/editorStore";
-import { PreviewContext, BlockProps, getCardStyles, getBackgroundStyles, BackgroundOverlay, getTextStyles } from "./shared";
+import { PreviewContext, BlockProps, useLinkHandler, getCardStyles, getBackgroundStyles, BackgroundOverlay, getTextStyles, SectionChildBlocks } from "./shared";
 import { DEFAULT_THEME, hexToRgb } from "@/lib/utils/theme";
 
 export function FeaturesBlock({ block }: BlockProps) {
@@ -56,7 +58,7 @@ export function FeaturesBlock({ block }: BlockProps) {
 
     const getBaseCardStyle = (idx: number, isHovered?: boolean): React.CSSProperties => {
         const isFocused = !isPreview && subItemFocus?.blockId === block.id && subItemFocus?.index == idx;
-        
+
         const base = getCardStyles({
             props: p,
             isFocused,
@@ -94,31 +96,31 @@ export function FeaturesBlock({ block }: BlockProps) {
     };
 
     const SectionHeader = () => (
-        <div 
-            onClick={() => !isPreview && focusSubItem(block.id, "Text Content")} 
-            style={{ 
-                textAlign: align as any, 
+        <div
+            onClick={() => !isPreview && focusSubItem(block.id, "Text Content")}
+            style={{
+                textAlign: align as any,
                 marginBottom: "3rem",
-                transition: "all 0.4s ease-in-out" 
+                transition: "all 0.4s ease-in-out"
             }}
         >
             {title && (
-                <h2 style={{ 
+                <h2 style={{
                     ...getTextStyles(p, "title"),
-                    margin: "0 0 1rem 0", 
-                    transition: "all 0.4s ease-in-out" 
+                    margin: "0 0 1rem 0",
+                    transition: "all 0.4s ease-in-out"
                 }}>
                     {title}
                 </h2>
             )}
             {subtitle && (
-                <p style={{ 
+                <p style={{
                     ...getTextStyles(p, "subtitle"),
-                    opacity: 0.7, 
-                    margin: 0, 
-                    maxWidth: "600px", 
-                    display: "inline-block", 
-                    transition: "all 0.4s ease-in-out" 
+                    opacity: 0.7,
+                    margin: 0,
+                    maxWidth: "600px",
+                    display: "inline-block",
+                    transition: "all 0.4s ease-in-out"
                 }}>
                     {subtitle}
                 </p>
@@ -143,7 +145,7 @@ export function FeaturesBlock({ block }: BlockProps) {
                             onMouseEnter={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx, true))}
                             onMouseLeave={e => isPreview && Object.assign(e.currentTarget.style, getBaseCardStyle(idx))}
                         >
-                            <div 
+                            <div
                                 style={{ marginBottom: "1.25rem" }}
                                 onClick={(e) => {
                                     if (isPreview) return;
@@ -337,22 +339,24 @@ export function FeaturesBlock({ block }: BlockProps) {
           @media (max-width: 768px) { .features-${block.id} { padding: ${mobilePadding}; } }
         `}</style>
             )}
-            <section 
-                id={(p.sectionId as string) || `block-${block.id}`} 
-                className={isPreview ? `features-${block.id}` : undefined} 
+            <section
+                id={(p.sectionId as string) || `block-${block.id}`}
+                className={isPreview ? `features-${block.id}` : undefined}
                 style={{
                     ...bgStyles,
-                    padding: isPreview ? undefined : editorPadding, 
-                    color: textColor, 
-                    width: "100%", 
+                    padding: isPreview ? undefined : editorPadding,
+                    color: textColor,
+                    width: "100%",
                     boxSizing: "border-box",
                     position: "relative"
                 }}
             >
                 <BackgroundOverlay p={p} />
+                <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} topBlocks={p.topBlocks as Block[]} top prefix="features" />
                 <div style={{ maxWidth: "100dvw", margin: "0 auto", boxSizing: "border-box", width: "100%", position: "relative", zIndex: 2 }}>
                     {renderContent()}
                 </div>
+                <SectionChildBlocks block={block} isSelected={useEditorStore.getState().selectedBlockId === block.id} childBlocks={p.childBlocks as Block[]} bottom prefix="features" emptyLabel="Drop more blocks here" />
             </section>
         </>
     );

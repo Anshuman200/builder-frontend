@@ -698,7 +698,46 @@ export function GridPanel({ block }: { block: Block }) {
                 <Field label="Border Radius"><BorderRadiusInput value={(p.borderRadius as string) || "0px"} onChange={(v) => up("borderRadius", v)} /></Field>
             </Section>
 
-            <Section title="Padding (Responsive)">
+            <Section title="Card Style">
+                <Field label="Card Background">
+                    <ColorInput
+                        value={(p.cardBg as string) || ""}
+                        onChange={(v) => up("cardBg", v)}
+                        onBlur={(v) => up("cardBg", v, true)}
+                        placeholder="Transparent"
+                    />
+                </Field>
+                <Field label="Card Padding">
+                    <TextInputWithUnit value={(p.cardPadding as string) ?? ""} onChange={(v) => up("cardPadding", v)} placeholder="16px" />
+                </Field>
+                <Field label="Card Border Radius">
+                    <BorderRadiusInput value={(p.cardBorderRadius as string) || "12px"} onChange={(v) => up("cardBorderRadius", v)} />
+                </Field>
+                <Field label="Card Border">
+                    <div style={{ display: "flex", gap: 8 }}>
+                        <TextInputWithUnit value={(p.cardBorderWidth as string) ?? ""} onChange={(v) => up("cardBorderWidth", v)} placeholder="0px" />
+                        <ColorInput
+                            value={(p.cardBorderColor as string) || ""}
+                            onChange={(v) => up("cardBorderColor", v)}
+                            onBlur={(v) => up("cardBorderColor", v, true)}
+                        />
+                    </div>
+                </Field>
+                <Field label="Card Shadow">
+                    <SelectInput
+                        value={(p.cardShadow as string) || "none"}
+                        onChange={(v) => up("cardShadow", v)}
+                        options={[
+                            { label: "None", value: "none" },
+                            { label: "Small", value: "sm" },
+                            { label: "Medium", value: "md" },
+                            { label: "Large", value: "lg" },
+                        ]}
+                    />
+                </Field>
+            </Section>
+
+            <Section title="Section Padding (Responsive)">
                 <Field label="Desktop"><TextInputWithUnit value={(p.padding as string) ?? ""} onChange={(v) => up("padding", v)} placeholder="24px" /></Field>
                 <Field label="Tablet"><TextInputWithUnit value={(p.tabletPadding as string) ?? ""} onChange={(v) => up("tabletPadding", v)} placeholder="same as desktop" /></Field>
                 <Field label="Mobile"><TextInputWithUnit value={(p.mobilePadding as string) ?? ""} onChange={(v) => up("mobilePadding", v)} placeholder="same as tablet" /></Field>

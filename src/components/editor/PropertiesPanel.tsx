@@ -68,13 +68,14 @@ function findBlock(blocks: Block[] | undefined, id: string): Block | undefined {
         if (b.id === id) return b;
         if (b.children) { const found = findBlock(b.children, id); if (found) return found; }
 
-        // Search inside named column props
-        const col0 = b.props.col0 as Block[] | undefined;
-        const col1 = b.props.col1 as Block[] | undefined;
-        const childBlocks = b.props.childBlocks as Block[] | undefined;
-        if (col0) { const f = findBlock(col0, id); if (f) return f; }
-        if (col1) { const f = findBlock(col1, id); if (f) return f; }
-        if (childBlocks) { const f = findBlock(childBlocks, id); if (f) return f; }
+        // Search inside standard array props
+        for (const key of ["col0", "col1", "childBlocks", "topBlocks", "sectionBlocks", "topSectionBlocks"]) {
+            const arr = b.props[key] as Block[] | undefined;
+            if (arr) {
+                const f = findBlock(arr, id);
+                if (f) return f;
+            }
+        }
 
         // Search inside generic items array (Grid units)
         const items = b.props.items as { id: string, blocks: Block[] }[] | undefined;

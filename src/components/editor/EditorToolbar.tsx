@@ -553,7 +553,7 @@ export default function EditorToolbar() {
           {/* ── Choose Template Button ── */}
           <button
             onClick={openTemplatePicker}
-            className="flex items-center gap-2 bg-linear-to-r from-green-400/10 to-emerald-400/10 border border-green-400/30 hover:from-green-400/20 hover:to-emerald-400/12 hover:border-green-400/50 transition-all duration-200 rounded-lg px-3 py-1.5 text-green-400 font-bold text-xs tracking-wide cursor-pointer min-w-36"
+            className="flex items-center gap-2 bg-linear-to-r from-green-400/10 to-emerald-400/10 border border-green-400/30 hover:from-green-400/20 hover:to-emerald-400/12 hover:border-green-400/50 transition-all duration-200 rounded-lg px-3 py-1.5 text-green-400 font-bold text-xs tracking-wide cursor-pointer min-w-40"
           >
             <SparklesIcon style={{ width: 13, height: 13, strokeWidth: 2.5 }} />
             Choose Template
@@ -609,7 +609,7 @@ export default function EditorToolbar() {
           </div>
 
           {/* Save Draft button */}
-          <button
+          {/* <button
             onClick={handleSave}
             disabled={isSaving || (!isDirty && !!user)}
             title="Save Changes"
@@ -627,7 +627,7 @@ export default function EditorToolbar() {
             }}
           >
             {isSaving ? "Saving..." : "Save"}
-          </button>
+          </button> */}
 
           {/* Thumbnail capture button */}
           {user && (
