@@ -203,19 +203,35 @@ export default function EditorToolbar() {
     }
     if (!pageId || !page) return;
 
+    // Check if the current user is the owner of this page
+    const authorId = typeof page.author === 'string' ? page.author : (page as any).author?._id;
+    const isOwner = user && authorId === (user as any).id;
+
     setIsSaving(true);
     try {
-      if (pageId.length < 24) {
+      // If it's a temporary ID OR the user doesn't own this page (e.g. editing a template), 
+      // we must CREATE a new page for them instead of updating.
+      if (pageId.length < 24 || !isOwner) {
         const payload = getPlainPayload();
         if (!payload) return;
+
+        // If not owner, ensure we don't accidentally send the old author ID
+        delete payload.author;
+        delete payload._id;
+
         const res = await createMutation.mutateAsync(payload);
         const newId = (res as any).data.page._id;
+
         markClean();
         clearLocalDraft(pageId);
         clearLocalDraft(newId);
+
+        // Redirect to the new page they now own
         router.replace(`/editor/${newId}`);
         return;
       }
+
+      // Normal update for owned pages
       const payload = getPlainPayload();
       if (!payload) return;
       await updateMutation.mutateAsync({ id: pageId, ...payload });
@@ -223,7 +239,7 @@ export default function EditorToolbar() {
       clearLocalDraft(pageId);
       pushPreviewCache(payload);
     } catch (e) {
-      console.error("Manual save failed", e);
+      console.error("Save failed", e);
     } finally {
       setIsSaving(false);
     }
@@ -609,7 +625,7 @@ export default function EditorToolbar() {
           </div>
 
           {/* Save Draft button */}
-          {/* <button
+          <button
             onClick={handleSave}
             disabled={isSaving || (!isDirty && !!user)}
             title="Save Changes"
@@ -627,7 +643,7 @@ export default function EditorToolbar() {
             }}
           >
             {isSaving ? "Saving..." : "Save"}
-          </button> */}
+          </button>
 
           {/* Thumbnail capture button */}
           {user && (
