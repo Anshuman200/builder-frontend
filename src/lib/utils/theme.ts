@@ -23,6 +23,12 @@ export const DEFAULT_THEME: ThemeConfig = {
         tabletPaddingX: "24px",
         mobilePaddingX: "16px",
     },
+    button: {
+        width: "auto",
+        minWidth: "",
+        bgColor: "",
+        textColor: "",
+    },
 };
 
 export function hexToRgb(hex: string): string | null {

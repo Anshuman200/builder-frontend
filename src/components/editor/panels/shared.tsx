@@ -860,29 +860,6 @@ export function AppColorPicker({
                 }
             }}
         >
-            {/* <ColorPicker
-                value={value}
-                onChange={onChange}
-                onChangeComplete={onChangeComplete}
-                showText={showText}
-                presets={[
-                    {
-                        label: 'Brand Colors',
-                        colors: ["#d97706", "#0ea5e9", "#22c55e", "#eab308", "#f97316", "#ef4444", "#0099ff"],
-                    },
-                    {
-                        label: 'Grayscale',
-                        colors: ["#ffffff", "#f8fafc", "#f1f5f9", "#e2e8f0", "#cbd5e1", "#94a3b8", "#64748b", "#475569", "#1e293b", "#0f172a", "#000000"],
-                    },
-                    {
-                        label: 'Utilities',
-                        colors: ["rgba(0,0,0,0)"],
-                    }
-                ]}
-                {...props}
-            >
-                {children}
-            </ColorPicker> */}
             <ColorPicker
                 value={value}
                 onChange={onChange}
@@ -912,13 +889,6 @@ export function AppColorPicker({
                             "#ffffff", "#f8fafc", "#f1f5f9", "#e2e8f0",
                             "#cbd5e1", "#94a3b8", "#64748b",
                             "#475569", "#1e293b", "#0f172a", "#000000"
-                        ],
-                    },
-                    {
-                        label: 'Soft Pastels',
-                        colors: [
-                            "#fbcfe8", "#fecaca", "#fde68a", "#bbf7d0",
-                            "#a7f3d0", "#bfdbfe", "#c7d2fe", "#ddd6fe"
                         ],
                     },
                 ]}

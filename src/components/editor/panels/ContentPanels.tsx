@@ -451,7 +451,256 @@ export function ContactInfoPanel({ block }: { block: Block }) {
     );
 }
 
+// ─── Block tree walker ────────────────────────────────────────────────────────
+function collectAllBlockIds(blocks: Block[]): string[] {
+    const ids: string[] = [];
+    function walk(bs: Block[]) {
+        for (const b of bs) {
+            ids.push(b.id);
+            if (b.children?.length) walk(b.children);
+            for (const key of ["col0", "col1", "childBlocks", "topBlocks", "sectionBlocks", "topSectionBlocks"]) {
+                const arr = b.props[key] as Block[] | undefined;
+                if (arr?.length) walk(arr);
+            }
+            const items = b.props.items as { id: string; blocks?: Block[] }[] | undefined;
+            if (items) for (const item of items) if (item.blocks?.length) walk(item.blocks);
+        }
+    }
+    walk(blocks);
+    return ids;
+}
+
+function findBlockById(blocks: Block[], id: string): Block | null {
+    for (const b of blocks) {
+        if (b.id === id) return b;
+        const fromChildren = findBlockById(b.children || [], id);
+        if (fromChildren) return fromChildren;
+        for (const key of ["col0", "col1", "childBlocks", "topBlocks", "sectionBlocks", "topSectionBlocks"]) {
+            const arr = b.props[key] as Block[] | undefined;
+            if (arr) { const f = findBlockById(arr, id); if (f) return f; }
+        }
+        const items = b.props.items as { blocks?: Block[] }[] | undefined;
+        if (items) for (const item of items) {
+            if (item.blocks) { const f = findBlockById(item.blocks, id); if (f) return f; }
+        }
+    }
+    return null;
+}
+
+const SECTION_BG_MAP: Record<string, string[]> = {
+    hero: ["bgColor"], features: ["bgColor"], stats: ["bgColor"], team: ["bgColor"],
+    container: ["bgColor"], wave: ["bgColor"], grid: ["bgColor"],
+    header: ["bgColor"], footer: ["bgColor"], contactForm: ["sectionBg"],
+    columns: ["bgColor"], accordion: ["bgColor"], text: ["bgColor"],
+};
+const TITLE_COLOR_MAP: Record<string, string[]> = {
+    features: ["titleColor"], stats: ["titleColor"], team: ["titleColor"],
+    hero: ["textColor"], contactForm: ["titleColor"], accordion: ["titleColor"],
+    grid: ["titleColor"],
+};
+const DESC_COLOR_MAP: Record<string, string[]> = {
+    features: ["subtitleColor"], stats: ["subtitleColor"], team: ["subtitleColor"],
+    contactForm: ["subtitleColor"], hero: ["subtitleColor"], grid: ["subtitleColor"],
+};
+const CARD_BG_MAP: Record<string, string[]> = {
+    features: ["cardBg"], stats: ["cardBg"], team: ["cardBg"], grid: ["cardBg"],
+    contactForm: ["bgColor"], columns: ["cardBg"],
+};
+const PADDING_MAP: Record<string, [string, string, string]> = {
+    hero: ["padding", "tabletPadding", "mobilePadding"],
+    features: ["padding", "tabletPadding", "mobilePadding"],
+    stats: ["padding", "tabletPadding", "mobilePadding"],
+    team: ["padding", "tabletPadding", "mobilePadding"],
+    grid: ["padding", "tabletPadding", "mobilePadding"],
+    footer: ["padding", "tabletPadding", "mobilePadding"],
+    header: ["padding", "tabletPadding", "mobilePadding"],
+    columns: ["padding", "tabletPadding", "mobilePadding"],
+    accordion: ["padding", "", ""],
+};
+
+function GlobalSectionStylesPanel() {
+    const page = useEditorStore(s => s.page);
+    const activeRouteId = useEditorStore(s => s.activeRouteId);
+    
+    const [sectionBg, setSectionBg] = React.useState("#ffffff");
+    const [pageBg, setPageBg] = React.useState(page?.theme?.colors?.background || "#ffffff");
+    const [titleColor, setTitleColor] = React.useState(page?.theme?.colors?.text || "#0f172a");
+    const [descColor, setDescColor] = React.useState(page?.theme?.colors?.textMuted || "#64748b");
+    const [cardBg, setCardBg] = React.useState(page?.theme?.colors?.surface || "#ffffff");
+    const [padding, setPadding] = React.useState(page?.theme?.layout?.paddingX || "1.5rem");
+    const [tabletPad, setTabletPad] = React.useState(page?.theme?.layout?.tabletPaddingX || "1.5rem");
+    const [mobilePad, setMobilePad] = React.useState(page?.theme?.layout?.mobilePaddingX || "1.5rem");
+    const [applying, setApplying] = React.useState(false);
+    const [appliedCount, setAppliedCount] = React.useState<number | null>(null);
+
+    // Sync from theme on first load or refresh
+    React.useEffect(() => {
+        if (!page) return;
+        if (page.theme) {
+            setPageBg(page.theme.colors.background);
+            setTitleColor(page.theme.colors.text);
+            setDescColor(page.theme.colors.textMuted);
+            setCardBg(page.theme.colors.surface);
+            
+            if (page.theme.layout) {
+                setPadding(page.theme.layout.paddingX);
+                setTabletPad(page.theme.layout.tabletPaddingX);
+                setMobilePad(page.theme.layout.mobilePaddingX);
+            }
+        }
+
+        // Try to sniff the current section color from the first section found
+        const route = page.routes?.find(r => r.id === activeRouteId);
+        const blocks = route?.content || (page as any).content || [];
+        const firstSection = blocks.find((b:any) => ["hero", "features", "team", "stats", "grid"].includes(b.type));
+        if (firstSection && firstSection.props?.bgColor) {
+            setSectionBg(firstSection.props.bgColor);
+        }
+    }, [page?.id]); // Only re-run if the page itself changes (e.g. initial load)
+
+    const handleApply = () => {
+        setApplying(true);
+        const store = useEditorStore.getState();
+        const { page, activeRouteId, updateBlock, pushHistory, updateTheme } = store;
+        if (!page) { setApplying(false); return; }
+
+        const getHX = (p: string) => {
+            const parts = p.trim().split(/\s+/);
+            return parts.length > 1 ? parts[1] : parts[0];
+        };
+
+        // Update Global Page Background (Body) and Container Padding (Gap)
+        updateTheme({
+            colors: {
+                ...page.theme?.colors,
+                background: pageBg
+            },
+            layout: {
+                maxWidth: page.theme?.layout?.maxWidth || "90dvw",
+                paddingX: getHX(padding),
+                tabletPaddingX: getHX(tabletPad),
+                mobilePaddingX: getHX(mobilePad)
+            }
+        });
+
+        const route = page.routes?.find(r => r.id === activeRouteId);
+        const allBlocks: Block[] = [
+            ...(page.globalBlocks?.header ? [page.globalBlocks.header] : []),
+            ...(route?.content || (page as any).content || []),
+            ...(page.globalBlocks?.footer ? [page.globalBlocks.footer] : []),
+        ];
+        const ids = collectAllBlockIds(allBlocks);
+        let count = 0;
+
+        for (const id of ids) {
+            const block = findBlockById(allBlocks, id);
+            if (!block) continue;
+            const type = block.type;
+            const updates: Record<string, string> = {};
+
+            if (type === "container")
+                updates["bgColor"] = pageBg;
+            if (SECTION_BG_MAP[type])
+                for (const k of SECTION_BG_MAP[type]) updates[k] = sectionBg;
+            if (TITLE_COLOR_MAP[type])
+                for (const k of TITLE_COLOR_MAP[type]) updates[k] = titleColor;
+            if (DESC_COLOR_MAP[type])
+                for (const k of DESC_COLOR_MAP[type]) updates[k] = descColor;
+            if (CARD_BG_MAP[type])
+                for (const k of CARD_BG_MAP[type]) updates[k] = cardBg;
+
+            if (type === "text") {
+                const tag = (block.props as any).tag || "p";
+                if (tag.startsWith("h")) updates["color"] = titleColor;
+                if (tag === "p") updates["color"] = descColor;
+            }
+
+            const pkeys = PADDING_MAP[type];
+            if (pkeys) {
+                if (pkeys[0]) updates[pkeys[0]] = padding;
+                if (pkeys[1]) updates[pkeys[1]] = tabletPad;
+                if (pkeys[2]) updates[pkeys[2]] = mobilePad;
+            }
+
+            if (Object.keys(updates).length > 0) { updateBlock(id, updates); count++; }
+        }
+        pushHistory();
+        setAppliedCount(count);
+        setApplying(false);
+        setTimeout(() => setAppliedCount(null), 3500);
+    };
+
+    const ColorRow = ({
+        label, hint, value, onChange,
+    }: { label: string; hint: string; value: string; onChange: (v: string) => void }) => (
+        <Field label={label}>
+            <div>
+                <ColorInput value={value} onChange={onChange} />
+                <div style={{ fontSize: 10, color: "var(--text-subtle)", marginTop: 6 }}>{hint}</div>
+            </div>
+        </Field>
+    );
+
+    const PadRow = ({
+        label, value, onChange, placeholder,
+    }: { label: string; value: string; onChange: (v: string) => void; placeholder: string }) => (
+        <div style={{ marginBottom: 12 }}>
+            <PaddingInput
+                label={label}
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+            />
+        </div>
+    );
+
+    return (
+        <Section title="Global Section Styles">
+            <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 16, lineHeight: 1.6 }}>
+                Configure and apply styles across all sections on the current page.
+            </div>
+
+            <ColorRow label="Page Background" hint="Top-level page containers" value={pageBg} onChange={setPageBg} />
+            <ColorRow label="Section Background" hint="Hero, Features, Team, Stats, etc." value={sectionBg} onChange={setSectionBg} />
+            <ColorRow label="Card Background" hint="Feature cards, Team cards, Grid cells" value={cardBg} onChange={setCardBg} />
+            <ColorRow label="Section Titles" hint="Main heading of each section" value={titleColor} onChange={setTitleColor} />
+            <ColorRow label="Descriptions" hint="Subtitles and body text" value={descColor} onChange={setDescColor} />
+
+            <div style={{ height: 1, background: "var(--border)", margin: "16px 0" }} />
+
+            <PadRow label="Desktop Padding" value={padding} onChange={setPadding} placeholder="64px 24px" />
+            <PadRow label="Tablet Padding" value={tabletPad} onChange={setTabletPad} placeholder="48px 16px" />
+            <PadRow label="Mobile Padding" value={mobilePad} onChange={setMobilePad} placeholder="32px 16px" />
+
+            {appliedCount !== null && (
+                <div style={{ padding: "8px 12px", background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 8, fontSize: 11, color: "#22c55e", marginTop: 12, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontSize: 14 }}>✅</span>
+                    <span>Updated <strong>{appliedCount}</strong> block{appliedCount !== 1 ? "s" : ""}.</span>
+                </div>
+            )}
+
+            <button
+                onClick={handleApply}
+                disabled={applying}
+                style={{
+                    width: "100%", padding: "10px 0", borderRadius: 8, border: "none",
+                    background: "var(--primary)",
+                    color: "#fff",
+                    fontWeight: 700, fontSize: 11,
+                    cursor: applying ? "not-allowed" : "pointer",
+                    letterSpacing: "0.05em", textTransform: "uppercase",
+                    opacity: applying ? 0.7 : 1, transition: "all 0.2s"
+                }}
+            >
+                {applying ? "Applying..." : "Apply Styles"}
+            </button>
+        </Section>
+    );
+}
+
+
 export function PageSettingsPanel({ page }: { page: EditorPage }) {
+
     const { updateTheme, updatePageData, activeRouteId, setActiveRoute, addRoute, updateRoute, deleteRoute, openWizard } = useEditorStore();
     const theme = page.theme || DEFAULT_THEME;
     const l = theme.layout || DEFAULT_THEME.layout!;
@@ -637,43 +886,113 @@ export function PageSettingsPanel({ page }: { page: EditorPage }) {
                     </Dropdown>
                 </div>
             </Section>
-            <Section title="Global Theme">
-                <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Synchronize colors across all components.</div>
-                <Field label="Primary Color">
+            <Section title="Global Button">
+                <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 12, lineHeight: 1.4 }}>Synchronize button colors and dimensions across all components.</div>
+
+                <Field label="Button Background">
                     <ColorInput
-                        value={c.primary}
-                        onChange={(v) => updateTheme({ colors: { ...c, primary: v } })}
-                        onBlur={(v) => { updateTheme({ colors: { ...c, primary: v } }, true); useEditorStore.getState().migrateThemeColors(); }}
-                    />
-                </Field>
-                <Field label="Secondary Color">
-                    <ColorInput
-                        value={c.secondary}
-                        onChange={(v) => updateTheme({ colors: { ...c, secondary: v } })}
-                        onBlur={(v) => updateTheme({ colors: { ...c, secondary: v } }, true)}
+                        value={theme.button?.bgColor || c.primary}
+                        onChange={(v) => updateTheme({ button: { ...theme.button, bgColor: v } })}
+                        onBlur={(v) => updateTheme({ button: { ...theme.button, bgColor: v } }, true)}
                     />
                 </Field>
                 <Field label="Button Text">
                     <ColorInput
-                        value={c.buttonText || "#ffffff"}
-                        onChange={(v) => updateTheme({ colors: { ...c, buttonText: v } })}
-                        onBlur={(v) => updateTheme({ colors: { ...c, buttonText: v } }, true)}
+                        value={theme.button?.textColor || c.buttonText || "#ffffff"}
+                        onChange={(v) => updateTheme({ button: { ...theme.button, textColor: v } })}
+                        onBlur={(v) => updateTheme({ button: { ...theme.button, textColor: v } }, true)}
                     />
                 </Field>
-                <Field label="Overlay Tint">
-                    <ColorInput
-                        value={c.overlay || "rgba(0,0,0,0.25)"}
-                        onChange={(v) => updateTheme({ colors: { ...c, overlay: v } })}
-                        onBlur={(v) => updateTheme({ colors: { ...c, overlay: v } }, true)}
-                    />
-                </Field>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <Field label="Button Width">
+                        <TextInputWithUnit 
+                            value={theme.button?.width || "auto"} 
+                            onChange={(v) => updateTheme({ button: { ...theme.button, width: v } })}
+                            placeholder="auto, 100%" 
+                        />
+                    </Field>
+                    <Field label="Min-Width">
+                        <TextInputWithUnit 
+                            value={theme.button?.minWidth || ""} 
+                            onChange={(v) => updateTheme({ button: { ...theme.button, minWidth: v } })}
+                            placeholder="120px" 
+                        />
+                    </Field>
+                </div>
                 <button
-                    onClick={() => useEditorStore.getState().migrateThemeColors()}
-                    style={{ marginTop: 8, padding: "4px 8px", fontSize: 10, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 4, cursor: "pointer", color: "var(--text)" }}
+                    onClick={() => {
+                        const store = useEditorStore.getState();
+                        const { page, activeRouteId, updateBlock, pushHistory } = store;
+                        if (!page) return;
+                        
+                        const route = page.routes?.find(r => r.id === activeRouteId);
+                        const allBlocks: Block[] = [
+                            ...(page.globalBlocks?.header ? [page.globalBlocks.header] : []),
+                            ...(route?.content || (page as any).content || []),
+                            ...(page.globalBlocks?.footer ? [page.globalBlocks.footer] : []),
+                        ];
+                        
+                        const ids = collectAllBlockIds(allBlocks);
+                        const keysToRemoveGeneral = [
+                            "buttonBg", "buttonBgColor", "buttonTextColor", "buttonColor", "buttonWidth", "buttonMinWidth", "buttonFullWidth",
+                            "ctaBg", "ctaBgColor", "ctaTextColor", "ctaColor", "ctaWidth", "ctaMinWidth", "ctaFullWidth",
+                            "submitBg", "submitBgColor", "submitTextColor", "submitColor", "submitWidth", "submitMinWidth", "submitFullWidth",
+                            "headerBg", "headerColor"
+                        ];
+                        const keysToRemoveForButtonType = [
+                            ...keysToRemoveGeneral,
+                            "bgColor", "bg", "textColor", "color", "width", "minWidth", "fullWidth"
+                        ];
+
+                        let updatedCount = 0;
+                        for (const id of ids) {
+                            const block = findBlockById(allBlocks, id);
+                            if (!block) continue;
+                            
+                            const updates: Record<string, any> = {};
+                            let changed = false;
+                            
+                            const isButtonType = block.type === "button" || block.type === "action";
+                            const keysToSweep = isButtonType ? keysToRemoveForButtonType : keysToRemoveGeneral;
+                            
+                            for (const key of keysToSweep) {
+                                if (block.props[key] !== undefined) {
+                                    updates[key] = undefined;
+                                    changed = true;
+                                }
+                            }
+                            if (changed) {
+                                updateBlock(id, updates);
+                                updatedCount++;
+                            }
+                        }
+                        pushHistory();
+                        
+                        // Show quick confirmation
+                        const btn = document.getElementById('sync-btn');
+                        if (btn) {
+                            const original = btn.innerText;
+                            btn.innerText = `Synced ${updatedCount} button${updatedCount !== 1 ? 's' : ''}!`;
+                            btn.style.color = "#22c55e";
+                            btn.style.borderColor = "rgba(34,197,94,0.3)";
+                            btn.style.background = "rgba(34,197,94,0.1)";
+                            setTimeout(() => {
+                                btn.innerText = original;
+                                btn.style.color = "";
+                                btn.style.borderColor = "";
+                                btn.style.background = "";
+                            }, 2000);
+                        }
+                    }}
+                    id="sync-btn"
+                    style={{ marginTop: 8, width: "100%", padding: "8px 0", fontSize: 10, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 6, cursor: "pointer", color: "var(--primary)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", transition: "all 0.2s" }}
+                    onMouseEnter={e => e.currentTarget.style.background = "rgba(99,102,241,0.15)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "rgba(99,102,241,0.1)"}
                 >
-                    Sync all components now
+                    Sync all buttons now
                 </button>
             </Section>
+            <GlobalSectionStylesPanel />
             <Section title="Global Container">
                 <div style={{ fontSize: 11, color: "var(--text-subtle)", marginBottom: 8, lineHeight: 1.4 }}>Controls max-width & horizontal padding for top-level blocks.</div>
                 <Field label="Max Width"><TextInputWithUnit value={l.maxWidth ?? ""} onChange={(v) => upL("maxWidth", v)} placeholder="100dvw" /></Field>

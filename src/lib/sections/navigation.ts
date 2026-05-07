@@ -17,6 +17,7 @@ export const navigationSections: SectionTemplate[] = [
       showCta: true, ctaText: "Get Started",
       bgColor: "#ffffff", textColor: "#0f172a",
       ctaBgColor: "#0f172a",
+      ctaTextColor: "#ffffff",
     }),
   },
   {
@@ -33,6 +34,7 @@ export const navigationSections: SectionTemplate[] = [
       showCta: true, ctaText: "Login",
       bgColor: "#ffffff", textColor: "#0f172a",
       ctaBgColor: "#0f172a",
+      ctaTextColor: "#ffffff",
     }),
   },
   {
@@ -50,6 +52,7 @@ export const navigationSections: SectionTemplate[] = [
       showCta: true, ctaText: "Launch App", ctaVariant: "outline",
       bgColor: "#0f172a", textColor: "#ffffff",
       ctaBgColor: "#0f172a",
+      ctaTextColor: "#ffffff",
     }),
   },
 ];

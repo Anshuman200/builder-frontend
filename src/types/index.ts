@@ -42,6 +42,12 @@ export interface ThemeConfig {
         buttonText?: string;
         overlay?: string;
     };
+    button?: {
+        width?: string;
+        minWidth?: string;
+        bgColor?: string;
+        textColor?: string;
+    };
     fonts: { heading: string; body: string };
     borderRadius: "none" | "sm" | "md" | "lg" | "full" | string;
     spacing: "compact" | "normal" | "relaxed" | string;

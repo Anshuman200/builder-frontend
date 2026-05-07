@@ -40,6 +40,12 @@ export const DEFAULT_THEME: ThemeConfig = {
     fonts: { heading: "Inter", body: "Inter" },
     borderRadius: "md",
     spacing: "normal",
+    button: {
+        width: "auto",
+        minWidth: "",
+        bgColor: "",
+        textColor: "",
+    },
     layout: {
         maxWidth: "100dvw",
         paddingX: "32px",

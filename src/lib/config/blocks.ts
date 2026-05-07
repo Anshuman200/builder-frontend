@@ -74,7 +74,7 @@ export const BLOCK_TYPES: BlockConfig[] = [
       ctaUrl: "#",
       ctaVariant: "solid",
       ctaBgColor: "var(--primary)",
-      ctaTextColor: "var(--button-text)",
+      ctaTextColor: "#ffffff",
 
       // Animation
       animationType: DEFAULT_CONFIG.animationHeader.type,
@@ -381,6 +381,9 @@ export const BLOCK_TYPES: BlockConfig[] = [
       mobilePadding: "12px",
       bgColor: "transparent",
       borderRadius: "0px",
+      cardBg: "#ffffff",
+      titleColor: "var(--text)",
+      subtitleColor: "var(--text-muted)",
       items: [
         { id: "slot-0", blocks: [] as Block[] },
         { id: "slot-1", blocks: [] as Block[] },

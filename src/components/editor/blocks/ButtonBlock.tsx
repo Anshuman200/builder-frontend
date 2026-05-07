@@ -21,6 +21,7 @@ export function ButtonBlock({ block }: BlockProps) {
                 props={p}
                 id={`btn-${block.id}`}
                 blockId={block.id}
+                isStandaloneButton={true}
             />
         </div>
     );

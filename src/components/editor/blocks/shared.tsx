@@ -829,9 +829,10 @@ interface CommonButtonProps {
     type?: "button" | "submit";
     prefix?: string;
     blockId?: string; // Add blockId to support inline editing
+    isStandaloneButton?: boolean;
 }
 
-export function CommonButton({ props: p, id, onClick, isLoading, disabled, className, type = "button", prefix = "button", blockId }: CommonButtonProps) {
+export function CommonButton({ props: p, id, onClick, isLoading, disabled, className, type = "button", prefix = "button", blockId, isStandaloneButton }: CommonButtonProps) {
     const isPreview = React.useContext(PreviewContext);
     const handleLink = useLinkHandler();
 
@@ -846,13 +847,16 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
     const bWidth = borderWidthProp || "1px";
 
     const theme = useEditorStore((s) => s.page?.theme) || DEFAULT_THEME;
-    const defaultPrimary = theme.colors?.primary || "#d97706";
+    const defaultPrimary = theme.button?.bgColor || theme.colors?.primary || "#d97706";
     const defaultSecondary = theme.colors?.secondary || "#8b5cf6";
-    const defaultText = theme.colors?.buttonText || "#ffffff";
+    const defaultText = theme.button?.textColor || theme.colors?.buttonText || "#ffffff";
 
     let background = defaultPrimary, color = defaultText, border = "none";
-    const finalBg = (p[`${prefix}Bg`] as string) || (p[`${prefix}BgColor`] as string) || (p.buttonBg as string) || (p.buttonBgColor as string) || (p.bgColor as string) || (p.bg as string);
-    const finalText = (p[`${prefix}TextColor`] as string) || (p[`${prefix}Color`] as string) || (p.buttonTextColor as string) || (p.buttonColor as string) || (p.textColor as string) || (p.color as string);
+    let finalBg = (p[`${prefix}Bg`] as string) || (p[`${prefix}BgColor`] as string) || (p.buttonBg as string) || (p.buttonBgColor as string);
+    if (isStandaloneButton && !finalBg) finalBg = (p.bgColor as string) || (p.bg as string);
+    
+    let finalText = (p[`${prefix}TextColor`] as string) || (p[`${prefix}Color`] as string) || (p.buttonTextColor as string) || (p.buttonColor as string);
+    if (isStandaloneButton && !finalText) finalText = (p.textColor as string) || (p.color as string);
     const resolvedBorderColor = borderColorProp || finalBg || defaultPrimary;
     const hasExplicitBorder = !!borderWidthProp && borderWidthProp !== "0px" && borderWidthProp !== "0";
 
@@ -903,7 +907,8 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
         alignItems: "center",
         justifyContent: "center",
         gap: "0.5em",
-        width: (p[`${prefix}FullWidth`] === true || p.buttonFullWidth === true || p.fullWidth === true) ? "100%" : undefined,
+        width: (p[`${prefix}FullWidth`] === true || p.buttonFullWidth === true || p.fullWidth === true) ? "100%" : (p[`${prefix}Width`] as string || p.buttonWidth as string || theme.button?.width || undefined),
+        minWidth: (p[`${prefix}MinWidth`] as string || p.buttonMinWidth as string || theme.button?.minWidth || undefined),
         textDecoration: variant === "link" ? "underline" : "none",
         borderRadius: radius,
         ...getTextStyles(p, prefix),
@@ -916,7 +921,7 @@ export function CommonButton({ props: p, id, onClick, isLoading, disabled, class
         boxShadow: shadow === "none" ? undefined : shadow,
         transition: "all 0.2s ease",
         background,
-        color: getTextStyles(p, prefix).color || color,
+        color: getTextStyles(p, prefix).color || '#fff',
         border,
         padding: variant === "link" ? "0" : sizeStyle.padding,
         opacity: (disabled || isLoading) ? 0.7 : 1,
